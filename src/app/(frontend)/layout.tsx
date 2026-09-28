@@ -1,5 +1,4 @@
 import React from 'react'
-import { SiteHeader } from '@/components/site/site-header'
 import { dmSans, helveticaNeueLtPro, inter } from './fonts'
 import './globals.css'
 
@@ -16,10 +15,7 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
       lang="en"
       className={`${helveticaNeueLtPro.variable} ${dmSans.variable} ${inter.variable}`}
     >
-      <body>
-        <SiteHeader />
-        <main>{children}</main>
-      </body>
+      <body>{children}</body>
     </html>
   )
 }
