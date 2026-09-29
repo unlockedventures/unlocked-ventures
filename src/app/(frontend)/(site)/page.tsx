@@ -1,9 +1,7 @@
-import {
-  DigitalEngineeringSection,
-  homepageDigitalEngineering,
-} from '@/components/site/digital-engineering/digital-engineering-section'
+import { DigitalEngineeringSection } from '@/components/site/digital-engineering/digital-engineering-section'
 import { AwardsSection } from '@/components/site/awards/awards-section'
 import { getAwards } from '@/data/get-awards'
+import { getDigitalEngineering } from '@/data/get-digital-engineering'
 import { HeroSection, homepageHero } from '@/components/site/hero/hero-section'
 import {
   homepageLocationStats,
@@ -33,14 +31,14 @@ import {
 export const dynamic = 'force-dynamic'
 
 export default async function HomePage() {
-  const awards = await getAwards()
+  const [awards, digitalEngineering] = await Promise.all([getAwards(), getDigitalEngineering()])
 
   return (
     <>
       <HeroSection {...homepageHero} />
       <TrustedBySection logos={homepageTrustedLogos} />
       <StrategicAdvisorySection {...homepageStrategicAdvisory} />
-      <DigitalEngineeringSection {...homepageDigitalEngineering} />
+      {digitalEngineering ? <DigitalEngineeringSection {...digitalEngineering} /> : null}
       <SuccessStoriesSection {...homepageSuccessStories} />
       <AwardsSection awards={awards} />
       <RecentPodcastSection title="Recent Podcast" episodes={homepagePodcastEpisodes} />

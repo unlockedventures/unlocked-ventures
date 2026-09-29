@@ -89,8 +89,12 @@ export interface Config {
     defaultIDType: number;
   };
   fallbackLocale: null;
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    'digital-engineering': DigitalEngineering;
+  };
+  globalsSelect: {
+    'digital-engineering': DigitalEngineeringSelect<false> | DigitalEngineeringSelect<true>;
+  };
   locale: null;
   widgets: {
     collections: CollectionsWidget;
@@ -355,6 +359,72 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "digital-engineering".
+ */
+export interface DigitalEngineering {
+  id: number;
+  title: string;
+  description: string;
+  cta: {
+    label: string;
+    href: string;
+  };
+  image?: (number | null) | Media;
+  imageAlt?: string | null;
+  groups?:
+    | {
+        index: string;
+        title: string;
+        description?: string | null;
+        items?:
+          | {
+              label: string;
+              href: string;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "digital-engineering_select".
+ */
+export interface DigitalEngineeringSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  cta?:
+    | T
+    | {
+        label?: T;
+        href?: T;
+      };
+  image?: T;
+  imageAlt?: T;
+  groups?:
+    | T
+    | {
+        index?: T;
+        title?: T;
+        description?: T;
+        items?:
+          | T
+          | {
+              label?: T;
+              href?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

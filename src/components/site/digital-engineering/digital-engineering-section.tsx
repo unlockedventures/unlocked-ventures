@@ -28,36 +28,6 @@ export type DigitalEngineeringSectionProps = {
   className?: string
 }
 
-const solution = (slug: string) => `/solutions/${slug}`
-
-export const homepageDigitalEngineering = {
-  title: 'DIGITAL ENGINEERING',
-  description:
-    'Our new report gives portfolio company CFOs 8 steps and 8 KPIs to build a defensible 2027 AI budget that survives sponsor.',
-  cta: {
-    label: 'Get in touch',
-    href: '/contact',
-  },
-  imageSrc: '/digital-engineering/section-photo.png',
-  groups: [
-    {
-      index: '01.',
-      title: 'Enterprise',
-      description:
-        "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever",
-      items: [
-        { label: 'Engineering as a Service', href: solution('engineering-as-a-service') },
-        { label: 'Market Positioning', href: solution('market-positioning') },
-        { label: 'GTM Design', href: solution('gtm-design') },
-      ],
-    },
-    {
-      index: '02.',
-      title: 'Early-stage',
-    },
-  ],
-} as const satisfies DigitalEngineeringSectionProps
-
 function ArrowUpRight({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" className={cn('size-6 shrink-0', className)}>

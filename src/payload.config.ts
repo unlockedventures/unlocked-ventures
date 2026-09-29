@@ -9,6 +9,8 @@ import { Awards } from './collections/Awards'
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
 import { seedAwards } from './data/seed-awards'
+import { seedDigitalEngineering } from './data/seed-digital-engineering'
+import { DigitalEngineering } from './globals/DigitalEngineering'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -28,8 +30,10 @@ export default buildConfig({
     },
   },
   collections: [Users, Media, Awards],
+  globals: [DigitalEngineering],
   onInit: async (payload) => {
     await seedAwards(payload)
+    await seedDigitalEngineering(payload)
   },
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
