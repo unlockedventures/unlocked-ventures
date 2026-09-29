@@ -21,6 +21,9 @@ const nextConfig: NextConfig = {
       {
         pathname: '/footer/**',
       },
+      {
+        pathname: '/contact/**',
+      },
     ],
   },
   webpack: (webpackConfig) => {
