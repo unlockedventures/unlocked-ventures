@@ -1,1 +1,346 @@
-/* Payload admin overrides. Keep this file as plain CSS. */
+/* Payload admin overrides. Keep this file as plain CSS.
+   Light login and account use the public-site palette.
+   Dark mode background is #111827. */
+
+html:not([data-theme='dark']):has(.template-minimal),
+html:not([data-theme='dark']):has(.payload-settings),
+html:not([data-theme='dark']) .template-minimal {
+  --theme-bg: #f3f4f9;
+  --theme-bg-color: #f3f4f9;
+  --theme-text: #33353f;
+  --theme-input-bg: #ffffff;
+  --theme-overlay: rgba(11, 31, 58, 0.4);
+  --theme-elevation-0: #ffffff;
+  --theme-elevation-50: #f3f4f9;
+  --theme-elevation-100: #e7e9f3;
+  --theme-elevation-150: #c8cad0;
+  --theme-elevation-200: #c8cad0;
+  --theme-elevation-250: #919191;
+  --theme-elevation-300: #8d959d;
+  --theme-elevation-350: #5a646f;
+  --theme-elevation-400: #5a646f;
+  --theme-elevation-450: #484d56;
+  --theme-elevation-500: #484d56;
+  --theme-elevation-550: #30373f;
+  --theme-elevation-600: #30373f;
+  --theme-elevation-650: #25282d;
+  --theme-elevation-700: #25282d;
+  --theme-elevation-750: #222222;
+  --theme-elevation-800: #25282d;
+  --theme-elevation-850: #171616;
+  --theme-elevation-900: #0b1f3a;
+  --theme-elevation-950: #0b1f3a;
+  --theme-elevation-1000: #0b1f3a;
+  --theme-success-500: #1cacae;
+  --theme-error-500: #b42318;
+  background: #f3f4f9;
+  color: #33353f;
+  color-scheme: light;
+}
+
+html:not([data-theme='dark']) .template-minimal {
+  background-color: #f3f4f9;
+  color: #33353f;
+}
+
+.template-minimal .graphic-logo path {
+  fill: #0b1f3a;
+}
+
+.uv-login-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.uv-login-logo__on-dark {
+  display: none;
+}
+
+.uv-login-logo__mark {
+  height: 40px;
+  width: auto;
+}
+
+.uv-login-logo__word {
+  height: 15px;
+  width: auto;
+}
+
+html[data-theme='dark'] .uv-login-logo__mark:not(.uv-login-logo__on-dark),
+html[data-theme='dark'] .uv-login-logo__word:not(.uv-login-logo__on-dark) {
+  display: none;
+}
+
+html[data-theme='dark'] .uv-login-logo__on-dark {
+  display: block;
+}
+
+.login-password {
+  position: relative;
+}
+
+.login-password input {
+  padding-right: 2.75rem;
+}
+
+.login-password__toggle {
+  position: absolute;
+  top: 50%;
+  right: 0.65rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 2px;
+  background: transparent;
+  color: #484d56;
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.login-password__toggle:hover {
+  color: #1cacae;
+}
+
+html:not([data-theme='dark']) .template-minimal .field-label,
+html:not([data-theme='dark']):has(.payload-settings) .field-label {
+  color: #222222;
+}
+
+html:not([data-theme='dark']) .template-minimal .field-label .required,
+html:not([data-theme='dark']):has(.payload-settings) .field-label .required {
+  color: #b42318;
+}
+
+html:not([data-theme='dark']) .template-minimal input,
+html:not([data-theme='dark']):has(.payload-settings) input:not([type='radio']):not([type='checkbox']),
+html:not([data-theme='dark']):has(.payload-settings) select,
+html:not([data-theme='dark']):has(.payload-settings) textarea {
+  border-color: #c8cad0;
+  background: #ffffff;
+  color: #25282d;
+}
+
+html:not([data-theme='dark']) .template-minimal input::placeholder,
+html:not([data-theme='dark']):has(.payload-settings) input::placeholder,
+html:not([data-theme='dark']):has(.payload-settings) textarea::placeholder {
+  color: #919191;
+}
+
+html:not([data-theme='dark']) .template-minimal input:hover,
+html:not([data-theme='dark']):has(.payload-settings) input:not([type='radio']):not([type='checkbox']):hover,
+html:not([data-theme='dark']):has(.payload-settings) select:hover,
+html:not([data-theme='dark']):has(.payload-settings) textarea:hover {
+  border-color: #484d56;
+}
+
+html:not([data-theme='dark']) .template-minimal input:focus,
+html:not([data-theme='dark']) .template-minimal input:focus-visible,
+html:not([data-theme='dark']):has(.payload-settings) input:not([type='radio']):not([type='checkbox']):focus,
+html:not([data-theme='dark']):has(.payload-settings) input:not([type='radio']):not([type='checkbox']):focus-visible,
+html:not([data-theme='dark']):has(.payload-settings) select:focus,
+html:not([data-theme='dark']):has(.payload-settings) textarea:focus {
+  border-color: #1cacae;
+  box-shadow: 0 0 0 1px #1cacae;
+  outline: none;
+}
+
+.template-minimal input:-webkit-autofill,
+.template-minimal input:-webkit-autofill:hover,
+.template-minimal input:-webkit-autofill:focus,
+.template-minimal input:-webkit-autofill:active {
+  -webkit-text-fill-color: #25282d;
+  caret-color: #25282d;
+  box-shadow: 0 0 0 1000px #ffffff inset;
+  transition: background-color 9999s ease-out 0s;
+}
+
+html:not([data-theme='dark']) .template-minimal a:not(.btn) {
+  color: #1cacae;
+  text-decoration-color: #1cacae;
+}
+
+html:not([data-theme='dark']) .template-minimal a:not(.btn):hover {
+  color: #0b1f3a;
+}
+
+html:not([data-theme='dark']) .template-minimal .btn--style-primary,
+html:not([data-theme='dark']):has(.payload-settings) .btn--style-primary {
+  --color: #ffffff;
+  --bg-color: #484d56;
+  --hover-bg: #30373f;
+  --hover-color: #ffffff;
+}
+
+html:not([data-theme='dark']):has(.payload-settings) .nav {
+  background: #f3f4f9;
+  border-right-color: #e7e9f3;
+}
+
+html:not([data-theme='dark']):has(.payload-settings) .nav a {
+  color: #25282d;
+}
+
+html:not([data-theme='dark']):has(.payload-settings) .nav a:hover,
+html:not([data-theme='dark']):has(.payload-settings) .nav__link:hover {
+  color: #1cacae;
+}
+
+html:not([data-theme='dark']):has(.payload-settings) .nav__link.active {
+  color: #0b1f3a;
+}
+
+html:not([data-theme='dark']):has(.payload-settings) .nav__link-indicator {
+  background: #1cacae;
+}
+
+/* Dark admin theme. Page background is #111827. */
+html[data-theme='dark'] {
+  --theme-bg: #111827;
+  --theme-bg-color: #111827;
+  --theme-text: #f3f4f9;
+  --theme-input-bg: #1f2937;
+  --theme-overlay: rgba(17, 24, 39, 0.72);
+  --theme-elevation-0: #111827;
+  --theme-elevation-50: #1f2937;
+  --theme-elevation-100: #1f2937;
+  --theme-elevation-150: #374151;
+  --theme-elevation-200: #374151;
+  --theme-elevation-250: #4b5563;
+  --theme-elevation-300: #6b7280;
+  --theme-elevation-350: #9ca3af;
+  --theme-elevation-400: #9ca3af;
+  --theme-elevation-450: #d1d5db;
+  --theme-elevation-500: #e5e7eb;
+  --theme-elevation-550: #e5e7eb;
+  --theme-elevation-600: #f3f4f6;
+  --theme-elevation-650: #f3f4f9;
+  --theme-elevation-700: #f9fafb;
+  --theme-elevation-750: #f9fafb;
+  --theme-elevation-800: #f3f4f9;
+  --theme-elevation-850: #ffffff;
+  --theme-elevation-900: #ffffff;
+  --theme-elevation-950: #ffffff;
+  --theme-elevation-1000: #ffffff;
+  --theme-success-500: #d1d5db;
+  --theme-error-500: #ffb4ab;
+  background: #111827;
+  color: #f3f4f9;
+  color-scheme: dark;
+}
+
+html[data-theme='dark'] .template-minimal,
+html[data-theme='dark'] .template-default {
+  background-color: #111827;
+  color: #f3f4f9;
+}
+
+html[data-theme='dark'] .template-minimal .graphic-logo path {
+  fill: #f3f4f9;
+}
+
+html[data-theme='dark'] .login-password__toggle {
+  color: #f3f4f9;
+}
+
+html[data-theme='dark'] .login-password__toggle:hover {
+  color: #ffffff;
+}
+
+html[data-theme='dark'] .template-minimal .field-label,
+html[data-theme='dark']:has(.payload-settings) .field-label {
+  color: #f3f4f9;
+}
+
+html[data-theme='dark'] .template-minimal .field-label .required,
+html[data-theme='dark']:has(.payload-settings) .field-label .required {
+  color: #ffb4ab;
+}
+
+html[data-theme='dark'] .template-minimal input,
+html[data-theme='dark']:has(.payload-settings) input:not([type='radio']):not([type='checkbox']),
+html[data-theme='dark']:has(.payload-settings) select,
+html[data-theme='dark']:has(.payload-settings) textarea {
+  border-color: #374151;
+  background: #1f2937;
+  color: #f3f4f9;
+}
+
+html[data-theme='dark'] .template-minimal input::placeholder,
+html[data-theme='dark']:has(.payload-settings) input::placeholder,
+html[data-theme='dark']:has(.payload-settings) textarea::placeholder {
+  color: #9ca3af;
+}
+
+html[data-theme='dark'] .template-minimal input:hover,
+html[data-theme='dark']:has(.payload-settings) input:not([type='radio']):not([type='checkbox']):hover,
+html[data-theme='dark']:has(.payload-settings) select:hover,
+html[data-theme='dark']:has(.payload-settings) textarea:hover {
+  border-color: #6b7280;
+}
+
+html[data-theme='dark'] .template-minimal input:focus,
+html[data-theme='dark'] .template-minimal input:focus-visible,
+html[data-theme='dark']:has(.payload-settings) input:not([type='radio']):not([type='checkbox']):focus,
+html[data-theme='dark']:has(.payload-settings) input:not([type='radio']):not([type='checkbox']):focus-visible,
+html[data-theme='dark']:has(.payload-settings) select:focus,
+html[data-theme='dark']:has(.payload-settings) textarea:focus {
+  border-color: #f3f4f9;
+  box-shadow: 0 0 0 1px #f3f4f9;
+  outline: none;
+}
+
+html[data-theme='dark'] .template-minimal input:-webkit-autofill,
+html[data-theme='dark'] .template-minimal input:-webkit-autofill:hover,
+html[data-theme='dark'] .template-minimal input:-webkit-autofill:focus,
+html[data-theme='dark'] .template-minimal input:-webkit-autofill:active {
+  -webkit-text-fill-color: #f3f4f9;
+  caret-color: #f3f4f9;
+  box-shadow: 0 0 0 1000px #1f2937 inset;
+}
+
+html[data-theme='dark'] .template-minimal a:not(.btn) {
+  color: #f3f4f9;
+  text-decoration-color: #f3f4f9;
+}
+
+html[data-theme='dark'] .template-minimal a:not(.btn):hover {
+  color: #ffffff;
+}
+
+html[data-theme='dark'] .template-minimal .btn--style-primary,
+html[data-theme='dark']:has(.payload-settings) .btn--style-primary {
+  --color: #111827;
+  --bg-color: #f3f4f9;
+  --hover-bg: #ffffff;
+  --hover-color: #111827;
+}
+
+html[data-theme='dark']:has(.payload-settings) .nav {
+  background: #111827;
+  border-right-color: #374151;
+}
+
+html[data-theme='dark']:has(.payload-settings) .nav a {
+  color: #f3f4f9;
+}
+
+html[data-theme='dark']:has(.payload-settings) .nav a:hover,
+html[data-theme='dark']:has(.payload-settings) .nav__link:hover {
+  color: #ffffff;
+}
+
+html[data-theme='dark']:has(.payload-settings) .nav__link.active {
+  color: #ffffff;
+}
+
+html[data-theme='dark']:has(.payload-settings) .nav__link-indicator {
+  background: #f3f4f9;
+}

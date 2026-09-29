@@ -1,5 +1,4 @@
-import Link from 'next/link'
-
+import { SiteOutlineButton } from '@/components/site/site-outline-button'
 import { cn } from '@/lib/utils'
 
 export type HeroMedia = {
@@ -89,19 +88,20 @@ export function HeroSection({ title, description, cta, media, className }: HeroS
                 </p>
               ))}
             </div>
-            <Link
+            <SiteOutlineButton
               href={cta.href}
-              className="mt-8 inline-flex h-12 cursor-pointer items-center gap-2.5 bg-[#484D56] px-5 font-sans text-base leading-[22px] font-normal text-white md:mt-10"
-            >
-              {cta.label}
-              <img
-                src="/contact/icon-arrow-up-right.svg"
-                alt=""
-                width={24}
-                height={24}
-                className="size-6 shrink-0"
-              />
-            </Link>
+              text={cta.label}
+              icon={
+                <img
+                  src="/contact/icon-arrow-up-right.svg"
+                  alt=""
+                  width={24}
+                  height={24}
+                  className="size-6 shrink-0"
+                />
+              }
+              className="mt-8 h-12 gap-2.5 border-0 bg-[#484D56] px-5 text-base text-white hover:bg-[#484D56] sm:h-12 sm:px-5 sm:text-base md:mt-10 lg:h-12 lg:px-5 lg:text-base 2xl:h-12 2xl:px-5 2xl:text-base"
+            />
           </div>
         </div>
         <HeroMediaCollage media={media} />

@@ -24,6 +24,9 @@ const nextConfig: NextConfig = {
       {
         pathname: '/contact/**',
       },
+      {
+        pathname: '/solutions/**',
+      },
     ],
   },
   webpack: (webpackConfig) => {
