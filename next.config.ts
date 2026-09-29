@@ -18,6 +18,9 @@ const nextConfig: NextConfig = {
       {
         pathname: '/brand/**',
       },
+      {
+        pathname: '/footer/**',
+      },
     ],
   },
   webpack: (webpackConfig) => {
