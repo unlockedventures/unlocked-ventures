@@ -344,3 +344,67 @@ html[data-theme='dark']:has(.payload-settings) .nav__link.active {
 html[data-theme='dark']:has(.payload-settings) .nav__link-indicator {
   background: #f3f4f9;
 }
+
+.uv-admin-home {
+  display: grid;
+  gap: 2rem;
+  padding-bottom: 3rem;
+}
+
+.uv-admin-home__intro h1 {
+  margin: 0 0 0.5rem;
+  font-size: 1.75rem;
+  line-height: 1.2;
+}
+
+.uv-admin-home__intro p {
+  max-width: 42rem;
+  margin: 0;
+  color: var(--theme-elevation-600);
+}
+
+.uv-admin-home__group h2 {
+  margin: 0 0 0.75rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--theme-elevation-500);
+}
+
+.uv-admin-home__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.uv-admin-home__card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  height: 100%;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: 8px;
+  background: var(--theme-elevation-0);
+  color: inherit;
+  text-decoration: none;
+}
+
+.uv-admin-home__card:hover,
+.uv-admin-home__card:focus-visible {
+  border-color: var(--theme-elevation-400);
+  text-decoration: none;
+}
+
+.uv-admin-home__card strong {
+  font-size: 1rem;
+}
+
+.uv-admin-home__card span {
+  color: var(--theme-elevation-550);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}

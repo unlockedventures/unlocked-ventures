@@ -6,6 +6,10 @@ import { fileURLToPath } from 'url'
 import sharp from 'sharp'
 
 import { Awards } from './collections/Awards'
+import { CaseStudies } from './collections/CaseStudies'
+import { NewsPosts } from './collections/NewsPosts'
+import { PodcastEpisodes } from './collections/PodcastEpisodes'
+import { TrustedLogos } from './collections/TrustedLogos'
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
 import { seedAwards } from './data/seed-awards'
@@ -48,14 +52,18 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
     components: {
+      Nav: '@/components/admin/admin-nav#AdminNav',
       views: {
+        dashboard: {
+          Component: '@/components/admin/admin-home#AdminHome',
+        },
         login: {
           Component: '@/components/admin/login-view#LoginView',
         },
       },
     },
   },
-  collections: [Users, Media, Awards],
+  collections: [Users, Media, Awards, NewsPosts, PodcastEpisodes, CaseStudies, TrustedLogos],
   globals: [
     Hero,
     Navigation,

@@ -19,7 +19,11 @@ export type LatestNewsSectionProps = {
 
 function ArrowUpRight() {
   return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className="size-6 shrink-0">
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className="size-6 shrink-0 transition-transform duration-300 ease-out group-hover:rotate-45 group-focus-visible:rotate-45"
+    >
       <path
         d="M7 17L17 7M7 7L17 7L17 17"
         fill="none"
@@ -57,7 +61,7 @@ function NewsCard({ post }: { post: NewsPost }) {
             href={post.href}
             text={post.ctaLabel ?? 'Read More'}
             icon={<ArrowUpRight />}
-            className="h-12 w-[154px] gap-2.5 border-[#484D56]! px-5 text-base whitespace-nowrap text-[#484D56] hover:border-[#484D56] hover:bg-[#484D56] hover:text-white sm:h-12 sm:border-[#484D56]! sm:px-5 sm:text-base lg:h-12 lg:border-[#484D56]! lg:px-5 lg:text-base lg:hover:border-[#484D56] lg:hover:bg-[#484D56] lg:hover:text-white 2xl:h-12 2xl:border-[#484D56]! 2xl:px-5 2xl:text-base [&>span]:shrink-0"
+            className="group h-12 w-[154px] gap-2.5 border-[#484D56]! px-5 text-base whitespace-nowrap text-[#484D56] hover:border-[#484D56] hover:bg-[#484D56] hover:text-white sm:h-12 sm:border-[#484D56]! sm:px-5 sm:text-base lg:h-12 lg:border-[#484D56]! lg:px-5 lg:text-base lg:hover:border-[#484D56] lg:hover:bg-[#484D56] lg:hover:text-white 2xl:h-12 2xl:border-[#484D56]! 2xl:px-5 2xl:text-base [&>span]:shrink-0"
           />
         </div>
       </div>
@@ -68,7 +72,7 @@ function NewsCard({ post }: { post: NewsPost }) {
 export function LatestNewsSection({ title, posts, className }: LatestNewsSectionProps) {
   return (
     <section aria-label="Latest news and blogs" className={cn('bg-white', className)}>
-      <div className="mx-auto w-full max-w-[1440px] px-4 py-12 sm:px-6 md:px-8 md:py-16 lg:px-9 lg:py-[100px]">
+      <div className="w-full px-4 py-12 sm:px-6 sm:py-14 md:px-8 md:py-16 lg:px-9 lg:py-[100px]">
         <ContentSlider
           label="Latest news and blogs"
           controlsClassName="gap-[21px]"
@@ -77,7 +81,7 @@ export function LatestNewsSection({ title, posts, className }: LatestNewsSection
               {title}
             </h2>
           }
-          slideClassName="md:w-[calc((100%-1rem)/2)] min-[1440px]:w-[calc((100%-2rem)/3)]"
+          slideClassName="md:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-2rem)/3)]"
         >
           {posts.map((post) => (
             <NewsCard key={post.href} post={post} />

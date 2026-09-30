@@ -1,8 +1,15 @@
 import type { GlobalConfig } from 'payload'
 
+import { adminGroups } from '@/admin/editor-guide'
+
 export const TrustedBy: GlobalConfig = {
   slug: 'trusted-by',
-  label: 'Trusted By',
+  label: 'Trusted by',
+  admin: {
+    group: adminGroups.homepage,
+    description: 'The heading above the row of company logos. The logos themselves are edited under Company logos.',
+    hideAPIURL: true,
+  },
   access: {
     read: () => true,
   },
@@ -12,47 +19,6 @@ export const TrustedBy: GlobalConfig = {
       type: 'text',
       required: true,
       defaultValue: 'Trusted by',
-    },
-    {
-      name: 'logos',
-      type: 'array',
-      required: true,
-      minRows: 1,
-      labels: {
-        singular: 'Logo',
-        plural: 'Logos',
-      },
-      fields: [
-        {
-          name: 'name',
-          type: 'text',
-          required: true,
-        },
-        {
-          name: 'logo',
-          type: 'upload',
-          relationTo: 'media',
-          required: true,
-        },
-        {
-          name: 'displayWidth',
-          type: 'number',
-          required: true,
-          min: 1,
-          admin: {
-            description: 'Rendered width of the logo, in pixels.',
-          },
-        },
-        {
-          name: 'displayHeight',
-          type: 'number',
-          required: true,
-          min: 1,
-          admin: {
-            description: 'Rendered height of the logo, in pixels.',
-          },
-        },
-      ],
     },
   ],
 }

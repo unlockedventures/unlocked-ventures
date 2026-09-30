@@ -6,11 +6,17 @@ import { latestNewsSeed } from '@/data/latest-news-seed'
 
 export async function seedLatestNews(payload: Payload) {
   const current = await payload.findGlobal({ slug: 'latest-news' })
-  if (current.title) return
+  if (!current.title) {
+    await payload.updateGlobal({
+      slug: 'latest-news',
+      data: { title: latestNewsSeed.title },
+    })
+  }
 
-  const posts = []
+  const existing = await payload.count({ collection: 'news-posts' })
+  if (existing.totalDocs > 0) return
 
-  for (const post of latestNewsSeed.posts) {
+  for (const [index, post] of latestNewsSeed.posts.entries()) {
     const filePath = path.join(process.cwd(), 'public', 'news', post.imageFile)
     const data = fs.readFileSync(filePath)
     const media = await payload.create({
@@ -24,21 +30,17 @@ export async function seedLatestNews(payload: Payload) {
       },
     })
 
-    posts.push({
-      title: post.title,
-      excerpt: post.excerpt,
-      href: post.href,
-      ctaLabel: post.ctaLabel,
-      image: media.id,
-      imageAlt: post.title,
+    await payload.create({
+      collection: 'news-posts',
+      data: {
+        title: post.title,
+        excerpt: post.excerpt,
+        href: post.href,
+        ctaLabel: post.ctaLabel,
+        image: media.id,
+        imageAlt: post.title,
+        sortOrder: index,
+      },
     })
   }
-
-  await payload.updateGlobal({
-    slug: 'latest-news',
-    data: {
-      title: latestNewsSeed.title,
-      posts,
-    },
-  })
 }

@@ -1,8 +1,15 @@
 import type { GlobalConfig } from 'payload'
 
+import { adminGroups } from '@/admin/editor-guide'
+
 export const RecentPodcast: GlobalConfig = {
   slug: 'recent-podcast',
-  label: 'Recent Podcast',
+  label: 'Podcast',
+  admin: {
+    group: adminGroups.homepage,
+    description: 'The heading above the podcast episodes. The episodes themselves are edited under Podcast episodes.',
+    hideAPIURL: true,
+  },
   access: {
     read: () => true,
   },
@@ -10,46 +17,8 @@ export const RecentPodcast: GlobalConfig = {
     {
       name: 'title',
       type: 'text',
+      label: 'Heading',
       required: true,
-    },
-    {
-      name: 'episodes',
-      type: 'array',
-      labels: {
-        singular: 'Episode',
-        plural: 'Episodes',
-      },
-      fields: [
-        {
-          name: 'meta',
-          type: 'text',
-          required: true,
-        },
-        {
-          name: 'title',
-          type: 'text',
-          required: true,
-        },
-        {
-          name: 'guests',
-          type: 'text',
-          required: true,
-        },
-        {
-          name: 'href',
-          type: 'text',
-          required: true,
-        },
-        {
-          name: 'image',
-          type: 'upload',
-          relationTo: 'media',
-        },
-        {
-          name: 'imageAlt',
-          type: 'text',
-        },
-      ],
     },
   ],
 }

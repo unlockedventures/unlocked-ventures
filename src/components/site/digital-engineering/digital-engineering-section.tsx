@@ -28,6 +28,8 @@ export type DigitalEngineeringSectionProps = {
   className?: string
 }
 
+const arrowMotionClassName = 'transition-transform duration-300 ease-out'
+
 function ArrowUpRight({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" className={cn('size-6 shrink-0', className)}>
@@ -64,11 +66,17 @@ function EngineeringGroupCard({ group }: { group: EngineeringGroup }) {
               <li key={item.href} className="border-b border-white/10 pb-4">
                 <Link
                   href={item.href}
-                  className="flex cursor-pointer items-center justify-between gap-4 text-white/70"
+                  className="group flex cursor-pointer items-center justify-between gap-4 text-white/70"
                 >
                   <span className="font-sans text-lg leading-8 font-normal sm:text-xl">{item.label}</span>
-                  <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-full border border-[#9C9EA4] text-[#9C9EA4]">
-                    <ArrowUpRight className="size-5" />
+                  <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-full border border-[#9C9EA4] text-[#9C9EA4] transition-colors duration-300 ease-out group-hover:border-white group-hover:bg-white group-hover:text-[#33353F] group-focus-visible:border-white group-focus-visible:bg-white group-focus-visible:text-[#33353F]">
+                    <ArrowUpRight
+                      className={cn(
+                        'size-5',
+                        arrowMotionClassName,
+                        'group-hover:rotate-45 group-focus-visible:rotate-45',
+                      )}
+                    />
                   </span>
                 </Link>
               </li>
@@ -91,7 +99,7 @@ export function DigitalEngineeringSection({
 }: DigitalEngineeringSectionProps) {
   return (
     <section aria-label="Digital engineering" className={cn('bg-[#484D56]', className)}>
-      <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-8 px-4 py-12 sm:px-6 md:gap-12 md:px-8 md:py-16 xl:px-[156px] xl:py-[100px]">
+      <div className="mx-auto flex w-full flex-col gap-8 px-4 py-12 sm:px-6 md:gap-12 md:px-8 md:py-16 xl:pt-[100px]! xl:pr-[156px]! xl:pb-[100px]! xl:pl-[156px]!">
         <div className="flex max-w-[610px] flex-col gap-9">
           <div className="flex flex-col gap-5">
             <h2 className="font-sans text-[2rem] leading-10 font-normal tracking-[-1px] text-white md:text-5xl md:leading-[56px]">
@@ -102,8 +110,10 @@ export function DigitalEngineeringSection({
           <SiteOutlineButton
             href={cta.href}
             text={cta.label}
-            icon={<ArrowUpRight />}
-            className="h-[60px] w-fit gap-2.5 border-0 bg-white px-5 text-base text-[#33353F] hover:bg-white sm:h-[60px] sm:px-5 sm:text-base lg:h-[60px] lg:px-5 lg:text-base 2xl:h-[60px] 2xl:px-5 2xl:text-base"
+            icon={
+              <ArrowUpRight className="transition-opacity duration-300 ease-out group-hover:opacity-0 group-focus-visible:opacity-0" />
+            }
+            className="group h-[60px] w-fit gap-2.5 border-0 bg-white px-5 text-base text-[#33353F] hover:bg-white sm:h-[60px] sm:px-5 sm:text-base lg:h-[60px] lg:px-5 lg:text-base 2xl:h-[60px] 2xl:px-5 2xl:text-base"
           />
         </div>
         <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-[minmax(0,556fr)_minmax(0,524fr)] lg:gap-12">

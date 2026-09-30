@@ -34,7 +34,7 @@ export function DesktopMenu({
         onMouseEnter={onEnter}
         onMouseLeave={onLeave}
       >
-        <div className="mx-auto flex max-w-[1440px] gap-16 px-6 py-10 lg:px-[72px] 2xl:px-24">
+        <div className="mx-auto flex w-full gap-16 px-4 py-10 sm:px-6 md:px-8 xl:px-14">
           <div className="w-64 shrink-0 border-r border-[#E4E7EE] pr-10">
             <p className="font-sans text-xs leading-4 font-medium tracking-[0.16em] text-[#292F35] uppercase">
               {exploreLabel}

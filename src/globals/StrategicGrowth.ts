@@ -1,8 +1,16 @@
 import type { GlobalConfig } from 'payload'
 
+import { adminGroups } from '@/admin/editor-guide'
+import { buttonGroup, linkField, sizeField } from '@/admin/editor-fields'
+
 export const StrategicGrowth: GlobalConfig = {
   slug: 'strategic-growth',
   label: 'Strategic Growth',
+  admin: {
+    group: adminGroups.pages,
+    description: 'The Strategic Growth page. Each tab is a part of that page, from top to bottom.',
+    hideAPIURL: true,
+  },
   access: {
     read: () => true,
   },
@@ -11,26 +19,27 @@ export const StrategicGrowth: GlobalConfig = {
       type: 'tabs',
       tabs: [
         {
-          label: 'Intro',
+          label: 'Top of the page',
           fields: [
             {
               name: 'breadcrumbs',
               type: 'array',
+              label: 'Page path',
               labels: {
-                singular: 'Breadcrumb',
-                plural: 'Breadcrumbs',
+                singular: 'Step',
+                plural: 'Steps',
+              },
+              admin: {
+                description: 'The small links above the title, such as Home and Our solutions.',
               },
               fields: [
                 {
                   name: 'label',
                   type: 'text',
+                  label: 'Text',
                   required: true,
                 },
-                {
-                  name: 'href',
-                  type: 'text',
-                  required: true,
-                },
+                linkField(),
               ],
             },
             {
@@ -38,7 +47,7 @@ export const StrategicGrowth: GlobalConfig = {
               type: 'text',
               required: true,
               admin: {
-                description: 'Current page label shown at the end of the breadcrumb.',
+                description: 'The last step in the path. This is the page people are on, so it is not a link.',
               },
             },
             {
@@ -138,7 +147,7 @@ export const StrategicGrowth: GlobalConfig = {
           ],
         },
         {
-          label: 'Call to action',
+          label: 'Closing button',
           fields: [
             {
               name: 'ctaTitle',
@@ -150,22 +159,7 @@ export const StrategicGrowth: GlobalConfig = {
               type: 'textarea',
               required: true,
             },
-            {
-              name: 'cta',
-              type: 'group',
-              fields: [
-                {
-                  name: 'label',
-                  type: 'text',
-                  required: true,
-                },
-                {
-                  name: 'href',
-                  type: 'text',
-                  required: true,
-                },
-              ],
-            },
+            buttonGroup(),
           ],
         },
         {
@@ -189,11 +183,7 @@ export const StrategicGrowth: GlobalConfig = {
                   type: 'text',
                   required: true,
                 },
-                {
-                  name: 'href',
-                  type: 'text',
-                  required: true,
-                },
+                linkField(),
                 {
                   name: 'body',
                   type: 'textarea',
@@ -204,18 +194,8 @@ export const StrategicGrowth: GlobalConfig = {
                   type: 'upload',
                   relationTo: 'media',
                 },
-                {
-                  name: 'iconWidth',
-                  type: 'number',
-                  required: true,
-                  min: 1,
-                },
-                {
-                  name: 'iconHeight',
-                  type: 'number',
-                  required: true,
-                  min: 1,
-                },
+                sizeField('iconWidth', 'Icon width (pixels)'),
+                sizeField('iconHeight', 'Icon height (pixels)'),
               ],
             },
           ],

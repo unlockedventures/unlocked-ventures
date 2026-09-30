@@ -73,7 +73,7 @@ export function MobileMenu({
         className="min-h-0 flex-1 overflow-y-auto"
         onScroll={() => setMenuScrolled((panelRef.current?.scrollTop ?? 0) > 0)}
       >
-        <ul className="mx-auto flex w-full max-w-[1440px] flex-col px-4 py-2 sm:px-6 md:px-8 lg:px-[72px]">
+        <ul className="mx-auto flex w-full flex-col px-4 py-2 sm:px-6 md:px-8 xl:px-14">
         {items.map((item) => (
           <li key={item.href} className="py-4">
             <p className={parentLabelClassName}>{item.label}</p>
@@ -101,7 +101,7 @@ export function MobileMenu({
         ))}
         </ul>
       </div>
-      <div className="mx-auto w-full max-w-[1440px] shrink-0 border-t border-[#E4E7EE] px-4 py-4 sm:px-6 md:px-8 lg:px-[72px]">
+      <div className="mx-auto w-full shrink-0 border-t border-[#E4E7EE] px-4 py-4 sm:px-6 md:px-8 xl:px-14">
         <SiteOutlineButton
           href={cta.href}
           text={cta.label}

@@ -12,25 +12,23 @@ export async function getSuccessStories(): Promise<
   Omit<SuccessStoriesSectionProps, 'className'> | null
 > {
   const payload = await getPayload({ config: configPromise })
-  const doc = await payload.findGlobal({
-    slug: 'success-stories',
-    depth: 1,
-  })
+  const [section, result] = await Promise.all([
+    payload.findGlobal({ slug: 'success-stories' }),
+    payload.find({
+      collection: 'case-studies',
+      sort: 'sortOrder',
+      limit: 100,
+      depth: 1,
+    }),
+  ])
 
-  const feature = doc.feature
-  if (
-    !doc.title ||
-    !doc.cta?.label ||
-    !doc.cta.href ||
-    !feature?.title ||
-    !feature.ctaLabel ||
-    !feature.href
-  ) {
+  const feature = result.docs.find((story) => story.featured) ?? result.docs[0]
+  if (!section.title || !section.cta?.label || !section.cta.href || !feature?.title || !feature.ctaLabel || !feature.href) {
     return null
   }
 
-  const stories = (doc.stories ?? []).flatMap((story) => {
-    if (!story.title || !story.ctaLabel || !story.href) return []
+  const stories = result.docs.flatMap((story) => {
+    if (story.id === feature.id || !story.title || !story.ctaLabel || !story.href) return []
 
     return [
       {
@@ -44,10 +42,10 @@ export async function getSuccessStories(): Promise<
   })
 
   return {
-    title: doc.title,
+    title: section.title,
     cta: {
-      label: doc.cta.label,
-      href: doc.cta.href,
+      label: section.cta.label,
+      href: section.cta.href,
     },
     feature: {
       title: feature.title,

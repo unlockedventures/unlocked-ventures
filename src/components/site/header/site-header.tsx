@@ -19,7 +19,7 @@ export type SiteHeaderProps = {
 export function SiteHeader({ cta, navigation, exploreLabel }: SiteHeaderProps) {
   return (
     <HeaderShell>
-      <div className="mx-auto flex h-full w-full max-w-[1440px] items-center px-4 sm:px-6 md:px-8 lg:px-[72px] 2xl:px-24">
+      <div className="mx-auto flex h-full w-full items-center px-4 sm:px-6 md:px-8 xl:px-14">
         <Link
           href="/"
           aria-label="Unlocked Ventures"

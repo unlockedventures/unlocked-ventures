@@ -1,8 +1,16 @@
 import type { GlobalConfig } from 'payload'
 
+import { adminGroups } from '@/admin/editor-guide'
+import { buttonGroup, linkField } from '@/admin/editor-fields'
+
 export const DigitalEngineering: GlobalConfig = {
   slug: 'digital-engineering',
   label: 'Digital Engineering',
+  admin: {
+    group: adminGroups.homepage,
+    description: 'The homepage section with the photo and the list of engineering services.',
+    hideAPIURL: true,
+  },
   access: {
     read: () => true,
   },
@@ -17,22 +25,7 @@ export const DigitalEngineering: GlobalConfig = {
       type: 'textarea',
       required: true,
     },
-    {
-      name: 'cta',
-      type: 'group',
-      fields: [
-        {
-          name: 'label',
-          type: 'text',
-          required: true,
-        },
-        {
-          name: 'href',
-          type: 'text',
-          required: true,
-        },
-      ],
-    },
+    buttonGroup(),
     {
       name: 'image',
       type: 'upload',
@@ -45,6 +38,7 @@ export const DigitalEngineering: GlobalConfig = {
     {
       name: 'groups',
       type: 'array',
+      label: 'Service groups',
       labels: {
         singular: 'Group',
         plural: 'Groups',
@@ -53,7 +47,11 @@ export const DigitalEngineering: GlobalConfig = {
         {
           name: 'index',
           type: 'text',
+          label: 'Number',
           required: true,
+          admin: {
+            description: 'The small number beside the heading, such as 01.',
+          },
         },
         {
           name: 'title',
@@ -77,11 +75,7 @@ export const DigitalEngineering: GlobalConfig = {
               type: 'text',
               required: true,
             },
-            {
-              name: 'href',
-              type: 'text',
-              required: true,
-            },
+            linkField(),
           ],
         },
       ],

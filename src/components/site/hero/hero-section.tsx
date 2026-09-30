@@ -37,11 +37,19 @@ function HeroMediaCollage({ media }: { media?: HeroMedia }) {
         />
       ) : null}
       {media?.badgeSrc ? (
-        <img
-          src={media.badgeSrc}
-          alt={media.badgeAlt || '30 years of experience'}
+        <div
+          role="img"
+          aria-label={media.badgeAlt || '30 years of experience'}
           className="absolute top-[calc(100%*196/475)] left-[calc(100%*175/555)] z-10 aspect-square w-[calc(100%*134/555)] min-[1440px]:top-[calc(100%*296/715)] min-[1440px]:left-[calc(100%*904/1440)] min-[1440px]:w-[calc(100%*134/1440)]"
-        />
+        >
+          <img src={media.badgeSrc} alt="" className="experience-badge-ring block size-full" />
+          <img
+            src={media.badgeSrc}
+            alt=""
+            aria-hidden="true"
+            className="experience-badge-core pointer-events-none absolute inset-0 size-full"
+          />
+        </div>
       ) : null}
     </div>
   )
@@ -81,10 +89,10 @@ export function HeroSection({ title, description, cta, media, className }: HeroS
                   alt=""
                   width={24}
                   height={24}
-                  className="size-6 shrink-0"
+                  className="size-6 shrink-0 transition-transform duration-300 ease-out group-hover:rotate-45 group-focus-visible:rotate-45"
                 />
               }
-              className="mt-8 h-12 gap-2.5 border-0 bg-[#484D56] px-5 text-base text-white hover:bg-[#484D56] sm:h-12 sm:px-5 sm:text-base md:mt-10 lg:h-12 lg:px-5 lg:text-base 2xl:h-12 2xl:px-5 2xl:text-base"
+              className="group mt-8 h-12 gap-2.5 border-0 bg-[#484D56] px-5 text-base text-white hover:bg-[#484D56] sm:h-12 sm:px-5 sm:text-base md:mt-10 lg:h-12 lg:px-5 lg:text-base 2xl:h-12 2xl:px-5 2xl:text-base"
             />
           </div>
         </div>

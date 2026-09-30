@@ -70,6 +70,10 @@ export interface Config {
     users: User;
     media: Media;
     awards: Award;
+    'news-posts': NewsPost;
+    'podcast-episodes': PodcastEpisode;
+    'case-studies': CaseStudy;
+    'trusted-logos': TrustedLogo;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -80,6 +84,10 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     awards: AwardsSelect<false> | AwardsSelect<true>;
+    'news-posts': NewsPostsSelect<false> | NewsPostsSelect<true>;
+    'podcast-episodes': PodcastEpisodesSelect<false> | PodcastEpisodesSelect<true>;
+    'case-studies': CaseStudiesSelect<false> | CaseStudiesSelect<true>;
+    'trusted-logos': TrustedLogosSelect<false> | TrustedLogosSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -150,6 +158,8 @@ export interface UserAuthOperations {
   };
 }
 /**
+ * People who can sign in and change the website.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
@@ -176,11 +186,16 @@ export interface User {
   collection: 'users';
 }
 /**
+ * Photos and logos used across the site. Each one needs a short description.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
  */
 export interface Media {
   id: number;
+  /**
+   * A short sentence describing the picture, for people who cannot see it.
+   */
   alt: string;
   updatedAt: string;
   createdAt: string;
@@ -195,6 +210,8 @@ export interface Media {
   focalY?: number | null;
 }
 /**
+ * The award logos on the homepage. Use Order to choose which logo comes first.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "awards".
  */
@@ -203,13 +220,118 @@ export interface Award {
   name: string;
   logo: number | Media;
   /**
-   * Rendered width of the logo, in pixels.
+   * Leave this unless the picture looks too big or too small.
    */
   displayWidth: number;
   /**
-   * Rendered height of the logo, in pixels.
+   * Leave this unless the picture looks too big or too small.
    */
   displayHeight: number;
+  /**
+   * Lower numbers appear first.
+   */
+  sortOrder: number;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Articles shown in News and blogs on the homepage. The heading is edited under News and blogs.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "news-posts".
+ */
+export interface NewsPost {
+  id: number;
+  title: string;
+  excerpt: string;
+  /**
+   * A page on this site, such as /contact, or a full address starting with https://
+   */
+  href: string;
+  ctaLabel: string;
+  image?: (number | null) | Media;
+  imageAlt?: string | null;
+  /**
+   * Lower numbers appear first.
+   */
+  sortOrder: number;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Episodes shown on the homepage. The heading is edited under Podcast.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "podcast-episodes".
+ */
+export interface PodcastEpisode {
+  id: number;
+  meta: string;
+  title: string;
+  guests: string;
+  /**
+   * A page on this site, such as /contact, or a full address starting with https://
+   */
+  href: string;
+  image?: (number | null) | Media;
+  imageAlt?: string | null;
+  /**
+   * Lower numbers appear first.
+   */
+  sortOrder: number;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Stories shown on the homepage. The heading and button are edited under Success stories.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "case-studies".
+ */
+export interface CaseStudy {
+  id: number;
+  title: string;
+  /**
+   * A page on this site, such as /contact, or a full address starting with https://
+   */
+  href: string;
+  ctaLabel: string;
+  category?: string | null;
+  badge?: string | null;
+  description?: string | null;
+  image?: (number | null) | Media;
+  /**
+   * Turn this on to show the story as the large one.
+   */
+  featured?: boolean | null;
+  /**
+   * Lower numbers appear first.
+   */
+  sortOrder: number;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * The logos in the Trusted by row on the homepage. Use Order to choose which logo comes first.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "trusted-logos".
+ */
+export interface TrustedLogo {
+  id: number;
+  name: string;
+  logo: number | Media;
+  /**
+   * Leave this unless the picture looks too big or too small.
+   */
+  displayWidth: number;
+  /**
+   * Leave this unless the picture looks too big or too small.
+   */
+  displayHeight: number;
+  /**
+   * Lower numbers appear first.
+   */
   sortOrder: number;
   updatedAt: string;
   createdAt: string;
@@ -249,6 +371,22 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'awards';
         value: number | Award;
+      } | null)
+    | ({
+        relationTo: 'news-posts';
+        value: number | NewsPost;
+      } | null)
+    | ({
+        relationTo: 'podcast-episodes';
+        value: number | PodcastEpisode;
+      } | null)
+    | ({
+        relationTo: 'case-studies';
+        value: number | CaseStudy;
+      } | null)
+    | ({
+        relationTo: 'trusted-logos';
+        value: number | TrustedLogo;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -348,6 +486,66 @@ export interface AwardsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "news-posts_select".
+ */
+export interface NewsPostsSelect<T extends boolean = true> {
+  title?: T;
+  excerpt?: T;
+  href?: T;
+  ctaLabel?: T;
+  image?: T;
+  imageAlt?: T;
+  sortOrder?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "podcast-episodes_select".
+ */
+export interface PodcastEpisodesSelect<T extends boolean = true> {
+  meta?: T;
+  title?: T;
+  guests?: T;
+  href?: T;
+  image?: T;
+  imageAlt?: T;
+  sortOrder?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "case-studies_select".
+ */
+export interface CaseStudiesSelect<T extends boolean = true> {
+  title?: T;
+  href?: T;
+  ctaLabel?: T;
+  category?: T;
+  badge?: T;
+  description?: T;
+  image?: T;
+  featured?: T;
+  sortOrder?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "trusted-logos_select".
+ */
+export interface TrustedLogosSelect<T extends boolean = true> {
+  name?: T;
+  logo?: T;
+  displayWidth?: T;
+  displayHeight?: T;
+  sortOrder?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -387,11 +585,16 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   createdAt?: T;
 }
 /**
+ * The first thing people see on the homepage: the heading, short text, button, and photos.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "hero".
  */
 export interface Hero {
   id: number;
+  /**
+   * Press Enter to start a new line. The line break is kept on the site.
+   */
   title: string;
   description?:
     | {
@@ -401,24 +604,41 @@ export interface Hero {
     | null;
   cta: {
     label: string;
+    /**
+     * A page on this site, such as /contact, or a full address starting with https://
+     */
     href: string;
   };
   primaryImage?: (number | null) | Media;
   secondaryImage?: (number | null) | Media;
   badgeImage?: (number | null) | Media;
+  /**
+   * Read aloud for people who cannot see the badge.
+   */
   badgeAlt?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
 /**
+ * The links in the header. This is what people use to move around the site.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "navigation".
  */
 export interface Navigation {
   id: number;
+  /**
+   * The word people click to open the menu.
+   */
   exploreLabel: string;
+  /**
+   * These appear across the top of the site, in this order.
+   */
   items: {
     label: string;
+    /**
+     * A page on this site, such as /contact, or a full address starting with https://
+     */
     href: string;
     groups?:
       | {
@@ -426,7 +646,13 @@ export interface Navigation {
           links?:
             | {
                 label: string;
+                /**
+                 * A page on this site, such as /contact, or a full address starting with https://
+                 */
                 href: string;
+                /**
+                 * Turn this on for LinkedIn, YouTube, and other sites outside Unlocked Ventures.
+                 */
                 external?: boolean | null;
                 id?: string | null;
               }[]
@@ -440,6 +666,8 @@ export interface Navigation {
   createdAt?: string | null;
 }
 /**
+ * The homepage section with the photo and the list of engineering services.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "digital-engineering".
  */
@@ -449,18 +677,27 @@ export interface DigitalEngineering {
   description: string;
   cta: {
     label: string;
+    /**
+     * A page on this site, such as /contact, or a full address starting with https://
+     */
     href: string;
   };
   image?: (number | null) | Media;
   imageAlt?: string | null;
   groups?:
     | {
+        /**
+         * The small number beside the heading, such as 01.
+         */
         index: string;
         title: string;
         description?: string | null;
         items?:
           | {
               label: string;
+              /**
+               * A page on this site, such as /contact, or a full address starting with https://
+               */
               href: string;
               id?: string | null;
             }[]
@@ -472,6 +709,8 @@ export interface DigitalEngineering {
   createdAt?: string | null;
 }
 /**
+ * The links, contact details, and social icons at the bottom of every page.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-footer".
  */
@@ -481,6 +720,9 @@ export interface SiteFooter {
   contacts?:
     | {
         label: string;
+        /**
+         * A page on this site, such as /contact, or a full address starting with https://
+         */
         href: string;
         icon: number | Media;
         id?: string | null;
@@ -490,6 +732,9 @@ export interface SiteFooter {
   pages?:
     | {
         label: string;
+        /**
+         * A page on this site, such as /contact, or a full address starting with https://
+         */
         href: string;
         id?: string | null;
       }[]
@@ -505,7 +750,13 @@ export interface SiteFooter {
     | {
         label: string;
         icon: number | Media;
+        /**
+         * Leave this unless the picture looks too big or too small.
+         */
         displayWidth: number;
+        /**
+         * Leave this unless the picture looks too big or too small.
+         */
         displayHeight: number;
         id?: string | null;
       }[]
@@ -514,6 +765,8 @@ export interface SiteFooter {
   createdAt?: string | null;
 }
 /**
+ * The button at the top of every page. It currently says Get in touch.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-header".
  */
@@ -521,33 +774,29 @@ export interface SiteHeader {
   id: number;
   cta: {
     label: string;
+    /**
+     * A page on this site, such as /contact, or a full address starting with https://
+     */
     href: string;
   };
   updatedAt?: string | null;
   createdAt?: string | null;
 }
 /**
+ * The heading above the news cards. The articles themselves are edited under News articles.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "latest-news".
  */
 export interface LatestNew {
   id: number;
   title: string;
-  posts?:
-    | {
-        title: string;
-        excerpt: string;
-        href: string;
-        ctaLabel?: string | null;
-        image?: (number | null) | Media;
-        imageAlt?: string | null;
-        id?: string | null;
-      }[]
-    | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
 /**
+ * The map and the numbers at the bottom of the homepage.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "locations".
  */
@@ -563,41 +812,40 @@ export interface Location {
   createdAt?: string | null;
 }
 /**
+ * The heading above the podcast episodes. The episodes themselves are edited under Podcast episodes.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "recent-podcast".
  */
 export interface RecentPodcast {
   id: number;
   title: string;
-  episodes?:
-    | {
-        meta: string;
-        title: string;
-        guests: string;
-        href: string;
-        image?: (number | null) | Media;
-        imageAlt?: string | null;
-        id?: string | null;
-      }[]
-    | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
 /**
+ * The Strategic Growth page. Each tab is a part of that page, from top to bottom.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "strategic-growth".
  */
 export interface StrategicGrowth {
   id: number;
+  /**
+   * The small links above the title, such as Home and Our solutions.
+   */
   breadcrumbs?:
     | {
         label: string;
+        /**
+         * A page on this site, such as /contact, or a full address starting with https://
+         */
         href: string;
         id?: string | null;
       }[]
     | null;
   /**
-   * Current page label shown at the end of the breadcrumb.
+   * The last step in the path. This is the page people are on, so it is not a link.
    */
   current: string;
   title: string;
@@ -627,16 +875,28 @@ export interface StrategicGrowth {
   ctaDescription: string;
   cta: {
     label: string;
+    /**
+     * A page on this site, such as /contact, or a full address starting with https://
+     */
     href: string;
   };
   relatedTitle: string;
   related?:
     | {
         title: string;
+        /**
+         * A page on this site, such as /contact, or a full address starting with https://
+         */
         href: string;
         body: string;
         icon?: (number | null) | Media;
+        /**
+         * Leave this unless the picture looks too big or too small.
+         */
         iconWidth: number;
+        /**
+         * Leave this unless the picture looks too big or too small.
+         */
         iconHeight: number;
         id?: string | null;
       }[]
@@ -645,6 +905,8 @@ export interface StrategicGrowth {
   createdAt?: string | null;
 }
 /**
+ * The two large cards on the homepage, Enterprise and Early-stage.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "strategic-advisory".
  */
@@ -654,22 +916,31 @@ export interface StrategicAdvisory {
   description: string;
   cta: {
     label: string;
+    /**
+     * A page on this site, such as /contact, or a full address starting with https://
+     */
     href: string;
   };
+  /**
+   * Enterprise and Early-stage.
+   */
   groups?:
     | {
         title: string;
         icon: number | Media;
         /**
-         * Intrinsic width of the group icon, in pixels.
+         * Leave this unless the picture looks too big or too small.
          */
         iconWidth: number;
         /**
-         * Intrinsic height of the group icon, in pixels.
+         * Leave this unless the picture looks too big or too small.
          */
         iconHeight: number;
         items: {
           label: string;
+          /**
+           * A page on this site, such as /contact, or a full address starting with https://
+           */
           href: string;
           id?: string | null;
         }[];
@@ -680,6 +951,8 @@ export interface StrategicAdvisory {
   createdAt?: string | null;
 }
 /**
+ * The heading and button for the case studies on the homepage. Each story is edited under Case studies.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "success-stories".
  */
@@ -688,53 +961,29 @@ export interface SuccessStory {
   title: string;
   cta: {
     label: string;
+    /**
+     * A page on this site, such as /contact, or a full address starting with https://
+     */
     href: string;
   };
-  feature: {
-    badge?: string | null;
-    title: string;
-    description?: string | null;
-    ctaLabel: string;
-    href: string;
-    image?: (number | null) | Media;
-  };
-  stories?:
-    | {
-        category?: string | null;
-        title: string;
-        ctaLabel: string;
-        href: string;
-        image?: (number | null) | Media;
-        id?: string | null;
-      }[]
-    | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
 /**
+ * The heading above the row of company logos. The logos themselves are edited under Company logos.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "trusted-by".
  */
 export interface TrustedBy {
   id: number;
   title: string;
-  logos: {
-    name: string;
-    logo: number | Media;
-    /**
-     * Rendered width of the logo, in pixels.
-     */
-    displayWidth: number;
-    /**
-     * Rendered height of the logo, in pixels.
-     */
-    displayHeight: number;
-    id?: string | null;
-  }[];
   updatedAt?: string | null;
   createdAt?: string | null;
 }
 /**
+ * The page people reach from Get in touch, including the form they fill in.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "contact".
  */
@@ -743,6 +992,9 @@ export interface Contact {
   metaTitle: string;
   metaDescription: string;
   breadcrumbHomeLabel: string;
+  /**
+   * Usually /. This is where the Home step in the path goes.
+   */
   breadcrumbHomeHref: string;
   breadcrumbCurrent: string;
   title: string;
@@ -751,9 +1003,18 @@ export interface Contact {
     | {
         label: string;
         value: string;
+        /**
+         * A page on this site, such as /contact, or a full address starting with https://
+         */
         href: string;
         icon: number | Media;
+        /**
+         * Leave this unless the picture looks too big or too small.
+         */
         displayWidth: number;
+        /**
+         * Leave this unless the picture looks too big or too small.
+         */
         displayHeight: number;
         id?: string | null;
       }[]
@@ -796,22 +1057,27 @@ export interface Contact {
   createdAt?: string | null;
 }
 /**
+ * The name in the browser tab, and the message shown when a page cannot be found.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site".
  */
 export interface Site {
   id: number;
   /**
-   * Default browser title.
+   * Shown in the browser tab and in search results.
    */
   title: string;
   /**
-   * Default meta description.
+   * A sentence search engines can show under the site name.
    */
   description: string;
   notFoundMetaTitle: string;
   notFoundLabel: string;
   notFoundTitle: string;
+  /**
+   * Shown when someone opens a page that does not exist.
+   */
   notFoundDescription: string;
   homeButtonLabel: string;
   updatedAt?: string | null;
@@ -973,17 +1239,6 @@ export interface SiteHeaderSelect<T extends boolean = true> {
  */
 export interface LatestNewsSelect<T extends boolean = true> {
   title?: T;
-  posts?:
-    | T
-    | {
-        title?: T;
-        excerpt?: T;
-        href?: T;
-        ctaLabel?: T;
-        image?: T;
-        imageAlt?: T;
-        id?: T;
-      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1011,17 +1266,6 @@ export interface LocationsSelect<T extends boolean = true> {
  */
 export interface RecentPodcastSelect<T extends boolean = true> {
   title?: T;
-  episodes?:
-    | T
-    | {
-        meta?: T;
-        title?: T;
-        guests?: T;
-        href?: T;
-        image?: T;
-        imageAlt?: T;
-        id?: T;
-      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1131,26 +1375,6 @@ export interface SuccessStoriesSelect<T extends boolean = true> {
         label?: T;
         href?: T;
       };
-  feature?:
-    | T
-    | {
-        badge?: T;
-        title?: T;
-        description?: T;
-        ctaLabel?: T;
-        href?: T;
-        image?: T;
-      };
-  stories?:
-    | T
-    | {
-        category?: T;
-        title?: T;
-        ctaLabel?: T;
-        href?: T;
-        image?: T;
-        id?: T;
-      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1161,15 +1385,6 @@ export interface SuccessStoriesSelect<T extends boolean = true> {
  */
 export interface TrustedBySelect<T extends boolean = true> {
   title?: T;
-  logos?:
-    | T
-    | {
-        name?: T;
-        logo?: T;
-        displayWidth?: T;
-        displayHeight?: T;
-        id?: T;
-      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

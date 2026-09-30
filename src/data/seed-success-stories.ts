@@ -22,7 +22,21 @@ async function uploadStoryImage(payload: Payload, file: string, alt: string) {
 
 export async function seedSuccessStories(payload: Payload) {
   const current = await payload.findGlobal({ slug: 'success-stories' })
-  if (current.title) return
+  if (!current.title || !current.cta?.label || !current.cta?.href) {
+    await payload.updateGlobal({
+      slug: 'success-stories',
+      data: {
+        title: current.title || successStoriesSeed.title,
+        cta: {
+          label: current.cta?.label || successStoriesSeed.cta.label,
+          href: current.cta?.href || successStoriesSeed.cta.href,
+        },
+      },
+    })
+  }
+
+  const existing = await payload.count({ collection: 'case-studies' })
+  if (existing.totalDocs > 0) return
 
   const featureImage = await uploadStoryImage(
     payload,
@@ -30,32 +44,33 @@ export async function seedSuccessStories(payload: Payload) {
     successStoriesSeed.feature.title,
   )
 
-  const stories = []
-  for (const story of successStoriesSeed.stories) {
-    const image = await uploadStoryImage(payload, story.imageFile, story.title)
-    stories.push({
-      category: story.category,
-      title: story.title,
-      ctaLabel: story.ctaLabel,
-      href: story.href,
-      image: image.id,
-    })
-  }
-
-  await payload.updateGlobal({
-    slug: 'success-stories',
+  await payload.create({
+    collection: 'case-studies',
     data: {
-      title: successStoriesSeed.title,
-      cta: successStoriesSeed.cta,
-      feature: {
-        badge: successStoriesSeed.feature.badge,
-        title: successStoriesSeed.feature.title,
-        description: successStoriesSeed.feature.description,
-        ctaLabel: successStoriesSeed.feature.ctaLabel,
-        href: successStoriesSeed.feature.href,
-        image: featureImage.id,
-      },
-      stories,
+      title: successStoriesSeed.feature.title,
+      href: successStoriesSeed.feature.href,
+      ctaLabel: successStoriesSeed.feature.ctaLabel,
+      badge: successStoriesSeed.feature.badge,
+      description: successStoriesSeed.feature.description,
+      image: featureImage.id,
+      featured: true,
+      sortOrder: 0,
     },
   })
+
+  for (const [index, story] of successStoriesSeed.stories.entries()) {
+    const image = await uploadStoryImage(payload, story.imageFile, story.title)
+    await payload.create({
+      collection: 'case-studies',
+      data: {
+        title: story.title,
+        href: story.href,
+        ctaLabel: story.ctaLabel,
+        category: story.category,
+        image: image.id,
+        featured: false,
+        sortOrder: index + 1,
+      },
+    })
+  }
 }

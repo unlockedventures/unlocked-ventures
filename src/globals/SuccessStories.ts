@@ -1,8 +1,16 @@
 import type { GlobalConfig } from 'payload'
 
+import { adminGroups } from '@/admin/editor-guide'
+import { buttonGroup } from '@/admin/editor-fields'
+
 export const SuccessStories: GlobalConfig = {
   slug: 'success-stories',
-  label: 'Success Stories',
+  label: 'Success stories',
+  admin: {
+    group: adminGroups.homepage,
+    description: 'The heading and button for the case studies on the homepage. Each story is edited under Case studies.',
+    hideAPIURL: true,
+  },
   access: {
     read: () => true,
   },
@@ -10,91 +18,9 @@ export const SuccessStories: GlobalConfig = {
     {
       name: 'title',
       type: 'text',
+      label: 'Heading',
       required: true,
     },
-    {
-      name: 'cta',
-      type: 'group',
-      fields: [
-        {
-          name: 'label',
-          type: 'text',
-          required: true,
-        },
-        {
-          name: 'href',
-          type: 'text',
-          required: true,
-        },
-      ],
-    },
-    {
-      name: 'feature',
-      type: 'group',
-      fields: [
-        {
-          name: 'badge',
-          type: 'text',
-        },
-        {
-          name: 'title',
-          type: 'text',
-          required: true,
-        },
-        {
-          name: 'description',
-          type: 'textarea',
-        },
-        {
-          name: 'ctaLabel',
-          type: 'text',
-          required: true,
-        },
-        {
-          name: 'href',
-          type: 'text',
-          required: true,
-        },
-        {
-          name: 'image',
-          type: 'upload',
-          relationTo: 'media',
-        },
-      ],
-    },
-    {
-      name: 'stories',
-      type: 'array',
-      labels: {
-        singular: 'Story',
-        plural: 'Stories',
-      },
-      fields: [
-        {
-          name: 'category',
-          type: 'text',
-        },
-        {
-          name: 'title',
-          type: 'text',
-          required: true,
-        },
-        {
-          name: 'ctaLabel',
-          type: 'text',
-          required: true,
-        },
-        {
-          name: 'href',
-          type: 'text',
-          required: true,
-        },
-        {
-          name: 'image',
-          type: 'upload',
-          relationTo: 'media',
-        },
-      ],
-    },
+    buttonGroup(),
   ],
 }

@@ -5,22 +5,19 @@ import type { TrustedBySectionProps } from '@/components/site/trusted-by/trusted
 
 export async function getTrustedBy(): Promise<Omit<TrustedBySectionProps, 'className'> | null> {
   const payload = await getPayload({ config: configPromise })
-  const doc = await payload.findGlobal({
-    slug: 'trusted-by',
-    depth: 1,
-  })
+  const [section, result] = await Promise.all([
+    payload.findGlobal({ slug: 'trusted-by' }),
+    payload.find({
+      collection: 'trusted-logos',
+      sort: 'sortOrder',
+      limit: 100,
+      depth: 1,
+    }),
+  ])
 
-  const logos = (doc.logos ?? []).flatMap((item) => {
+  const logos = result.docs.flatMap((item) => {
     const logo = item.logo
-    if (
-      !item.name ||
-      !item.displayWidth ||
-      !item.displayHeight ||
-      typeof logo === 'number' ||
-      !logo?.url
-    ) {
-      return []
-    }
+    if (typeof logo === 'number' || !logo?.url) return []
 
     return [
       {
@@ -32,10 +29,10 @@ export async function getTrustedBy(): Promise<Omit<TrustedBySectionProps, 'class
     ]
   })
 
-  if (!doc.title || !logos.length) return null
+  if (!section.title || !logos.length) return null
 
   return {
-    title: doc.title,
+    title: section.title,
     logos,
   }
 }

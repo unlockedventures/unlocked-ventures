@@ -10,14 +10,19 @@ function mediaUrl(value: number | { url?: string | null } | null | undefined) {
 
 export async function getLatestNews(): Promise<LatestNewsSectionProps | null> {
   const payload = await getPayload({ config: configPromise })
-  const doc = await payload.findGlobal({
-    slug: 'latest-news',
-    depth: 1,
-  })
+  const [section, result] = await Promise.all([
+    payload.findGlobal({ slug: 'latest-news' }),
+    payload.find({
+      collection: 'news-posts',
+      sort: 'sortOrder',
+      limit: 100,
+      depth: 1,
+    }),
+  ])
 
-  if (!doc.title) return null
+  if (!section.title) return null
 
-  const posts = (doc.posts ?? []).flatMap((post) => {
+  const posts = result.docs.flatMap((post) => {
     if (!post.title || !post.excerpt || !post.href) return []
 
     return [
@@ -35,7 +40,7 @@ export async function getLatestNews(): Promise<LatestNewsSectionProps | null> {
   if (!posts.length) return null
 
   return {
-    title: doc.title,
+    title: section.title,
     posts,
   }
 }

@@ -1,8 +1,16 @@
 import type { GlobalConfig } from 'payload'
 
+import { adminGroups } from '@/admin/editor-guide'
+import { buttonGroup, linkField, sizeField } from '@/admin/editor-fields'
+
 export const StrategicAdvisory: GlobalConfig = {
   slug: 'strategic-advisory',
   label: 'Strategic Advisory',
+  admin: {
+    group: adminGroups.homepage,
+    description: 'The two large cards on the homepage, Enterprise and Early-stage.',
+    hideAPIURL: true,
+  },
   access: {
     read: () => true,
   },
@@ -17,28 +25,17 @@ export const StrategicAdvisory: GlobalConfig = {
       type: 'textarea',
       required: true,
     },
-    {
-      name: 'cta',
-      type: 'group',
-      fields: [
-        {
-          name: 'label',
-          type: 'text',
-          required: true,
-        },
-        {
-          name: 'href',
-          type: 'text',
-          required: true,
-        },
-      ],
-    },
+    buttonGroup(),
     {
       name: 'groups',
       type: 'array',
+      label: 'Cards',
       labels: {
-        singular: 'Group',
-        plural: 'Groups',
+        singular: 'Card',
+        plural: 'Cards',
+      },
+      admin: {
+        description: 'Enterprise and Early-stage.',
       },
       fields: [
         {
@@ -52,24 +49,8 @@ export const StrategicAdvisory: GlobalConfig = {
           relationTo: 'media',
           required: true,
         },
-        {
-          name: 'iconWidth',
-          type: 'number',
-          required: true,
-          min: 1,
-          admin: {
-            description: 'Intrinsic width of the group icon, in pixels.',
-          },
-        },
-        {
-          name: 'iconHeight',
-          type: 'number',
-          required: true,
-          min: 1,
-          admin: {
-            description: 'Intrinsic height of the group icon, in pixels.',
-          },
-        },
+        sizeField('iconWidth', 'Icon width (pixels)'),
+        sizeField('iconHeight', 'Icon height (pixels)'),
         {
           name: 'items',
           type: 'array',
@@ -85,11 +66,7 @@ export const StrategicAdvisory: GlobalConfig = {
               type: 'text',
               required: true,
             },
-            {
-              name: 'href',
-              type: 'text',
-              required: true,
-            },
+            linkField(),
           ],
         },
       ],

@@ -146,7 +146,29 @@
   animation: trusted-marquee 45s linear infinite;
 }
 
+@keyframes experience-badge-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.experience-badge-ring {
+  animation: experience-badge-spin 16s linear infinite;
+  transform-origin: center;
+}
+
+.experience-badge-core {
+  clip-path: circle(26% at 50% 50%);
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .experience-badge-ring {
+    animation: none;
+  }
+
   .trusted-marquee-track {
     animation: none;
     width: 100%;

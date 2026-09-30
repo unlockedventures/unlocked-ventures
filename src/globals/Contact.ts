@@ -1,5 +1,8 @@
 import type { GlobalConfig } from 'payload'
 
+import { adminGroups } from '@/admin/editor-guide'
+import { linkField, sizeField } from '@/admin/editor-fields'
+
 const labeledField = (name: string, label: string) => ({
   name,
   type: 'group' as const,
@@ -12,7 +15,12 @@ const labeledField = (name: string, label: string) => ({
 
 export const Contact: GlobalConfig = {
   slug: 'contact',
-  label: 'Contact',
+  label: 'Contact page',
+  admin: {
+    group: adminGroups.pages,
+    description: 'The page people reach from Get in touch, including the form they fill in.',
+    hideAPIURL: true,
+  },
   access: {
     read: () => true,
   },
@@ -20,26 +28,34 @@ export const Contact: GlobalConfig = {
     {
       name: 'metaTitle',
       type: 'text',
+      label: 'Browser tab title',
       required: true,
     },
     {
       name: 'metaDescription',
       type: 'textarea',
+      label: 'Short summary',
       required: true,
     },
     {
       name: 'breadcrumbHomeLabel',
       type: 'text',
+      label: 'Home link text',
       required: true,
     },
     {
       name: 'breadcrumbHomeHref',
       type: 'text',
+      label: 'Home link',
       required: true,
+      admin: {
+        description: 'Usually /. This is where the Home step in the path goes.',
+      },
     },
     {
       name: 'breadcrumbCurrent',
       type: 'text',
+      label: 'Current page name',
       required: true,
     },
     {
@@ -60,12 +76,12 @@ export const Contact: GlobalConfig = {
         plural: 'Cards',
       },
       fields: [
-        { name: 'label', type: 'text', required: true },
-        { name: 'value', type: 'text', required: true },
-        { name: 'href', type: 'text', required: true },
-        { name: 'icon', type: 'upload', relationTo: 'media', required: true },
-        { name: 'displayWidth', type: 'number', required: true, min: 1 },
-        { name: 'displayHeight', type: 'number', required: true, min: 1 },
+        { name: 'label', type: 'text', label: 'Label', required: true },
+        { name: 'value', type: 'text', label: 'Details', required: true },
+        linkField(),
+        { name: 'icon', type: 'upload', label: 'Icon', relationTo: 'media', required: true },
+        sizeField('displayWidth', 'Icon width (pixels)'),
+        sizeField('displayHeight', 'Icon height (pixels)'),
       ],
     },
     {
@@ -76,9 +92,10 @@ export const Contact: GlobalConfig = {
     {
       name: 'form',
       type: 'group',
+      label: 'Form',
       fields: [
-        { name: 'successMessage', type: 'text', required: true },
-        { name: 'submitLabel', type: 'text', required: true },
+        { name: 'successMessage', type: 'text', label: 'Thank-you message', required: true },
+        { name: 'submitLabel', type: 'text', label: 'Submit button text', required: true },
         { name: 'countryCode', type: 'text', required: true },
         { name: 'phoneLabel', type: 'text', required: true },
         { name: 'phonePlaceholder', type: 'text', required: true },

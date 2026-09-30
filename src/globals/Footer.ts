@@ -1,8 +1,16 @@
 import type { GlobalConfig } from 'payload'
 
+import { adminGroups } from '@/admin/editor-guide'
+import { linkField, sizeField } from '@/admin/editor-fields'
+
 export const Footer: GlobalConfig = {
   slug: 'site-footer',
   label: 'Footer',
+  admin: {
+    group: adminGroups.menus,
+    description: 'The links, contact details, and social icons at the bottom of every page.',
+    hideAPIURL: true,
+  },
   access: {
     read: () => true,
   },
@@ -25,11 +33,7 @@ export const Footer: GlobalConfig = {
           type: 'text',
           required: true,
         },
-        {
-          name: 'href',
-          type: 'text',
-          required: true,
-        },
+        linkField(),
         {
           name: 'icon',
           type: 'upload',
@@ -57,16 +61,13 @@ export const Footer: GlobalConfig = {
           type: 'text',
           required: true,
         },
-        {
-          name: 'href',
-          type: 'text',
-          required: true,
-        },
+        linkField(),
       ],
     },
     {
       name: 'newsletter',
       type: 'group',
+      label: 'Newsletter',
       fields: [
         {
           name: 'title',
@@ -86,6 +87,7 @@ export const Footer: GlobalConfig = {
         {
           name: 'buttonLabel',
           type: 'text',
+          label: 'Button text',
           required: true,
         },
       ],
@@ -93,6 +95,7 @@ export const Footer: GlobalConfig = {
     {
       name: 'copyright',
       type: 'text',
+      label: 'Copyright line',
       required: true,
     },
     {
@@ -114,18 +117,8 @@ export const Footer: GlobalConfig = {
           relationTo: 'media',
           required: true,
         },
-        {
-          name: 'displayWidth',
-          type: 'number',
-          required: true,
-          min: 1,
-        },
-        {
-          name: 'displayHeight',
-          type: 'number',
-          required: true,
-          min: 1,
-        },
+        sizeField('displayWidth', 'Icon width (pixels)'),
+        sizeField('displayHeight', 'Icon height (pixels)'),
       ],
     },
   ],

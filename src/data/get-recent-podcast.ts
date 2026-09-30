@@ -10,14 +10,19 @@ function mediaUrl(value: number | { url?: string | null } | null | undefined) {
 
 export async function getRecentPodcast(): Promise<RecentPodcastSectionProps | null> {
   const payload = await getPayload({ config: configPromise })
-  const doc = await payload.findGlobal({
-    slug: 'recent-podcast',
-    depth: 1,
-  })
+  const [section, result] = await Promise.all([
+    payload.findGlobal({ slug: 'recent-podcast' }),
+    payload.find({
+      collection: 'podcast-episodes',
+      sort: 'sortOrder',
+      limit: 100,
+      depth: 1,
+    }),
+  ])
 
-  if (!doc.title) return null
+  if (!section.title) return null
 
-  const episodes = (doc.episodes ?? []).flatMap((episode) => {
+  const episodes = result.docs.flatMap((episode) => {
     if (!episode.meta || !episode.title || !episode.guests || !episode.href) return []
 
     return [
@@ -35,7 +40,7 @@ export async function getRecentPodcast(): Promise<RecentPodcastSectionProps | nu
   if (!episodes.length) return null
 
   return {
-    title: doc.title,
+    title: section.title,
     episodes,
   }
 }

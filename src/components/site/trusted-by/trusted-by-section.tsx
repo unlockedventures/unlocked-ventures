@@ -44,11 +44,11 @@ export function TrustedBySection({
 }: TrustedBySectionProps) {
   return (
     <section className={cn('overflow-hidden bg-white', className)}>
-      <div className="mx-auto flex w-full max-w-[1440px] flex-col items-center gap-10 py-12 md:py-16 xl:py-[100px]">
-        <h2 className="px-4 text-center font-sans text-[2rem] leading-[3rem] font-normal text-[#171616]">
+      <div className="flex w-full flex-col items-center gap-10 px-4 py-12 sm:px-6 md:px-8 md:py-16 lg:px-12 xl:px-16 xl:py-[100px] 2xl:px-20">
+        <h2 className="text-center font-sans text-[2rem] leading-[3rem] font-normal text-[#171616]">
           {title}
         </h2>
-        <div className="relative w-full max-w-[1328px] overflow-hidden">
+        <div className="relative w-full overflow-hidden">
           <div className="trusted-marquee-track flex w-max items-center">
             <LogoRow logos={logos} />
             <LogoRow logos={logos} hidden />

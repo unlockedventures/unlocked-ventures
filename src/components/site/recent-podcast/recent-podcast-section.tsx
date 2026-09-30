@@ -18,10 +18,18 @@ export type RecentPodcastSectionProps = {
   className?: string
 }
 
+function PlayIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="ml-0.5 size-7 sm:size-8 lg:size-9">
+      <path d="M8.5 6.2v11.6L18.2 12 8.5 6.2z" fill="currentColor" />
+    </svg>
+  )
+}
+
 function PodcastCard({ episode }: { episode: PodcastEpisode }) {
   return (
     <article className="h-full bg-white">
-      <Link href={episode.href} className="flex h-full cursor-pointer flex-col gap-7">
+      <Link href={episode.href} className="group flex h-full cursor-pointer flex-col gap-7">
         <div className="relative h-[220px] shrink-0 overflow-hidden bg-[#E4E6EA] sm:h-[280px] lg:h-[360px]">
           {episode.imageSrc ? (
             <img
@@ -30,6 +38,12 @@ function PodcastCard({ episode }: { episode: PodcastEpisode }) {
               className="absolute inset-0 h-full w-full object-cover grayscale"
             />
           ) : null}
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute top-1/2 left-1/2 flex size-14 -translate-x-1/2 -translate-y-1/2 scale-90 items-center justify-center rounded-full bg-[#E7E9F3] text-[#25282D] opacity-0 transition duration-300 ease-out group-hover:scale-100 group-hover:opacity-100 group-focus-visible:scale-100 group-focus-visible:opacity-100 sm:size-16 lg:size-[72px]"
+          >
+            <PlayIcon />
+          </span>
         </div>
         <div className="flex flex-col gap-3 px-5 pb-5">
           <p className="font-sans text-base leading-6 font-normal text-[#222222]/68">{episode.meta}</p>
@@ -50,7 +64,7 @@ function PodcastCard({ episode }: { episode: PodcastEpisode }) {
 export function RecentPodcastSection({ title, episodes, className }: RecentPodcastSectionProps) {
   return (
     <section aria-label="Recent podcast" className={cn('bg-[#F3F4F9]', className)}>
-      <div className="mx-auto w-full max-w-[1440px] px-4 py-12 sm:px-6 md:px-8 md:py-16 xl:px-14 xl:py-20">
+      <div className="w-full px-4 py-12 sm:px-6 md:px-8 md:py-16 lg:px-[56px] lg:py-[80px]">
         <ContentSlider
           label="Recent podcast episodes"
           headerClassName="sm:items-center"

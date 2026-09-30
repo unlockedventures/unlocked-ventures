@@ -1,8 +1,15 @@
 import type { GlobalConfig } from 'payload'
 
+import { adminGroups } from '@/admin/editor-guide'
+
 export const LatestNews: GlobalConfig = {
   slug: 'latest-news',
-  label: 'Latest News',
+  label: 'News and blogs',
+  admin: {
+    group: adminGroups.homepage,
+    description: 'The heading above the news cards. The articles themselves are edited under News articles.',
+    hideAPIURL: true,
+  },
   access: {
     read: () => true,
   },
@@ -10,46 +17,8 @@ export const LatestNews: GlobalConfig = {
     {
       name: 'title',
       type: 'text',
+      label: 'Heading',
       required: true,
-    },
-    {
-      name: 'posts',
-      type: 'array',
-      labels: {
-        singular: 'Post',
-        plural: 'Posts',
-      },
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-          required: true,
-        },
-        {
-          name: 'excerpt',
-          type: 'textarea',
-          required: true,
-        },
-        {
-          name: 'href',
-          type: 'text',
-          required: true,
-        },
-        {
-          name: 'ctaLabel',
-          type: 'text',
-          defaultValue: 'Read More',
-        },
-        {
-          name: 'image',
-          type: 'upload',
-          relationTo: 'media',
-        },
-        {
-          name: 'imageAlt',
-          type: 'text',
-        },
-      ],
     },
   ],
 }

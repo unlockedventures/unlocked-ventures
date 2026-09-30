@@ -27,9 +27,16 @@ export type SuccessStoriesSectionProps = {
 const trimmedLabelClassName =
   'block leading-none [text-box-edge:cap_alphabetic] [text-box-trim:trim-both]'
 
-function ArrowUpRight() {
+function ArrowUpRight({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className="size-6 shrink-0">
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className={cn(
+        'size-6 shrink-0 transition-transform duration-300 ease-out group-hover:rotate-45 group-focus-visible:rotate-45',
+        className,
+      )}
+    >
       <path
         d="M7 17L17 7M7 7L17 7L17 17"
         fill="none"
@@ -51,7 +58,7 @@ function StoryLink({
   className?: string
 }) {
   return (
-    <Link href={href} className={cn('inline-flex items-center gap-2.5 font-sans text-base font-normal', className)}>
+    <Link href={href} className={cn('group inline-flex items-center gap-2.5 font-sans text-base font-normal', className)}>
       <span className={trimmedLabelClassName}>{label}</span>
       <ArrowUpRight />
     </Link>
@@ -124,7 +131,7 @@ export function SuccessStoriesSection({
 }: SuccessStoriesSectionProps) {
   return (
     <section aria-label="Our success stories" className={cn('bg-white', className)}>
-      <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-8 px-4 py-12 sm:px-6 md:gap-12 md:px-8 md:py-16 lg:px-14 lg:py-[100px]">
+      <div className="mx-auto flex w-full flex-col gap-8 px-4 py-12 sm:px-6 md:gap-12 md:px-8 md:py-16 xl:px-14 xl:py-[100px]">
         <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
           <h2 className="font-sans text-[2rem] leading-10 font-normal tracking-[-1px] text-[#171616] md:text-5xl md:leading-[56px]">
             {title}
@@ -133,7 +140,7 @@ export function SuccessStoriesSection({
             href={cta.href}
             text={cta.label}
             icon={<ArrowUpRight />}
-            className="h-[60px] gap-2.5 border-0 bg-[#484D56] px-5 text-base text-white hover:bg-[#484D56] sm:h-[60px] sm:px-5 sm:text-base lg:h-[60px] lg:px-5 lg:text-base 2xl:h-[60px] 2xl:px-5 2xl:text-base"
+            className="group h-[60px] gap-2.5 border-0 bg-[#484D56] px-5 text-base text-white hover:bg-[#484D56] sm:h-[60px] sm:px-5 sm:text-base lg:h-[60px] lg:px-5 lg:text-base 2xl:h-[60px] 2xl:px-5 2xl:text-base"
           />
         </div>
         <div className="flex flex-col gap-3">
