@@ -74,7 +74,10 @@ export function RecentPodcastSection({ title, episodes, className }: RecentPodca
               {title}
             </h2>
           }
-          slideClassName="lg:w-[500px]"
+          snapClassName="max-lg:snap-x max-lg:snap-mandatory"
+          slideSnapClassName="max-lg:snap-start"
+          slideClassName="lg:w-[calc((100%-5.5rem)/2)]"
+          endFadeClassName="via-[#F3F4F9] via-45% to-[#F3F4F9] lg:w-16"
         >
           {episodes.map((episode) => (
             <PodcastCard key={episode.href} episode={episode} />

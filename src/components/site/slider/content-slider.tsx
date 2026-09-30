@@ -13,6 +13,9 @@ export type ContentSliderProps = {
   controlsClassName?: string
   trackClassName?: string
   slideClassName?: string
+  snapClassName?: string
+  slideSnapClassName?: string
+  endFadeClassName?: string
 }
 
 export function ContentSlider({
@@ -24,6 +27,9 @@ export function ContentSlider({
   controlsClassName,
   trackClassName,
   slideClassName,
+  snapClassName = 'snap-x snap-mandatory',
+  slideSnapClassName = 'snap-start',
+  endFadeClassName,
 }: ContentSliderProps) {
   const scrollerRef = useRef<HTMLDivElement>(null)
   const [canPrevious, setCanPrevious] = useState(false)
@@ -81,31 +87,44 @@ export function ContentSlider({
           <SliderControl direction="next" disabled={!canNext} onClick={() => scrollBySlide(1)} />
         </div>
       </div>
-      <div
-        ref={scrollerRef}
-        role="region"
-        aria-label={label}
-        tabIndex={0}
-        onKeyDown={(event) => {
-          if (event.key === 'ArrowLeft') {
-            event.preventDefault()
-            scrollBySlide(-1)
-          }
-          if (event.key === 'ArrowRight') {
-            event.preventDefault()
-            scrollBySlide(1)
-          }
-        }}
-        className={cn(
-          'flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#484D56] [&::-webkit-scrollbar]:hidden',
-          trackClassName,
-        )}
-      >
-        {Children.map(children, (child) => (
-          <div data-slider-slide className={cn('w-full shrink-0 snap-start', slideClassName)}>
-            {child}
-          </div>
-        ))}
+      <div className="relative">
+        <div
+          ref={scrollerRef}
+          role="region"
+          aria-label={label}
+          tabIndex={0}
+          onKeyDown={(event) => {
+            if (event.key === 'ArrowLeft') {
+              event.preventDefault()
+              scrollBySlide(-1)
+            }
+            if (event.key === 'ArrowRight') {
+              event.preventDefault()
+              scrollBySlide(1)
+            }
+          }}
+          className={cn(
+            'flex gap-4 overflow-x-auto scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#484D56] [&::-webkit-scrollbar]:hidden',
+            snapClassName,
+            trackClassName,
+          )}
+        >
+          {Children.map(children, (child) => (
+            <div data-slider-slide className={cn('w-full shrink-0', slideSnapClassName, slideClassName)}>
+              {child}
+            </div>
+          ))}
+        </div>
+        {endFadeClassName ? (
+          <div
+            aria-hidden="true"
+            className={cn(
+              'pointer-events-none absolute inset-y-0 right-0 z-10 w-28 bg-gradient-to-r from-transparent transition-opacity duration-300',
+              canNext ? 'opacity-100' : 'opacity-0',
+              endFadeClassName,
+            )}
+          />
+        ) : null}
       </div>
     </div>
   )

@@ -345,6 +345,53 @@ html[data-theme='dark']:has(.payload-settings) .nav__link-indicator {
   background: #f3f4f9;
 }
 
+.uv-admin-nav__group-button {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0;
+  padding: 12px 4px 6px;
+  border: 0;
+  background: transparent;
+  color: #6b7280;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.uv-admin-nav__group-button svg {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  transform: rotate(-90deg);
+}
+
+.uv-admin-nav__group-button svg.is-open {
+  transform: none;
+}
+
+.uv-admin-nav__items {
+  margin: 0 0 8px 8px;
+  padding: 2px 0 6px 12px;
+  list-style: none;
+}
+
+.uv-admin-nav__items .nav__link {
+  padding-inline-start: 4px;
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+html[data-theme='dark']:has(.payload-settings) .uv-admin-nav__group-button {
+  color: #9ca3af;
+}
+
 .uv-admin-home {
   display: grid;
   gap: 2rem;
