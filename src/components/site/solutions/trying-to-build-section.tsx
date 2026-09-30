@@ -3,7 +3,16 @@ import Link from 'next/link'
 
 const labelClassName = 'block leading-none'
 
-export function TryingToBuildSection() {
+export type TryingToBuildSectionProps = {
+  title: string
+  description: string
+  cta: {
+    label: string
+    href: string
+  }
+}
+
+export function TryingToBuildSection({ title, description, cta }: TryingToBuildSectionProps) {
   return (
     <section className="relative overflow-hidden bg-[#484D56]">
       <Image
@@ -27,18 +36,17 @@ export function TryingToBuildSection() {
       <div className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-col items-center gap-8 px-4 py-16 text-center sm:px-6 md:px-8 md:py-20 xl:gap-10">
         <div className="flex max-w-[680px] flex-col items-center gap-4">
           <h2 className="font-sans text-[1.75rem] leading-9 font-bold text-white sm:text-[2rem] sm:leading-10 md:text-[36px] md:leading-[44px]">
-            Tell us what you are trying to build.
+            {title}
           </h2>
           <p className="max-w-[590px] font-sans text-base leading-6 font-normal text-white">
-            The best sales organizations start with the right environment, define what &quot;good&quot;
-            looks like, and constantly improve. I&apos;ll show you how to do all three.
+            {description}
           </p>
         </div>
         <Link
-          href="/contact"
+          href={cta.href}
           className="inline-flex h-14 items-center justify-center gap-3 bg-white px-6 font-sans text-base font-semibold text-[#222222]"
         >
-          <span className={labelClassName}>Get in touch</span>
+          <span className={labelClassName}>{cta.label}</span>
           <Image
             src="/solutions/strategic-growth/icon-arrow-right.svg"
             alt=""

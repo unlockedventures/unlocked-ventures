@@ -1,11 +1,22 @@
 import Image from 'next/image'
 import Link from 'next/link'
 
+import type { NavItem } from '@/config/navigation'
+
 import { HeaderShell } from '@/components/site/header/header-shell'
 import { SiteNavigation } from '@/components/site/navigation/site-navigation'
 import { SiteOutlineButton } from '@/components/site/site-outline-button'
 
-export function SiteHeader() {
+export type SiteHeaderProps = {
+  cta: {
+    label: string
+    href: string
+  }
+  navigation: readonly NavItem[]
+  exploreLabel: string
+}
+
+export function SiteHeader({ cta, navigation, exploreLabel }: SiteHeaderProps) {
   return (
     <HeaderShell>
       <div className="mx-auto flex h-full w-full max-w-[1440px] items-center px-4 sm:px-6 md:px-8 lg:px-[72px] 2xl:px-24">
@@ -31,9 +42,9 @@ export function SiteHeader() {
             className="h-[10.5px] w-auto sm:h-3 md:h-[13.5px] lg:h-[15px] xl:h-[15px] 2xl:h-[16.5px]"
           />
         </Link>
-        <SiteNavigation />
+        <SiteNavigation items={navigation} cta={cta} exploreLabel={exploreLabel} />
         <div className="hidden xl:block">
-          <SiteOutlineButton href="/contact" text="Get in touch" />
+          <SiteOutlineButton href={cta.href} text={cta.label} />
         </div>
       </div>
     </HeaderShell>

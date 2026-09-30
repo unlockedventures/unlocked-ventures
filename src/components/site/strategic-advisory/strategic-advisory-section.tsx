@@ -27,50 +27,6 @@ export type StrategicAdvisorySectionProps = {
   className?: string
 }
 
-const solution = (slug: string) => `/solutions/${slug}`
-
-export const homepageStrategicAdvisory = {
-  title: 'Strategic Advisory',
-  description:
-    'Our new report gives portfolio company CFOs 8 steps and 8 KPIs to build a defensible 2027 AI budget that survives sponsor and diligence scrutiny.',
-  cta: {
-    label: 'Get in touch',
-    href: '/contact',
-  },
-  groups: [
-    {
-      title: 'Enterprise',
-      iconSrc: '/strategic-advisory/icon-enterprise.png',
-      iconWidth: 210,
-      iconHeight: 204,
-      items: [
-        { label: 'Product Strategy', href: solution('product-strategy') },
-        { label: 'Market Radar', href: solution('market-radar') },
-        { label: 'Strategic Growth', href: solution('strategic-growth') },
-        { label: 'New Product Incubation', href: solution('new-product-incubation') },
-        { label: 'Digital Transformation', href: solution('digital-transformation') },
-      ],
-    },
-    {
-      title: 'Early-stage',
-      iconSrc: '/strategic-advisory/icon-early-stage.png',
-      iconWidth: 210,
-      iconHeight: 210,
-      items: [
-        { label: 'Product Strategy', href: solution('product-strategy') },
-        { label: 'Market Positioning', href: solution('market-positioning') },
-        { label: 'GTM Design', href: solution('gtm-design') },
-        { label: 'Business Development', href: solution('business-development') },
-        { label: 'Capital Raise', href: solution('capital-raise') },
-        {
-          label: 'CXO Mentorship and Hiring Support',
-          href: solution('cxo-mentorship-and-hiring-support'),
-        },
-      ],
-    },
-  ],
-} as const satisfies StrategicAdvisorySectionProps
-
 function ArrowUpRight() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" className="size-6 shrink-0">
@@ -87,13 +43,13 @@ function ArrowUpRight() {
 
 function AdvisoryCard({ group }: { group: AdvisoryGroup }) {
   return (
-    <article className="flex h-full flex-col gap-7 bg-[#F3F4F9] px-6 py-10 sm:px-8 sm:py-12 lg:px-10 lg:pt-[60px] lg:pb-12">
+    <article className="flex h-full min-w-0 flex-col gap-7 overflow-visible bg-[#F3F4F9] px-6 py-10 sm:px-8 sm:py-12 lg:px-10 lg:pt-[60px] lg:pb-12">
       <img
         src={group.iconSrc}
         alt=""
         width={group.iconWidth}
         height={group.iconHeight}
-        className="block h-auto w-[clamp(4.5rem,12vw,5.625rem)] max-w-full object-contain"
+        className="block h-auto w-[4.5rem] max-w-full shrink-0 self-start sm:w-20 lg:w-[90px]"
       />
       <div className="flex flex-col gap-8">
         <h3 className="font-sans text-base leading-7 font-normal tracking-normal text-[#25282D] uppercase">

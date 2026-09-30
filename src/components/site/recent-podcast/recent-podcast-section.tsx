@@ -18,30 +18,6 @@ export type RecentPodcastSectionProps = {
   className?: string
 }
 
-export const homepagePodcastEpisodes = [
-  {
-    meta: '233K plays · 6 days ago',
-    title: "How tech will (and won't) replace your doctor",
-    guests: 'Saker ghani, Dhruv Khullar',
-    href: '/podcast/how-tech-will-and-wont-replace-your-doctor',
-    imageSrc: '/podcast/how-tech-will-replace-your-doctor.png',
-  },
-  {
-    meta: '89K plays · 2 days ago',
-    title: 'The future of AI in mental health care',
-    guests: 'Saker ghani, Raj Patel',
-    href: '/podcast/the-future-of-ai-in-mental-health-care',
-    imageSrc: '/podcast/future-of-ai-in-mental-health.png',
-  },
-  {
-    meta: '150K plays · 1 week ago',
-    title: 'Wearable tech: Revolutionizing fitness tracking',
-    guests: 'Saker ghani, Ethan Zhang',
-    href: '/podcast/wearable-tech-revolutionizing-fitness-tracking',
-    imageSrc: '/podcast/wearable-tech-fitness-tracking.png',
-  },
-] as const satisfies readonly PodcastEpisode[]
-
 function PodcastCard({ episode }: { episode: PodcastEpisode }) {
   return (
     <article className="h-full bg-white">

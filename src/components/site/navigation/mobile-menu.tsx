@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
 
-import { primaryNavigation } from '@/config/navigation'
+import type { NavItem } from '@/config/navigation'
 
 import { useHeaderMenuScroll } from '@/components/site/header/header-shell'
 import { NavAnchor } from '@/components/site/navigation/nav-link'
@@ -27,7 +27,17 @@ function isSamePage(href: string) {
   )
 }
 
-export function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function MobileMenu({
+  items,
+  cta,
+  open,
+  onClose,
+}: {
+  items: readonly NavItem[]
+  cta: { label: string; href: string }
+  open: boolean
+  onClose: () => void
+}) {
   const setMenuScrolled = useHeaderMenuScroll()
   const panelRef = useRef<HTMLDivElement>(null)
   const pathname = usePathname()
@@ -64,7 +74,7 @@ export function MobileMenu({ open, onClose }: { open: boolean; onClose: () => vo
         onScroll={() => setMenuScrolled((panelRef.current?.scrollTop ?? 0) > 0)}
       >
         <ul className="mx-auto flex w-full max-w-[1440px] flex-col px-4 py-2 sm:px-6 md:px-8 lg:px-[72px]">
-        {primaryNavigation.map((item) => (
+        {items.map((item) => (
           <li key={item.href} className="py-4">
             <p className={parentLabelClassName}>{item.label}</p>
             <div className="mt-3 flex flex-col gap-4 pl-4">
@@ -93,11 +103,11 @@ export function MobileMenu({ open, onClose }: { open: boolean; onClose: () => vo
       </div>
       <div className="mx-auto w-full max-w-[1440px] shrink-0 border-t border-[#E4E7EE] px-4 py-4 sm:px-6 md:px-8 lg:px-[72px]">
         <SiteOutlineButton
-          href="/contact"
-          text="Get in touch"
+          href={cta.href}
+          text={cta.label}
           className="w-full"
           onClick={() => {
-            if (isSamePage('/contact')) onClose()
+            if (isSamePage(cta.href)) onClose()
           }}
         />
       </div>

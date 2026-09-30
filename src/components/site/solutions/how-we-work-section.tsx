@@ -1,32 +1,18 @@
-const steps = [
-  {
-    number: '1',
-    title: 'Assess',
-    body: 'A short, senior review of the stack, the team, and the thesis it has to support.',
-  },
-  {
-    number: '2',
-    title: 'Prioritise',
-    body: 'Initiatives sized against EBITDA and cut to the few worth funding this year.',
-  },
-  {
-    number: '3',
-    title: 'Mobilise',
-    body: 'Owners named, budgets set, and delivery started before the plan goes stale.',
-  },
-  {
-    number: '4',
-    title: 'Review',
-    body: 'Quarterly checkpoints with the board, and honest recommendations to stop what is not working.',
-  },
-] as const
+export type HowWeWorkSectionProps = {
+  title: string
+  steps: readonly {
+    number: string
+    title: string
+    body: string
+  }[]
+}
 
-export function HowWeWorkSection() {
+export function HowWeWorkSection({ title, steps }: HowWeWorkSectionProps) {
   return (
     <section className="bg-[#F3F4F9]">
       <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-8 px-4 py-16 sm:px-6 md:px-8 md:py-20 lg:px-[72px] xl:gap-12 xl:px-[156px] xl:py-[100px]">
         <h2 className="font-sans text-[2rem] leading-[2.4rem] font-normal tracking-[-1px] text-[#33353F] sm:text-4xl sm:leading-[2.75rem] lg:text-5xl lg:leading-[56px]">
-          How we work
+          {title}
         </h2>
         <ol className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {steps.map((step) => (

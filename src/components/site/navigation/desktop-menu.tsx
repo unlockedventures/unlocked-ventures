@@ -7,12 +7,14 @@ import { NavAnchor } from '@/components/site/navigation/nav-link'
 
 export function DesktopMenu({
   item,
+  exploreLabel,
   panelRef,
   onEnter,
   onLeave,
   onClose,
 }: {
   item: NavItem
+  exploreLabel: string
   panelRef: RefObject<HTMLDivElement | null>
   onEnter: () => void
   onLeave: () => void
@@ -35,7 +37,7 @@ export function DesktopMenu({
         <div className="mx-auto flex max-w-[1440px] gap-16 px-6 py-10 lg:px-[72px] 2xl:px-24">
           <div className="w-64 shrink-0 border-r border-[#E4E7EE] pr-10">
             <p className="font-sans text-xs leading-4 font-medium tracking-[0.16em] text-[#292F35] uppercase">
-              Explore
+              {exploreLabel}
             </p>
             <p className="mt-4 font-sans text-[28px] leading-9 font-medium tracking-normal text-[#1CACAE] antialiased">
               {item.label}

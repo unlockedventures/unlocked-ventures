@@ -90,10 +90,36 @@ export interface Config {
   };
   fallbackLocale: null;
   globals: {
+    hero: Hero;
+    navigation: Navigation;
     'digital-engineering': DigitalEngineering;
+    'site-footer': SiteFooter;
+    'site-header': SiteHeader;
+    'latest-news': LatestNew;
+    locations: Location;
+    'recent-podcast': RecentPodcast;
+    'strategic-growth': StrategicGrowth;
+    'strategic-advisory': StrategicAdvisory;
+    'success-stories': SuccessStory;
+    'trusted-by': TrustedBy;
+    contact: Contact;
+    site: Site;
   };
   globalsSelect: {
+    hero: HeroSelect<false> | HeroSelect<true>;
+    navigation: NavigationSelect<false> | NavigationSelect<true>;
     'digital-engineering': DigitalEngineeringSelect<false> | DigitalEngineeringSelect<true>;
+    'site-footer': SiteFooterSelect<false> | SiteFooterSelect<true>;
+    'site-header': SiteHeaderSelect<false> | SiteHeaderSelect<true>;
+    'latest-news': LatestNewsSelect<false> | LatestNewsSelect<true>;
+    locations: LocationsSelect<false> | LocationsSelect<true>;
+    'recent-podcast': RecentPodcastSelect<false> | RecentPodcastSelect<true>;
+    'strategic-growth': StrategicGrowthSelect<false> | StrategicGrowthSelect<true>;
+    'strategic-advisory': StrategicAdvisorySelect<false> | StrategicAdvisorySelect<true>;
+    'success-stories': SuccessStoriesSelect<false> | SuccessStoriesSelect<true>;
+    'trusted-by': TrustedBySelect<false> | TrustedBySelect<true>;
+    contact: ContactSelect<false> | ContactSelect<true>;
+    site: SiteSelect<false> | SiteSelect<true>;
   };
   locale: null;
   widgets: {
@@ -362,6 +388,59 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hero".
+ */
+export interface Hero {
+  id: number;
+  title: string;
+  description?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  cta: {
+    label: string;
+    href: string;
+  };
+  primaryImage?: (number | null) | Media;
+  secondaryImage?: (number | null) | Media;
+  badgeImage?: (number | null) | Media;
+  badgeAlt?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "navigation".
+ */
+export interface Navigation {
+  id: number;
+  exploreLabel: string;
+  items: {
+    label: string;
+    href: string;
+    groups?:
+      | {
+          title?: string | null;
+          links?:
+            | {
+                label: string;
+                href: string;
+                external?: boolean | null;
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+        }[]
+      | null;
+    id?: string | null;
+  }[];
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "digital-engineering".
  */
 export interface DigitalEngineering {
@@ -394,6 +473,409 @@ export interface DigitalEngineering {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-footer".
+ */
+export interface SiteFooter {
+  id: number;
+  description: string;
+  contacts?:
+    | {
+        label: string;
+        href: string;
+        icon: number | Media;
+        id?: string | null;
+      }[]
+    | null;
+  pagesTitle: string;
+  pages?:
+    | {
+        label: string;
+        href: string;
+        id?: string | null;
+      }[]
+    | null;
+  newsletter: {
+    title: string;
+    description: string;
+    placeholder: string;
+    buttonLabel: string;
+  };
+  copyright: string;
+  socials?:
+    | {
+        label: string;
+        icon: number | Media;
+        displayWidth: number;
+        displayHeight: number;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-header".
+ */
+export interface SiteHeader {
+  id: number;
+  cta: {
+    label: string;
+    href: string;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "latest-news".
+ */
+export interface LatestNew {
+  id: number;
+  title: string;
+  posts?:
+    | {
+        title: string;
+        excerpt: string;
+        href: string;
+        ctaLabel?: string | null;
+        image?: (number | null) | Media;
+        imageAlt?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "locations".
+ */
+export interface Location {
+  id: number;
+  map: number | Media;
+  stats: {
+    value: string;
+    label: string;
+    id?: string | null;
+  }[];
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "recent-podcast".
+ */
+export interface RecentPodcast {
+  id: number;
+  title: string;
+  episodes?:
+    | {
+        meta: string;
+        title: string;
+        guests: string;
+        href: string;
+        image?: (number | null) | Media;
+        imageAlt?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "strategic-growth".
+ */
+export interface StrategicGrowth {
+  id: number;
+  breadcrumbs?:
+    | {
+        label: string;
+        href: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Current page label shown at the end of the breadcrumb.
+   */
+  current: string;
+  title: string;
+  description: string;
+  illustration?: (number | null) | Media;
+  heroImage?: (number | null) | Media;
+  heroImageAlt?: string | null;
+  engagementTitle: string;
+  engagementItems?:
+    | {
+        number: string;
+        title: string;
+        body: string;
+        id?: string | null;
+      }[]
+    | null;
+  howWeWorkTitle: string;
+  steps?:
+    | {
+        number: string;
+        title: string;
+        body: string;
+        id?: string | null;
+      }[]
+    | null;
+  ctaTitle: string;
+  ctaDescription: string;
+  cta: {
+    label: string;
+    href: string;
+  };
+  relatedTitle: string;
+  related?:
+    | {
+        title: string;
+        href: string;
+        body: string;
+        icon?: (number | null) | Media;
+        iconWidth: number;
+        iconHeight: number;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "strategic-advisory".
+ */
+export interface StrategicAdvisory {
+  id: number;
+  title: string;
+  description: string;
+  cta: {
+    label: string;
+    href: string;
+  };
+  groups?:
+    | {
+        title: string;
+        icon: number | Media;
+        /**
+         * Intrinsic width of the group icon, in pixels.
+         */
+        iconWidth: number;
+        /**
+         * Intrinsic height of the group icon, in pixels.
+         */
+        iconHeight: number;
+        items: {
+          label: string;
+          href: string;
+          id?: string | null;
+        }[];
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "success-stories".
+ */
+export interface SuccessStory {
+  id: number;
+  title: string;
+  cta: {
+    label: string;
+    href: string;
+  };
+  feature: {
+    badge?: string | null;
+    title: string;
+    description?: string | null;
+    ctaLabel: string;
+    href: string;
+    image?: (number | null) | Media;
+  };
+  stories?:
+    | {
+        category?: string | null;
+        title: string;
+        ctaLabel: string;
+        href: string;
+        image?: (number | null) | Media;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "trusted-by".
+ */
+export interface TrustedBy {
+  id: number;
+  title: string;
+  logos: {
+    name: string;
+    logo: number | Media;
+    /**
+     * Rendered width of the logo, in pixels.
+     */
+    displayWidth: number;
+    /**
+     * Rendered height of the logo, in pixels.
+     */
+    displayHeight: number;
+    id?: string | null;
+  }[];
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contact".
+ */
+export interface Contact {
+  id: number;
+  metaTitle: string;
+  metaDescription: string;
+  breadcrumbHomeLabel: string;
+  breadcrumbHomeHref: string;
+  breadcrumbCurrent: string;
+  title: string;
+  illustration?: (number | null) | Media;
+  cards?:
+    | {
+        label: string;
+        value: string;
+        href: string;
+        icon: number | Media;
+        displayWidth: number;
+        displayHeight: number;
+        id?: string | null;
+      }[]
+    | null;
+  helpTitle: string;
+  form: {
+    successMessage: string;
+    submitLabel: string;
+    countryCode: string;
+    phoneLabel: string;
+    phonePlaceholder: string;
+    countryCodeLabel: string;
+    phoneAriaLabel: string;
+    requiredMessage: string;
+    invalidEmailMessage: string;
+    invalidCountryCodeMessage: string;
+    invalidPhoneMessage: string;
+    firstName: {
+      label: string;
+      placeholder: string;
+    };
+    lastName: {
+      label: string;
+      placeholder: string;
+    };
+    company: {
+      label: string;
+      placeholder: string;
+    };
+    email: {
+      label: string;
+      placeholder: string;
+    };
+    message: {
+      label: string;
+      placeholder: string;
+    };
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site".
+ */
+export interface Site {
+  id: number;
+  /**
+   * Default browser title.
+   */
+  title: string;
+  /**
+   * Default meta description.
+   */
+  description: string;
+  notFoundMetaTitle: string;
+  notFoundLabel: string;
+  notFoundTitle: string;
+  notFoundDescription: string;
+  homeButtonLabel: string;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hero_select".
+ */
+export interface HeroSelect<T extends boolean = true> {
+  title?: T;
+  description?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  cta?:
+    | T
+    | {
+        label?: T;
+        href?: T;
+      };
+  primaryImage?: T;
+  secondaryImage?: T;
+  badgeImage?: T;
+  badgeAlt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "navigation_select".
+ */
+export interface NavigationSelect<T extends boolean = true> {
+  exploreLabel?: T;
+  items?:
+    | T
+    | {
+        label?: T;
+        href?: T;
+        groups?:
+          | T
+          | {
+              title?: T;
+              links?:
+                | T
+                | {
+                    label?: T;
+                    href?: T;
+                    external?: T;
+                    id?: T;
+                  };
+              id?: T;
+            };
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "digital-engineering_select".
  */
 export interface DigitalEngineeringSelect<T extends boolean = true> {
@@ -422,6 +904,361 @@ export interface DigitalEngineeringSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-footer_select".
+ */
+export interface SiteFooterSelect<T extends boolean = true> {
+  description?: T;
+  contacts?:
+    | T
+    | {
+        label?: T;
+        href?: T;
+        icon?: T;
+        id?: T;
+      };
+  pagesTitle?: T;
+  pages?:
+    | T
+    | {
+        label?: T;
+        href?: T;
+        id?: T;
+      };
+  newsletter?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        placeholder?: T;
+        buttonLabel?: T;
+      };
+  copyright?: T;
+  socials?:
+    | T
+    | {
+        label?: T;
+        icon?: T;
+        displayWidth?: T;
+        displayHeight?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-header_select".
+ */
+export interface SiteHeaderSelect<T extends boolean = true> {
+  cta?:
+    | T
+    | {
+        label?: T;
+        href?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "latest-news_select".
+ */
+export interface LatestNewsSelect<T extends boolean = true> {
+  title?: T;
+  posts?:
+    | T
+    | {
+        title?: T;
+        excerpt?: T;
+        href?: T;
+        ctaLabel?: T;
+        image?: T;
+        imageAlt?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "locations_select".
+ */
+export interface LocationsSelect<T extends boolean = true> {
+  map?: T;
+  stats?:
+    | T
+    | {
+        value?: T;
+        label?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "recent-podcast_select".
+ */
+export interface RecentPodcastSelect<T extends boolean = true> {
+  title?: T;
+  episodes?:
+    | T
+    | {
+        meta?: T;
+        title?: T;
+        guests?: T;
+        href?: T;
+        image?: T;
+        imageAlt?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "strategic-growth_select".
+ */
+export interface StrategicGrowthSelect<T extends boolean = true> {
+  breadcrumbs?:
+    | T
+    | {
+        label?: T;
+        href?: T;
+        id?: T;
+      };
+  current?: T;
+  title?: T;
+  description?: T;
+  illustration?: T;
+  heroImage?: T;
+  heroImageAlt?: T;
+  engagementTitle?: T;
+  engagementItems?:
+    | T
+    | {
+        number?: T;
+        title?: T;
+        body?: T;
+        id?: T;
+      };
+  howWeWorkTitle?: T;
+  steps?:
+    | T
+    | {
+        number?: T;
+        title?: T;
+        body?: T;
+        id?: T;
+      };
+  ctaTitle?: T;
+  ctaDescription?: T;
+  cta?:
+    | T
+    | {
+        label?: T;
+        href?: T;
+      };
+  relatedTitle?: T;
+  related?:
+    | T
+    | {
+        title?: T;
+        href?: T;
+        body?: T;
+        icon?: T;
+        iconWidth?: T;
+        iconHeight?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "strategic-advisory_select".
+ */
+export interface StrategicAdvisorySelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  cta?:
+    | T
+    | {
+        label?: T;
+        href?: T;
+      };
+  groups?:
+    | T
+    | {
+        title?: T;
+        icon?: T;
+        iconWidth?: T;
+        iconHeight?: T;
+        items?:
+          | T
+          | {
+              label?: T;
+              href?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "success-stories_select".
+ */
+export interface SuccessStoriesSelect<T extends boolean = true> {
+  title?: T;
+  cta?:
+    | T
+    | {
+        label?: T;
+        href?: T;
+      };
+  feature?:
+    | T
+    | {
+        badge?: T;
+        title?: T;
+        description?: T;
+        ctaLabel?: T;
+        href?: T;
+        image?: T;
+      };
+  stories?:
+    | T
+    | {
+        category?: T;
+        title?: T;
+        ctaLabel?: T;
+        href?: T;
+        image?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "trusted-by_select".
+ */
+export interface TrustedBySelect<T extends boolean = true> {
+  title?: T;
+  logos?:
+    | T
+    | {
+        name?: T;
+        logo?: T;
+        displayWidth?: T;
+        displayHeight?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contact_select".
+ */
+export interface ContactSelect<T extends boolean = true> {
+  metaTitle?: T;
+  metaDescription?: T;
+  breadcrumbHomeLabel?: T;
+  breadcrumbHomeHref?: T;
+  breadcrumbCurrent?: T;
+  title?: T;
+  illustration?: T;
+  cards?:
+    | T
+    | {
+        label?: T;
+        value?: T;
+        href?: T;
+        icon?: T;
+        displayWidth?: T;
+        displayHeight?: T;
+        id?: T;
+      };
+  helpTitle?: T;
+  form?:
+    | T
+    | {
+        successMessage?: T;
+        submitLabel?: T;
+        countryCode?: T;
+        phoneLabel?: T;
+        phonePlaceholder?: T;
+        countryCodeLabel?: T;
+        phoneAriaLabel?: T;
+        requiredMessage?: T;
+        invalidEmailMessage?: T;
+        invalidCountryCodeMessage?: T;
+        invalidPhoneMessage?: T;
+        firstName?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+            };
+        lastName?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+            };
+        company?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+            };
+        email?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+            };
+        message?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site_select".
+ */
+export interface SiteSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  notFoundMetaTitle?: T;
+  notFoundLabel?: T;
+  notFoundTitle?: T;
+  notFoundDescription?: T;
+  homeButtonLabel?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

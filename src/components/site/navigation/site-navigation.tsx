@@ -7,20 +7,28 @@ import { Suspense, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { cn } from 'cn'
 
-import { primaryNavigation } from '@/config/navigation'
+import type { NavItem } from '@/config/navigation'
 
 import { DesktopMenu } from '@/components/site/navigation/desktop-menu'
 import { MobileMenu } from '@/components/site/navigation/mobile-menu'
 import { primaryItemClassName } from '@/components/site/navigation/nav-styles'
 
-export function SiteNavigation() {
+export function SiteNavigation({
+  items,
+  cta,
+  exploreLabel,
+}: {
+  items: readonly NavItem[]
+  cta: { label: string; href: string }
+  exploreLabel: string
+}) {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
   const [activeHref, setActiveHref] = useState<string | null>(null)
   const closeTimer = useRef<number | null>(null)
   const navRef = useRef<HTMLElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
-  const activeItem = primaryNavigation.find((item) => item.href === activeHref) ?? null
+  const activeItem = items.find((item) => item.href === activeHref) ?? null
 
   const clearCloseTimer = () => {
     if (closeTimer.current === null) return
@@ -73,7 +81,7 @@ export function SiteNavigation() {
         className="mx-8 hidden h-full min-w-0 flex-1 items-stretch justify-center xl:flex"
         onMouseLeave={scheduleClose}
       >
-        {primaryNavigation.map((item) => (
+        {items.map((item) => (
           <div
             key={item.href}
             className="flex cursor-pointer items-center px-3"
@@ -95,6 +103,7 @@ export function SiteNavigation() {
         ? createPortal(
             <DesktopMenu
               item={activeItem}
+              exploreLabel={exploreLabel}
               panelRef={panelRef}
               onEnter={() => showMenu(activeItem.href)}
               onLeave={scheduleClose}
@@ -114,7 +123,7 @@ export function SiteNavigation() {
         <span className="sr-only">{open ? 'Close menu' : 'Open menu'}</span>
       </button>
       <Suspense fallback={null}>
-        <MobileMenu open={open} onClose={() => setOpen(false)} />
+        <MobileMenu items={items} cta={cta} open={open} onClose={() => setOpen(false)} />
       </Suspense>
     </>
   )

@@ -22,13 +22,31 @@ const fieldClassName =
 
 const errorClassName = 'font-sans text-[13px] leading-4 font-normal text-[#B42318]'
 
-const requiredMessage = 'This field is required'
-
-function requiredText(value: string) {
-  return value.trim().length > 0 || requiredMessage
+export type ContactField = {
+  label: string
+  placeholder: string
 }
 
-export function ContactForm() {
+export type ContactFormContent = {
+  successMessage: string
+  submitLabel: string
+  countryCode: string
+  phoneLabel: string
+  phonePlaceholder: string
+  countryCodeLabel: string
+  phoneAriaLabel: string
+  requiredMessage: string
+  invalidEmailMessage: string
+  invalidCountryCodeMessage: string
+  invalidPhoneMessage: string
+  firstName: ContactField
+  lastName: ContactField
+  company: ContactField
+  email: ContactField
+  message: ContactField
+}
+
+export function ContactForm({ content }: { content: ContactFormContent }) {
   const [sent, setSent] = useState(false)
   const {
     register,
@@ -40,7 +58,7 @@ export function ContactForm() {
       lastName: '',
       company: '',
       email: '',
-      countryCode: '+971',
+      countryCode: content.countryCode,
       phone: '',
       message: '',
     },
@@ -49,7 +67,7 @@ export function ContactForm() {
   if (sent) {
     return (
       <p className="font-sans text-2xl leading-8 font-normal tracking-[-0.5px] text-[#33353F]">
-        Thank you. We will be in touch.
+        {content.successMessage}
       </p>
     )
   }
@@ -58,14 +76,16 @@ export function ContactForm() {
     <form className="flex flex-col gap-8" noValidate onSubmit={handleSubmit(() => setSent(true))}>
       <div className="grid grid-cols-1 gap-x-8 gap-y-8 md:grid-cols-2">
         <label className="flex flex-col gap-[11px]">
-          <span className={labelClassName}>First name *</span>
+          <span className={labelClassName}>{content.firstName.label}</span>
           <input
             className={fieldClassName}
-            placeholder="Enter first name"
+            placeholder={content.firstName.placeholder}
             autoComplete="given-name"
             aria-invalid={errors.firstName ? true : undefined}
             aria-describedby={errors.firstName ? 'firstName-error' : undefined}
-            {...register('firstName', { validate: requiredText })}
+            {...register('firstName', {
+              validate: (value) => value.trim().length > 0 || content.requiredMessage,
+            })}
           />
           {errors.firstName ? (
             <span id="firstName-error" className={errorClassName}>
@@ -74,14 +94,16 @@ export function ContactForm() {
           ) : null}
         </label>
         <label className="flex flex-col gap-[11px]">
-          <span className={labelClassName}>Last name *</span>
+          <span className={labelClassName}>{content.lastName.label}</span>
           <input
             className={fieldClassName}
-            placeholder="Enter last name"
+            placeholder={content.lastName.placeholder}
             autoComplete="family-name"
             aria-invalid={errors.lastName ? true : undefined}
             aria-describedby={errors.lastName ? 'lastName-error' : undefined}
-            {...register('lastName', { validate: requiredText })}
+            {...register('lastName', {
+              validate: (value) => value.trim().length > 0 || content.requiredMessage,
+            })}
           />
           {errors.lastName ? (
             <span id="lastName-error" className={errorClassName}>
@@ -90,14 +112,16 @@ export function ContactForm() {
           ) : null}
         </label>
         <label className="flex flex-col gap-[11px]">
-          <span className={labelClassName}>Company *</span>
+          <span className={labelClassName}>{content.company.label}</span>
           <input
             className={fieldClassName}
-            placeholder="Enter company name"
+            placeholder={content.company.placeholder}
             autoComplete="organization"
             aria-invalid={errors.company ? true : undefined}
             aria-describedby={errors.company ? 'company-error' : undefined}
-            {...register('company', { validate: requiredText })}
+            {...register('company', {
+              validate: (value) => value.trim().length > 0 || content.requiredMessage,
+            })}
           />
           {errors.company ? (
             <span id="company-error" className={errorClassName}>
@@ -106,19 +130,19 @@ export function ContactForm() {
           ) : null}
         </label>
         <label className="flex flex-col gap-[11px]">
-          <span className={labelClassName}>Email *</span>
+          <span className={labelClassName}>{content.email.label}</span>
           <input
             className={fieldClassName}
             type="email"
-            placeholder="Enter email address"
+            placeholder={content.email.placeholder}
             autoComplete="email"
             aria-invalid={errors.email ? true : undefined}
             aria-describedby={errors.email ? 'email-error' : undefined}
             {...register('email', {
               validate: (value) => {
                 const trimmed = value.trim()
-                if (!trimmed) return requiredMessage
-                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) return 'Enter a valid email address'
+                if (!trimmed) return content.requiredMessage
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) return content.invalidEmailMessage
                 return true
               },
             })}
@@ -130,26 +154,26 @@ export function ContactForm() {
           ) : null}
         </label>
         <label className="flex flex-col gap-[11px] md:col-span-2">
-          <span className={labelClassName}>Phone number</span>
+          <span className={labelClassName}>{content.phoneLabel}</span>
           <span className="flex h-[46px] items-center gap-4 border-b border-black/12">
             <input
               className="w-16 shrink-0 border-0 bg-transparent font-sans text-base leading-6 text-[#242B1A] outline-none"
-              aria-label="Country code"
+              aria-label={content.countryCodeLabel}
               autoComplete="tel-country-code"
               aria-invalid={errors.countryCode ? true : undefined}
               aria-describedby={errors.phone || errors.countryCode ? 'phone-error' : undefined}
               {...register('countryCode', {
                 validate: (value, formValues) => {
                   if (!formValues.phone.trim()) return true
-                  if (!/^\+\d{1,4}$/.test(value.trim())) return 'Enter a valid country code'
+                  if (!/^\+\d{1,4}$/.test(value.trim())) return content.invalidCountryCodeMessage
                   return true
                 },
               })}
             />
             <input
               className="min-w-0 flex-1 border-0 bg-transparent font-sans text-base leading-6 text-[#25282D] outline-none placeholder:text-[#919191]"
-              aria-label="Phone number"
-              placeholder="543210987"
+              aria-label={content.phoneAriaLabel}
+              placeholder={content.phonePlaceholder}
               autoComplete="tel-national"
               inputMode="tel"
               aria-invalid={errors.phone ? true : undefined}
@@ -158,7 +182,7 @@ export function ContactForm() {
                 validate: (value) => {
                   const trimmed = value.trim()
                   if (!trimmed) return true
-                  if (!/^\d[\d\s()-]{5,}$/.test(trimmed)) return 'Enter a valid phone number'
+                  if (!/^\d[\d\s()-]{5,}$/.test(trimmed)) return content.invalidPhoneMessage
                   return true
                 },
               })}
@@ -171,13 +195,15 @@ export function ContactForm() {
           ) : null}
         </label>
         <label className="flex flex-col gap-[11px] md:col-span-2">
-          <span className={labelClassName}>Message *</span>
+          <span className={labelClassName}>{content.message.label}</span>
           <textarea
             className="h-[98px] w-full resize-none border-0 border-b border-black/12 bg-transparent pt-2 font-sans text-base leading-6 font-normal text-[#25282D] outline-none placeholder:text-[#919191]"
-            placeholder="Enter message"
+            placeholder={content.message.placeholder}
             aria-invalid={errors.message ? true : undefined}
             aria-describedby={errors.message ? 'message-error' : undefined}
-            {...register('message', { validate: requiredText })}
+            {...register('message', {
+              validate: (value) => value.trim().length > 0 || content.requiredMessage,
+            })}
           />
           {errors.message ? (
             <span id="message-error" className={errorClassName}>
@@ -190,7 +216,7 @@ export function ContactForm() {
         type="submit"
         className="inline-flex h-12 w-fit cursor-pointer items-center gap-2.5 bg-[#484D56] px-5 font-sans text-base leading-6 font-normal text-white"
       >
-        Send message
+        {content.submitLabel}
         <Image src="/contact/icon-arrow-up-right.svg" alt="" width={24} height={24} />
       </button>
     </form>

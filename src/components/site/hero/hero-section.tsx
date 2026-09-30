@@ -5,6 +5,7 @@ export type HeroMedia = {
   primarySrc?: string
   secondarySrc?: string
   badgeSrc?: string
+  badgeAlt?: string
 }
 
 export type HeroSectionProps = {
@@ -17,23 +18,6 @@ export type HeroSectionProps = {
   media?: HeroMedia
   className?: string
 }
-
-export const homepageHero = {
-  title: 'We support\nAdvising',
-  description: [
-    'We sit at the heart of private equity - where sponsors and CFOs meet. Through financial consulting rooted in data, technology, and AI, we help clients drive value.',
-    'From foundational finance & technology solutions to business transformations & transactions, we support the office of the CFO to drive end-to-end value creation.',
-  ],
-  cta: {
-    label: 'See Our Solutions',
-    href: '/strategic-advisory',
-  },
-  media: {
-    primarySrc: '/hero/hero-photo-primary.png',
-    secondarySrc: '/hero/hero-photo-secondary.png',
-    badgeSrc: '/hero/hero-badge.png',
-  },
-} as const satisfies HeroSectionProps
 
 function HeroMediaCollage({ media }: { media?: HeroMedia }) {
   return (
@@ -55,7 +39,7 @@ function HeroMediaCollage({ media }: { media?: HeroMedia }) {
       {media?.badgeSrc ? (
         <img
           src={media.badgeSrc}
-          alt="30 years of experience"
+          alt={media.badgeAlt || '30 years of experience'}
           className="absolute top-[calc(100%*196/475)] left-[calc(100%*175/555)] z-10 aspect-square w-[calc(100%*134/555)] min-[1440px]:top-[calc(100%*296/715)] min-[1440px]:left-[calc(100%*904/1440)] min-[1440px]:w-[calc(100%*134/1440)]"
         />
       ) : null}

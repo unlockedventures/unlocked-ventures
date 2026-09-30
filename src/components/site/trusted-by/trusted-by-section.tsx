@@ -7,56 +7,11 @@ export type TrustedLogo = {
   height: number
 }
 
-type TrustedBySectionProps = {
+export type TrustedBySectionProps = {
   title?: string
   logos: readonly TrustedLogo[]
   className?: string
 }
-
-export const homepageTrustedLogos = [
-  {
-    name: 'Constellation',
-    src: '/logos/partners/constellation.svg',
-    width: 164,
-    height: 41,
-  },
-  {
-    name: 'Elevance Health',
-    src: '/logos/partners/elevance-health.svg',
-    width: 115,
-    height: 48,
-  },
-  {
-    name: 'TransUnion',
-    src: '/logos/partners/transunion.svg',
-    width: 145,
-    height: 39,
-  },
-  {
-    name: 'PayPal',
-    src: '/logos/partners/paypal.svg',
-    width: 124,
-    height: 33,
-  },
-  {
-    name: 'Amwell',
-    src: '/logos/partners/amwell.svg',
-    width: 130,
-    height: 36,
-  },
-  {
-    name: 'Vori Health',
-    src: '/logos/partners/vori-health.svg',
-    width: 180,
-    height: 35,
-  },
-  {
-    name: 'Coca-Cola',
-    src: '/logos/partners/coca-cola.svg',
-    width: 120,
-    height: 41,
-  },
-] as const satisfies readonly TrustedLogo[]
 
 function LogoRow({ logos, hidden = false }: { logos: readonly TrustedLogo[]; hidden?: boolean }) {
   const slotWidth = Math.max(...logos.map((logo) => logo.width))

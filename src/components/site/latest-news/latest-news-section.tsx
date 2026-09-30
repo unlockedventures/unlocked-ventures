@@ -17,33 +17,6 @@ export type LatestNewsSectionProps = {
   className?: string
 }
 
-export const homepageNewsPosts = [
-  {
-    title: 'Harnessing AI for Charitable Impact',
-    excerpt:
-      'AI is reshaping how charities work and how people donate. The real opportunity lies less in new tools than in...',
-    href: '/insights/harnessing-ai-for-charitable-impact',
-    ctaLabel: 'Read More',
-    imageSrc: '/news/harnessing-ai-for-charitable-impact.png',
-  },
-  {
-    title: '3 things finance teams get wrong before AI can accelerate the close',
-    excerpt:
-      'Before AI can transform the financial close, teams need to address the process, data, and workflow gaps holding them back.',
-    href: '/insights/finance-teams-before-ai-can-accelerate-the-close',
-    ctaLabel: 'Read More',
-    imageSrc: '/news/finance-teams-before-ai.png',
-  },
-  {
-    title: 'Trailer manufacturer’s transformation lifts revenue by $15M',
-    excerpt:
-      'You’re ALCOM, a leading manufacturer of top-quality aluminum trailer products. You have expanded production facilities from a single flagship plant to 6 plants across the country. Your business has grown. Now your operational sophistication must follow in tow.',
-    href: '/insights/trailer-manufacturer-transformation',
-    ctaLabel: 'Read More',
-    imageSrc: '/news/trailer-manufacturer-transformation.png',
-  },
-] as const satisfies readonly NewsPost[]
-
 function ArrowUpRight() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" className="size-6 shrink-0">

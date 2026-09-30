@@ -6,10 +6,12 @@ export function ErrorScreen({
   label,
   title,
   description,
+  homeLabel = 'Go home',
 }: {
   label: string
   title: string
   description: string
+  homeLabel?: string
 }) {
   return (
     <main className="flex min-h-svh flex-col items-center overflow-y-auto bg-[#F3F4F9] px-6 py-16 text-center">
@@ -35,7 +37,7 @@ export function ErrorScreen({
             {description}
           </p>
         </div>
-        <SiteOutlineButton href="/" text="Go home" />
+        <SiteOutlineButton href="/" text={homeLabel} />
       </div>
     </main>
   )
