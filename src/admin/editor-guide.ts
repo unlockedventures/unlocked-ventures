@@ -2,6 +2,7 @@ export const adminGroups = {
   homepage: 'Homepage',
   menus: 'Menus',
   pages: 'Pages',
+  successStories: 'Success Stories',
   library: 'Library',
   accounts: 'Accounts',
   settings: 'Settings',
@@ -9,8 +10,9 @@ export const adminGroups = {
 
 export const adminGroupOrder = [
   adminGroups.homepage,
-  adminGroups.menus,
   adminGroups.pages,
+  adminGroups.successStories,
+  adminGroups.menus,
   adminGroups.library,
   adminGroups.accounts,
   adminGroups.settings,

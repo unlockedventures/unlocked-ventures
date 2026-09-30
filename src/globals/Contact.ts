@@ -66,7 +66,11 @@ export const Contact: GlobalConfig = {
     {
       name: 'illustration',
       type: 'upload',
+      label: 'Illustration',
       relationTo: 'media',
+      admin: {
+        description: 'Choose a different file to replace this picture.',
+      },
     },
     {
       name: 'cards',
@@ -79,7 +83,7 @@ export const Contact: GlobalConfig = {
         { name: 'label', type: 'text', label: 'Label', required: true },
         { name: 'value', type: 'text', label: 'Details', required: true },
         linkField(),
-        { name: 'icon', type: 'upload', label: 'Icon', relationTo: 'media', required: true },
+        { name: 'icon', type: 'upload', label: 'Icon', relationTo: 'media', required: true, admin: { description: 'Choose a different file to replace this icon. Add or remove a card with the controls on this list.' } },
         sizeField('displayWidth', 'Icon width (pixels)'),
         sizeField('displayHeight', 'Icon height (pixels)'),
       ],

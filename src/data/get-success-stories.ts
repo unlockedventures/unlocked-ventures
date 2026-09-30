@@ -19,10 +19,15 @@ export async function getSuccessStories(): Promise<
       sort: 'sortOrder',
       limit: 100,
       depth: 1,
+      where: {
+        featured: {
+          equals: true,
+        },
+      },
     }),
   ])
 
-  const feature = result.docs.find((story) => story.featured) ?? result.docs[0]
+  const feature = result.docs[0]
   if (!section.title || !section.cta?.label || !section.cta.href || !feature?.title || !feature.ctaLabel || !feature.href) {
     return null
   }

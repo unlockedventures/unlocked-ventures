@@ -1,0 +1,242 @@
+'use client'
+
+import Link from 'next/link'
+import { useEffect, useId, useRef, useState } from 'react'
+
+import type { CaseStudyCard } from '@/data/get-case-studies'
+import { cn } from '@/lib/utils'
+
+const pageSize = 8
+
+const trimmedLabelClassName =
+  'block leading-none [text-box-edge:cap_alphabetic] [text-box-trim:trim-both]'
+
+function ArrowUpRight({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className={cn(
+        'size-6 shrink-0 transition-transform duration-300 ease-out group-hover:rotate-45 group-focus-visible:rotate-45',
+        className,
+      )}
+    >
+      <path
+        d="M7 17L17 7M7 7L17 7L17 17"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+function ChevronDown({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className={cn('size-6 shrink-0', className)}>
+      <path
+        d="M6 9.5L12 15.5L18 9.5"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+function ChevronRight() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="size-6 shrink-0">
+      <path
+        d="M9 6.5L15 12.5L9 18.5"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+function StoryCard({ story }: { story: CaseStudyCard }) {
+  return (
+    <article className="relative flex min-h-80 flex-col justify-end overflow-hidden bg-[#F7F7F7] md:h-[420px]">
+      {story.imageSrc ? (
+        <img src={story.imageSrc} alt="" className="absolute inset-0 h-full w-full object-cover object-top" />
+      ) : null}
+      {story.imageSrc ? (
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent from-30% to-[#F7F7F7] to-70%" />
+      ) : null}
+      <div className="relative z-10 flex flex-col gap-4 p-6 sm:p-[30px]">
+        <div className="flex flex-col gap-3">
+          {story.category ? (
+            <p className="inline-flex h-8 w-fit items-center bg-white px-3 font-inter text-xs leading-4 font-normal text-[#231F20] uppercase">
+              {story.category}
+            </p>
+          ) : null}
+          <h2 className="font-sans text-2xl leading-8 font-normal text-[#25282D] md:text-[1.75rem] md:leading-9">
+            {story.title}
+          </h2>
+        </div>
+        <Link
+          href={story.href}
+          className="group inline-flex h-6 items-center gap-2.5 font-sans text-base font-normal text-[#222222]"
+        >
+          <span className={trimmedLabelClassName}>{story.ctaLabel}</span>
+          <ArrowUpRight />
+        </Link>
+      </div>
+    </article>
+  )
+}
+
+function CategoryFilter({
+  categories,
+  value,
+  onChange,
+}: {
+  categories: readonly string[]
+  value: string
+  onChange: (value: string) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const rootRef = useRef<HTMLDivElement>(null)
+  const listId = useId()
+  const selectedLabel = value === 'all' ? 'All' : value
+
+  useEffect(() => {
+    function onPointerDown(event: MouseEvent) {
+      if (!rootRef.current?.contains(event.target as Node)) setOpen(false)
+    }
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') setOpen(false)
+    }
+
+    document.addEventListener('mousedown', onPointerDown)
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', onPointerDown)
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  }, [])
+
+  return (
+    <div ref={rootRef} className="relative shrink-0">
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-haspopup="listbox"
+        aria-controls={listId}
+        className="inline-flex h-[60px] cursor-pointer items-center gap-2.5 border border-[#484D56] bg-white px-5 font-sans text-base leading-[22px] font-normal text-[#484D56]"
+        onClick={() => setOpen((current) => !current)}
+      >
+        <span className={trimmedLabelClassName}>Select category: {selectedLabel}</span>
+        <ChevronDown className={cn('transition-transform duration-200', open && 'rotate-180')} />
+      </button>
+      {open ? (
+        <ul
+          id={listId}
+          role="listbox"
+          aria-label="Category"
+          className="absolute top-full right-0 z-20 mt-1 min-w-full border border-[#484D56] bg-white py-2 shadow-sm"
+        >
+          {['all', ...categories].map((category) => {
+            const label = category === 'all' ? 'All' : category
+            const selected = value === category
+
+            return (
+              <li key={category} role="presentation">
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={selected}
+                  className={cn(
+                    'block w-full cursor-pointer px-5 py-2 text-left font-sans text-base leading-[22px] text-[#484D56] hover:bg-[#F7F7F7]',
+                    selected && 'bg-[#F7F7F7]',
+                  )}
+                  onClick={() => {
+                    onChange(category)
+                    setOpen(false)
+                  }}
+                >
+                  {label}
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+      ) : null}
+    </div>
+  )
+}
+
+export function CaseStudiesListing({ stories }: { stories: readonly CaseStudyCard[] }) {
+  const [category, setCategory] = useState('all')
+  const [visibleCount, setVisibleCount] = useState(pageSize)
+  const categories = [...new Set(stories.flatMap((story) => (story.category ? [story.category] : [])))]
+  const filtered =
+    category === 'all' ? stories : stories.filter((story) => story.category === category)
+  const visible = filtered.slice(0, visibleCount)
+  const hasMore = visible.length < filtered.length
+
+  return (
+    <div className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-12 px-4 pt-12 pb-16 sm:px-6 md:px-8 md:pt-16 lg:px-[72px] lg:pt-20 xl:gap-[72px] xl:px-[156px] xl:pt-40 xl:pb-[100px]">
+      <div className="flex flex-col items-start justify-between gap-8 lg:flex-row lg:items-center lg:gap-12">
+        <div className="flex max-w-[740px] flex-col gap-8 md:gap-12">
+          <p className="font-sans text-base leading-[22px] font-normal text-[#222222]">
+            <Link href="/" className="hover:text-[#1CACAE]">
+              Home
+            </Link>
+            <span aria-hidden="true"> / </span>
+            <span>Our success story</span>
+          </p>
+          <div className="flex flex-col gap-4">
+            <h1 className="font-sans text-[2rem] leading-[2.4rem] font-normal tracking-[-1px] text-[#33353F] sm:text-4xl sm:leading-[2.75rem] lg:text-5xl lg:leading-[56px]">
+              Our Success Stories
+            </h1>
+            <p className="font-sans text-base leading-6 font-normal tracking-[0.36px] text-[#23313C] md:text-lg md:leading-[27px]">
+              Products, platforms and roadmaps we have built with operators, founders and portfolio
+              companies, and what changed once they shipped.
+            </p>
+          </div>
+        </div>
+        <CategoryFilter
+          categories={categories}
+          value={category}
+          onChange={(next) => {
+            setCategory(next)
+            setVisibleCount(pageSize)
+          }}
+        />
+      </div>
+
+      {visible.length > 0 ? (
+        <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
+          {visible.map((story) => (
+            <li key={story.id}>
+              <StoryCard story={story} />
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="font-sans text-base leading-6 text-[#23313C]">No stories in this category yet.</p>
+      )}
+
+      {hasMore ? (
+        <div className="flex justify-center">
+          <button
+            type="button"
+            className="inline-flex h-[60px] cursor-pointer items-center gap-2.5 border border-[#484D56] bg-white px-5 font-sans text-base leading-[22px] font-normal text-[#484D56]"
+            onClick={() => setVisibleCount((count) => count + pageSize)}
+          >
+            <span className={trimmedLabelClassName}>See more</span>
+            <ChevronRight />
+          </button>
+        </div>
+      ) : null}
+    </div>
+  )
+}

@@ -11,7 +11,8 @@ export const PodcastEpisodes: CollectionConfig = {
   },
   admin: {
     group: adminGroups.homepage,
-    description: 'Episodes shown on the homepage. The heading is edited under Podcast.',
+    hidden: true,
+    description: 'Episodes shown under Podcast. Add, replace, reorder, and remove them from Podcast.',
     hideAPIURL: true,
     useAsTitle: 'title',
     defaultColumns: ['title', 'sortOrder'],
@@ -25,7 +26,7 @@ export const PodcastEpisodes: CollectionConfig = {
     { name: 'title', type: 'text', required: true },
     { name: 'guests', type: 'text', required: true },
     linkField(),
-    { name: 'image', type: 'upload', relationTo: 'media' },
+    { name: 'image', type: 'upload', label: 'Picture', relationTo: 'media', admin: { description: 'The photo on this episode. Choose a different file to replace it.' } },
     { name: 'imageAlt', type: 'text' },
     {
       name: 'sortOrder',

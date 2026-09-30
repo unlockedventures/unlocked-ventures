@@ -46,8 +46,12 @@ export const StrategicAdvisory: GlobalConfig = {
         {
           name: 'icon',
           type: 'upload',
+          label: 'Icon',
           relationTo: 'media',
           required: true,
+          admin: {
+            description: 'The icon on this card. Choose a different file to replace it. Add or remove a card with the controls on this list.',
+          },
         },
         sizeField('iconWidth', 'Icon width (pixels)'),
         sizeField('iconHeight', 'Icon height (pixels)'),

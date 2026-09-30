@@ -37,8 +37,12 @@ export const Footer: GlobalConfig = {
         {
           name: 'icon',
           type: 'upload',
+          label: 'Icon',
           relationTo: 'media',
           required: true,
+          admin: {
+            description: 'Choose a different file to replace this icon. Add or remove a contact with the controls on this list.',
+          },
         },
       ],
     },
@@ -114,8 +118,12 @@ export const Footer: GlobalConfig = {
         {
           name: 'icon',
           type: 'upload',
+          label: 'Icon',
           relationTo: 'media',
           required: true,
+          admin: {
+            description: 'Choose a different file to replace this icon. Add or remove a social icon with the controls on this list.',
+          },
         },
         sizeField('displayWidth', 'Icon width (pixels)'),
         sizeField('displayHeight', 'Icon height (pixels)'),

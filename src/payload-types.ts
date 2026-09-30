@@ -186,13 +186,17 @@ export interface User {
   collection: 'users';
 }
 /**
- * Photos and logos used across the site. Each one needs a short description.
+ * Every photo and logo already uploaded. Change a picture on its section. Open a file here to reuse it, update its description, or delete one that is no longer used.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
  */
 export interface Media {
   id: number;
+  /**
+   * This chooses the All files submenu: Images, Icons, or Files.
+   */
+  kind: 'image' | 'icon' | 'file';
   /**
    * A short sentence describing the picture, for people who cannot see it.
    */
@@ -210,7 +214,7 @@ export interface Media {
   focalY?: number | null;
 }
 /**
- * The award logos on the homepage. Use Order to choose which logo comes first.
+ * The award logos under Awards & Recognitions on the homepage. Use Create New to add one, open a row to replace its image, and delete a row to remove it. Use Order to choose which logo comes first.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "awards".
@@ -218,6 +222,9 @@ export interface Media {
 export interface Award {
   id: number;
   name: string;
+  /**
+   * This picture is shown in the awards row. Choose a different file to replace it.
+   */
   logo: number | Media;
   /**
    * Leave this unless the picture looks too big or too small.
@@ -235,7 +242,7 @@ export interface Award {
   createdAt: string;
 }
 /**
- * Articles shown in News and blogs on the homepage. The heading is edited under News and blogs.
+ * Articles shown under News and blogs. Add, replace, reorder, and remove them from News and blogs.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "news-posts".
@@ -249,6 +256,9 @@ export interface NewsPost {
    */
   href: string;
   ctaLabel: string;
+  /**
+   * The photo on this article. Choose a different file to replace it.
+   */
   image?: (number | null) | Media;
   imageAlt?: string | null;
   /**
@@ -259,7 +269,7 @@ export interface NewsPost {
   createdAt: string;
 }
 /**
- * Episodes shown on the homepage. The heading is edited under Podcast.
+ * Episodes shown under Podcast. Add, replace, reorder, and remove them from Podcast.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "podcast-episodes".
@@ -273,6 +283,9 @@ export interface PodcastEpisode {
    * A page on this site, such as /contact, or a full address starting with https://
    */
   href: string;
+  /**
+   * The photo on this episode. Choose a different file to replace it.
+   */
   image?: (number | null) | Media;
   imageAlt?: string | null;
   /**
@@ -283,7 +296,7 @@ export interface PodcastEpisode {
   createdAt: string;
 }
 /**
- * Stories shown on the homepage. The heading and button are edited under Success stories.
+ * Every success story. Check Show on the homepage to include a story there. The box saves when you click it. The first checked story in this list is the large one.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "case-studies".
@@ -299,9 +312,12 @@ export interface CaseStudy {
   category?: string | null;
   badge?: string | null;
   description?: string | null;
+  /**
+   * The photo on this story. Choose a different file to replace it.
+   */
   image?: (number | null) | Media;
   /**
-   * Turn this on to show the story as the large one.
+   * Turn this on, then save, to include this story in the homepage Success stories section. The first homepage story is the large one.
    */
   featured?: boolean | null;
   /**
@@ -312,7 +328,7 @@ export interface CaseStudy {
   createdAt: string;
 }
 /**
- * The logos in the Trusted by row on the homepage. Use Order to choose which logo comes first.
+ * The logos in the Trusted by row. Add, replace, remove, and reorder them from Trusted by.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "trusted-logos".
@@ -320,6 +336,9 @@ export interface CaseStudy {
 export interface TrustedLogo {
   id: number;
   name: string;
+  /**
+   * This picture is shown in the Trusted by row. Choose a different file to replace it.
+   */
   logo: number | Media;
   /**
    * Leave this unless the picture looks too big or too small.
@@ -458,6 +477,7 @@ export interface UsersSelect<T extends boolean = true> {
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
+  kind?: T;
   alt?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -609,8 +629,17 @@ export interface Hero {
      */
     href: string;
   };
+  /**
+   * Choose a different file to replace this photo.
+   */
   primaryImage?: (number | null) | Media;
+  /**
+   * Choose a different file to replace this photo.
+   */
   secondaryImage?: (number | null) | Media;
+  /**
+   * Choose a different file to replace this badge.
+   */
   badgeImage?: (number | null) | Media;
   /**
    * Read aloud for people who cannot see the badge.
@@ -682,6 +711,9 @@ export interface DigitalEngineering {
      */
     href: string;
   };
+  /**
+   * The picture beside the service list. Choose a different file to replace it.
+   */
   image?: (number | null) | Media;
   imageAlt?: string | null;
   groups?:
@@ -724,6 +756,9 @@ export interface SiteFooter {
          * A page on this site, such as /contact, or a full address starting with https://
          */
         href: string;
+        /**
+         * Choose a different file to replace this icon. Add or remove a contact with the controls on this list.
+         */
         icon: number | Media;
         id?: string | null;
       }[]
@@ -749,6 +784,9 @@ export interface SiteFooter {
   socials?:
     | {
         label: string;
+        /**
+         * Choose a different file to replace this icon. Add or remove a social icon with the controls on this list.
+         */
         icon: number | Media;
         /**
          * Leave this unless the picture looks too big or too small.
@@ -783,7 +821,7 @@ export interface SiteHeader {
   createdAt?: string | null;
 }
 /**
- * The heading above the news cards. The articles themselves are edited under News articles.
+ * The heading above the news cards. Each article, including its picture, is listed below.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "latest-news".
@@ -802,6 +840,9 @@ export interface LatestNew {
  */
 export interface Location {
   id: number;
+  /**
+   * Choose a different file to replace the map.
+   */
   map: number | Media;
   stats: {
     value: string;
@@ -812,7 +853,7 @@ export interface Location {
   createdAt?: string | null;
 }
 /**
- * The heading above the podcast episodes. The episodes themselves are edited under Podcast episodes.
+ * The heading above the podcast episodes. Each episode, including its picture, is listed below.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "recent-podcast".
@@ -850,7 +891,13 @@ export interface StrategicGrowth {
   current: string;
   title: string;
   description: string;
+  /**
+   * Choose a different file to replace this picture.
+   */
   illustration?: (number | null) | Media;
+  /**
+   * Choose a different file to replace this photo.
+   */
   heroImage?: (number | null) | Media;
   heroImageAlt?: string | null;
   engagementTitle: string;
@@ -889,6 +936,9 @@ export interface StrategicGrowth {
          */
         href: string;
         body: string;
+        /**
+         * Choose a different file to replace this icon. Add or remove a solution with the controls on this list.
+         */
         icon?: (number | null) | Media;
         /**
          * Leave this unless the picture looks too big or too small.
@@ -927,6 +977,9 @@ export interface StrategicAdvisory {
   groups?:
     | {
         title: string;
+        /**
+         * The icon on this card. Choose a different file to replace it. Add or remove a card with the controls on this list.
+         */
         icon: number | Media;
         /**
          * Leave this unless the picture looks too big or too small.
@@ -951,7 +1004,7 @@ export interface StrategicAdvisory {
   createdAt?: string | null;
 }
 /**
- * The heading and button for the case studies on the homepage. Each story is edited under Case studies.
+ * The heading and button for the homepage section. Stories marked Show on the homepage are listed below.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "success-stories".
@@ -970,7 +1023,7 @@ export interface SuccessStory {
   createdAt?: string | null;
 }
 /**
- * The heading above the row of company logos. The logos themselves are edited under Company logos.
+ * The heading above the row of company logos. Add, replace, or remove the logos below.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "trusted-by".
@@ -998,6 +1051,9 @@ export interface Contact {
   breadcrumbHomeHref: string;
   breadcrumbCurrent: string;
   title: string;
+  /**
+   * Choose a different file to replace this picture.
+   */
   illustration?: (number | null) | Media;
   cards?:
     | {
@@ -1007,6 +1063,9 @@ export interface Contact {
          * A page on this site, such as /contact, or a full address starting with https://
          */
         href: string;
+        /**
+         * Choose a different file to replace this icon. Add or remove a card with the controls on this list.
+         */
         icon: number | Media;
         /**
          * Leave this unless the picture looks too big or too small.

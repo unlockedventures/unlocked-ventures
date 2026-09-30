@@ -365,14 +365,34 @@ html[data-theme='dark']:has(.payload-settings) .nav__link-indicator {
   text-transform: uppercase;
 }
 
-.uv-admin-nav__group-button svg {
+.uv-admin-nav__page-button {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0;
+  padding: 6px 4px;
+  border: 0;
+  background: transparent;
+  color: #25282d;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-align: left;
+}
+
+.uv-admin-nav__group-button svg,
+.uv-admin-nav__page-button svg {
   width: 12px;
   height: 12px;
   flex-shrink: 0;
   transform: rotate(-90deg);
 }
 
-.uv-admin-nav__group-button svg.is-open {
+.uv-admin-nav__group-button svg.is-open,
+.uv-admin-nav__page-button svg.is-open {
   transform: none;
 }
 
@@ -390,6 +410,155 @@ html[data-theme='dark']:has(.payload-settings) .nav__link-indicator {
 
 html[data-theme='dark']:has(.payload-settings) .uv-admin-nav__group-button {
   color: #9ca3af;
+}
+
+.nav .uv-admin-nav__page-button,
+.nav .uv-admin-nav__page-button span {
+  color: #25282d;
+  opacity: 1;
+}
+
+html[data-theme='dark'] .nav .uv-admin-nav__page-button,
+html[data-theme='dark'] .nav .uv-admin-nav__page-button span {
+  color: #f3f4f9;
+}
+
+.nav .uv-admin-nav__direct {
+  margin: 10px 0 4px;
+  padding: 8px 4px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.nav .uv-admin-nav__direct,
+.nav .uv-admin-nav__direct .nav__link-label {
+  color: #25282d;
+}
+
+html[data-theme='dark'] .nav .uv-admin-nav__direct,
+html[data-theme='dark'] .nav .uv-admin-nav__direct .nav__link-label {
+  color: #f3f4f9;
+}
+
+.uv-featured-cell {
+  display: inline-flex;
+}
+
+.uv-featured-cell .checkbox-input:not(.checkbox-input--read-only) {
+  cursor: pointer;
+}
+
+.uv-related-items {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+}
+
+.uv-related-items__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.uv-related-items__header h3,
+.uv-related-items p {
+  margin: 0;
+}
+
+.uv-related-items ul {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.uv-related-items__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: 8px;
+  background: var(--theme-elevation-50);
+  cursor: grab;
+}
+
+.uv-related-items__row img,
+.uv-related-items__placeholder {
+  width: 72px;
+  height: 48px;
+  flex-shrink: 0;
+  object-fit: contain;
+  border-radius: 4px;
+  background: var(--theme-elevation-100);
+}
+
+.uv-related-items__placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--theme-elevation-500);
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+.uv-related-items__handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 36px;
+  flex-shrink: 0;
+  color: var(--theme-elevation-500);
+}
+
+.uv-related-items__handle svg {
+  width: 12px;
+  height: 16px;
+}
+
+.uv-related-items__row:active {
+  cursor: grabbing;
+}
+
+.uv-related-items__row.is-dragging {
+  opacity: 0.45;
+}
+
+.uv-related-items__row.is-over {
+  outline: 1px solid var(--theme-elevation-400);
+}
+
+.uv-related-items__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.uv-related-items button:not(.uv-related-items__handle) {
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--theme-elevation-250);
+  border-radius: 4px;
+  background: var(--theme-elevation-0);
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.85rem;
+}
+
+.uv-related-items__add {
+  font-weight: 600;
+}
+
+.uv-related-items__error {
+  width: 100%;
+  color: var(--theme-error-500);
 }
 
 .uv-admin-home {
@@ -416,6 +585,17 @@ html[data-theme='dark']:has(.payload-settings) .uv-admin-nav__group-button {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--theme-elevation-500);
+}
+
+.uv-admin-home__nested {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.uv-admin-home__page h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
 }
 
 .uv-admin-home__list {

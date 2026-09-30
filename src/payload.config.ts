@@ -26,6 +26,7 @@ import { seedStrategicAdvisory } from './data/seed-strategic-advisory'
 import { seedTrustedBy } from './data/seed-trusted-by'
 import { seedSuccessStories } from './data/seed-success-stories'
 import { seedContact } from './data/seed-contact'
+import { classifyMedia } from './data/classify-media'
 import { seedSite } from './data/seed-site'
 import { Contact } from './globals/Contact'
 import { DigitalEngineering } from './globals/DigitalEngineering'
@@ -96,6 +97,7 @@ export default buildConfig({
     await seedSuccessStories(payload)
     await seedContact(payload)
     await seedSite(payload)
+    await classifyMedia(payload)
   },
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',

@@ -74,9 +74,12 @@ function StoryImage({ src, className }: { src?: string; className?: string }) {
 function FeaturedStory({ story }: { story: SuccessStory }) {
   return (
     <article className="relative flex min-h-[22rem] items-center overflow-hidden bg-[#F8F8F8] lg:h-[420px]">
-      <StoryImage src={story.imageSrc} className="inset-y-0 right-0 h-full w-full md:w-[58%]" />
       {story.imageSrc ? (
-        <div className="absolute inset-0 bg-gradient-to-r from-[#F8F8F8] from-35% via-[#F8F8F8]/85 via-55% to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-full md:w-[58%]">
+          <img src={story.imageSrc} alt="" className="absolute inset-0 h-full w-full object-cover object-top" />
+          <div className="absolute inset-y-0 left-0 w-[73%] bg-gradient-to-r from-[#F8F8F8] to-transparent" />
+          <div className="absolute top-[-4%] -left-[7.2%] h-[115%] w-[26.8%] bg-[#F8F8F8] blur-[100px]" />
+        </div>
       ) : null}
       <div className="relative z-10 w-full px-6 py-10 sm:px-8 lg:px-[70px] lg:py-0">
         <div className="flex max-w-[572px] flex-col gap-6">

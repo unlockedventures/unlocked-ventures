@@ -20,6 +20,9 @@ export const Locations: GlobalConfig = {
       label: 'Map',
       relationTo: 'media',
       required: true,
+      admin: {
+        description: 'Choose a different file to replace the map.',
+      },
     },
     {
       name: 'stats',

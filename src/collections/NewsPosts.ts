@@ -11,7 +11,8 @@ export const NewsPosts: CollectionConfig = {
   },
   admin: {
     group: adminGroups.homepage,
-    description: 'Articles shown in News and blogs on the homepage. The heading is edited under News and blogs.',
+    hidden: true,
+    description: 'Articles shown under News and blogs. Add, replace, reorder, and remove them from News and blogs.',
     hideAPIURL: true,
     useAsTitle: 'title',
     defaultColumns: ['title', 'sortOrder'],
@@ -25,7 +26,7 @@ export const NewsPosts: CollectionConfig = {
     { name: 'excerpt', type: 'textarea', required: true },
     linkField(),
     { name: 'ctaLabel', type: 'text', label: 'Button text', required: true, defaultValue: 'Read More' },
-    { name: 'image', type: 'upload', relationTo: 'media' },
+    { name: 'image', type: 'upload', label: 'Picture', relationTo: 'media', admin: { description: 'The photo on this article. Choose a different file to replace it.' } },
     { name: 'imageAlt', type: 'text' },
     {
       name: 'sortOrder',

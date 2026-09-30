@@ -29,7 +29,11 @@ export const DigitalEngineering: GlobalConfig = {
     {
       name: 'image',
       type: 'upload',
+      label: 'Photo',
       relationTo: 'media',
+      admin: {
+        description: 'The picture beside the service list. Choose a different file to replace it.',
+      },
     },
     {
       name: 'imageAlt',

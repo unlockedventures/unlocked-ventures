@@ -63,12 +63,20 @@ export const StrategicGrowth: GlobalConfig = {
             {
               name: 'illustration',
               type: 'upload',
+              label: 'Illustration',
               relationTo: 'media',
+              admin: {
+                description: 'Choose a different file to replace this picture.',
+              },
             },
             {
               name: 'heroImage',
               type: 'upload',
+              label: 'Photo',
               relationTo: 'media',
+              admin: {
+                description: 'Choose a different file to replace this photo.',
+              },
             },
             {
               name: 'heroImageAlt',
@@ -192,7 +200,11 @@ export const StrategicGrowth: GlobalConfig = {
                 {
                   name: 'icon',
                   type: 'upload',
+                  label: 'Icon',
                   relationTo: 'media',
+                  admin: {
+                    description: 'Choose a different file to replace this icon. Add or remove a solution with the controls on this list.',
+                  },
                 },
                 sizeField('iconWidth', 'Icon width (pixels)'),
                 sizeField('iconHeight', 'Icon height (pixels)'),

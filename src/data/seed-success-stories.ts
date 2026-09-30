@@ -68,7 +68,7 @@ export async function seedSuccessStories(payload: Payload) {
         ctaLabel: story.ctaLabel,
         category: story.category,
         image: image.id,
-        featured: false,
+        featured: true,
         sortOrder: index + 1,
       },
     })

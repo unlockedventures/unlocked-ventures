@@ -6,12 +6,13 @@ import { linkField } from '@/admin/editor-fields'
 export const CaseStudies: CollectionConfig = {
   slug: 'case-studies',
   labels: {
-    singular: 'Case study',
-    plural: 'Case studies',
+    singular: 'Success story',
+    plural: 'Success Stories',
   },
   admin: {
-    group: adminGroups.homepage,
-    description: 'Stories shown on the homepage. The heading and button are edited under Success stories.',
+    group: adminGroups.successStories,
+    description:
+      'Every success story. Check Show on the homepage to include a story there. The box saves when you click it. The first checked story in this list is the large one.',
     hideAPIURL: true,
     useAsTitle: 'title',
     defaultColumns: ['title', 'featured', 'sortOrder'],
@@ -27,15 +28,18 @@ export const CaseStudies: CollectionConfig = {
     { name: 'category', type: 'text' },
     { name: 'badge', type: 'text' },
     { name: 'description', type: 'textarea' },
-    { name: 'image', type: 'upload', relationTo: 'media' },
+    { name: 'image', type: 'upload', label: 'Picture', relationTo: 'media', admin: { description: 'The photo on this story. Choose a different file to replace it.' } },
     {
       name: 'featured',
       type: 'checkbox',
-      label: 'Large story',
+      label: 'Show on the homepage',
       defaultValue: false,
       admin: {
         position: 'sidebar',
-        description: 'Turn this on to show the story as the large one.',
+        description: 'Turn this on, then save, to include this story in the homepage Success stories section. The first homepage story is the large one.',
+        components: {
+          Cell: '@/components/admin/featured-cell#FeaturedCell',
+        },
       },
     },
     {

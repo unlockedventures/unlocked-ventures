@@ -49,7 +49,7 @@ export default async function HomePage() {
       {strategicAdvisory ? <StrategicAdvisorySection {...strategicAdvisory} /> : null}
       {digitalEngineering ? <DigitalEngineeringSection {...digitalEngineering} /> : null}
       {successStories ? <SuccessStoriesSection {...successStories} /> : null}
-      <AwardsSection awards={awards} />
+      <AwardsSection awards={awards} flushTop={Boolean(successStories)} />
       {recentPodcast ? <RecentPodcastSection {...recentPodcast} /> : null}
       {latestNews ? <LatestNewsSection {...latestNews} /> : null}
       {locations ? <LocationsSection {...locations} className="bg-white" /> : null}

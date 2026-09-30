@@ -47,18 +47,27 @@ export const Hero: GlobalConfig = {
       type: 'upload',
       label: 'Large photo',
       relationTo: 'media',
+      admin: {
+        description: 'Choose a different file to replace this photo.',
+      },
     },
     {
       name: 'secondaryImage',
       type: 'upload',
       label: 'Smaller photo',
       relationTo: 'media',
+      admin: {
+        description: 'Choose a different file to replace this photo.',
+      },
     },
     {
       name: 'badgeImage',
       type: 'upload',
       label: 'Badge',
       relationTo: 'media',
+      admin: {
+        description: 'Choose a different file to replace this badge.',
+      },
     },
     {
       name: 'badgeAlt',

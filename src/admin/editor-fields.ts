@@ -1,4 +1,4 @@
-import type { GroupField, NumberField, TextField } from 'payload'
+import type { GroupField, NumberField, TextField, UIField } from 'payload'
 
 import { linkHint, sizeHint } from '@/admin/editor-guide'
 
@@ -28,6 +28,38 @@ export function buttonGroup(): GroupField {
       },
       linkField(),
     ],
+  }
+}
+
+export function relatedItemsField(options: {
+  name: string
+  label: string
+  collection: string
+  titleField: string
+  imageField: string
+  singular: string
+  plural: string
+  help: string
+  where?: string
+}): UIField {
+  return {
+    name: options.name,
+    type: 'ui',
+    label: options.label,
+    admin: {
+      components: {
+        Field: '@/components/admin/related-items-field#RelatedItemsField',
+      },
+      custom: {
+        collection: options.collection,
+        titleField: options.titleField,
+        imageField: options.imageField,
+        singular: options.singular,
+        plural: options.plural,
+        help: options.help,
+        where: options.where ?? '',
+      },
+    },
   }
 }
 
