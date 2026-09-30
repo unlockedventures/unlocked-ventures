@@ -39,8 +39,8 @@ export function ContentSlider({
     const scroller = scrollerRef.current
     if (!scroller) return
     const maxScroll = scroller.scrollWidth - scroller.clientWidth
-    setCanPrevious(scroller.scrollLeft > 1)
-    setCanNext(scroller.scrollLeft < maxScroll - 1)
+    setCanPrevious(scroller.scrollLeft > 2)
+    setCanNext(maxScroll > 2 && scroller.scrollLeft < maxScroll - 2)
   }, [])
 
   useLayoutEffect(() => {
@@ -60,6 +60,9 @@ export function ContentSlider({
     const scroller = scrollerRef.current
     const slide = scroller?.querySelector<HTMLElement>('[data-slider-slide]')
     if (!scroller || !slide) return
+    const maxScroll = scroller.scrollWidth - scroller.clientWidth
+    if (direction === -1 && scroller.scrollLeft <= 2) return
+    if (direction === 1 && (maxScroll <= 2 || scroller.scrollLeft >= maxScroll - 2)) return
     const styles = getComputedStyle(scroller)
     const gap = Number.parseFloat(styles.columnGap || styles.gap) || 0
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -148,7 +151,7 @@ export function SliderControl({
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        'inline-flex size-12 cursor-pointer items-center justify-center rounded-full border border-[#EBEDF0] text-[#30373F] disabled:cursor-default disabled:opacity-40',
+        'inline-flex size-12 cursor-pointer items-center justify-center rounded-full border border-[#EBEDF0] text-[#30373F] disabled:cursor-not-allowed disabled:opacity-40',
         direction === 'next' && 'text-[#484D56]',
       )}
     >

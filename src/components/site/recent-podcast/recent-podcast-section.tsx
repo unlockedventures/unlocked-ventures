@@ -76,7 +76,7 @@ export function RecentPodcastSection({ title, episodes, className }: RecentPodca
           }
           snapClassName="max-lg:snap-x max-lg:snap-mandatory"
           slideSnapClassName="max-lg:snap-start"
-          slideClassName="lg:w-[calc((100%-5.5rem)/2)]"
+          slideClassName="lg:w-[calc((100%-2rem)/3)]"
           endFadeClassName="via-[#F3F4F9] via-45% to-[#F3F4F9] lg:w-16"
         >
           {episodes.map((episode) => (

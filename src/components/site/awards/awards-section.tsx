@@ -33,13 +33,16 @@ export function AwardsSection({
         </h2>
         <ul className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-6">
           {awards.map((award) => (
-            <li key={award.name} className="flex h-[130px] items-center justify-center border border-black/10">
+            <li
+              key={award.name}
+              className="group flex h-[130px] items-center justify-center border border-black/10"
+            >
               <img
                 src={award.src}
                 alt={award.name}
                 width={award.width}
                 height={award.height}
-                className="h-auto w-auto max-h-[97px] max-w-full object-contain grayscale"
+                className="h-auto w-auto max-h-[97px] max-w-full object-contain grayscale transition-[filter] duration-300 group-hover:grayscale-0"
                 style={{ width: award.width }}
               />
             </li>
