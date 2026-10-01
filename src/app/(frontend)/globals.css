@@ -164,6 +164,11 @@
   clip-path: circle(26% at 50% 50%);
 }
 
+.hero-digital-banner {
+  overflow: hidden;
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 14%, #000 86%, transparent 100%);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .experience-badge-ring {
     animation: none;
@@ -190,5 +195,9 @@
 
   .trusted-by-fade {
     display: none;
+  }
+
+  .hero-digital-banner {
+    mask-image: none;
   }
 }

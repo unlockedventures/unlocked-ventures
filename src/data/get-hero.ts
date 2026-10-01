@@ -22,8 +22,11 @@ export async function getHero(): Promise<HeroSectionProps | null> {
   )
   if (!description.length) return null
 
+  const rotatingWords = (doc.rotatingWords ?? []).flatMap((word) => (word.text ? [word.text] : []))
+
   return {
     title: doc.title,
+    rotatingWords,
     description,
     cta: {
       label: doc.cta.label,

@@ -1,3 +1,4 @@
+import { HeroRotatingWord } from '@/components/site/hero/hero-rotating-word'
 import { SiteOutlineButton } from '@/components/site/site-outline-button'
 import { cn } from '@/lib/utils'
 
@@ -10,6 +11,7 @@ export type HeroMedia = {
 
 export type HeroSectionProps = {
   title: string
+  rotatingWords: readonly string[]
   description: readonly string[]
   cta: {
     label: string
@@ -55,7 +57,10 @@ function HeroMediaCollage({ media }: { media?: HeroMedia }) {
   )
 }
 
-export function HeroSection({ title, description, cta, media, className }: HeroSectionProps) {
+export function HeroSection({ title, rotatingWords, description, cta, media, className }: HeroSectionProps) {
+  const staticTitle = title.split('\n')[0] || 'We support'
+  const spokenTitle = [staticTitle, ...rotatingWords].join(', ')
+
   return (
     <section aria-label="Introduction" className={cn('overflow-hidden bg-[#F3F4F9]', className)}>
       <div className="relative isolate mx-auto w-full max-w-[1440px] min-[1440px]:min-h-[715px]">
@@ -66,8 +71,12 @@ export function HeroSection({ title, description, cta, media, className }: HeroS
         />
       <div className="flex flex-col gap-10 px-4 py-12 sm:px-6 md:px-8 md:py-16 lg:flex-row lg:items-center lg:justify-between lg:gap-8 lg:px-12 min-[1440px]:block min-[1440px]:px-[156px]! min-[1440px]:pt-[132px]! min-[1440px]:pb-[122px]!">
         <div className="relative z-10 w-full lg:max-w-[32rem] lg:shrink-0 min-[1440px]:max-w-[628px]!">
-          <h1 className="font-sans text-[2.5rem] leading-[1.15] font-normal whitespace-pre-line text-[#33353F] sm:text-[3.25rem] sm:leading-[1.12] md:text-[4.25rem] md:leading-[1.1] xl:text-[4.375rem] xl:leading-[5rem]">
-            {title}
+          <h1 className="font-sans text-[2.5rem] leading-[1.15] font-normal text-[#33353F] sm:text-[3.25rem] sm:leading-[1.12] md:text-[4.25rem] md:leading-[1.1] xl:text-[4.375rem] xl:leading-[5rem]">
+            <span className="sr-only">{spokenTitle}</span>
+            <span className="block" aria-hidden="true">
+              {staticTitle}
+            </span>
+            {rotatingWords.length > 0 ? <HeroRotatingWord words={rotatingWords} /> : null}
           </h1>
           <div className="mt-6 w-full lg:max-w-[499px]">
             <div className="flex flex-col gap-[27px]">

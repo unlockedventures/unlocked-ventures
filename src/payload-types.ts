@@ -623,9 +623,16 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 export interface Hero {
   id: number;
   /**
-   * Press Enter to start a new line. The line break is kept on the site.
+   * The fixed line above the changing words. Only the first line is shown.
    */
   title: string;
+  /**
+   * These appear one after another under the heading, in this order.
+   */
+  rotatingWords: {
+    text: string;
+    id?: string | null;
+  }[];
   description?:
     | {
         text: string;
@@ -1158,6 +1165,12 @@ export interface Site {
  */
 export interface HeroSelect<T extends boolean = true> {
   title?: T;
+  rotatingWords?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
   description?:
     | T
     | {

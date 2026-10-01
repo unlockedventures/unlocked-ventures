@@ -21,8 +21,26 @@ export const Hero: GlobalConfig = {
       label: 'Heading',
       required: true,
       admin: {
-        description: 'Press Enter to start a new line. The line break is kept on the site.',
+        description: 'The fixed line above the changing words. Only the first line is shown.',
       },
+    },
+    {
+      name: 'rotatingWords',
+      type: 'array',
+      label: 'Changing words',
+      required: true,
+      minRows: 1,
+      admin: {
+        description: 'These appear one after another under the heading, in this order.',
+      },
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+          label: 'Word',
+          required: true,
+        },
+      ],
     },
     {
       name: 'description',

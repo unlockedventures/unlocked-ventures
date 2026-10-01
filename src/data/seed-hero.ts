@@ -22,7 +22,17 @@ async function uploadHeroImage(payload: Payload, file: string, alt: string) {
 
 export async function seedHero(payload: Payload) {
   const current = await payload.findGlobal({ slug: 'hero' })
-  if (current.title) return
+  const rotatingWords = heroSeed.rotatingWords.map((text) => ({ text }))
+
+  if (current.title) {
+    if (!current.rotatingWords?.length) {
+      await payload.updateGlobal({
+        slug: 'hero',
+        data: { rotatingWords },
+      })
+    }
+    return
+  }
 
   const [primaryImage, secondaryImage, badgeImage] = await Promise.all([
     uploadHeroImage(payload, heroSeed.primaryFile, 'Hero primary photo'),
@@ -34,6 +44,7 @@ export async function seedHero(payload: Payload) {
     slug: 'hero',
     data: {
       title: heroSeed.title,
+      rotatingWords,
       description: heroSeed.description.map((text) => ({ text })),
       cta: heroSeed.cta,
       primaryImage: primaryImage.id,
