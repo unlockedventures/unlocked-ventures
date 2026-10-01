@@ -65,5 +65,28 @@ export const Site: GlobalConfig = {
       label: 'Home button text',
       required: true,
     },
+    {
+      name: 'errorMetaTitle',
+      type: 'text',
+      label: 'Error page browser title',
+    },
+    {
+      name: 'errorLabel',
+      type: 'text',
+      label: 'Error label',
+    },
+    {
+      name: 'errorTitle',
+      type: 'text',
+      label: 'Error heading',
+    },
+    {
+      name: 'errorDescription',
+      type: 'textarea',
+      label: 'Error message',
+      admin: {
+        description: 'Shown when a page fails to load.',
+      },
+    },
   ],
 }

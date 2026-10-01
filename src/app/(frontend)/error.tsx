@@ -1,6 +1,9 @@
 'use client'
 
+import { useEffect, useState } from 'react'
+
 import { ErrorScreen } from '@/components/site/error-screen'
+import { getErrorContent } from '@/data/get-error-content'
 
 export default function FrontendError({
   error,
@@ -11,14 +14,22 @@ export default function FrontendError({
 }) {
   void error
   void reset
+  const [content, setContent] = useState<Awaited<ReturnType<typeof getErrorContent>>>(null)
+
+  useEffect(() => {
+    void getErrorContent().then(setContent)
+  }, [])
+
+  if (!content) return null
 
   return (
     <>
-      <title>Something went wrong</title>
+      <title>{content.metaTitle}</title>
       <ErrorScreen
-        label="Error"
-        title="Something went wrong"
-        description="This page could not be loaded."
+        label={content.label}
+        title={content.title}
+        description={content.description}
+        homeLabel={content.homeLabel}
       />
     </>
   )

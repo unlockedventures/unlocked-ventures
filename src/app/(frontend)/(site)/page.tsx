@@ -1,6 +1,7 @@
 import { DigitalEngineeringSection } from '@/components/site/digital-engineering/digital-engineering-section'
 import { AwardsSection } from '@/components/site/awards/awards-section'
 import { getAwards } from '@/data/get-awards'
+import { getAwardsSection } from '@/data/get-awards-section'
 import { getDigitalEngineering } from '@/data/get-digital-engineering'
 import { getHero } from '@/data/get-hero'
 import { getLatestNews } from '@/data/get-latest-news'
@@ -23,6 +24,7 @@ export default async function HomePage() {
   const [
     hero,
     awards,
+    awardsSection,
     digitalEngineering,
     latestNews,
     locations,
@@ -33,6 +35,7 @@ export default async function HomePage() {
   ] = await Promise.all([
     getHero(),
     getAwards(),
+    getAwardsSection(),
     getDigitalEngineering(),
     getLatestNews(),
     getLocations(),
@@ -49,7 +52,9 @@ export default async function HomePage() {
       {strategicAdvisory ? <StrategicAdvisorySection {...strategicAdvisory} /> : null}
       {digitalEngineering ? <DigitalEngineeringSection {...digitalEngineering} /> : null}
       {successStories ? <SuccessStoriesSection {...successStories} /> : null}
-      <AwardsSection awards={awards} flushTop={Boolean(successStories)} />
+      {awardsSection ? (
+        <AwardsSection title={awardsSection.title} awards={awards} flushTop={Boolean(successStories)} />
+      ) : null}
       {recentPodcast ? <RecentPodcastSection {...recentPodcast} /> : null}
       {latestNews ? <LatestNewsSection {...latestNews} /> : null}
       {locations ? <LocationsSection {...locations} /> : null}

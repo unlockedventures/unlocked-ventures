@@ -63,10 +63,10 @@ function PodcastCard({ episode }: { episode: PodcastEpisode }) {
 
 export function RecentPodcastSection({ title, episodes, className }: RecentPodcastSectionProps) {
   return (
-    <section aria-label="Recent podcast" className={cn('bg-[#F3F4F9]', className)}>
+    <section aria-label={title} className={cn('bg-[#F3F4F9]', className)}>
       <div className="w-full px-4 py-12 sm:px-6 md:px-8 md:py-16 lg:px-[56px] lg:py-[80px] min-[1440px]:mx-auto min-[1440px]:max-w-[1440px]">
         <ContentSlider
-          label="Recent podcast episodes"
+          label={title}
           headerClassName="sm:items-center"
           controlsClassName="gap-[21px]"
           heading={

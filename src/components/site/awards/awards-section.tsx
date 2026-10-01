@@ -8,14 +8,14 @@ export type Award = {
 }
 
 type AwardsSectionProps = {
-  title?: string
+  title: string
   awards: readonly Award[]
   className?: string
   flushTop?: boolean
 }
 
 export function AwardsSection({
-  title = 'Awards & Recognitions',
+  title,
   awards,
   className,
   flushTop = false,

@@ -58,7 +58,7 @@ function HeroMediaCollage({ media }: { media?: HeroMedia }) {
 }
 
 export function HeroSection({ title, rotatingWords, description, cta, media, className }: HeroSectionProps) {
-  const staticTitle = title.split('\n')[0] || 'We support'
+  const staticTitle = title.split('\n')[0]
   const spokenTitle = [staticTitle, ...rotatingWords].join(', ')
 
   return (

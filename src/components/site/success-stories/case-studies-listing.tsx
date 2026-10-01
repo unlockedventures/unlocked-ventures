@@ -8,6 +8,19 @@ import { cn } from '@/lib/utils'
 
 const pageSize = 8
 
+export type CaseStudiesListingCopy = {
+  metaTitle: string
+  homeLabel: string
+  homeHref: string
+  currentLabel: string
+  title: string
+  description: string
+  categoryPrefix: string
+  allLabel: string
+  emptyLabel: string
+  seeMoreLabel: string
+}
+
 const trimmedLabelClassName =
   'block leading-none [text-box-edge:cap_alphabetic] [text-box-trim:trim-both]'
 
@@ -116,15 +129,19 @@ function CategoryFilter({
   categories,
   value,
   onChange,
+  categoryPrefix,
+  allLabel,
 }: {
   categories: readonly string[]
   value: string
   onChange: (value: string) => void
+  categoryPrefix: string
+  allLabel: string
 }) {
   const [open, setOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
   const listId = useId()
-  const selectedLabel = value === 'all' ? 'All' : value
+  const selectedLabel = value === 'all' ? allLabel : value
 
   useEffect(() => {
     function onPointerDown(event: MouseEvent) {
@@ -153,7 +170,7 @@ function CategoryFilter({
         className="inline-flex h-[60px] cursor-pointer items-center gap-2.5 border border-[#484D56] bg-white px-5 font-sans text-base leading-[22px] font-normal text-[#484D56]"
         onClick={() => setOpen((current) => !current)}
       >
-        <span className={trimmedLabelClassName}>Select category: {selectedLabel}</span>
+        <span className={trimmedLabelClassName}>{categoryPrefix} {selectedLabel}</span>
         <ChevronDown className={cn('transition-transform duration-200', open && 'rotate-180')} />
       </button>
       {open ? (
@@ -164,7 +181,7 @@ function CategoryFilter({
           className="absolute top-full right-0 z-20 mt-1 min-w-full border border-[#484D56] bg-white py-2 shadow-sm"
         >
           {['all', ...categories].map((category) => {
-            const label = category === 'all' ? 'All' : category
+            const label = category === 'all' ? allLabel : category
             const selected = value === category
 
             return (
@@ -193,7 +210,13 @@ function CategoryFilter({
   )
 }
 
-export function CaseStudiesListing({ stories }: { stories: readonly CaseStudyCard[] }) {
+export function CaseStudiesListing({
+  stories,
+  copy,
+}: {
+  stories: readonly CaseStudyCard[]
+  copy: CaseStudiesListingCopy
+}) {
   const [category, setCategory] = useState('all')
   const [visibleCount, setVisibleCount] = useState(pageSize)
   const categories = [...new Set(stories.flatMap((story) => (story.category ? [story.category] : [])))]
@@ -207,28 +230,29 @@ export function CaseStudiesListing({ stories }: { stories: readonly CaseStudyCar
       <div className="flex flex-col items-start justify-between gap-8 px-4 sm:px-6 md:px-8 lg:flex-row lg:max-[1439px]:items-center lg:gap-12 lg:px-[72px] xl:px-[156px] min-[1440px]:items-end">
         <div className="flex max-w-[740px] flex-col gap-8 md:gap-12">
           <p className="font-sans text-base leading-[22px] font-normal text-[#222222]">
-            <Link href="/" className="text-[#222222] hover:text-[#1CACAE] min-[1440px]:text-[#919191]">
-              Home
+            <Link href={copy.homeHref} className="text-[#222222] hover:text-[#1CACAE] min-[1440px]:text-[#919191]">
+              {copy.homeLabel}
             </Link>
             <span aria-hidden="true" className="min-[1440px]:text-[#919191]">
               {' '}
               /{' '}
             </span>
-            <span>Our success story</span>
+            <span>{copy.currentLabel}</span>
           </p>
           <div className="flex flex-col gap-4">
             <h1 className="font-sans text-[2rem] leading-[2.4rem] font-normal tracking-[-1px] text-[#33353F] sm:text-4xl sm:leading-[2.75rem] lg:text-5xl lg:leading-[56px]">
-              Our Success Stories
+              {copy.title}
             </h1>
             <p className="font-sans text-base leading-6 font-normal tracking-[0.36px] text-[#23313C] md:text-lg md:leading-[27px] min-[1440px]:opacity-80">
-              Products, platforms and roadmaps we have built with operators, founders and portfolio
-              companies, and what changed once they shipped.
+              {copy.description}
             </p>
           </div>
         </div>
         <CategoryFilter
           categories={categories}
           value={category}
+          categoryPrefix={copy.categoryPrefix}
+          allLabel={copy.allLabel}
           onChange={(next) => {
             setCategory(next)
             setVisibleCount(pageSize)
@@ -246,7 +270,7 @@ export function CaseStudiesListing({ stories }: { stories: readonly CaseStudyCar
             ))}
           </ul>
         ) : (
-          <p className="font-sans text-base leading-6 text-[#23313C]">No stories in this category yet.</p>
+          <p className="font-sans text-base leading-6 text-[#23313C]">{copy.emptyLabel}</p>
         )}
 
         {hasMore ? (
@@ -256,7 +280,7 @@ export function CaseStudiesListing({ stories }: { stories: readonly CaseStudyCar
               className="inline-flex h-[60px] cursor-pointer items-center gap-2.5 border border-[#484D56] bg-white px-5 font-sans text-base leading-[22px] font-normal text-[#484D56]"
               onClick={() => setVisibleCount((count) => count + pageSize)}
             >
-              <span className={trimmedLabelClassName}>See more</span>
+              <span className={trimmedLabelClassName}>{copy.seeMoreLabel}</span>
               <ChevronRight />
             </button>
           </div>

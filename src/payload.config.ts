@@ -5,6 +5,10 @@ import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
 import sharp from 'sharp'
 
+import { seedAbout } from './data/seed-about'
+import { seedAwardsSection } from './data/seed-awards-section'
+import { seedOurSuccesses } from './data/seed-our-successes'
+import { seedPodcastPage } from './data/seed-podcast-page'
 import { Awards } from './collections/Awards'
 import { CaseStudies } from './collections/CaseStudies'
 import { NewsPosts } from './collections/NewsPosts'
@@ -28,7 +32,11 @@ import { seedSuccessStories } from './data/seed-success-stories'
 import { seedContact } from './data/seed-contact'
 import { classifyMedia } from './data/classify-media'
 import { seedSite } from './data/seed-site'
+import { About } from './globals/About'
+import { AwardsSection } from './globals/AwardsSection'
 import { Contact } from './globals/Contact'
+import { OurSuccesses } from './globals/OurSuccesses'
+import { PodcastPage } from './globals/PodcastPage'
 import { DigitalEngineering } from './globals/DigitalEngineering'
 import { Footer } from './globals/Footer'
 import { Header } from './globals/Header'
@@ -66,6 +74,8 @@ export default buildConfig({
   },
   collections: [Users, Media, Awards, NewsPosts, PodcastEpisodes, CaseStudies, TrustedLogos],
   globals: [
+    About,
+    AwardsSection,
     Hero,
     Navigation,
     DigitalEngineering,
@@ -77,12 +87,16 @@ export default buildConfig({
     StrategicGrowth,
     StrategicAdvisory,
     SuccessStories,
+    OurSuccesses,
+    PodcastPage,
     TrustedBy,
     Contact,
     Site,
   ],
   onInit: async (payload) => {
     await seedAwards(payload)
+    await seedAwardsSection(payload)
+    await seedAbout(payload)
     await seedHero(payload)
     await seedDigitalEngineering(payload)
     await seedFooter(payload)
@@ -95,6 +109,8 @@ export default buildConfig({
     await seedStrategicAdvisory(payload)
     await seedTrustedBy(payload)
     await seedSuccessStories(payload)
+    await seedOurSuccesses(payload)
+    await seedPodcastPage(payload)
     await seedContact(payload)
     await seedSite(payload)
     await classifyMedia(payload)

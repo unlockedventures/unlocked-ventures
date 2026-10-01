@@ -98,7 +98,7 @@ export function DigitalEngineeringSection({
   className,
 }: DigitalEngineeringSectionProps) {
   return (
-    <section aria-label="Digital engineering" className={cn('bg-[#484D56]', className)}>
+    <section aria-label={title} className={cn('bg-[#484D56]', className)}>
       <div className="mx-auto flex w-full flex-col gap-8 px-4 py-12 sm:px-6 md:gap-12 md:px-8 md:py-16 xl:pt-[100px]! xl:pr-[156px]! xl:pb-[100px]! xl:pl-[156px]! min-[1440px]:max-w-[1440px]">
         <div className="flex max-w-[610px] flex-col gap-9">
           <div className="flex flex-col gap-5">

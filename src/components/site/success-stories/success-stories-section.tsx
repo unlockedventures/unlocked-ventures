@@ -181,7 +181,7 @@ export function SuccessStoriesSection({
   className,
 }: SuccessStoriesSectionProps) {
   return (
-    <section aria-label="Our success stories" className={cn('bg-white', className)}>
+    <section aria-label={title} className={cn('bg-white', className)}>
       <div className="mx-auto flex w-full flex-col gap-8 px-4 py-12 sm:px-6 md:gap-12 md:px-8 md:py-16 xl:px-14 xl:py-[100px] min-[1440px]:max-w-[1440px]">
         <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
           <h2 className="font-sans text-[2rem] leading-10 font-normal tracking-[-1px] text-[#33353F] md:text-5xl md:leading-[56px] min-[1440px]:text-[48px] min-[1440px]:leading-[56px] min-[1440px]:text-[#171616]">

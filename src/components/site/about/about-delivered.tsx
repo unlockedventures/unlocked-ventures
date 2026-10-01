@@ -1,16 +1,11 @@
-const stats = [
-  { value: '3.2x', label: 'Average ROI for clients' },
-  { value: '140+', label: 'Products shipped' },
-  { value: '85', label: 'Engineers, designers and advisors' },
-  { value: '3', label: 'Offices on two continents' },
-] as const
+import type { AboutContent } from '@/components/site/about/about-content'
 
-export function AboutDelivered() {
+export function AboutDelivered({ title, stats }: { title: string; stats: AboutContent['stats'] }) {
   return (
     <section id="experience" className="scroll-mt-24 bg-[#F3F4F9] py-[100px]">
       <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-12 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-[156px]">
         <h2 className="font-sans text-[2rem] leading-10 font-normal tracking-[-1px] text-[#33353F] md:text-[3rem] md:leading-[56px]">
-          What we&apos;ve delivered
+          {title}
         </h2>
         <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {stats.map((stat) => (

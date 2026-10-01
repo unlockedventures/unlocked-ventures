@@ -2,19 +2,21 @@ import type { Metadata } from 'next'
 
 import { CaseStudiesListing } from '@/components/site/success-stories/case-studies-listing'
 import { getCaseStudies } from '@/data/get-case-studies'
+import { getOurSuccesses } from '@/data/get-our-successes'
 
 export const dynamic = 'force-dynamic'
 
-const description =
-  'Products, platforms and roadmaps we have built with operators, founders and portfolio companies, and what changed once they shipped.'
-
-export const metadata: Metadata = {
-  title: 'Our Success Stories',
-  description,
+export async function generateMetadata(): Promise<Metadata> {
+  const page = await getOurSuccesses()
+  return {
+    title: page?.metaTitle,
+    description: page?.description,
+  }
 }
 
 export default async function OurSuccessesPage() {
-  const stories = await getCaseStudies()
+  const [stories, page] = await Promise.all([getCaseStudies(), getOurSuccesses()])
+  if (!page) return null
 
   return (
     <section className="relative overflow-hidden bg-white">
@@ -26,7 +28,7 @@ export default async function OurSuccessesPage() {
           height={756}
           className="pointer-events-none absolute top-10 left-[calc(266/1440*100%)] z-0 h-[756px] w-[1174px] max-w-none select-none xl:max-[1439px]:top-20 min-[1440px]:top-0 min-[1440px]:left-[266px]"
         />
-        <CaseStudiesListing stories={stories} />
+        <CaseStudiesListing stories={stories} copy={page} />
       </div>
     </section>
   )

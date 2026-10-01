@@ -71,10 +71,10 @@ function NewsCard({ post }: { post: NewsPost }) {
 
 export function LatestNewsSection({ title, posts, className }: LatestNewsSectionProps) {
   return (
-    <section aria-label="Latest news and blogs" className={cn('bg-white', className)}>
+    <section aria-label={title} className={cn('bg-white', className)}>
       <div className="w-full px-4 py-12 sm:px-6 sm:py-14 md:px-8 md:py-16 lg:px-9 lg:py-[100px] min-[1440px]:mx-auto min-[1440px]:max-w-[1440px] min-[1440px]:px-9 min-[1440px]:py-[100px]">
         <ContentSlider
-          label="Latest news and blogs"
+          label={title}
           controlsClassName="gap-[21px]"
           heading={
             <h2 className="font-sans text-[2rem] leading-10 font-normal tracking-[-1px] text-[#33353F] md:text-5xl md:leading-[56px]">

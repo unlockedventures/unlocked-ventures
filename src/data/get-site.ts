@@ -9,6 +9,10 @@ export type SiteContent = {
   notFoundTitle: string
   notFoundDescription: string
   homeButtonLabel: string
+  errorMetaTitle: string
+  errorLabel: string
+  errorTitle: string
+  errorDescription: string
 }
 
 export async function getSite(): Promise<SiteContent | null> {
@@ -22,7 +26,11 @@ export async function getSite(): Promise<SiteContent | null> {
     !doc.notFoundLabel ||
     !doc.notFoundTitle ||
     !doc.notFoundDescription ||
-    !doc.homeButtonLabel
+    !doc.homeButtonLabel ||
+    !doc.errorMetaTitle ||
+    !doc.errorLabel ||
+    !doc.errorTitle ||
+    !doc.errorDescription
   ) {
     return null
   }
@@ -35,5 +43,9 @@ export async function getSite(): Promise<SiteContent | null> {
     notFoundTitle: doc.notFoundTitle,
     notFoundDescription: doc.notFoundDescription,
     homeButtonLabel: doc.homeButtonLabel,
+    errorMetaTitle: doc.errorMetaTitle,
+    errorLabel: doc.errorLabel,
+    errorTitle: doc.errorTitle,
+    errorDescription: doc.errorDescription,
   }
 }

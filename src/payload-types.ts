@@ -98,6 +98,8 @@ export interface Config {
   };
   fallbackLocale: null;
   globals: {
+    about: About;
+    'awards-section': AwardsSection;
     hero: Hero;
     navigation: Navigation;
     'digital-engineering': DigitalEngineering;
@@ -109,11 +111,15 @@ export interface Config {
     'strategic-growth': StrategicGrowth;
     'strategic-advisory': StrategicAdvisory;
     'success-stories': SuccessStory;
+    'our-successes': OurSuccess;
+    'podcast-page': PodcastPage;
     'trusted-by': TrustedBy;
     contact: Contact;
     site: Site;
   };
   globalsSelect: {
+    about: AboutSelect<false> | AboutSelect<true>;
+    'awards-section': AwardsSectionSelect<false> | AwardsSectionSelect<true>;
     hero: HeroSelect<false> | HeroSelect<true>;
     navigation: NavigationSelect<false> | NavigationSelect<true>;
     'digital-engineering': DigitalEngineeringSelect<false> | DigitalEngineeringSelect<true>;
@@ -125,6 +131,8 @@ export interface Config {
     'strategic-growth': StrategicGrowthSelect<false> | StrategicGrowthSelect<true>;
     'strategic-advisory': StrategicAdvisorySelect<false> | StrategicAdvisorySelect<true>;
     'success-stories': SuccessStoriesSelect<false> | SuccessStoriesSelect<true>;
+    'our-successes': OurSuccessesSelect<false> | OurSuccessesSelect<true>;
+    'podcast-page': PodcastPageSelect<false> | PodcastPageSelect<true>;
     'trusted-by': TrustedBySelect<false> | TrustedBySelect<true>;
     contact: ContactSelect<false> | ContactSelect<true>;
     site: SiteSelect<false> | SiteSelect<true>;
@@ -615,6 +623,77 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   createdAt?: T;
 }
 /**
+ * Copy and pictures for the About page.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "about".
+ */
+export interface About {
+  id: number;
+  metaTitle: string;
+  metaDescription: string;
+  breadcrumbHomeLabel: string;
+  breadcrumbHomeHref: string;
+  breadcrumbCurrent: string;
+  title: string;
+  description: string;
+  badgeImage?: (number | null) | Media;
+  badgeAlt: string;
+  heroImage: number | Media;
+  heroImageAlt: string;
+  logoTitle: string;
+  logos?:
+    | {
+        name: string;
+        image: number | Media;
+        displayWidth: number;
+        displayHeight: number;
+        id?: string | null;
+      }[]
+    | null;
+  deliveredTitle: string;
+  stats?:
+    | {
+        value: string;
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  founderRole: string;
+  founderTitle: string;
+  founderSummary: string;
+  founderBio: string;
+  founderImage: number | Media;
+  founderImageAlt: string;
+  founderCtaLabel: string;
+  founderCtaHref: string;
+  howWeWorkTitle: string;
+  principles?:
+    | {
+        title: string;
+        body: string;
+        icon: number | Media;
+        iconWidth: number;
+        iconHeight: number;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * The heading above the award logos. The logos are edited under Awards.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "awards-section".
+ */
+export interface AwardsSection {
+  id: number;
+  title: string;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * The first thing people see on the homepage: the heading, short text, button, and photos.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1040,6 +1119,85 @@ export interface SuccessStory {
   createdAt?: string | null;
 }
 /**
+ * Heading, introduction, and filter labels for the success stories page. The stories themselves are edited under Case studies.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "our-successes".
+ */
+export interface OurSuccess {
+  id: number;
+  metaTitle: string;
+  homeLabel: string;
+  homeHref: string;
+  currentLabel: string;
+  title: string;
+  description: string;
+  categoryPrefix: string;
+  allLabel: string;
+  emptyLabel: string;
+  seeMoreLabel: string;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * The featured episode, chapters, and subscribe links on the podcast page.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "podcast-page".
+ */
+export interface PodcastPage {
+  id: number;
+  breadcrumbHomeLabel: string;
+  breadcrumbHomeHref: string;
+  breadcrumbPodcastLabel: string;
+  breadcrumbPodcastHref: string;
+  category: string;
+  title: string;
+  meta: string;
+  description: string;
+  cover: number | Media;
+  coverAlt: string;
+  timeLabel: string;
+  progress: number;
+  shareLabel: string;
+  saveLabel: string;
+  likeLabel: string;
+  transcriptLabel: string;
+  chaptersTitle: string;
+  chapters?:
+    | {
+        time: string;
+        title: string;
+        id?: string | null;
+      }[]
+    | null;
+  listenNextTitle: string;
+  listenNext?:
+    | {
+        meta: string;
+        title: string;
+        href: string;
+        image: number | Media;
+        id?: string | null;
+      }[]
+    | null;
+  allEpisodesLabel: string;
+  allEpisodesHref: string;
+  subscribeTitle: string;
+  subscribe?:
+    | {
+        name: string;
+        href: string;
+        logo: number | Media;
+        width: number;
+        height: number;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * The heading above the row of company logos. Add, replace, or remove the logos below.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1156,8 +1314,82 @@ export interface Site {
    */
   notFoundDescription: string;
   homeButtonLabel: string;
+  errorMetaTitle?: string | null;
+  errorLabel?: string | null;
+  errorTitle?: string | null;
+  /**
+   * Shown when a page fails to load.
+   */
+  errorDescription?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "about_select".
+ */
+export interface AboutSelect<T extends boolean = true> {
+  metaTitle?: T;
+  metaDescription?: T;
+  breadcrumbHomeLabel?: T;
+  breadcrumbHomeHref?: T;
+  breadcrumbCurrent?: T;
+  title?: T;
+  description?: T;
+  badgeImage?: T;
+  badgeAlt?: T;
+  heroImage?: T;
+  heroImageAlt?: T;
+  logoTitle?: T;
+  logos?:
+    | T
+    | {
+        name?: T;
+        image?: T;
+        displayWidth?: T;
+        displayHeight?: T;
+        id?: T;
+      };
+  deliveredTitle?: T;
+  stats?:
+    | T
+    | {
+        value?: T;
+        label?: T;
+        id?: T;
+      };
+  founderRole?: T;
+  founderTitle?: T;
+  founderSummary?: T;
+  founderBio?: T;
+  founderImage?: T;
+  founderImageAlt?: T;
+  founderCtaLabel?: T;
+  founderCtaHref?: T;
+  howWeWorkTitle?: T;
+  principles?:
+    | T
+    | {
+        title?: T;
+        body?: T;
+        icon?: T;
+        iconWidth?: T;
+        iconHeight?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "awards-section_select".
+ */
+export interface AwardsSectionSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1463,6 +1695,81 @@ export interface SuccessStoriesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "our-successes_select".
+ */
+export interface OurSuccessesSelect<T extends boolean = true> {
+  metaTitle?: T;
+  homeLabel?: T;
+  homeHref?: T;
+  currentLabel?: T;
+  title?: T;
+  description?: T;
+  categoryPrefix?: T;
+  allLabel?: T;
+  emptyLabel?: T;
+  seeMoreLabel?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "podcast-page_select".
+ */
+export interface PodcastPageSelect<T extends boolean = true> {
+  breadcrumbHomeLabel?: T;
+  breadcrumbHomeHref?: T;
+  breadcrumbPodcastLabel?: T;
+  breadcrumbPodcastHref?: T;
+  category?: T;
+  title?: T;
+  meta?: T;
+  description?: T;
+  cover?: T;
+  coverAlt?: T;
+  timeLabel?: T;
+  progress?: T;
+  shareLabel?: T;
+  saveLabel?: T;
+  likeLabel?: T;
+  transcriptLabel?: T;
+  chaptersTitle?: T;
+  chapters?:
+    | T
+    | {
+        time?: T;
+        title?: T;
+        id?: T;
+      };
+  listenNextTitle?: T;
+  listenNext?:
+    | T
+    | {
+        meta?: T;
+        title?: T;
+        href?: T;
+        image?: T;
+        id?: T;
+      };
+  allEpisodesLabel?: T;
+  allEpisodesHref?: T;
+  subscribeTitle?: T;
+  subscribe?:
+    | T
+    | {
+        name?: T;
+        href?: T;
+        logo?: T;
+        width?: T;
+        height?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "trusted-by_select".
  */
 export interface TrustedBySelect<T extends boolean = true> {
@@ -1556,6 +1863,10 @@ export interface SiteSelect<T extends boolean = true> {
   notFoundTitle?: T;
   notFoundDescription?: T;
   homeButtonLabel?: T;
+  errorMetaTitle?: T;
+  errorLabel?: T;
+  errorTitle?: T;
+  errorDescription?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
