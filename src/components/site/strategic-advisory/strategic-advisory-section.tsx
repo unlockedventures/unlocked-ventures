@@ -88,7 +88,7 @@ export function StrategicAdvisorySection({
   className,
 }: StrategicAdvisorySectionProps) {
   return (
-    <section aria-label={title} className={cn('bg-white', className)}>
+    <section id="strategic-advisory" aria-label={title} className={cn('scroll-mt-24 bg-white', className)}>
       <div className="mx-auto flex w-full flex-col gap-8 px-4 py-12 sm:px-6 md:gap-12 md:px-8 md:py-16 xl:px-[156px] xl:py-[100px] min-[1440px]:max-w-[1440px]">
         <div className="flex flex-col items-start justify-between gap-5 md:flex-row md:items-end">
           <div className="flex max-w-[610px] flex-col gap-5">

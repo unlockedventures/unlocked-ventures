@@ -3,7 +3,7 @@ export const navigationSeed = {
   items: [
     {
       label: 'Strategic Advisory',
-      href: '/strategic-advisory',
+      href: '/#strategic-advisory',
       groups: [
         {
           title: 'Enterprise',
@@ -33,7 +33,7 @@ export const navigationSeed = {
     },
     {
       label: 'Digital Engineering',
-      href: '/digital-engineering',
+      href: '/#digital-engineering',
       groups: [
         {
           title: 'Enterprise',
