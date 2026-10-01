@@ -49,10 +49,10 @@ function NewsCard({ post }: { post: NewsPost }) {
       </div>
       <div className="flex flex-1 flex-col gap-6 px-6 pb-5 sm:px-8">
         <div className="flex flex-col gap-3">
-          <h3 className="min-h-[60px] font-sans text-2xl leading-[30px] font-normal tracking-[-0.48px] text-[#25282D]">
+          <h3 className="min-h-[60px] font-sans text-2xl leading-[30px] font-normal tracking-[-0.48px] text-[#25282D] min-[1440px]:h-[60px] min-[1440px]:overflow-hidden min-[1440px]:text-ellipsis min-[1440px]:[display:-webkit-box] min-[1440px]:[-webkit-box-orient:vertical] min-[1440px]:[-webkit-line-clamp:2]">
             {post.title}
           </h3>
-          <p className="h-12 overflow-hidden font-sans text-base leading-6 font-normal text-ellipsis text-[#222222]/68 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">
+          <p className="h-12 overflow-hidden font-sans text-base leading-6 font-normal text-ellipsis text-[#222222]/68 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] min-[1440px]:h-[54px]">
             {post.excerpt}
           </p>
         </div>
@@ -61,7 +61,7 @@ function NewsCard({ post }: { post: NewsPost }) {
             href={post.href}
             text={post.ctaLabel ?? 'Read More'}
             icon={<ArrowUpRight />}
-            className="group h-12 w-[154px] gap-2.5 border-[#484D56]! px-5 text-base whitespace-nowrap text-[#484D56] hover:border-[#484D56] hover:bg-[#484D56] hover:text-white sm:h-12 sm:border-[#484D56]! sm:px-5 sm:text-base lg:h-12 lg:border-[#484D56]! lg:px-5 lg:text-base lg:hover:border-[#484D56] lg:hover:bg-[#484D56] lg:hover:text-white 2xl:h-12 2xl:border-[#484D56]! 2xl:px-5 2xl:text-base [&>span]:shrink-0"
+            className="group h-12 w-[154px] gap-2.5 border-[#484D56]! px-5 text-base whitespace-nowrap text-[#484D56] hover:border-[#484D56]! hover:bg-[#484D56] hover:text-white sm:h-12 sm:px-5 sm:text-base lg:h-12 lg:px-5 lg:text-base lg:hover:border-[#484D56]! lg:hover:bg-[#484D56] lg:hover:text-white min-[1440px]:border-[#484D56]/12! min-[1440px]:hover:border-[#484D56]! 2xl:h-12 2xl:px-5 2xl:text-base [&>span]:shrink-0"
           />
         </div>
       </div>

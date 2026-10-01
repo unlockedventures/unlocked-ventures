@@ -47,8 +47,8 @@ export function PodcastPage() {
         </div>
       </section>
 
-      <section className="mx-auto flex w-full max-w-[1440px] flex-col gap-12 px-4 py-12 sm:px-6 md:px-8 md:py-16 xl:flex-row xl:items-start xl:gap-12 xl:px-[156px] xl:pt-[60px] xl:pb-20">
-        <div className="flex min-w-0 flex-1 flex-col gap-12 xl:max-w-[710px]">
+      <section className="mx-auto flex w-full flex-col gap-12 px-4 py-12 sm:px-6 md:px-8 md:py-16 xl:flex-row xl:items-start xl:gap-8 xl:px-[156px] xl:pt-[80px] xl:pb-20">
+        <div className="flex min-w-0 flex-1 flex-col gap-12">
           <div className="flex flex-col gap-8">
             <div className="flex flex-col gap-6">
               <p className="inline-flex w-fit items-center bg-[#33353F]/8 px-4 py-1.5 font-sans text-sm leading-[26px] font-normal text-[#231F20]">
@@ -90,7 +90,7 @@ export function PodcastPage() {
               </div>
               <div className="h-px bg-[#33353F]" />
             </div>
-            <p className="max-w-[703px] font-sans text-lg leading-[27px] font-normal tracking-[0.36px] text-[#23313C]">
+            <p className="font-sans text-lg leading-[27px] font-normal tracking-[0.36px] text-[#23313C]">
               {episode.description}
             </p>
           </div>

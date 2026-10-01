@@ -62,7 +62,7 @@ function ChevronRight() {
 
 function StoryCard({ story }: { story: CaseStudyCard }) {
   return (
-    <article className="relative flex min-h-80 flex-col justify-end overflow-hidden bg-[#F7F7F7] md:h-[420px]">
+    <article className="relative flex min-h-80 flex-col justify-end overflow-hidden bg-[#F7F7F7] md:h-[calc(100cqi*420/1128)] md:min-h-0 min-[1440px]:h-[420px] min-[1440px]:bg-[#F8F8F8]">
       {story.imageSrc ? (
         <img src={story.imageSrc} alt="" className="absolute inset-0 h-full w-full object-cover object-top" />
       ) : null}
@@ -82,7 +82,7 @@ function StoryCard({ story }: { story: CaseStudyCard }) {
         </div>
         <Link
           href={story.href}
-          className="group inline-flex h-6 items-center gap-2.5 font-sans text-base font-normal text-[#222222]"
+          className="group inline-flex h-6 items-center gap-2.5 font-sans text-base font-normal text-[#222222] min-[1440px]:text-[rgba(34,34,34,0.7)]"
         >
           <span className={trimmedLabelClassName}>{story.ctaLabel}</span>
           <ArrowUpRight />
@@ -183,21 +183,24 @@ export function CaseStudiesListing({ stories }: { stories: readonly CaseStudyCar
   const hasMore = visible.length < filtered.length
 
   return (
-    <div className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-12 px-4 pt-12 pb-16 sm:px-6 md:px-8 md:pt-16 lg:px-[72px] lg:pt-20 xl:gap-[72px] xl:px-[156px] xl:pt-40 xl:pb-[100px]">
-      <div className="flex flex-col items-start justify-between gap-8 lg:flex-row lg:items-center lg:gap-12">
+    <div className="relative z-10 flex w-full flex-col gap-12 pt-12 md:pt-16 lg:pt-20 xl:gap-[72px]">
+      <div className="flex flex-col items-start justify-between gap-8 px-4 sm:px-6 md:px-8 lg:flex-row lg:max-[1439px]:items-center lg:gap-12 lg:px-[72px] xl:px-[156px] min-[1440px]:items-end">
         <div className="flex max-w-[740px] flex-col gap-8 md:gap-12">
           <p className="font-sans text-base leading-[22px] font-normal text-[#222222]">
-            <Link href="/" className="hover:text-[#1CACAE]">
+            <Link href="/" className="text-[#222222] hover:text-[#1CACAE] min-[1440px]:text-[#919191]">
               Home
             </Link>
-            <span aria-hidden="true"> / </span>
+            <span aria-hidden="true" className="min-[1440px]:text-[#919191]">
+              {' '}
+              /{' '}
+            </span>
             <span>Our success story</span>
           </p>
           <div className="flex flex-col gap-4">
             <h1 className="font-sans text-[2rem] leading-[2.4rem] font-normal tracking-[-1px] text-[#33353F] sm:text-4xl sm:leading-[2.75rem] lg:text-5xl lg:leading-[56px]">
               Our Success Stories
             </h1>
-            <p className="font-sans text-base leading-6 font-normal tracking-[0.36px] text-[#23313C] md:text-lg md:leading-[27px]">
+            <p className="font-sans text-base leading-6 font-normal tracking-[0.36px] text-[#23313C] md:text-lg md:leading-[27px] min-[1440px]:opacity-80">
               Products, platforms and roadmaps we have built with operators, founders and portfolio
               companies, and what changed once they shipped.
             </p>
@@ -213,30 +216,32 @@ export function CaseStudiesListing({ stories }: { stories: readonly CaseStudyCar
         />
       </div>
 
-      {visible.length > 0 ? (
-        <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
-          {visible.map((story) => (
-            <li key={story.id}>
-              <StoryCard story={story} />
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className="font-sans text-base leading-6 text-[#23313C]">No stories in this category yet.</p>
-      )}
+      <div className="flex flex-col gap-12 px-4 pb-16 sm:px-6 md:px-8 lg:px-[72px] xl:px-[156px] xl:pb-[100px]">
+        {visible.length > 0 ? (
+          <ul className="grid grid-cols-1 gap-[calc(100vw*1/45)] md:@container md:grid-cols-2 min-[1440px]:gap-3">
+            {visible.map((story) => (
+              <li key={story.id}>
+                <StoryCard story={story} />
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="font-sans text-base leading-6 text-[#23313C]">No stories in this category yet.</p>
+        )}
 
-      {hasMore ? (
-        <div className="flex justify-center">
-          <button
-            type="button"
-            className="inline-flex h-[60px] cursor-pointer items-center gap-2.5 border border-[#484D56] bg-white px-5 font-sans text-base leading-[22px] font-normal text-[#484D56]"
-            onClick={() => setVisibleCount((count) => count + pageSize)}
-          >
-            <span className={trimmedLabelClassName}>See more</span>
-            <ChevronRight />
-          </button>
-        </div>
-      ) : null}
+        {hasMore ? (
+          <div className="flex justify-center">
+            <button
+              type="button"
+              className="inline-flex h-[60px] cursor-pointer items-center gap-2.5 border border-[#484D56] bg-white px-5 font-sans text-base leading-[22px] font-normal text-[#484D56]"
+              onClick={() => setVisibleCount((count) => count + pageSize)}
+            >
+              <span className={trimmedLabelClassName}>See more</span>
+              <ChevronRight />
+            </button>
+          </div>
+        ) : null}
+      </div>
     </div>
   )
 }

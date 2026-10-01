@@ -42,5 +42,33 @@ export const successStoriesSeed = {
       href: '/our-successes/patient-management',
       imageFile: 'patient-management.png',
     },
+    {
+      category: 'E-commerce Optimization',
+      title: 'Enhance user experience and conversion rates for an online fashion retailer',
+      ctaLabel: 'Explore the project details',
+      href: '/our-successes/ecommerce-optimization',
+      imageFile: 'ecommerce-optimization.png',
+    },
+    {
+      category: 'Education',
+      title: 'Interactive learning platform for remote students',
+      ctaLabel: 'Explore the project details',
+      href: '/our-successes/remote-learning',
+      imageFile: 'remote-learning.png',
+    },
+    {
+      category: 'Digital Transformation',
+      title: 'Develop a green supply chain strategy for a manufacturing company',
+      ctaLabel: 'Explore the project details',
+      href: '/our-successes/green-supply-chain',
+      imageFile: 'green-supply-chain.png',
+    },
+    {
+      category: 'Travel',
+      title: 'Personalized travel planning app with eco-friendly options',
+      ctaLabel: 'Explore the project details',
+      href: '/our-successes/eco-travel',
+      imageFile: 'eco-travel.png',
+    },
   ],
 }

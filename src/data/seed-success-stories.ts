@@ -35,30 +35,34 @@ export async function seedSuccessStories(payload: Payload) {
     })
   }
 
-  const existing = await payload.count({ collection: 'case-studies' })
-  if (existing.totalDocs > 0) return
+  const existing = await payload.find({ collection: 'case-studies', limit: 100, depth: 0 })
+  const hrefs = new Set(existing.docs.map((story) => story.href))
 
-  const featureImage = await uploadStoryImage(
-    payload,
-    successStoriesSeed.feature.imageFile,
-    successStoriesSeed.feature.title,
-  )
+  if (!hrefs.has(successStoriesSeed.feature.href)) {
+    const featureImage = await uploadStoryImage(
+      payload,
+      successStoriesSeed.feature.imageFile,
+      successStoriesSeed.feature.title,
+    )
 
-  await payload.create({
-    collection: 'case-studies',
-    data: {
-      title: successStoriesSeed.feature.title,
-      href: successStoriesSeed.feature.href,
-      ctaLabel: successStoriesSeed.feature.ctaLabel,
-      badge: successStoriesSeed.feature.badge,
-      description: successStoriesSeed.feature.description,
-      image: featureImage.id,
-      featured: true,
-      sortOrder: 0,
-    },
-  })
+    await payload.create({
+      collection: 'case-studies',
+      data: {
+        title: successStoriesSeed.feature.title,
+        href: successStoriesSeed.feature.href,
+        ctaLabel: successStoriesSeed.feature.ctaLabel,
+        badge: successStoriesSeed.feature.badge,
+        description: successStoriesSeed.feature.description,
+        image: featureImage.id,
+        featured: true,
+        sortOrder: 0,
+      },
+    })
+  }
 
   for (const [index, story] of successStoriesSeed.stories.entries()) {
+    if (hrefs.has(story.href)) continue
+
     const image = await uploadStoryImage(payload, story.imageFile, story.title)
     await payload.create({
       collection: 'case-studies',
@@ -68,7 +72,7 @@ export async function seedSuccessStories(payload: Payload) {
         ctaLabel: story.ctaLabel,
         category: story.category,
         image: image.id,
-        featured: true,
+        featured: index < 4,
         sortOrder: index + 1,
       },
     })
