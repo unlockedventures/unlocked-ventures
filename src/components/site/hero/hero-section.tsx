@@ -74,7 +74,7 @@ export function HeroSection({ title, description, cta, media, className }: HeroS
               {description.map((paragraph) => (
                 <p
                   key={paragraph}
-                  className="font-sans text-base leading-6 font-normal tracking-[0.36px] text-[#23313C] md:text-lg md:leading-[27px]"
+                  className="font-sans text-base leading-6 font-normal tracking-[0.36px] text-[#23313C] md:text-lg md:leading-[27px] min-[1440px]:opacity-80"
                 >
                   {paragraph}
                 </p>

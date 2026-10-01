@@ -41,6 +41,8 @@ export function relatedItemsField(options: {
   plural: string
   help: string
   where?: string
+  readOnly?: boolean
+  manageLabel?: string
 }): UIField {
   return {
     name: options.name,
@@ -58,6 +60,8 @@ export function relatedItemsField(options: {
         plural: options.plural,
         help: options.help,
         where: options.where ?? '',
+        readOnly: options.readOnly ?? false,
+        manageLabel: options.manageLabel ?? '',
       },
     },
   }

@@ -99,7 +99,7 @@ export function DigitalEngineeringSection({
 }: DigitalEngineeringSectionProps) {
   return (
     <section aria-label="Digital engineering" className={cn('bg-[#484D56]', className)}>
-      <div className="mx-auto flex w-full flex-col gap-8 px-4 py-12 sm:px-6 md:gap-12 md:px-8 md:py-16 xl:pt-[100px]! xl:pr-[156px]! xl:pb-[100px]! xl:pl-[156px]!">
+      <div className="mx-auto flex w-full flex-col gap-8 px-4 py-12 sm:px-6 md:gap-12 md:px-8 md:py-16 xl:pt-[100px]! xl:pr-[156px]! xl:pb-[100px]! xl:pl-[156px]! min-[1440px]:max-w-[1440px]">
         <div className="flex max-w-[610px] flex-col gap-9">
           <div className="flex flex-col gap-5">
             <h2 className="font-sans text-[2rem] leading-10 font-normal tracking-[-1px] text-white md:text-5xl md:leading-[56px]">
@@ -111,7 +111,9 @@ export function DigitalEngineeringSection({
             href={cta.href}
             text={cta.label}
             icon={
-              <ArrowUpRight className="transition-opacity duration-300 ease-out group-hover:opacity-0 group-focus-visible:opacity-0" />
+              <ArrowUpRight
+                className={cn(arrowMotionClassName, 'group-hover:rotate-45 group-focus-visible:rotate-45')}
+              />
             }
             className="group h-[60px] w-fit gap-2.5 border-0 bg-white px-5 text-base text-[#33353F] hover:bg-white sm:h-[60px] sm:px-5 sm:text-base lg:h-[60px] lg:px-5 lg:text-base 2xl:h-[60px] 2xl:px-5 2xl:text-base"
           />

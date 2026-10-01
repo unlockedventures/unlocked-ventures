@@ -20,6 +20,12 @@ export const trustedBySeed = {
       displayHeight: 39,
     },
     {
+      name: 'Exelon',
+      file: 'exelon.png',
+      displayWidth: 150,
+      displayHeight: 38,
+    },
+    {
       name: 'PayPal',
       file: 'paypal.svg',
       displayWidth: 124,

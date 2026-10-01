@@ -8,7 +8,7 @@ export const LatestNews: GlobalConfig = {
   label: 'News and blogs',
   admin: {
     group: adminGroups.homepage,
-    description: 'The heading above the news cards. Each article, including its picture, is listed below.',
+    description: 'The heading above the news cards. Articles marked Show on the homepage are listed below.',
     hideAPIURL: true,
   },
   access: {
@@ -29,7 +29,10 @@ export const LatestNews: GlobalConfig = {
       imageField: 'image',
       singular: 'article',
       plural: 'articles',
-      help: 'These articles appear under the heading, in this order. Drag a row to move it. Open Change to replace a picture or edit the words, or remove an article.',
+      help: 'Only articles marked Show on the homepage appear here and on the site, in this order. Turn that on from News and blogs.',
+      readOnly: true,
+      manageLabel: 'News and blogs',
+      where: 'where[featured][equals]=true',
     }),
   ],
 }

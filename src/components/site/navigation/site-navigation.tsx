@@ -26,6 +26,7 @@ export function SiteNavigation({
   const [open, setOpen] = useState(false)
   const [activeHref, setActiveHref] = useState<string | null>(null)
   const closeTimer = useRef<number | null>(null)
+  const suppressedHref = useRef<string | null>(null)
   const navRef = useRef<HTMLElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
   const activeItem = items.find((item) => item.href === activeHref) ?? null
@@ -40,8 +41,16 @@ export function SiteNavigation({
     Boolean(navRef.current?.matches(':hover') || panelRef.current?.matches(':hover'))
 
   const showMenu = (href: string) => {
+    if (suppressedHref.current === href) return
+    suppressedHref.current = null
     clearCloseTimer()
     setActiveHref(href)
+  }
+
+  const dismissMenu = (href: string) => {
+    clearCloseTimer()
+    suppressedHref.current = href
+    setActiveHref(null)
   }
 
   const scheduleClose = () => {
@@ -60,6 +69,7 @@ export function SiteNavigation({
 
   useEffect(() => {
     setOpen(false)
+    setActiveHref(null)
   }, [pathname])
 
   useEffect(() => {
@@ -86,6 +96,9 @@ export function SiteNavigation({
             key={item.href}
             className="flex cursor-pointer items-center px-3"
             onMouseEnter={() => showMenu(item.href)}
+            onMouseLeave={() => {
+              if (suppressedHref.current === item.href) suppressedHref.current = null
+            }}
             onFocus={() => showMenu(item.href)}
           >
             <Link
@@ -93,6 +106,8 @@ export function SiteNavigation({
               aria-expanded={activeHref === item.href}
               className={cn(primaryItemClassName, activeHref === item.href && 'after:scale-x-100!')}
               onMouseEnter={() => showMenu(item.href)}
+              onMouseDown={() => dismissMenu(item.href)}
+              onClick={() => dismissMenu(item.href)}
             >
               {item.label}
             </Link>

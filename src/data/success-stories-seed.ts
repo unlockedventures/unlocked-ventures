@@ -16,28 +16,28 @@ export const successStoriesSeed = {
   stories: [
     {
       category: 'Telecom',
-      title: 'Dynamic payment solution for telecom providers',
+      title: 'Dynamic payment solution for\ntelecom providers',
       ctaLabel: 'Read the case study',
       href: '/our-successes/telecom-payments',
       imageFile: 'telecom-payments.png',
     },
     {
       category: 'Workflow Automation',
-      title: 'Streamlined operations engine for enterprise teams',
+      title: 'Streamlined operations engine for\nenterprise teams',
       ctaLabel: 'Read the case study',
       href: '/our-successes/workflow-automation',
       imageFile: 'workflow-automation.png',
     },
     {
       category: 'Product Strategy',
-      title: 'Go-to-market roadmap for a fintech startup',
+      title: 'Go-to-market roadmap for a\nfintech startup',
       ctaLabel: 'Explore the project details',
       href: '/our-successes/fintech-roadmap',
       imageFile: 'fintech-roadmap.png',
     },
     {
       category: 'Healthcare',
-      title: 'Innovative patient management system for hospitals',
+      title: 'Innovative patient management system\nfor hospitals',
       ctaLabel: 'Explore the project details',
       href: '/our-successes/patient-management',
       imageFile: 'patient-management.png',

@@ -39,6 +39,7 @@ export async function seedRecentPodcast(payload: Payload) {
         href: episode.href,
         image: media.id,
         imageAlt: episode.title,
+        featured: true,
         sortOrder: index,
       },
     })

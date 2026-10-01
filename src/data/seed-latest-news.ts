@@ -13,8 +13,19 @@ export async function seedLatestNews(payload: Payload) {
     })
   }
 
-  const existing = await payload.count({ collection: 'news-posts' })
-  if (existing.totalDocs > 0) return
+  const existing = await payload.find({ collection: 'news-posts', limit: 100, depth: 0 })
+  if (existing.totalDocs > 0) {
+    if (!existing.docs.some((post) => post.featured)) {
+      for (const post of existing.docs) {
+        await payload.update({
+          collection: 'news-posts',
+          id: post.id,
+          data: { featured: true },
+        })
+      }
+    }
+    return
+  }
 
   for (const [index, post] of latestNewsSeed.posts.entries()) {
     const filePath = path.join(process.cwd(), 'public', 'news', post.imageFile)
@@ -39,6 +50,7 @@ export async function seedLatestNews(payload: Payload) {
         ctaLabel: post.ctaLabel,
         image: media.id,
         imageAlt: post.title,
+        featured: true,
         sortOrder: index,
       },
     })

@@ -36,7 +36,7 @@ export function FeaturedCell({ cellData, collectionSlug, rowData }: DefaultCellC
       }
     } catch {
       setPending(null)
-      toast.error('This story could not be saved. Try again.')
+      toast.error('This could not be saved. Try again.')
     } finally {
       setSaving(false)
     }

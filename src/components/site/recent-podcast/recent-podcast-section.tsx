@@ -64,7 +64,7 @@ function PodcastCard({ episode }: { episode: PodcastEpisode }) {
 export function RecentPodcastSection({ title, episodes, className }: RecentPodcastSectionProps) {
   return (
     <section aria-label="Recent podcast" className={cn('bg-[#F3F4F9]', className)}>
-      <div className="w-full px-4 py-12 sm:px-6 md:px-8 md:py-16 lg:px-[56px] lg:py-[80px]">
+      <div className="w-full px-4 py-12 sm:px-6 md:px-8 md:py-16 lg:px-[56px] lg:py-[80px] min-[1440px]:mx-auto min-[1440px]:max-w-[1440px]">
         <ContentSlider
           label="Recent podcast episodes"
           headerClassName="sm:items-center"
@@ -76,7 +76,7 @@ export function RecentPodcastSection({ title, episodes, className }: RecentPodca
           }
           snapClassName="max-lg:snap-x max-lg:snap-mandatory"
           slideSnapClassName="max-lg:snap-start"
-          slideClassName="lg:w-[calc((100%-2rem)/3)]"
+          slideClassName="lg:max-[1439px]:w-[calc((100%-2rem)/3)] min-[1440px]:w-[500px]"
           endFadeClassName="via-[#F3F4F9] via-45% to-[#F3F4F9] lg:w-16"
         >
           {episodes.map((episode) => (

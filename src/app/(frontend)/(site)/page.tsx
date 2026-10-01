@@ -52,7 +52,7 @@ export default async function HomePage() {
       <AwardsSection awards={awards} flushTop={Boolean(successStories)} />
       {recentPodcast ? <RecentPodcastSection {...recentPodcast} /> : null}
       {latestNews ? <LatestNewsSection {...latestNews} /> : null}
-      {locations ? <LocationsSection {...locations} className="bg-white" /> : null}
+      {locations ? <LocationsSection {...locations} /> : null}
     </>
   )
 }

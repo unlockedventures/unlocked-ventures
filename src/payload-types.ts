@@ -242,7 +242,7 @@ export interface Award {
   createdAt: string;
 }
 /**
- * Articles shown under News and blogs. Add, replace, reorder, and remove them from News and blogs.
+ * Every news article. Check Show on the homepage to include an article there. The box saves when you click it.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "news-posts".
@@ -262,6 +262,10 @@ export interface NewsPost {
   image?: (number | null) | Media;
   imageAlt?: string | null;
   /**
+   * Turn this on to include this article in the homepage News and blogs section.
+   */
+  featured?: boolean | null;
+  /**
    * Lower numbers appear first.
    */
   sortOrder: number;
@@ -269,7 +273,7 @@ export interface NewsPost {
   createdAt: string;
 }
 /**
- * Episodes shown under Podcast. Add, replace, reorder, and remove them from Podcast.
+ * Every podcast episode. Check Show on the homepage to include an episode there. The box saves when you click it.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "podcast-episodes".
@@ -288,6 +292,10 @@ export interface PodcastEpisode {
    */
   image?: (number | null) | Media;
   imageAlt?: string | null;
+  /**
+   * Turn this on to include this episode in the homepage Podcast section.
+   */
+  featured?: boolean | null;
   /**
    * Lower numbers appear first.
    */
@@ -515,6 +523,7 @@ export interface NewsPostsSelect<T extends boolean = true> {
   ctaLabel?: T;
   image?: T;
   imageAlt?: T;
+  featured?: T;
   sortOrder?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -530,6 +539,7 @@ export interface PodcastEpisodesSelect<T extends boolean = true> {
   href?: T;
   image?: T;
   imageAlt?: T;
+  featured?: T;
   sortOrder?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -821,7 +831,7 @@ export interface SiteHeader {
   createdAt?: string | null;
 }
 /**
- * The heading above the news cards. Each article, including its picture, is listed below.
+ * The heading above the news cards. Articles marked Show on the homepage are listed below.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "latest-news".
@@ -853,7 +863,7 @@ export interface Location {
   createdAt?: string | null;
 }
 /**
- * The heading above the podcast episodes. Each episode, including its picture, is listed below.
+ * The heading above the podcast episodes. Episodes marked Show on the homepage are listed below.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "recent-podcast".

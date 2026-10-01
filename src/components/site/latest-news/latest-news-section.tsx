@@ -52,7 +52,7 @@ function NewsCard({ post }: { post: NewsPost }) {
           <h3 className="min-h-[60px] font-sans text-2xl leading-[30px] font-normal tracking-[-0.48px] text-[#25282D] min-[1440px]:h-[60px] min-[1440px]:overflow-hidden min-[1440px]:text-ellipsis min-[1440px]:[display:-webkit-box] min-[1440px]:[-webkit-box-orient:vertical] min-[1440px]:[-webkit-line-clamp:2]">
             {post.title}
           </h3>
-          <p className="h-12 overflow-hidden font-sans text-base leading-6 font-normal text-ellipsis text-[#222222]/68 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] min-[1440px]:h-[54px]">
+          <p className="h-[72px] overflow-hidden font-sans text-base leading-6 font-normal text-[#222222]/68 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3]">
             {post.excerpt}
           </p>
         </div>
@@ -72,7 +72,7 @@ function NewsCard({ post }: { post: NewsPost }) {
 export function LatestNewsSection({ title, posts, className }: LatestNewsSectionProps) {
   return (
     <section aria-label="Latest news and blogs" className={cn('bg-white', className)}>
-      <div className="w-full px-4 py-12 sm:px-6 sm:py-14 md:px-8 md:py-16 lg:px-9 lg:py-[100px]">
+      <div className="w-full px-4 py-12 sm:px-6 sm:py-14 md:px-8 md:py-16 lg:px-9 lg:py-[100px] min-[1440px]:mx-auto min-[1440px]:max-w-[1440px] min-[1440px]:px-9 min-[1440px]:py-[100px]">
         <ContentSlider
           label="Latest news and blogs"
           controlsClassName="gap-[21px]"

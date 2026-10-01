@@ -21,7 +21,7 @@ function LogoRow({ logos, hidden = false }: { logos: readonly TrustedLogo[]; hid
       {logos.map((logo) => (
         <li
           key={logo.name}
-          className="group flex shrink-0 items-center justify-center"
+          className="group flex shrink-0 items-center justify-center min-[1440px]:w-auto!"
           style={{ width: slotWidth }}
         >
           <img
@@ -44,11 +44,11 @@ export function TrustedBySection({
 }: TrustedBySectionProps) {
   return (
     <section className={cn('overflow-hidden bg-white', className)}>
-      <div className="flex w-full flex-col items-center gap-10 px-4 py-12 sm:px-6 md:px-8 md:py-16 lg:px-12 xl:px-16 xl:py-[100px] 2xl:px-20">
+      <div className="flex w-full flex-col items-center gap-10 px-4 py-12 sm:px-6 md:px-8 md:py-16 lg:px-12 xl:px-16 xl:py-[100px] min-[1440px]:mx-auto min-[1440px]:max-w-[1440px] min-[1440px]:px-[156px]! min-[1440px]:py-[100px]">
         <h2 className="text-center font-sans text-[2rem] leading-[3rem] font-normal text-[#171616]">
           {title}
         </h2>
-        <div className="relative w-full overflow-hidden">
+        <div className="relative w-full overflow-hidden min-[1440px]:h-12 min-[1440px]:w-[1328px]! min-[1440px]:max-w-none">
           <div className="trusted-marquee-track flex w-max items-center">
             <LogoRow logos={logos} />
             <LogoRow logos={logos} hidden />

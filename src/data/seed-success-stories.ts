@@ -37,6 +37,17 @@ export async function seedSuccessStories(payload: Payload) {
 
   const existing = await payload.find({ collection: 'case-studies', limit: 100, depth: 0 })
   const hrefs = new Set(existing.docs.map((story) => story.href))
+  const homepageHrefs = new Set(successStoriesSeed.stories.slice(0, 4).map((story) => story.href))
+
+  for (const story of existing.docs) {
+    if (!story.href || !homepageHrefs.has(story.href) || story.featured) continue
+
+    await payload.update({
+      collection: 'case-studies',
+      id: story.id,
+      data: { featured: true },
+    })
+  }
 
   if (!hrefs.has(successStoriesSeed.feature.href)) {
     const featureImage = await uploadStoryImage(

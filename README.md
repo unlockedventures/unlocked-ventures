@@ -1,67 +1,125 @@
-# Payload Blank Template
+# Unlocked Ventures
 
-This template comes configured with the bare minimum to get started on anything you need.
+Marketing site and content admin for Unlocked Ventures. The public site is a Next.js app. Editors manage pages, media, and site content in [Payload CMS](https://payloadcms.com).
 
-## Quick start
+## Run with Docker
 
-This template can be deployed directly from our Cloud hosting and it will setup MongoDB and cloud S3 object storage for media.
+Install [Docker](https://docs.docker.com/get-docker/) with Compose. `docker compose up` starts PostgreSQL in its own container, then starts the app.
 
-## Quick Start - local setup
+```bash
+git clone https://github.com/BrainStation-23/unlocked-venture.git
+cd unlocked-venture
+git checkout develop
+cp .env.example .env
+docker compose up
+```
 
-To spin up this template locally, follow these steps:
+The app reads `DATABASE_URL` and `PAYLOAD_SECRET` from `.env`. For this Compose file, `DATABASE_URL` must be:
 
-### Clone
+```bash
+postgresql://payload:payload@postgres:5432/unlocked_ventures
+```
 
-After you click the `Deploy` button above, you'll want to have standalone copy of this repo on your machine. If you've already cloned this repo, skip to [Development](#development).
+`postgres` is the database container’s name. The user, password, and database name match the container.
 
-### Development
+The first start installs dependencies, creates the database tables, and fills empty content with the built-in site seed. Later starts leave content that already exists.
 
-1. First [clone the repo](#clone) if you have not done so already
-2. `cd my-project && cp .env.example .env` to copy the example environment variables. You'll need to add the `MONGODB_URL` from your Cloud project to your `.env` if you want to use S3 storage and the MongoDB database that was created for you.
+Open:
 
-3. `pnpm install && pnpm dev` to install dependencies and start the dev server
-4. open `http://localhost:3000` to open the app in your browser
+- Site: [http://localhost:3000](http://localhost:3000)
+- Admin: [http://localhost:3000/admin](http://localhost:3000/admin)
 
-That's it! Changes made in `./src` will be reflected in your app. Follow the on-screen instructions to login and create your first admin user. Then check out [Production](#production) once you're ready to build and serve your app, and [Deployment](#deployment) when you're ready to go live.
+On the first visit to the admin, create the first editor account. Use that email and password to sign in afterward.
 
-#### Docker (Optional)
+Stop the app with Ctrl+C. Add `-d` to keep it running in the background: `docker compose up -d`.
 
-If you prefer to use Docker for local development instead of a local MongoDB instance, the provided docker-compose.yml file can be used.
+`PAYLOAD_SECRET` should be a long random string (`openssl rand -hex 32`). `.env` stays on your machine. Do not commit it.
 
-To do so, follow these steps:
+## Run without Docker
 
-- Modify the `MONGODB_URL` in your `.env` file to `mongodb://127.0.0.1/<dbname>`
-- Modify the `docker-compose.yml` file's `MONGODB_URL` to match the above `<dbname>`
-- Run `docker-compose up` to start the database, optionally pass `-d` to run in the background.
+### Prerequisites
 
-## How it works
+- Node.js 20.9 or newer (18.20.2 or newer is also accepted)
+- pnpm 9, 10, or 11
+- PostgreSQL 15 or newer
 
-The Payload config is tailored specifically to the needs of most websites. It is pre-configured in the following ways:
+Enable pnpm with Corepack if it is not already installed:
 
-### Collections
+```bash
+corepack enable
+corepack prepare pnpm@10 --activate
+```
 
-See the [Collections](https://payloadcms.com/docs/configuration/collections) docs for details on how to extend this functionality.
+### Setup
 
-- #### Users (Authentication)
+1. Clone the repository and move into it:
 
-  Users are auth-enabled collections that have access to the admin panel.
+```bash
+git clone https://github.com/BrainStation-23/unlocked-venture.git
+cd unlocked-venture
+git checkout develop
+```
 
-  For additional help, see the official [Auth Example](https://github.com/payloadcms/payload/tree/3.x/examples/auth) or the [Authentication](https://payloadcms.com/docs/authentication/overview#authentication-overview) docs.
+2. Install dependencies:
 
-- #### Media
+```bash
+pnpm install
+```
 
-  This is the uploads enabled collection. It features pre-configured sizes, focal point and manual resizing to help you manage your pictures.
+3. Start PostgreSQL and create a database named `unlocked_ventures`.
 
-### Docker
+4. Create the local environment file:
 
-Alternatively, you can use [Docker](https://www.docker.com) to spin up this template locally. To do so, follow these steps:
+```bash
+cp .env.example .env
+```
 
-1. Follow [steps 1 and 2 from above](#development), the docker-compose file will automatically use the `.env` file in your project root
-1. Next run `docker-compose up`
-1. Follow [steps 4 and 5 from above](#development) to login and create your first admin user
+5. Open `.env` and set both values:
 
-That's it! The Docker instance will help you get up and running quickly while also standardizing the development environment across your teams.
+- `DATABASE_URL` must match your PostgreSQL user, password, host, port, and database. On your machine the host is `127.0.0.1`, not `postgres`.
+- `PAYLOAD_SECRET` must be a long random string. Generate one with:
 
-## Questions
+```bash
+openssl rand -hex 32
+```
 
-If you have any issues or questions, reach out to us on [Discord](https://discord.com/invite/payload) or start a [GitHub discussion](https://github.com/payloadcms/payload/discussions).
+`.env` stays on your machine. Do not commit it.
+
+### Start
+
+```bash
+pnpm dev
+```
+
+The first start creates the database tables and fills empty content with the built-in site seed. Later starts leave content that already exists. The site and admin URLs are the same as in the Docker section.
+
+## Production
+
+Set `DATABASE_URL` and `PAYLOAD_SECRET` in the environment, then:
+
+```bash
+pnpm build
+pnpm start
+```
+
+The app listens on port 3000.
+
+## Scripts
+
+| Command | What it does |
+| --- | --- |
+| `pnpm dev` | Start the development server |
+| `pnpm devsafe` | Clear the Next.js cache, then start the development server |
+| `pnpm build` | Build for production |
+| `pnpm start` | Serve the production build |
+| `pnpm lint` | Run ESLint |
+| `pnpm test` | Run unit tests, then end-to-end tests |
+| `pnpm payload` | Run the Payload CLI |
+| `docker compose up` | Start the app and its PostgreSQL container |
+
+End-to-end tests need Playwright browsers:
+
+```bash
+pnpm exec playwright install
+pnpm test
+```

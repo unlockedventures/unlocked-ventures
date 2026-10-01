@@ -60,24 +60,44 @@ function ChevronRight() {
   )
 }
 
+const titleLineBreaks: Record<string, string> = {
+  'Dynamic payment solution for telecom providers': 'Dynamic payment solution for\ntelecom providers',
+  'Streamlined operations engine for enterprise teams':
+    'Streamlined operations engine for\nenterprise teams',
+  'Go-to-market roadmap for a fintech startup': 'Go-to-market roadmap for a\nfintech startup',
+  'Innovative patient management system for hospitals':
+    'Innovative patient management system\nfor hospitals',
+}
+
+function storyTitle(title: string) {
+  return titleLineBreaks[title] ?? title
+}
+
 function StoryCard({ story }: { story: CaseStudyCard }) {
   return (
     <article className="relative flex min-h-80 flex-col justify-end overflow-hidden bg-[#F7F7F7] md:h-[calc(100cqi*420/1128)] md:min-h-0 min-[1440px]:h-[420px] min-[1440px]:bg-[#F8F8F8]">
       {story.imageSrc ? (
-        <img src={story.imageSrc} alt="" className="absolute inset-0 h-full w-full object-cover object-top" />
+        <img
+          src={story.imageSrc}
+          alt=""
+          className="absolute top-0 left-0 h-[72%] w-full object-cover object-top grayscale min-[1440px]:top-[-40px] min-[1440px]:h-[377px] min-[1440px]:w-[565px] min-[1440px]:max-w-none"
+        />
       ) : null}
       {story.imageSrc ? (
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent from-30% to-[#F7F7F7] to-70%" />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 bottom-[28%] h-24 bg-gradient-to-b from-transparent to-[#F7F7F7] min-[1440px]:top-[161px] min-[1440px]:bottom-auto min-[1440px]:h-[259px] min-[1440px]:bg-[linear-gradient(180deg,transparent_0%,#F8F8F8_50%)]"
+        />
       ) : null}
-      <div className="relative z-10 flex flex-col gap-4 p-6 sm:p-[30px]">
+      <div className="relative z-10 flex flex-col gap-4 p-6 sm:p-[30px] min-[1440px]:absolute min-[1440px]:top-[239px] min-[1440px]:left-[30px] min-[1440px]:w-[572px] min-[1440px]:p-0!">
         <div className="flex flex-col gap-3">
           {story.category ? (
             <p className="inline-flex h-8 w-fit items-center bg-white px-3 font-inter text-xs leading-4 font-normal text-[#231F20] uppercase">
               {story.category}
             </p>
           ) : null}
-          <h2 className="font-sans text-2xl leading-8 font-normal text-[#25282D] md:text-[1.75rem] md:leading-9">
-            {story.title}
+          <h2 className="font-sans text-2xl leading-8 font-normal text-[#25282D] md:text-[1.75rem] md:leading-9 min-[1440px]:w-full min-[1440px]:text-[28px] min-[1440px]:leading-[36px] min-[1440px]:whitespace-pre-line min-[1440px]:line-clamp-2">
+            {storyTitle(story.title)}
           </h2>
         </div>
         <Link

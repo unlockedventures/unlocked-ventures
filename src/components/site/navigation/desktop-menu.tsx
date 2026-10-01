@@ -25,12 +25,12 @@ export function DesktopMenu({
       <button
         type="button"
         aria-label="Close menu"
-        className="fixed inset-x-0 bottom-0 top-20 z-40 bg-[#111827]/20 backdrop-blur-[3px] max-xl:hidden 2xl:top-[88px]"
+        className="fixed inset-x-0 bottom-0 top-20 z-40 bg-[#111827]/20 backdrop-blur-[3px] max-xl:hidden min-[1440px]:top-20!"
         onClick={onClose}
       />
       <div
         ref={panelRef}
-        className="fixed inset-x-0 top-20 z-50 border-b border-[#E4E7EE] bg-[#F8F9FC]/95 shadow-[0_28px_60px_-24px_rgba(17,24,39,0.28)] backdrop-blur-xl before:absolute before:inset-x-0 before:-top-4 before:h-4 before:content-[''] max-xl:hidden 2xl:top-[88px]"
+        className="fixed inset-x-0 top-20 z-50 border-b border-[#E4E7EE] bg-[#F8F9FC]/95 shadow-[0_28px_60px_-24px_rgba(17,24,39,0.28)] backdrop-blur-xl before:absolute before:inset-x-0 before:-top-4 before:h-4 before:content-[''] max-xl:hidden min-[1440px]:top-20!"
         onMouseEnter={onEnter}
         onMouseLeave={onLeave}
       >

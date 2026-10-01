@@ -2,7 +2,7 @@
 
 import { Link, Logout, useAuth, useConfig, useNav } from '@payloadcms/ui'
 import { usePathname, useSearchParams } from 'next/navigation'
-import { Fragment, useEffect, useState } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 
 import { buildAdminNav, buildAdminSections, type AdminNavItem } from '@/admin/build-admin-sections'
 
@@ -88,11 +88,16 @@ function AdminNavGroup({
 }) {
   const sectionId = `admin-nav-${label.toLowerCase().replace(/\s+/g, '-')}`
   const containsCurrent = items.some((item) => itemContainsPath(item, pathname, search))
+  const closedByUser = useRef(false)
   const [open, setOpen] = useState(defaultOpen || containsCurrent)
 
   useEffect(() => {
-    if (containsCurrent) setOpen(true)
-  }, [containsCurrent])
+    closedByUser.current = false
+  }, [pathname, search])
+
+  useEffect(() => {
+    if (containsCurrent && !closedByUser.current) setOpen(true)
+  }, [containsCurrent, pathname, search])
 
   return (
     <div className={nested ? 'uv-admin-nav__page' : 'uv-admin-nav__group'}>
@@ -101,7 +106,13 @@ function AdminNavGroup({
         className={nested ? 'uv-admin-nav__page-button' : 'uv-admin-nav__group-button'}
         aria-expanded={open}
         aria-controls={sectionId}
-        onClick={() => setOpen((current) => !current)}
+        onClick={() =>
+          setOpen((current) => {
+            const next = !current
+            closedByUser.current = !next
+            return next
+          })
+        }
       >
         <span>{label}</span>
         <svg viewBox="0 0 12 12" aria-hidden="true" className={open ? 'is-open' : undefined}>

@@ -553,7 +553,19 @@ html[data-theme='dark'] .nav .uv-admin-nav__direct .nav__link-label {
 }
 
 .uv-related-items__add {
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--theme-elevation-250);
+  border-radius: 4px;
+  background: var(--theme-elevation-0);
+  color: inherit;
+  font: inherit;
+  font-size: 0.85rem;
   font-weight: 600;
+  text-decoration: none;
+}
+
+.uv-related-items__row.is-readonly {
+  cursor: default;
 }
 
 .uv-related-items__error {

@@ -1,6 +1,6 @@
 'use client'
 
-import { useDocumentDrawer } from '@payloadcms/ui'
+import { Link, useConfig, useDocumentDrawer } from '@payloadcms/ui'
 import { useCallback, useEffect, useState } from 'react'
 
 type MediaValue = {
@@ -20,6 +20,8 @@ type RelatedItemsCustom = {
   plural: string
   help: string
   where?: string
+  readOnly?: boolean
+  manageLabel?: string
 }
 
 type FieldProps = {
@@ -49,6 +51,27 @@ function readImage(item: ItemDoc, imageField: string) {
   if (!value || typeof value !== 'object') return null
   const media = value as MediaValue
   return media.url ? media : null
+}
+
+function ReadOnlyRelatedItemRow({
+  title,
+  imageUrl,
+  imageAlt,
+}: {
+  title: string
+  imageUrl: string | null
+  imageAlt: string
+}) {
+  return (
+    <li className="uv-related-items__row is-readonly">
+      {imageUrl ? (
+        <img src={imageUrl} alt={imageAlt} />
+      ) : (
+        <span className="uv-related-items__placeholder">No image</span>
+      )}
+      <span className="uv-related-items__title">{title}</span>
+    </li>
+  )
 }
 
 function RelatedItemRow({
@@ -266,25 +289,55 @@ export function RelatedItemsField({ field }: FieldProps) {
     }
   }
 
+  const { config } = useConfig()
+  const manageHref = `${config.routes.admin}/collections/${collection}`
+  const readOnly =
+    Boolean(custom?.readOnly) ||
+    custom?.collection === 'case-studies' ||
+    custom?.collection === 'podcast-episodes'
+  const manageLabel = custom?.manageLabel || (custom?.collection === 'podcast-episodes' ? 'Podcast' : custom?.plural)
+
   if (!custom) return null
 
   return (
     <section className="uv-related-items">
       <div className="uv-related-items__header">
         <h3>{label}</h3>
-        <AddRelatedItem collection={custom.collection} singular={custom.singular} onChange={() => void load()} />
+        {readOnly ? (
+          <Link className="uv-related-items__add" href={manageHref}>
+            Open {manageLabel}
+          </Link>
+        ) : (
+          <AddRelatedItem collection={custom.collection} singular={custom.singular} onChange={() => void load()} />
+        )}
       </div>
       <p>{custom.help}</p>
       {loading ? <p>Loading…</p> : null}
       {error ? <p className="uv-related-items__error">{error}</p> : null}
       {orderError ? <p className="uv-related-items__error">{orderError}</p> : null}
       {savingOrder ? <p>Saving the new order…</p> : null}
-      {!loading && !error && items.length === 0 ? <p>None yet. Use Add {custom.singular} to put the first one on the site.</p> : null}
+      {!loading && !error && items.length === 0 ? (
+        <p>
+          {readOnly
+            ? `None yet. Add a ${custom.singular} from ${manageLabel}.`
+            : `None yet. Use Add ${custom.singular} to put the first one on the site.`}
+        </p>
+      ) : null}
       {items.length > 0 ? (
         <ul>
           {items.map((item, index) => {
             const image = readImage(item, custom.imageField)
             const title = readTitle(item, custom.titleField)
+            if (readOnly) {
+              return (
+                <ReadOnlyRelatedItemRow
+                  key={String(item.id)}
+                  title={title}
+                  imageUrl={image?.url ?? null}
+                  imageAlt={image?.alt || title}
+                />
+              )
+            }
             return (
               <RelatedItemRow
                 key={String(item.id)}

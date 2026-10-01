@@ -15,7 +15,7 @@ type ContactValues = {
 }
 
 const labelClassName =
-  'font-sans text-[13px] leading-4 font-normal tracking-[0.78px] text-[#222222]'
+  'font-sans text-[13px] leading-4 font-normal tracking-[0.78px] text-[#222222] min-[1440px]:text-[#222222]/80 min-[1440px]:uppercase'
 
 const fieldClassName =
   'h-[46px] w-full border-0 border-b border-black/12 bg-transparent font-sans text-base leading-6 font-normal text-[#25282D] outline-none placeholder:text-[#919191]'

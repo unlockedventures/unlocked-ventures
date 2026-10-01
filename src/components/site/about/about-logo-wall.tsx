@@ -28,13 +28,13 @@ export function AboutLogoWall({ spaced = false }: { spaced?: boolean }) {
         </h2>
         <ul className="grid w-full max-w-[1128px] grid-cols-2 items-center gap-x-[27px] gap-y-[27px] sm:grid-cols-3 lg:grid-cols-5">
           {logos.map((logo) => (
-            <li key={logo.name} className="flex h-[84px] items-center justify-center">
+            <li key={logo.name} className="group flex h-[84px] items-center justify-center">
               <img
                 src={logo.src}
                 alt={logo.name}
                 width={logo.width}
                 height={logo.height}
-                className="h-auto max-h-[84px] w-auto max-w-full"
+                className="h-auto max-h-[84px] w-auto max-w-full grayscale transition-[filter] duration-300 group-hover:grayscale-0"
               />
             </li>
           ))}

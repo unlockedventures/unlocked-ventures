@@ -89,7 +89,7 @@ export function StrategicAdvisorySection({
 }: StrategicAdvisorySectionProps) {
   return (
     <section aria-label="Strategic advisory" className={cn('bg-white', className)}>
-      <div className="mx-auto flex w-full flex-col gap-8 px-4 py-12 sm:px-6 md:gap-12 md:px-8 md:py-16 xl:px-[156px] xl:py-[100px]">
+      <div className="mx-auto flex w-full flex-col gap-8 px-4 py-12 sm:px-6 md:gap-12 md:px-8 md:py-16 xl:px-[156px] xl:py-[100px] min-[1440px]:max-w-[1440px]">
         <div className="flex flex-col items-start justify-between gap-5 md:flex-row md:items-end">
           <div className="flex max-w-[610px] flex-col gap-5">
             <h2 className="font-sans text-[2rem] leading-10 font-normal tracking-[-1px] text-[#33353F] md:text-5xl md:leading-[56px]">

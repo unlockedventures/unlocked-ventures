@@ -13,10 +13,26 @@ export async function seedTrustedBy(payload: Payload) {
     })
   }
 
-  const existing = await payload.count({ collection: 'trusted-logos' })
-  if (existing.totalDocs > 0) return
+  const existing = await payload.find({ collection: 'trusted-logos', limit: 100, depth: 0 })
+  const byName = new Map(existing.docs.map((logo) => [logo.name, logo]))
 
   for (const [index, logo] of trustedBySeed.logos.entries()) {
+    const current = byName.get(logo.name)
+    if (current) {
+      if (current.sortOrder !== index || current.displayWidth !== logo.displayWidth || current.displayHeight !== logo.displayHeight) {
+        await payload.update({
+          collection: 'trusted-logos',
+          id: current.id,
+          data: {
+            sortOrder: index,
+            displayWidth: logo.displayWidth,
+            displayHeight: logo.displayHeight,
+          },
+        })
+      }
+      continue
+    }
+
     const filePath = path.join(process.cwd(), 'public', 'logos', 'partners', logo.file)
     const data = fs.readFileSync(filePath)
     const media = await payload.create({
@@ -24,7 +40,7 @@ export async function seedTrustedBy(payload: Payload) {
       data: { alt: logo.name },
       file: {
         data,
-        mimetype: 'image/svg+xml',
+        mimetype: logo.file.endsWith('.png') ? 'image/png' : 'image/svg+xml',
         name: logo.file,
         size: data.length,
       },

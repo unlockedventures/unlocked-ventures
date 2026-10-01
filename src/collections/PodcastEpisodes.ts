@@ -6,16 +6,16 @@ import { linkField } from '@/admin/editor-fields'
 export const PodcastEpisodes: CollectionConfig = {
   slug: 'podcast-episodes',
   labels: {
-    singular: 'Podcast episode',
-    plural: 'Podcast episodes',
+    singular: 'Episode',
+    plural: 'Podcast',
   },
   admin: {
-    group: adminGroups.homepage,
-    hidden: true,
-    description: 'Episodes shown under Podcast. Add, replace, reorder, and remove them from Podcast.',
+    group: adminGroups.podcast,
+    description:
+      'Every podcast episode. Check Show on the homepage to include an episode there. The box saves when you click it.',
     hideAPIURL: true,
     useAsTitle: 'title',
-    defaultColumns: ['title', 'sortOrder'],
+    defaultColumns: ['title', 'featured', 'guests', 'image', 'sortOrder'],
   },
   access: {
     read: () => true,
@@ -28,6 +28,19 @@ export const PodcastEpisodes: CollectionConfig = {
     linkField(),
     { name: 'image', type: 'upload', label: 'Picture', relationTo: 'media', admin: { description: 'The photo on this episode. Choose a different file to replace it.' } },
     { name: 'imageAlt', type: 'text' },
+    {
+      name: 'featured',
+      type: 'checkbox',
+      label: 'Show on the homepage',
+      defaultValue: false,
+      admin: {
+        position: 'sidebar',
+        description: 'Turn this on to include this episode in the homepage Podcast section.',
+        components: {
+          Cell: '@/components/admin/featured-cell#FeaturedCell',
+        },
+      },
+    },
     {
       name: 'sortOrder',
       type: 'number',

@@ -17,6 +17,11 @@ export async function getLatestNews(): Promise<LatestNewsSectionProps | null> {
       sort: 'sortOrder',
       limit: 100,
       depth: 1,
+      where: {
+        featured: {
+          equals: true,
+        },
+      },
     }),
   ])
 

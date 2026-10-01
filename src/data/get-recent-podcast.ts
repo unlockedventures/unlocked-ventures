@@ -17,6 +17,11 @@ export async function getRecentPodcast(): Promise<RecentPodcastSectionProps | nu
       sort: 'sortOrder',
       limit: 100,
       depth: 1,
+      where: {
+        featured: {
+          equals: true,
+        },
+      },
     }),
   ])
 

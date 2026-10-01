@@ -24,7 +24,7 @@ export default async function AboutPage() {
       <AboutHero />
       <AboutLogoWall />
       <AboutDelivered />
-      <AboutLogoWall spaced />
+      {/* <AboutLogoWall spaced /> */}
       <AboutFounder />
       <AboutHowWeWork />
       {locations ? <LocationsSection {...locations} /> : null}

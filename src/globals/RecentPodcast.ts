@@ -8,7 +8,7 @@ export const RecentPodcast: GlobalConfig = {
   label: 'Podcast',
   admin: {
     group: adminGroups.homepage,
-    description: 'The heading above the podcast episodes. Each episode, including its picture, is listed below.',
+    description: 'The heading above the podcast episodes. Episodes marked Show on the homepage are listed below.',
     hideAPIURL: true,
   },
   access: {
@@ -29,7 +29,10 @@ export const RecentPodcast: GlobalConfig = {
       imageField: 'image',
       singular: 'episode',
       plural: 'episodes',
-      help: 'These episodes appear under the heading, in this order. Drag a row to move it. Open Change to replace a picture or edit the details, or remove an episode.',
+      help: 'Only episodes marked Show on the homepage appear here and on the site, in this order. Turn that on from Podcast.',
+      readOnly: true,
+      manageLabel: 'Podcast',
+      where: 'where[featured][equals]=true',
     }),
   ],
 }

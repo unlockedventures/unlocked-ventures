@@ -1,6 +1,6 @@
 import { adminGroupOrder, adminGroups, adminSlugOrder } from '@/admin/editor-guide'
 
-const hiddenFromNav = new Set(['trusted-logos', 'podcast-episodes', 'news-posts'])
+const hiddenFromNav = new Set(['trusted-logos'])
 
 export type AdminLink = {
   slug: string
@@ -102,7 +102,6 @@ export function buildAdminNav(sections: AdminSection[]): AdminNavItem[] {
     pageItems.push({
       kind: 'group',
       label: 'Home',
-      defaultOpen: true,
       items: home.links.map((link) => ({ kind: 'link', link })),
     })
   }
@@ -124,13 +123,18 @@ export function buildAdminNav(sections: AdminSection[]): AdminNavItem[] {
 
   for (const section of sections) {
     if (section.label === adminGroups.homepage || section.label === adminGroups.pages) continue
-    if (section.label === adminGroups.successStories && section.links.length === 1) {
-      const [stories] = section.links
+    if (
+      (section.label === adminGroups.successStories ||
+        section.label === adminGroups.podcast ||
+        section.label === adminGroups.news) &&
+      section.links.length === 1
+    ) {
+      const [link] = section.links
       nav.push({
         kind: 'link',
         link: {
-          ...stories,
-          label: 'Success Stories',
+          ...link,
+          label: section.label,
         },
       })
       continue
