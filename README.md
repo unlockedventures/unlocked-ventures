@@ -4,14 +4,14 @@ Marketing site and content admin for Unlocked Ventures. The public site is a Nex
 
 ## Run with Docker
 
-Install [Docker](https://docs.docker.com/get-docker/) with Compose. `docker compose up` starts PostgreSQL in its own container, then starts the app.
+Install [Docker](https://docs.docker.com/get-docker/) with Compose. `docker compose up -d` starts PostgreSQL in its own container, then starts the app in the background.
 
 ```bash
 git clone https://github.com/BrainStation-23/unlocked-venture.git
 cd unlocked-venture
 git checkout develop
 cp .env.example .env
-docker compose up
+docker compose up -d
 ```
 
 The app reads `DATABASE_URL` and `PAYLOAD_SECRET` from `.env`. For this Compose file, `DATABASE_URL` must be:
@@ -31,7 +31,7 @@ Open:
 
 On the first visit to the admin, create the first editor account. Use that email and password to sign in afterward.
 
-Stop the app with Ctrl+C. Add `-d` to keep it running in the background: `docker compose up -d`.
+Stop the app with `docker compose down`. Follow the logs with `docker compose logs -f`.
 
 `PAYLOAD_SECRET` should be a long random string (`openssl rand -hex 32`). `.env` stays on your machine. Do not commit it.
 
@@ -115,7 +115,7 @@ The app listens on port 3000.
 | `pnpm lint` | Run ESLint |
 | `pnpm test` | Run unit tests, then end-to-end tests |
 | `pnpm payload` | Run the Payload CLI |
-| `docker compose up` | Start the app and its PostgreSQL container |
+| `docker compose up -d` | Start the app and its PostgreSQL container in the background |
 
 End-to-end tests need Playwright browsers:
 
