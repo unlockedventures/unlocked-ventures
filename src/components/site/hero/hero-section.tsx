@@ -28,14 +28,14 @@ function HeroMediaCollage({ media }: { media?: HeroMedia }) {
         <img
           src={media.primarySrc}
           alt=""
-          className="absolute top-0 left-0 h-auto w-[calc(100%*279/555)] min-[1440px]:top-[calc(100%*100/715)] min-[1440px]:left-[calc(100%*729/1440)] min-[1440px]:w-[calc(100%*279/1440)]"
+          className="absolute top-0 left-0 h-auto w-[calc(100%*279/555)] grayscale transition-[filter] duration-300 ease-out hover:grayscale-0 min-[1440px]:top-[calc(100%*100/715)] min-[1440px]:left-[calc(100%*729/1440)] min-[1440px]:w-[calc(100%*279/1440)]"
         />
       ) : null}
       {media?.secondarySrc ? (
         <img
           src={media.secondarySrc}
           alt=""
-          className="absolute top-[calc(100%*238/475)] left-[calc(100%*208/555)] h-auto w-[calc(100%*347/555)] min-[1440px]:top-[calc(100%*338/715)] min-[1440px]:left-[calc(100%*937/1440)] min-[1440px]:w-[calc(100%*347/1440)]"
+          className="absolute top-[calc(100%*238/475)] left-[calc(100%*208/555)] h-auto w-[calc(100%*347/555)] grayscale transition-[filter] duration-300 ease-out hover:grayscale-0 min-[1440px]:top-[calc(100%*338/715)] min-[1440px]:left-[calc(100%*937/1440)] min-[1440px]:w-[calc(100%*347/1440)]"
         />
       ) : null}
       {media?.badgeSrc ? (
@@ -101,7 +101,7 @@ export function HeroSection({ title, rotatingWords, description, cta, media, cla
                   className="size-6 shrink-0 transition-transform duration-300 ease-out group-hover:rotate-45 group-focus-visible:rotate-45"
                 />
               }
-              className="group mt-8 h-12 gap-2.5 border-0 bg-[#484D56] px-5 text-base text-white hover:bg-[#484D56] sm:h-12 sm:px-5 sm:text-base md:mt-10 lg:h-12 lg:px-5 lg:text-base 2xl:h-12 2xl:px-5 2xl:text-base"
+              className="group mt-8 h-12 gap-2.5 border border-[#484D56] bg-[#484D56] px-5 text-base text-white shadow-none transition-[border-color,box-shadow] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] hover:border-[#c5c8ce] hover:bg-[#484D56] hover:shadow-[0_0_0_6px_rgba(72,77,86,0.10),0_12px_28px_-14px_rgba(72,77,86,0.32)] focus-visible:border-[#c5c8ce] focus-visible:bg-[#484D56] focus-visible:shadow-[0_0_0_6px_rgba(72,77,86,0.10),0_12px_28px_-14px_rgba(72,77,86,0.32)] sm:h-12 sm:px-5 sm:text-base md:mt-10 lg:h-12 lg:px-5 lg:text-base 2xl:h-12 2xl:px-5 2xl:text-base"
             />
           </div>
         </div>

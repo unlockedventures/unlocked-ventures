@@ -35,14 +35,14 @@ export function AwardsSection({
           {awards.map((award) => (
             <li
               key={award.name}
-              className="group flex h-[130px] items-center justify-center border border-black/10"
+              className="group flex h-[130px] items-center justify-center border border-black/10 bg-white transition-[background-color,border-color,box-shadow,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:border-[#1CACAE]/30 hover:bg-[#F4FBFA] hover:shadow-[0_18px_36px_-22px_rgba(28,172,174,0.5)] motion-reduce:transition-none motion-reduce:hover:translate-y-0 motion-reduce:hover:shadow-none"
             >
               <img
                 src={award.src}
                 alt={award.name}
                 width={award.width}
                 height={award.height}
-                className="h-auto w-auto max-h-[97px] max-w-full object-contain grayscale transition-[filter] duration-300 group-hover:grayscale-0"
+                className="h-auto w-auto max-h-[97px] max-w-full object-contain grayscale transition-[filter,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.04] group-hover:grayscale-0 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
                 style={{ width: award.width }}
               />
             </li>

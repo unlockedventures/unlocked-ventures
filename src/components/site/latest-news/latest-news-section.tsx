@@ -37,13 +37,13 @@ function ArrowUpRight() {
 
 function NewsCard({ post }: { post: NewsPost }) {
   return (
-    <article className="flex h-full flex-col gap-8 border border-[#E7E9F3] bg-[#F3F4F9] pb-3">
+    <article className="group/card flex h-full flex-col gap-8 border border-[#E7E9F3] bg-[#F3F4F9] pb-3 transition-[background-color,border-color,box-shadow,translate] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:border-[#1CACAE]/30 hover:bg-[#F4FBFA] hover:shadow-[0_18px_36px_-22px_rgba(28,172,174,0.5)] motion-reduce:transition-none motion-reduce:hover:translate-y-0 motion-reduce:hover:shadow-none">
       <div className="flex h-[270px] shrink-0 items-center justify-center">
         {post.imageSrc ? (
           <img
             src={post.imageSrc}
             alt={post.imageAlt ?? ''}
-            className="size-[220px] object-contain"
+            className="size-[220px] object-contain transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/card:scale-[1.04] motion-reduce:transition-none motion-reduce:group-hover/card:scale-100"
           />
         ) : null}
       </div>
@@ -76,6 +76,7 @@ export function LatestNewsSection({ title, posts, className }: LatestNewsSection
         <ContentSlider
           label={title}
           controlsClassName="gap-[21px]"
+          trackClassName="py-6 -my-6"
           heading={
             <h2 className="font-sans text-[2rem] leading-10 font-normal tracking-[-1px] text-[#33353F] md:text-5xl md:leading-[56px]">
               {title}
