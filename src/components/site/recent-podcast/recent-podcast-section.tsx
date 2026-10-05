@@ -26,6 +26,8 @@ function PlayIcon() {
   )
 }
 
+const cardEase = 'duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]'
+
 function PodcastCard({ episode }: { episode: PodcastEpisode }) {
   return (
     <article className="h-full bg-white">
@@ -35,12 +37,28 @@ function PodcastCard({ episode }: { episode: PodcastEpisode }) {
             <img
               src={episode.imageSrc}
               alt={episode.imageAlt ?? ''}
-              className="absolute inset-0 h-full w-full object-cover grayscale"
+              className={cn(
+                'absolute inset-0 h-full w-full object-cover grayscale transition-[transform,filter]',
+                cardEase,
+                'group-hover:scale-[1.035] group-hover:grayscale-[0.15] group-focus-visible:scale-[1.035] group-focus-visible:grayscale-[0.15] motion-reduce:transition-none motion-reduce:group-hover:scale-100',
+              )}
             />
           ) : null}
           <span
             aria-hidden="true"
-            className="pointer-events-none absolute top-1/2 left-1/2 flex size-14 -translate-x-1/2 -translate-y-1/2 scale-90 items-center justify-center rounded-full bg-[#E7E9F3] text-[#25282D] opacity-0 transition duration-300 ease-out group-hover:scale-100 group-hover:opacity-100 group-focus-visible:scale-100 group-focus-visible:opacity-100 sm:size-16 lg:size-[72px]"
+            className={cn(
+              'pointer-events-none absolute inset-0 bg-[#25282D]/12 transition-opacity',
+              cardEase,
+              'group-hover:opacity-0 group-focus-visible:opacity-0 motion-reduce:transition-none',
+            )}
+          />
+          <span
+            aria-hidden="true"
+            className={cn(
+              'pointer-events-none absolute top-1/2 left-1/2 flex size-14 -translate-x-1/2 -translate-y-1/2 scale-90 items-center justify-center rounded-full bg-[#E7E9F3] text-[#25282D] opacity-0 shadow-[0_10px_24px_-12px_rgba(37,40,45,0.35)] transition-[transform,opacity]',
+              cardEase,
+              'group-hover:scale-100 group-hover:opacity-100 group-focus-visible:scale-100 group-focus-visible:opacity-100 sm:size-16 lg:size-[72px]',
+            )}
           >
             <PlayIcon />
           </span>

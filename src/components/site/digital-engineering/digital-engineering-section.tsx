@@ -66,10 +66,10 @@ function EngineeringGroupCard({ group }: { group: EngineeringGroup }) {
               <li key={item.href} className="border-b border-white/10 pb-4">
                 <Link
                   href={item.href}
-                  className="group flex cursor-pointer items-center justify-between gap-4 text-white/70"
+                  className="group flex origin-left cursor-pointer items-center justify-between gap-4 text-white/70 transition-[color,scale,translate] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 hover:scale-[1.03] hover:text-[#1CACAE] focus-visible:-translate-y-0.5 focus-visible:scale-[1.03] focus-visible:text-[#1CACAE] motion-reduce:transition-none motion-reduce:hover:translate-y-0 motion-reduce:hover:scale-100"
                 >
                   <span className="font-sans text-lg leading-8 font-normal sm:text-xl">{item.label}</span>
-                  <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-full border border-[#9C9EA4] text-[#9C9EA4] transition-colors duration-300 ease-out group-hover:border-white group-hover:bg-white group-hover:text-[#33353F] group-focus-visible:border-white group-focus-visible:bg-white group-focus-visible:text-[#33353F]">
+                  <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-full border border-[#9C9EA4] text-[#9C9EA4] transition-colors duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:border-[#1CACAE] group-hover:bg-[#1CACAE] group-hover:text-white group-focus-visible:border-[#1CACAE] group-focus-visible:bg-[#1CACAE] group-focus-visible:text-white">
                     <ArrowUpRight
                       className={cn(
                         'size-5',
@@ -115,7 +115,7 @@ export function DigitalEngineeringSection({
                 className={cn(arrowMotionClassName, 'group-hover:rotate-45 group-focus-visible:rotate-45')}
               />
             }
-            className="group h-[60px] w-fit gap-2.5 border-0 bg-white px-5 text-base text-[#33353F] hover:bg-white sm:h-[60px] sm:px-5 sm:text-base lg:h-[60px] lg:px-5 lg:text-base 2xl:h-[60px] 2xl:px-5 2xl:text-base"
+            className="group h-[60px] w-fit gap-2.5 rounded-none border border-[#D7EDED] bg-white px-7 text-base text-[#33353F] transition-[background-color,border-color,border-radius,box-shadow,translate,scale] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:scale-[1.06] hover:rounded-full hover:border-[#1CACAE] hover:bg-[#F4FBFA] hover:shadow-[0_20px_40px_-12px_rgba(28,172,174,0.85)] focus-visible:-translate-y-1 focus-visible:scale-[1.06] focus-visible:border-[#1CACAE] focus-visible:bg-[#F4FBFA] focus-visible:shadow-[0_20px_40px_-12px_rgba(28,172,174,0.85)] motion-reduce:transition-none motion-reduce:hover:translate-y-0 motion-reduce:hover:scale-100 motion-reduce:hover:shadow-none sm:h-[60px] sm:px-7 sm:text-base lg:h-[60px] lg:px-7 lg:text-base 2xl:h-[60px] 2xl:px-7 2xl:text-base"
           />
         </div>
         <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-[minmax(0,556fr)_minmax(0,524fr)] lg:gap-12">
