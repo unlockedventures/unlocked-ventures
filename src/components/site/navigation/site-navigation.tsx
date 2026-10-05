@@ -104,7 +104,10 @@ export function SiteNavigation({
             <Link
               href={item.href}
               aria-expanded={activeHref === item.href}
-              className={cn(primaryItemClassName, activeHref === item.href && 'after:scale-x-100!')}
+              className={cn(
+                primaryItemClassName,
+                activeHref === item.href && 'scale-[1.06] before:scale-x-100! after:scale-x-100!',
+              )}
               onMouseEnter={() => showMenu(item.href)}
               onMouseDown={() => dismissMenu(item.href)}
               onClick={() => dismissMenu(item.href)}
