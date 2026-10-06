@@ -121,6 +121,9 @@ export default buildConfig({
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
   db: postgresAdapter({
+    // Docker sets this to false after the database exists. A schema warning
+    // otherwise waits for a keypress that `docker compose up` cannot provide.
+    push: process.env.PAYLOAD_DB_PUSH !== 'false',
     pool: {
       connectionString: process.env.DATABASE_URL || '',
     },

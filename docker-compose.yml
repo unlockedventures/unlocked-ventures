@@ -19,7 +19,7 @@ services:
     init: true
     extra_hosts:
       - host.docker.internal:host-gateway
-    command: sh -c "corepack enable && corepack prepare pnpm@10 --activate && pnpm install --frozen-lockfile && DATABASE_URL=\"$$(printf '%s' \"$$DATABASE_URL\" | sed 's/127.0.0.1/host.docker.internal/')\" pnpm dev --hostname 0.0.0.0 --port 3000"
+    command: sh /app/scripts/docker-dev.sh
     ports:
       - '3000:3000'
     env_file:
