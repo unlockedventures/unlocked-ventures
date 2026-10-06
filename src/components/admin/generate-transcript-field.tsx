@@ -4,6 +4,7 @@ import { Button, useAllFormFields, useDocumentInfo } from '@payloadcms/ui'
 import { useEffect, useRef, useState } from 'react'
 
 import { transcriptButtonState } from '@/pipeline/button-state'
+import { collectVideoLinksFromForm } from '@/pipeline/form-video-links'
 import { overallTranscriptPercent } from '@/pipeline/progress'
 
 type PipelineResponse = {
@@ -15,16 +16,6 @@ type PipelineResponse = {
 
 function fieldText(value: unknown) {
   return typeof value === 'string' ? value : ''
-}
-
-function videoLinkCount(value: unknown) {
-  if (!Array.isArray(value)) return 1
-  const count = value.filter((row) => {
-    if (!row || typeof row !== 'object') return false
-    const url = (row as { url?: unknown }).url
-    return typeof url === 'string' && url.trim() !== ''
-  }).length
-  return Math.max(1, count)
 }
 
 export function GenerateTranscriptField() {
@@ -39,11 +30,17 @@ export function GenerateTranscriptField() {
   const statusRef = useRef(status)
   statusRef.current = status
   const button = transcriptButtonState({ saved: id != null && id !== '', status, pending })
+  const waiting = /waiting for another transcript/i.test(statusMessage)
   const overall = overallTranscriptPercent({ statusMessage, stagePercent })
+  // While queued behind another job, show the waiting message without a fake 0%.
   const percent =
-    status === 'processing' || watching
-      ? (overall ?? (stagePercent != null ? Math.min(99, Math.max(0, Math.round(stagePercent))) : 0))
-      : null
+    !(status === 'processing' || watching) || waiting
+      ? null
+      : overall != null
+        ? overall
+        : stagePercent != null && stagePercent > 0
+          ? Math.min(99, Math.max(0, Math.round(stagePercent)))
+          : null
 
   useEffect(() => {
     if (status === 'processing') setWatching(true)
@@ -96,7 +93,12 @@ export function GenerateTranscriptField() {
 
   async function onGenerate() {
     if (button.disabled || id == null) return
-    const total = videoLinkCount(fields.videoLinks?.value)
+    const urls = collectVideoLinksFromForm(fields)
+    if (urls.length === 0) {
+      setLocalMessage('Add at least one video link.')
+      return
+    }
+    const total = urls.length
     setLocalMessage(null)
     setPending(true)
     setWatching(true)
@@ -108,6 +110,23 @@ export function GenerateTranscriptField() {
       value: `Generating transcript for video 1 of ${total}.`,
     })
     try {
+      // Persist unsaved video links before the server reads the document.
+      const saveResponse = await fetch(`/api/pipeline/${id}`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ videoLinks: urls.map((url) => ({ url })) }),
+      })
+      if (!saveResponse.ok) {
+        setLocalMessage('Could not save video links before generating a transcript.')
+        setPending(false)
+        setWatching(false)
+        setStagePercent(null)
+        dispatchFields({ type: 'UPDATE', path: 'status', value: 'idle' })
+        dispatchFields({ type: 'UPDATE', path: 'statusMessage', value: '' })
+        return
+      }
+
       const response = await fetch('/api/pipeline/transcribe', {
         method: 'POST',
         credentials: 'include',

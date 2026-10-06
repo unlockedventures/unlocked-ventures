@@ -26,13 +26,17 @@ def transcribe_url(url, *, run, work_root, timeout_seconds=1800, on_progress=Non
     deadline = time.monotonic() + timeout_seconds
     report = on_progress or (lambda _percent: None)
     try:
-        report(5)
+        report(1)
         source_template = str(directory / "source.%(ext)s")
-        _run(
+        _run_with_crawl(
             ["yt-dlp", "-x", "--audio-format", "wav", "-o", source_template, "--no-playlist", url],
             run,
             deadline,
             "Could not download audio from this video.",
+            report,
+            start_percent=1,
+            end_percent=29,
+            step_seconds=2,
         )
         sources = [path for path in directory.iterdir() if path.name.startswith("source.")]
         if len(sources) != 1:
@@ -86,6 +90,31 @@ def _run(command, run, deadline, failure):
         raise TranscriptionError("This video took longer than 30 minutes.") from error
     if completed.returncode != 0:
         raise TranscriptionError(failure)
+
+
+def _run_with_crawl(command, run, deadline, failure, report, *, start_percent, end_percent, step_seconds):
+    """Run a blocking command while slowly advancing progress so the UI does not sit at 0%."""
+    holder = {"percent": start_percent}
+    stop = threading.Event()
+    report(start_percent)
+
+    def crawl():
+        while not stop.is_set() and holder["percent"] < end_percent:
+            if stop.wait(step_seconds):
+                break
+            nxt = min(end_percent, holder["percent"] + 1)
+            if nxt > holder["percent"]:
+                holder["percent"] = nxt
+                report(nxt)
+
+    crawler = threading.Thread(target=crawl, daemon=True)
+    crawler.start()
+    try:
+        _run(command, run, deadline, failure)
+        report(end_percent)
+    finally:
+        stop.set()
+        crawler.join(timeout=1)
 
 
 def _run_whisper(command, run, deadline, report):

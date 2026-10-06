@@ -50,6 +50,7 @@ def serve(transcribe, secret, lock, port=0, progress=None):
                 except (json.JSONDecodeError, KeyError, TypeError, UnicodeDecodeError):
                     self._json(422, {"error": "The video link must start with http:// or https://."})
                     return
+                state["percent"] = 1
                 try:
                     transcript = transcribe(url)
                 except TranscriptionError as error:

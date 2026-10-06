@@ -27,7 +27,7 @@ export type RunResult = {
 }
 
 const busyMessage = 'Another transcript is already being generated. Try again when it finishes.'
-const busyRetryLimit = 200
+const busyRetryLimit = 40
 const busyRetryDelayMs = 3000
 
 export async function handleTranscribeRequest(args: {
