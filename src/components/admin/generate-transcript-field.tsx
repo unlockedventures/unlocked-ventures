@@ -51,11 +51,10 @@ export function GenerateTranscriptField() {
         }
       } catch {
         if (cancelled) return
+        if (statusRef.current === 'processing') return
         setLocalMessage('Could not generate a transcript.')
-        if (statusRef.current !== 'processing') {
-          setPending(false)
-          setWatching(false)
-        }
+        setPending(false)
+        setWatching(false)
       }
     }
 
@@ -87,18 +86,41 @@ export function GenerateTranscriptField() {
         ) {
           return
         }
-        setWatching(false)
-        setPending(false)
         setLocalMessage(body?.error ?? 'Could not generate a transcript.')
+        try {
+          const refresh = await fetch(`/api/pipeline/${id}?depth=0`, { credentials: 'include' })
+          if (!refresh.ok) {
+            if (statusRef.current !== 'processing') {
+              setWatching(false)
+              setPending(false)
+            }
+            return
+          }
+          const doc = (await refresh.json()) as PipelineResponse
+          dispatchFields({ type: 'UPDATE', path: 'transcript', value: doc.transcript ?? '' })
+          dispatchFields({ type: 'UPDATE', path: 'status', value: doc.status ?? 'idle' })
+          dispatchFields({ type: 'UPDATE', path: 'statusMessage', value: doc.statusMessage ?? '' })
+          if (doc.status === 'processing') {
+            setWatching(true)
+            setPending(true)
+          } else {
+            setWatching(false)
+            setPending(false)
+          }
+        } catch {
+          if (statusRef.current !== 'processing') {
+            setWatching(false)
+            setPending(false)
+          }
+        }
         return
       }
       setPending(false)
     } catch {
+      if (statusRef.current === 'processing') return
       setLocalMessage('Could not generate a transcript.')
-      if (statusRef.current !== 'processing') {
-        setWatching(false)
-        setPending(false)
-      }
+      setWatching(false)
+      setPending(false)
     }
   }
 
