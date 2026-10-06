@@ -17,6 +17,15 @@ describe('transcriptButtonState', () => {
     })
   })
 
+  it('disables the button while a podcast script is generating', () => {
+    expect(
+      transcriptButtonState({ saved: true, status: 'ready', scriptStatus: 'processing' }),
+    ).toEqual({
+      disabled: true,
+      hint: 'Wait for the podcast script to finish before generating a transcript.',
+    })
+  })
+
   it('enables the button for a saved idle document', () => {
     expect(transcriptButtonState({ saved: true, status: 'idle' })).toEqual({
       disabled: false,

@@ -9,12 +9,14 @@ export type PipelineDoc = {
   transcript?: string | null
   status?: PipelineStatus | null
   statusMessage?: string | null
+  scriptStatus?: string | null
 }
 
 export type PipelinePatch = {
   transcript: string
   status: PipelineStatus
   statusMessage: string
+  videoLinks?: { url: string }[]
 }
 
 export type TranscribeResult =
@@ -34,6 +36,8 @@ export async function handleTranscribeRequest(args: {
   user: unknown
   doc: PipelineDoc | null
   otherProcessing: boolean
+  /** Optional links from the request body (preferred over unsaved form/DB values). */
+  videoLinks?: { url?: string | null }[] | null
   save: (data: PipelinePatch) => Promise<void>
   transcribe: (url: string) => Promise<TranscribeResult>
   wait?: (ms: number) => Promise<void>
@@ -43,11 +47,18 @@ export async function handleTranscribeRequest(args: {
   if (args.doc.status === 'processing') {
     return { status: 409, body: { error: 'This transcript is already being generated.' } }
   }
+  if (args.doc.scriptStatus === 'processing') {
+    return {
+      status: 409,
+      body: { error: 'Wait for the podcast script to finish before generating a transcript.' },
+    }
+  }
   if (args.otherProcessing) return { status: 409, body: { error: busyMessage } }
 
-  const links = validateVideoLinks(args.doc.videoLinks)
+  const links = validateVideoLinks(args.videoLinks ?? args.doc.videoLinks)
   if (!links.ok) return { status: 400, body: { error: links.message } }
 
+  const persistedLinks = links.urls.map((url) => ({ url }))
   const wait = args.wait ?? ((ms) => new Promise((resolve) => setTimeout(resolve, ms)))
   let transcript = ''
   let failed = false
@@ -57,6 +68,7 @@ export async function handleTranscribeRequest(args: {
       transcript,
       status: 'processing',
       statusMessage: `Generating transcript for video ${index + 1} of ${links.urls.length}.`,
+      ...(index === 0 ? { videoLinks: persistedLinks } : {}),
     })
 
     const result = await transcribeWithBusyRetry({

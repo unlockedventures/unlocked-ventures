@@ -27,12 +27,19 @@ export function GenerateTranscriptField() {
   const [stagePercent, setStagePercent] = useState<number | null>(null)
   const status = fieldText(fields.status?.value) || 'idle'
   const statusMessage = fieldText(fields.statusMessage?.value)
+  const scriptStatus = fieldText(fields.scriptStatus?.value) || 'idle'
   const statusRef = useRef(status)
+  /** Ignore stale ready/error from a previous run until this run has been processing on the server. */
+  const seenProcessingRef = useRef(false)
   statusRef.current = status
-  const button = transcriptButtonState({ saved: id != null && id !== '', status, pending })
+  const button = transcriptButtonState({
+    saved: id != null && id !== '',
+    status,
+    scriptStatus,
+    pending,
+  })
   const waiting = /waiting for another transcript/i.test(statusMessage)
   const overall = overallTranscriptPercent({ statusMessage, stagePercent })
-  // While queued behind another job, show the waiting message without a fake 0%.
   const percent =
     !(status === 'processing' || watching) || waiting
       ? null
@@ -59,15 +66,30 @@ export function GenerateTranscriptField() {
         if (!docResponse.ok || cancelled) return
         const doc = (await docResponse.json()) as PipelineResponse
         if (cancelled) return
-        dispatchFields({ type: 'UPDATE', path: 'transcript', value: doc.transcript ?? '' })
-        dispatchFields({ type: 'UPDATE', path: 'status', value: doc.status ?? 'idle' })
-        dispatchFields({ type: 'UPDATE', path: 'statusMessage', value: doc.statusMessage ?? '' })
+
         if (progressResponse.ok) {
           const progress = (await progressResponse.json()) as { percent?: number }
           if (!cancelled && typeof progress.percent === 'number') {
             setStagePercent(progress.percent)
           }
         }
+
+        if (doc.status === 'processing') {
+          seenProcessingRef.current = true
+          dispatchFields({ type: 'UPDATE', path: 'transcript', value: doc.transcript ?? '' })
+          dispatchFields({ type: 'UPDATE', path: 'status', value: doc.status ?? 'idle' })
+          dispatchFields({ type: 'UPDATE', path: 'statusMessage', value: doc.statusMessage ?? '' })
+          return
+        }
+
+        // Stale ready/error from before this click — keep waiting for processing.
+        if ((doc.status === 'ready' || doc.status === 'error') && !seenProcessingRef.current) {
+          return
+        }
+
+        dispatchFields({ type: 'UPDATE', path: 'transcript', value: doc.transcript ?? '' })
+        dispatchFields({ type: 'UPDATE', path: 'status', value: doc.status ?? 'idle' })
+        dispatchFields({ type: 'UPDATE', path: 'statusMessage', value: doc.statusMessage ?? '' })
         if (doc.status === 'ready' || doc.status === 'error') {
           setPending(false)
           setWatching(false)
@@ -75,11 +97,6 @@ export function GenerateTranscriptField() {
         }
       } catch {
         if (cancelled) return
-        if (statusRef.current === 'processing') return
-        setLocalMessage('Could not generate a transcript.')
-        setPending(false)
-        setWatching(false)
-        setStagePercent(null)
       }
     }
 
@@ -101,6 +118,7 @@ export function GenerateTranscriptField() {
     const total = urls.length
     setLocalMessage(null)
     setPending(true)
+    seenProcessingRef.current = false
     setWatching(true)
     setStagePercent(0)
     dispatchFields({ type: 'UPDATE', path: 'status', value: 'processing' })
@@ -110,36 +128,35 @@ export function GenerateTranscriptField() {
       value: `Generating transcript for video 1 of ${total}.`,
     })
     try {
-      // Persist unsaved video links before the server reads the document.
-      const saveResponse = await fetch(`/api/pipeline/${id}`, {
-        method: 'PATCH',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ videoLinks: urls.map((url) => ({ url })) }),
-      })
-      if (!saveResponse.ok) {
-        setLocalMessage('Could not save video links before generating a transcript.')
-        setPending(false)
-        setWatching(false)
-        setStagePercent(null)
-        dispatchFields({ type: 'UPDATE', path: 'status', value: 'idle' })
-        dispatchFields({ type: 'UPDATE', path: 'statusMessage', value: '' })
-        return
-      }
-
       const response = await fetch('/api/pipeline/transcribe', {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id }),
+        body: JSON.stringify({
+          id,
+          videoLinks: urls.map((url) => ({ url })),
+        }),
       })
       const body = (await response.json().catch(() => null)) as PipelineResponse | null
       if (!response.ok) {
         if (
           response.status === 409 &&
+          body?.error === 'Wait for the podcast script to finish before generating a transcript.'
+        ) {
+          setLocalMessage(body.error)
+          setPending(false)
+          setWatching(false)
+          setStagePercent(null)
+          dispatchFields({ type: 'UPDATE', path: 'status', value: 'idle' })
+          dispatchFields({ type: 'UPDATE', path: 'statusMessage', value: '' })
+          return
+        }
+        if (
+          response.status === 409 &&
           (body?.error === 'This transcript is already being generated.' ||
             body?.error === 'Another transcript is already being generated. Try again when it finishes.')
         ) {
+          seenProcessingRef.current = true
           setWatching(true)
           setPending(true)
           return
@@ -156,6 +173,7 @@ export function GenerateTranscriptField() {
             return
           }
           const doc = (await refresh.json()) as PipelineResponse
+          if (doc.status === 'processing') seenProcessingRef.current = true
           dispatchFields({ type: 'UPDATE', path: 'transcript', value: doc.transcript ?? '' })
           dispatchFields({ type: 'UPDATE', path: 'status', value: doc.status ?? 'idle' })
           dispatchFields({ type: 'UPDATE', path: 'statusMessage', value: doc.statusMessage ?? '' })
@@ -176,14 +194,26 @@ export function GenerateTranscriptField() {
         }
         return
       }
+
+      seenProcessingRef.current = true
+      try {
+        const refresh = await fetch(`/api/pipeline/${id}?depth=0`, { credentials: 'include' })
+        if (refresh.ok) {
+          const doc = (await refresh.json()) as PipelineResponse
+          dispatchFields({ type: 'UPDATE', path: 'transcript', value: doc.transcript ?? '' })
+          dispatchFields({ type: 'UPDATE', path: 'status', value: doc.status ?? 'idle' })
+          dispatchFields({ type: 'UPDATE', path: 'statusMessage', value: doc.statusMessage ?? '' })
+        }
+      } catch {
+        // polling effect will catch up if needed
+      }
       setPending(false)
+      setWatching(false)
       setStagePercent(null)
     } catch {
-      if (statusRef.current === 'processing') return
-      setLocalMessage('Could not generate a transcript.')
-      setWatching(false)
-      setPending(false)
-      setStagePercent(null)
+      // Long Whisper runs can time out the browser fetch while the server keeps working.
+      setWatching(true)
+      setPending(true)
     }
   }
 

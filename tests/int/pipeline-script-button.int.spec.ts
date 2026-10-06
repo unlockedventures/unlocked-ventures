@@ -33,6 +33,22 @@ describe('scriptButtonState', () => {
     })
   })
 
+  it('disables while a transcript is generating', () => {
+    expect(
+      scriptButtonState({
+        saved: true,
+        hasTranscript: true,
+        hasHostGender: true,
+        hasGuestGender: true,
+        scriptStatus: 'idle',
+        transcriptStatus: 'processing',
+      }),
+    ).toEqual({
+      disabled: true,
+      hint: 'Wait for the transcript to finish before creating a podcast script.',
+    })
+  })
+
   it('asks for host and guest genders before generating', () => {
     expect(
       scriptButtonState({

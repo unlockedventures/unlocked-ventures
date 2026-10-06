@@ -149,6 +149,26 @@ describe('handleGenerateScriptRequest', () => {
     })
   })
 
+  it('returns 409 when a transcript is generating', async () => {
+    const result = await handleGenerateScriptRequest({
+      user: { id: 1 },
+      doc: {
+        id: 1,
+        transcript: 'Raw text',
+        hostGender: 'male',
+        guestGender: 'female',
+        status: 'processing',
+        scriptStatus: 'idle',
+      },
+      save: async () => undefined,
+      generate: async () => ({ ok: false, error: 'nope' }),
+    })
+    expect(result).toEqual({
+      status: 409,
+      body: { error: 'Wait for the transcript to finish before creating a podcast script.' },
+    })
+  })
+
   it('returns 400 when genders are missing', async () => {
     const result = await handleGenerateScriptRequest({
       user: { id: 1 },

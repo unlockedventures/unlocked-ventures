@@ -14,7 +14,7 @@ const transcribeEndpoint: Endpoint = {
 
     const body = (
       req.json ? await req.json().catch(() => null) : null
-    ) as { id?: number | string } | null
+    ) as { id?: number | string; videoLinks?: { url?: string | null }[] | null } | null
     const id = body?.id
     if (id == null || id === '') {
       return Response.json({ error: 'Pipeline document not found.' }, { status: 404 })
@@ -34,6 +34,7 @@ const transcribeEndpoint: Endpoint = {
     const result = await handleTranscribeRequest({
       user: req.user,
       doc: doc as PipelineDoc | null,
+      videoLinks: body?.videoLinks,
       otherProcessing: others.totalDocs > 0,
       save: async (data) => {
         await req.payload.update({ collection: 'pipeline', id, data, depth: 0, req })
@@ -127,6 +128,11 @@ export const Pipeline: CollectionConfig = {
     hideAPIURL: true,
     useAsTitle: 'name',
     defaultColumns: ['name', 'status', 'scriptStatus'],
+    components: {
+      edit: {
+        SaveButton: '@/components/admin/pipeline-save-button#PipelineSaveButton',
+      },
+    },
   },
   access: {
     create: ({ req }) => Boolean(req.user),

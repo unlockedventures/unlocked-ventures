@@ -8,6 +8,7 @@ export type ScriptPipelineDoc = {
   transcript?: string | null
   hostGender?: string | null
   guestGender?: string | null
+  status?: string | null
   scriptStatus?: ScriptStatus | null
 }
 
@@ -44,6 +45,12 @@ export async function handleGenerateScriptRequest(args: {
   if (!args.doc) return { status: 404, body: { error: 'Pipeline document not found.' } }
   if (args.doc.scriptStatus === 'processing') {
     return { status: 409, body: { error: 'This podcast script is already being generated.' } }
+  }
+  if (args.doc.status === 'processing') {
+    return {
+      status: 409,
+      body: { error: 'Wait for the transcript to finish before creating a podcast script.' },
+    }
   }
 
   const transcript = typeof args.doc.transcript === 'string' ? args.doc.transcript.trim() : ''

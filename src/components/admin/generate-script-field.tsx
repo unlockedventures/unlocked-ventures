@@ -89,6 +89,7 @@ export function GenerateScriptField() {
   const [localMessage, setLocalMessage] = useState<string | null>(null)
   const scriptStatus = fieldText(fields.scriptStatus?.value) || 'idle'
   const scriptStatusMessage = fieldText(fields.scriptStatusMessage?.value)
+  const transcriptStatus = fieldText(fields.status?.value) || 'idle'
   const transcript = fieldText(fields.transcript?.value)
   const hostGender = fieldText(fields.hostGender?.value)
   const guestGender = fieldText(fields.guestGender?.value)
@@ -104,6 +105,7 @@ export function GenerateScriptField() {
     hasHostGender: isSpeakerGender(hostGender),
     hasGuestGender: isSpeakerGender(guestGender),
     scriptStatus,
+    transcriptStatus,
     pending,
   })
 
@@ -180,6 +182,17 @@ export function GenerateScriptField() {
       })
       const body = (await response.json().catch(() => null)) as PipelineResponse | null
       if (!response.ok) {
+        if (
+          response.status === 409 &&
+          body?.error === 'Wait for the transcript to finish before creating a podcast script.'
+        ) {
+          setLocalMessage(body.error)
+          setPending(false)
+          setWatching(false)
+          dispatchFields({ type: 'UPDATE', path: 'scriptStatus', value: 'idle' })
+          dispatchFields({ type: 'UPDATE', path: 'scriptStatusMessage', value: '' })
+          return
+        }
         if (
           response.status === 409 &&
           body?.error === 'This podcast script is already being generated.'

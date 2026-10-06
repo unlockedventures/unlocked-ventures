@@ -4,12 +4,20 @@ export function scriptButtonState(args: {
   hasHostGender: boolean
   hasGuestGender: boolean
   scriptStatus: string | null | undefined
+  /** Transcript pipeline status — disable script generation while a transcript is running. */
+  transcriptStatus?: string | null
   pending?: boolean
 }) {
   if (!args.saved) {
     return {
       disabled: true,
       hint: 'Save this Pipeline document before creating a podcast script.',
+    }
+  }
+  if (args.transcriptStatus === 'processing') {
+    return {
+      disabled: true,
+      hint: 'Wait for the transcript to finish before creating a podcast script.',
     }
   }
   if (!args.hasTranscript) {

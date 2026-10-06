@@ -46,6 +46,29 @@ describe('handleTranscribeRequest', () => {
     expect(saves).toEqual([])
   })
 
+  it('returns 409 when a podcast script is generating', async () => {
+    const { promise, saves } = harness(async () => ({ ok: true, transcript: 'nope' }), {
+      doc: { ...doc, scriptStatus: 'processing' },
+    })
+    await expect(promise).resolves.toEqual({
+      status: 409,
+      body: { error: 'Wait for the podcast script to finish before generating a transcript.' },
+    })
+    expect(saves).toEqual([])
+  })
+
+  it('persists video links from the request body on the first save', async () => {
+    const { promise, saves } = harness(async () => ({ ok: true, transcript: 'ok' }), {
+      doc: { ...doc, videoLinks: [{ url: 'https://www.youtube.com/watch?v=oldvvvvvvvv' }] },
+      videoLinks: [{ url: 'https://www.youtube.com/watch?v=newvvvvvvvv' }],
+    })
+    await expect(promise).resolves.toEqual({ status: 200, body: { status: 'ready' } })
+    expect(saves[0]).toMatchObject({
+      status: 'processing',
+      videoLinks: [{ url: 'https://www.youtube.com/watch?v=newvvvvvvvv' }],
+    })
+  })
+
   it('returns 409 when another document is processing and leaves this document unchanged', async () => {
     const { promise, saves } = harness(async () => ({ ok: true, transcript: 'nope' }), { otherProcessing: true })
     await expect(promise).resolves.toEqual({
