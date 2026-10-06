@@ -107,21 +107,50 @@ describe('handleTranscribeRequest', () => {
     expect(saves.at(-1)?.transcript).not.toContain('vimeo.com')
   })
 
-  it('restores the previous transcript when the transcriber is busy before any block is written', async () => {
-    const { promise, saves } = harness(async () => ({
-      ok: false,
-      error: 'Another transcript is already being generated. Try again when it finishes.',
-      stop: true,
-      busy: true,
-    }))
+  it('restores the previous transcript when the transcriber stays busy before any block is written', async () => {
+    const { promise, saves } = harness(
+      async () => ({
+        ok: false,
+        error: 'Another transcript is already being generated. Try again when it finishes.',
+        stop: true,
+        busy: true,
+      }),
+      { wait: async () => undefined },
+    )
     await expect(promise).resolves.toEqual({
       status: 409,
       body: { error: 'Another transcript is already being generated. Try again when it finishes.' },
     })
     expect(saves.at(-1)).toEqual({
       transcript: 'old transcript',
-      status: 'ready',
-      statusMessage: '',
+      status: 'idle',
+      statusMessage: 'Another transcript is already being generated. Try again when it finishes.',
     })
   })
+
+  it('retries when the transcriber is briefly busy and then succeeds', async () => {
+    let calls = 0
+    const { promise, saves } = harness(
+      async () => {
+        calls += 1
+        if (calls === 1) {
+          return {
+            ok: false,
+            error: 'Another transcript is already being generated. Try again when it finishes.',
+            stop: true,
+            busy: true,
+          }
+        }
+        return { ok: true, transcript: `text for call ${calls}` }
+      },
+      { wait: async () => undefined },
+    )
+    await expect(promise).resolves.toEqual({ status: 200, body: { status: 'ready' } })
+    expect(calls).toBe(3)
+    expect(saves.some((save) => save.statusMessage === 'Waiting for another transcript to finish.')).toBe(
+      true,
+    )
+    expect(saves.at(-1)?.status).toBe('ready')
+  })
 })
+

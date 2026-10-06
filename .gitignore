@@ -46,6 +46,12 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
 # misc
 .DS_Store
 *.pem

@@ -1,7 +1,9 @@
 import type { CollectionConfig, Endpoint } from 'payload'
 
 import { adminGroups } from '@/admin/editor-guide'
+import { generateScriptFromTranscript } from '@/pipeline/generate-script'
 import { requestTranscript } from '@/pipeline/request-transcript'
+import { handleGenerateScriptRequest, type ScriptPipelineDoc } from '@/pipeline/run-generate-script'
 import { handleTranscribeRequest, type PipelineDoc } from '@/pipeline/run-transcription'
 
 const transcribeEndpoint: Endpoint = {
@@ -48,6 +50,70 @@ const transcribeEndpoint: Endpoint = {
   },
 }
 
+const progressEndpoint: Endpoint = {
+  path: '/progress',
+  method: 'get',
+  handler: async (req) => {
+    if (!req.user) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const endpoint = process.env.TRANSCRIBER_URL ?? ''
+    const secret = process.env.TRANSCRIBER_SECRET ?? ''
+    if (!endpoint || !secret) {
+      return Response.json({ percent: 0 })
+    }
+
+    try {
+      const response = await fetch(`${endpoint}/progress`, {
+        headers: { Authorization: `Bearer ${secret}` },
+        cache: 'no-store',
+      })
+      if (!response.ok) return Response.json({ percent: 0 })
+      const body = (await response.json()) as { percent?: number }
+      const percent = typeof body.percent === 'number' ? body.percent : 0
+      return Response.json({ percent })
+    } catch {
+      return Response.json({ percent: 0 })
+    }
+  },
+}
+
+const generateScriptEndpoint: Endpoint = {
+  path: '/generate-script',
+  method: 'post',
+  handler: async (req) => {
+    if (!req.user) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const body = (
+      req.json ? await req.json().catch(() => null) : null
+    ) as { id?: number | string } | null
+    const id = body?.id
+    if (id == null || id === '') {
+      return Response.json({ error: 'Pipeline document not found.' }, { status: 404 })
+    }
+
+    const doc = await req.payload
+      .findByID({ collection: 'pipeline', id, depth: 0, req })
+      .catch(() => null)
+
+    const result = await handleGenerateScriptRequest({
+      user: req.user,
+      doc: doc as ScriptPipelineDoc | null,
+      save: async (data) => {
+        await req.payload.update({ collection: 'pipeline', id, data, depth: 0, req })
+      },
+      generate: (transcript) =>
+        generateScriptFromTranscript({
+          transcript,
+          // Read at request time so a key added after boot is visible.
+          apiKey: process.env['GEMINI_API_KEY']?.trim() ?? '',
+          model: process.env['GEMINI_MODEL']?.trim() || undefined,
+        }),
+    })
+
+    return Response.json(result.body, { status: result.status })
+  },
+}
+
 export const Pipeline: CollectionConfig = {
   slug: 'pipeline',
   labels: { singular: 'Pipeline', plural: 'Pipeline' },
@@ -56,7 +122,7 @@ export const Pipeline: CollectionConfig = {
     description: 'Paste public video links and generate a transcript.',
     hideAPIURL: true,
     useAsTitle: 'name',
-    defaultColumns: ['name', 'status'],
+    defaultColumns: ['name', 'status', 'scriptStatus'],
   },
   access: {
     create: ({ req }) => Boolean(req.user),
@@ -64,7 +130,7 @@ export const Pipeline: CollectionConfig = {
     update: ({ req }) => Boolean(req.user),
     delete: ({ req }) => Boolean(req.user),
   },
-  endpoints: [transcribeEndpoint],
+  endpoints: [transcribeEndpoint, progressEndpoint, generateScriptEndpoint],
   fields: [
     { name: 'name', type: 'text', required: true },
     {
@@ -99,6 +165,60 @@ export const Pipeline: CollectionConfig = {
       admin: { description: 'Generated text. You can edit it before saving.' },
     },
     {
+      name: 'generateScript',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '@/components/admin/generate-script-field#GenerateScriptField',
+        },
+      },
+    },
+    {
+      name: 'scriptJson',
+      type: 'textarea',
+      label: 'script.json',
+      admin: {
+        description: 'Podcast-video script JSON for a later video generation step. You can edit it.',
+      },
+    },
+    {
+      name: 'summary',
+      type: 'textarea',
+      label: 'Summary',
+      admin: { description: 'Short episode summary.' },
+    },
+    {
+      name: 'mainPoints',
+      type: 'array',
+      label: 'Main points',
+      labels: { singular: 'Main point', plural: 'Main points' },
+      maxRows: 10,
+      fields: [{ name: 'point', type: 'text', required: true, label: 'Point' }],
+    },
+    {
+      name: 'contrastingPoints',
+      type: 'array',
+      label: 'Contrasting points',
+      labels: { singular: 'Contrasting point', plural: 'Contrasting points' },
+      fields: [{ name: 'point', type: 'text', required: true, label: 'Point' }],
+    },
+    {
+      name: 'disagreementPoints',
+      type: 'array',
+      label: 'Disagreement points',
+      labels: { singular: 'Disagreement point', plural: 'Disagreement points' },
+      admin: {
+        description: 'Explicit disagreements from the source. Leave empty when none.',
+      },
+      fields: [{ name: 'point', type: 'text', required: true, label: 'Point' }],
+    },
+    {
+      name: 'systemOpinion',
+      type: 'textarea',
+      label: "System's overall opinion",
+      admin: { description: 'Overall assessment of the material.' },
+    },
+    {
       name: 'status',
       type: 'select',
       defaultValue: 'idle',
@@ -114,6 +234,25 @@ export const Pipeline: CollectionConfig = {
       name: 'statusMessage',
       type: 'text',
       label: 'Status detail',
+      admin: { position: 'sidebar', readOnly: true },
+    },
+    {
+      name: 'scriptStatus',
+      type: 'select',
+      defaultValue: 'idle',
+      label: 'Script status',
+      options: [
+        { label: 'Idle', value: 'idle' },
+        { label: 'Processing', value: 'processing' },
+        { label: 'Ready', value: 'ready' },
+        { label: 'Error', value: 'error' },
+      ],
+      admin: { position: 'sidebar', readOnly: true },
+    },
+    {
+      name: 'scriptStatusMessage',
+      type: 'text',
+      label: 'Script status detail',
       admin: { position: 'sidebar', readOnly: true },
     },
   ],

@@ -395,8 +395,43 @@ export interface Pipeline {
    * Generated text. You can edit it before saving.
    */
   transcript?: string | null;
+  /**
+   * Podcast-video script JSON for a later video generation step. You can edit it.
+   */
+  scriptJson?: string | null;
+  /**
+   * Short episode summary.
+   */
+  summary?: string | null;
+  mainPoints?:
+    | {
+        point: string;
+        id?: string | null;
+      }[]
+    | null;
+  contrastingPoints?:
+    | {
+        point: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Explicit disagreements from the source. Leave empty when none.
+   */
+  disagreementPoints?:
+    | {
+        point: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Overall assessment of the material.
+   */
+  systemOpinion?: string | null;
   status?: ('idle' | 'processing' | 'ready' | 'error') | null;
   statusMessage?: string | null;
+  scriptStatus?: ('idle' | 'processing' | 'ready' | 'error') | null;
+  scriptStatusMessage?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -628,8 +663,31 @@ export interface PipelineSelect<T extends boolean = true> {
         id?: T;
       };
   transcript?: T;
+  scriptJson?: T;
+  summary?: T;
+  mainPoints?:
+    | T
+    | {
+        point?: T;
+        id?: T;
+      };
+  contrastingPoints?:
+    | T
+    | {
+        point?: T;
+        id?: T;
+      };
+  disagreementPoints?:
+    | T
+    | {
+        point?: T;
+        id?: T;
+      };
+  systemOpinion?: T;
   status?: T;
   statusMessage?: T;
+  scriptStatus?: T;
+  scriptStatusMessage?: T;
   updatedAt?: T;
   createdAt?: T;
 }

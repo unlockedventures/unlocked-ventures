@@ -46,6 +46,8 @@ services:
       - .env
     environment:
       TRANSCRIBER_URL: http://transcriber:8080
+      # GEMINI_API_KEY comes from env_file (.env). Do not set it here with
+      # ${GEMINI_API_KEY:-} — an empty interpolation overrides env_file.
     volumes:
       - .:/app
       - node_modules:/app/node_modules

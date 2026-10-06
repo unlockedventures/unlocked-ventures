@@ -4,6 +4,7 @@ import { Button, useAllFormFields, useDocumentInfo } from '@payloadcms/ui'
 import { useEffect, useRef, useState } from 'react'
 
 import { transcriptButtonState } from '@/pipeline/button-state'
+import { overallTranscriptPercent } from '@/pipeline/progress'
 
 type PipelineResponse = {
   transcript?: string | null
@@ -16,17 +17,33 @@ function fieldText(value: unknown) {
   return typeof value === 'string' ? value : ''
 }
 
+function videoLinkCount(value: unknown) {
+  if (!Array.isArray(value)) return 1
+  const count = value.filter((row) => {
+    if (!row || typeof row !== 'object') return false
+    const url = (row as { url?: unknown }).url
+    return typeof url === 'string' && url.trim() !== ''
+  }).length
+  return Math.max(1, count)
+}
+
 export function GenerateTranscriptField() {
   const { id } = useDocumentInfo()
   const [fields, dispatchFields] = useAllFormFields()
   const [watching, setWatching] = useState(false)
   const [pending, setPending] = useState(false)
   const [localMessage, setLocalMessage] = useState<string | null>(null)
+  const [stagePercent, setStagePercent] = useState<number | null>(null)
   const status = fieldText(fields.status?.value) || 'idle'
   const statusMessage = fieldText(fields.statusMessage?.value)
   const statusRef = useRef(status)
   statusRef.current = status
   const button = transcriptButtonState({ saved: id != null && id !== '', status, pending })
+  const overall = overallTranscriptPercent({ statusMessage, stagePercent })
+  const percent =
+    status === 'processing' || watching
+      ? (overall ?? (stagePercent != null ? Math.min(99, Math.max(0, Math.round(stagePercent))) : 0))
+      : null
 
   useEffect(() => {
     if (status === 'processing') setWatching(true)
@@ -38,16 +55,26 @@ export function GenerateTranscriptField() {
 
     async function pull() {
       try {
-        const response = await fetch(`/api/pipeline/${id}?depth=0`, { credentials: 'include' })
-        if (!response.ok || cancelled) return
-        const doc = (await response.json()) as PipelineResponse
+        const [docResponse, progressResponse] = await Promise.all([
+          fetch(`/api/pipeline/${id}?depth=0`, { credentials: 'include' }),
+          fetch('/api/pipeline/progress', { credentials: 'include' }),
+        ])
+        if (!docResponse.ok || cancelled) return
+        const doc = (await docResponse.json()) as PipelineResponse
         if (cancelled) return
         dispatchFields({ type: 'UPDATE', path: 'transcript', value: doc.transcript ?? '' })
         dispatchFields({ type: 'UPDATE', path: 'status', value: doc.status ?? 'idle' })
         dispatchFields({ type: 'UPDATE', path: 'statusMessage', value: doc.statusMessage ?? '' })
+        if (progressResponse.ok) {
+          const progress = (await progressResponse.json()) as { percent?: number }
+          if (!cancelled && typeof progress.percent === 'number') {
+            setStagePercent(progress.percent)
+          }
+        }
         if (doc.status === 'ready' || doc.status === 'error') {
           setPending(false)
           setWatching(false)
+          setStagePercent(null)
         }
       } catch {
         if (cancelled) return
@@ -55,6 +82,7 @@ export function GenerateTranscriptField() {
         setLocalMessage('Could not generate a transcript.')
         setPending(false)
         setWatching(false)
+        setStagePercent(null)
       }
     }
 
@@ -68,9 +96,17 @@ export function GenerateTranscriptField() {
 
   async function onGenerate() {
     if (button.disabled || id == null) return
+    const total = videoLinkCount(fields.videoLinks?.value)
     setLocalMessage(null)
     setPending(true)
     setWatching(true)
+    setStagePercent(0)
+    dispatchFields({ type: 'UPDATE', path: 'status', value: 'processing' })
+    dispatchFields({
+      type: 'UPDATE',
+      path: 'statusMessage',
+      value: `Generating transcript for video 1 of ${total}.`,
+    })
     try {
       const response = await fetch('/api/pipeline/transcribe', {
         method: 'POST',
@@ -82,8 +118,11 @@ export function GenerateTranscriptField() {
       if (!response.ok) {
         if (
           response.status === 409 &&
-          body?.error === 'This transcript is already being generated.'
+          (body?.error === 'This transcript is already being generated.' ||
+            body?.error === 'Another transcript is already being generated. Try again when it finishes.')
         ) {
+          setWatching(true)
+          setPending(true)
           return
         }
         setLocalMessage(body?.error ?? 'Could not generate a transcript.')
@@ -93,6 +132,7 @@ export function GenerateTranscriptField() {
             if (statusRef.current !== 'processing') {
               setWatching(false)
               setPending(false)
+              setStagePercent(null)
             }
             return
           }
@@ -106,21 +146,25 @@ export function GenerateTranscriptField() {
           } else {
             setWatching(false)
             setPending(false)
+            setStagePercent(null)
           }
         } catch {
           if (statusRef.current !== 'processing') {
             setWatching(false)
             setPending(false)
+            setStagePercent(null)
           }
         }
         return
       }
       setPending(false)
+      setStagePercent(null)
     } catch {
       if (statusRef.current === 'processing') return
       setLocalMessage('Could not generate a transcript.')
       setWatching(false)
       setPending(false)
+      setStagePercent(null)
     }
   }
 
@@ -132,6 +176,7 @@ export function GenerateTranscriptField() {
         Generate Transcript
       </Button>
       {detail ? <p>{detail}</p> : null}
+      {percent != null ? <p>{percent}%</p> : null}
     </div>
   )
 }

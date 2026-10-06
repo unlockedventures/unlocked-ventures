@@ -1,0 +1,179 @@
+import { GoogleGenerativeAI } from '@google/generative-ai'
+
+import {
+  formatScriptJson,
+  parseScriptEnvelope,
+  ScriptValidationError,
+  toPointRows,
+  type ScriptEnvelope,
+} from '@/pipeline/script-schema'
+
+// Prefer a current lite model; older flash IDs are retired for many new keys.
+export const DEFAULT_GEMINI_MODEL = 'gemini-3.1-flash-lite'
+
+const FALLBACK_MODELS = [
+  'gemini-3.1-flash-lite',
+  'gemini-3.8-flash',
+  'gemini-flash-latest',
+]
+
+export type GenerateScriptResult =
+  | {
+      ok: true
+      scriptJson: string
+      summary: string
+      mainPoints: { point: string }[]
+      contrastingPoints: { point: string }[]
+      disagreementPoints: { point: string }[]
+      systemOpinion: string
+    }
+  | { ok: false; error: string }
+
+export type GeminiGenerateFn = (args: {
+  apiKey: string
+  model: string
+  prompt: string
+}) => Promise<string>
+
+const SYSTEM_PROMPT = `You turn a raw video transcript into a podcast-video script and analysis.
+Return JSON only, no markdown fences.
+
+Shape:
+{
+  "script": {
+    "format": "podcast_video",
+    "title": string,
+    "estimatedWordCount": number,
+    "estimatedDurationSeconds": number,
+    "sections": [
+      {
+        "id": string,
+        "heading": string,
+        "narration": string,
+        "visualCue": string,
+        "onScreenText": string,
+        "durationHintSeconds": number
+      }
+    ]
+  },
+  "summary": string,
+  "mainPoints": string[],
+  "contrastingPoints": string[],
+  "disagreementPoints": string[],
+  "systemOpinion": string
+}
+
+Rules:
+- Use only the provided transcript.
+- Write narration in a clear podcast-host voice for a later narrated video.
+- Target about 2200 words of narration across sections (sum of narration).
+- mainPoints: at most 10 short bullets.
+- contrastingPoints: contrasts or tensions in the source.
+- disagreementPoints: only explicit disagreements; use [] if none.
+- systemOpinion: concise overall assessment, not a repeat of every point.
+- onScreenText may be an empty string.
+- section ids should be unique, like s1, s2, ...`
+
+export async function defaultGeminiGenerate(args: {
+  apiKey: string
+  model: string
+  prompt: string
+}): Promise<string> {
+  const client = new GoogleGenerativeAI(args.apiKey)
+  const model = client.getGenerativeModel({
+    model: args.model,
+    generationConfig: { responseMimeType: 'application/json' },
+  })
+  const result = await model.generateContent(args.prompt)
+  return result.response.text()
+}
+
+export async function generateScriptFromTranscript(args: {
+  transcript: string
+  apiKey: string
+  model?: string
+  generate?: GeminiGenerateFn
+  sleep?: (ms: number) => Promise<void>
+}): Promise<GenerateScriptResult> {
+  const transcript = args.transcript.trim()
+  if (!transcript) return { ok: false, error: 'Add a transcript before creating a podcast script.' }
+  if (!args.apiKey.trim()) return { ok: false, error: 'Gemini is not configured.' }
+
+  const generate = args.generate ?? defaultGeminiGenerate
+  const sleep = args.sleep ?? ((ms) => new Promise((resolve) => setTimeout(resolve, ms)))
+  const models = uniqueModels([args.model ?? DEFAULT_GEMINI_MODEL, ...FALLBACK_MODELS])
+  const prompt = `${SYSTEM_PROMPT}\n\nTranscript:\n${transcript}`
+
+  let lastError: unknown
+  for (const model of models) {
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      try {
+        const raw = await generate({ apiKey: args.apiKey, model, prompt })
+        const parsed = JSON.parse(raw) as unknown
+        const envelope = parseScriptEnvelope(parsed)
+        return envelopeToResult(envelope)
+      } catch (error) {
+        lastError = error
+        if (error instanceof ScriptValidationError) {
+          return { ok: false, error: error.message }
+        }
+        if (error instanceof SyntaxError) {
+          return { ok: false, error: 'Gemini returned invalid JSON.' }
+        }
+        if (!isRetryableGeminiError(error) || attempt === 2) break
+        await sleep(1000 * (attempt + 1))
+      }
+    }
+  }
+
+  return { ok: false, error: geminiErrorMessage(lastError) }
+}
+
+function uniqueModels(models: string[]): string[] {
+  const seen = new Set<string>()
+  const ordered: string[] = []
+  for (const model of models) {
+    const name = model.trim()
+    if (!name || seen.has(name)) continue
+    seen.add(name)
+    ordered.push(name)
+  }
+  return ordered
+}
+
+function isRetryableGeminiError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error)
+  return /503|429|high demand|rate limit|quota|temporarily|unavailable/i.test(message)
+}
+
+function geminiErrorMessage(error: unknown): string {
+  const message = error instanceof Error ? error.message : String(error)
+  if (/API key not valid|API_KEY_INVALID/i.test(message)) {
+    return 'Gemini rejected the API key.'
+  }
+  if (/429|quota|rate limit/i.test(message)) {
+    return 'Gemini rate limit reached. Try again in a moment.'
+  }
+  if (/503|high demand|temporarily/i.test(message)) {
+    return 'Gemini is busy right now. Try again in a moment.'
+  }
+  if (/404|no longer available|not found for API version/i.test(message)) {
+    return 'The configured Gemini model is unavailable. Check GEMINI model settings.'
+  }
+  if (/fetch failed|ECONNREFUSED|ENOTFOUND|network/i.test(message)) {
+    return 'Could not reach Gemini. Check network access from the app.'
+  }
+  return 'Could not generate a podcast script.'
+}
+
+function envelopeToResult(envelope: ScriptEnvelope): GenerateScriptResult {
+  return {
+    ok: true,
+    scriptJson: formatScriptJson(envelope.script),
+    summary: envelope.summary,
+    mainPoints: toPointRows(envelope.mainPoints),
+    contrastingPoints: toPointRows(envelope.contrastingPoints),
+    disagreementPoints: toPointRows(envelope.disagreementPoints),
+    systemOpinion: envelope.systemOpinion,
+  }
+}

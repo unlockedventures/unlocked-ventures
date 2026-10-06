@@ -1,3 +1,4 @@
+import json
 import shutil
 import subprocess
 import tempfile
@@ -8,7 +9,12 @@ import urllib.request
 from pathlib import Path
 
 from server import serve
-from transcribe import TranscriptionError, transcribe_url
+from transcribe import (
+    TranscriptionError,
+    segment_end_seconds,
+    transcribe_url,
+    whisper_percent_for_seconds,
+)
 
 URL = "https://www.youtube.com/watch?v=abcdefghijk"
 
@@ -27,6 +33,17 @@ def successful_run(command, timeout):
         directory = Path(command[command.index("--output_dir") + 1])
         (directory / "audio.txt").write_text("Hello from the video\n", encoding="utf-8")
     return Completed()
+
+
+class ProgressParseTests(unittest.TestCase):
+    def test_reads_segment_end_times(self):
+        self.assertEqual(segment_end_seconds("[00:22.000 --> 00:28.000] text"), 28.0)
+        self.assertEqual(segment_end_seconds("[01:02.000 --> 01:08.000] text"), 68.0)
+
+    def test_maps_audio_position_into_the_whisper_range(self):
+        self.assertEqual(whisper_percent_for_seconds(0, 100), 40)
+        self.assertEqual(whisper_percent_for_seconds(50, 100), 69)
+        self.assertEqual(whisper_percent_for_seconds(100, 100), 99)
 
 
 class TranscribeTests(unittest.TestCase):
@@ -115,3 +132,15 @@ class ServerTests(unittest.TestCase):
         self.assertEqual(caught.exception.code, 409)
         release.set()
         first.join(2)
+
+    def test_reports_progress_for_an_authorized_client(self):
+        progress = {"percent": 42}
+        server = serve(lambda url: url, "secret", threading.Lock(), progress=progress)
+        self.addCleanup(server.shutdown)
+        request = urllib.request.Request(
+            f"http://127.0.0.1:{server.server_address[1]}/progress",
+            headers={"Authorization": "Bearer secret"},
+        )
+        with urllib.request.urlopen(request) as response:
+            body = json.loads(response.read().decode("utf-8"))
+        self.assertEqual(body, {"percent": 42})
