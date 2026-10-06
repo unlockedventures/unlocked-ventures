@@ -1,7 +1,7 @@
 'use client'
 
 import { Button, useAllFormFields, useDocumentInfo } from '@payloadcms/ui'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { transcriptButtonState } from '@/pipeline/button-state'
 
@@ -20,10 +20,13 @@ export function GenerateTranscriptField() {
   const { id } = useDocumentInfo()
   const [fields, dispatchFields] = useAllFormFields()
   const [watching, setWatching] = useState(false)
+  const [pending, setPending] = useState(false)
   const [localMessage, setLocalMessage] = useState<string | null>(null)
   const status = fieldText(fields.status?.value) || 'idle'
   const statusMessage = fieldText(fields.statusMessage?.value)
-  const button = transcriptButtonState({ saved: id != null && id !== '', status })
+  const statusRef = useRef(status)
+  statusRef.current = status
+  const button = transcriptButtonState({ saved: id != null && id !== '', status, pending })
 
   useEffect(() => {
     if (status === 'processing') setWatching(true)
@@ -34,13 +37,26 @@ export function GenerateTranscriptField() {
     let cancelled = false
 
     async function pull() {
-      const response = await fetch(`/api/pipeline/${id}?depth=0`, { credentials: 'include' })
-      if (!response.ok || cancelled) return
-      const doc = (await response.json()) as PipelineResponse
-      dispatchFields({ type: 'UPDATE', path: 'transcript', value: doc.transcript ?? '' })
-      dispatchFields({ type: 'UPDATE', path: 'status', value: doc.status ?? 'idle' })
-      dispatchFields({ type: 'UPDATE', path: 'statusMessage', value: doc.statusMessage ?? '' })
-      if (doc.status === 'ready' || doc.status === 'error') setWatching(false)
+      try {
+        const response = await fetch(`/api/pipeline/${id}?depth=0`, { credentials: 'include' })
+        if (!response.ok || cancelled) return
+        const doc = (await response.json()) as PipelineResponse
+        if (cancelled) return
+        dispatchFields({ type: 'UPDATE', path: 'transcript', value: doc.transcript ?? '' })
+        dispatchFields({ type: 'UPDATE', path: 'status', value: doc.status ?? 'idle' })
+        dispatchFields({ type: 'UPDATE', path: 'statusMessage', value: doc.statusMessage ?? '' })
+        if (doc.status === 'ready' || doc.status === 'error') {
+          setPending(false)
+          setWatching(false)
+        }
+      } catch {
+        if (cancelled) return
+        setLocalMessage('Could not generate a transcript.')
+        if (statusRef.current !== 'processing') {
+          setPending(false)
+          setWatching(false)
+        }
+      }
     }
 
     void pull()
@@ -54,17 +70,35 @@ export function GenerateTranscriptField() {
   async function onGenerate() {
     if (button.disabled || id == null) return
     setLocalMessage(null)
+    setPending(true)
     setWatching(true)
-    const response = await fetch('/api/pipeline/transcribe', {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id }),
-    })
-    const body = (await response.json().catch(() => null)) as PipelineResponse | null
-    if (!response.ok) {
-      setWatching(false)
-      setLocalMessage(body?.error ?? 'Could not generate a transcript.')
+    try {
+      const response = await fetch('/api/pipeline/transcribe', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      })
+      const body = (await response.json().catch(() => null)) as PipelineResponse | null
+      if (!response.ok) {
+        if (
+          response.status === 409 &&
+          body?.error === 'This transcript is already being generated.'
+        ) {
+          return
+        }
+        setWatching(false)
+        setPending(false)
+        setLocalMessage(body?.error ?? 'Could not generate a transcript.')
+        return
+      }
+      setPending(false)
+    } catch {
+      setLocalMessage('Could not generate a transcript.')
+      if (statusRef.current !== 'processing') {
+        setWatching(false)
+        setPending(false)
+      }
     }
   }
 

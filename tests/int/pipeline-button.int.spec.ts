@@ -23,4 +23,11 @@ describe('transcriptButtonState', () => {
       hint: null,
     })
   })
+
+  it('disables the button while the request is pending', () => {
+    expect(transcriptButtonState({ saved: true, status: 'idle', pending: true })).toEqual({
+      disabled: true,
+      hint: null,
+    })
+  })
 })
