@@ -85,7 +85,7 @@ const generateScriptEndpoint: Endpoint = {
 
     const body = (
       req.json ? await req.json().catch(() => null) : null
-    ) as { id?: number | string } | null
+    ) as { id?: number | string; hostGender?: unknown; guestGender?: unknown } | null
     const id = body?.id
     if (id == null || id === '') {
       return Response.json({ error: 'Pipeline document not found.' }, { status: 404 })
@@ -98,12 +98,16 @@ const generateScriptEndpoint: Endpoint = {
     const result = await handleGenerateScriptRequest({
       user: req.user,
       doc: doc as ScriptPipelineDoc | null,
+      hostGender: body?.hostGender,
+      guestGender: body?.guestGender,
       save: async (data) => {
         await req.payload.update({ collection: 'pipeline', id, data, depth: 0, req })
       },
-      generate: (transcript) =>
+      generate: ({ transcript, hostGender, guestGender }) =>
         generateScriptFromTranscript({
           transcript,
+          hostGender,
+          guestGender,
           // Read at request time so a key added after boot is visible.
           apiKey: process.env['GEMINI_API_KEY']?.trim() ?? '',
           model: process.env['GEMINI_MODEL']?.trim() || undefined,
@@ -165,6 +169,30 @@ export const Pipeline: CollectionConfig = {
       admin: { description: 'Generated text. You can edit it before saving.' },
     },
     {
+      name: 'hostGender',
+      type: 'select',
+      label: 'Host gender',
+      options: [
+        { label: 'Male', value: 'male' },
+        { label: 'Female', value: 'female' },
+      ],
+      admin: {
+        description: 'Voice/persona for the podcast host in script.json.',
+      },
+    },
+    {
+      name: 'guestGender',
+      type: 'select',
+      label: 'Guest gender',
+      options: [
+        { label: 'Male', value: 'male' },
+        { label: 'Female', value: 'female' },
+      ],
+      admin: {
+        description: 'Voice/persona for the podcast guest in script.json.',
+      },
+    },
+    {
       name: 'generateScript',
       type: 'ui',
       admin: {
@@ -178,7 +206,8 @@ export const Pipeline: CollectionConfig = {
       type: 'textarea',
       label: 'script.json',
       admin: {
-        description: 'Podcast-video script JSON for a later video generation step. You can edit it.',
+        description:
+          'Two-person (host/guest) podcast-video script JSON for a later video generation step. You can edit it.',
       },
     },
     {
@@ -208,7 +237,8 @@ export const Pipeline: CollectionConfig = {
       label: 'Disagreement points',
       labels: { singular: 'Disagreement point', plural: 'Disagreement points' },
       admin: {
-        description: 'Explicit disagreements from the source. Leave empty when none.',
+        description:
+          'Disagreements or debate points from the source. Inferred when the source has no explicit disagreements.',
       },
       fields: [{ name: 'point', type: 'text', required: true, label: 'Point' }],
     },

@@ -396,7 +396,15 @@ export interface Pipeline {
    */
   transcript?: string | null;
   /**
-   * Podcast-video script JSON for a later video generation step. You can edit it.
+   * Voice/persona for the podcast host in script.json.
+   */
+  hostGender?: ('male' | 'female') | null;
+  /**
+   * Voice/persona for the podcast guest in script.json.
+   */
+  guestGender?: ('male' | 'female') | null;
+  /**
+   * Two-person (host/guest) podcast-video script JSON for a later video generation step. You can edit it.
    */
   scriptJson?: string | null;
   /**
@@ -416,7 +424,7 @@ export interface Pipeline {
       }[]
     | null;
   /**
-   * Explicit disagreements from the source. Leave empty when none.
+   * Disagreements or debate points from the source. Inferred when the source has no explicit disagreements.
    */
   disagreementPoints?:
     | {
@@ -663,6 +671,8 @@ export interface PipelineSelect<T extends boolean = true> {
         id?: T;
       };
   transcript?: T;
+  hostGender?: T;
+  guestGender?: T;
   scriptJson?: T;
   summary?: T;
   mainPoints?:

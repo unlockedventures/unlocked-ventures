@@ -1,10 +1,13 @@
 import type { GenerateScriptResult } from '@/pipeline/generate-script'
+import { isSpeakerGender, type SpeakerGender } from '@/pipeline/script-schema'
 
 export type ScriptStatus = 'idle' | 'processing' | 'ready' | 'error'
 
 export type ScriptPipelineDoc = {
   id: number | string
   transcript?: string | null
+  hostGender?: string | null
+  guestGender?: string | null
   scriptStatus?: ScriptStatus | null
 }
 
@@ -27,8 +30,15 @@ export type ScriptRunResult = {
 export async function handleGenerateScriptRequest(args: {
   user: unknown
   doc: ScriptPipelineDoc | null
-  save: (data: ScriptPipelinePatch) => Promise<void>
-  generate: (transcript: string) => Promise<GenerateScriptResult>
+  /** Optional genders from the request body (preferred over unsaved form/DB values). */
+  hostGender?: unknown
+  guestGender?: unknown
+  save: (data: ScriptPipelinePatch & { hostGender?: SpeakerGender; guestGender?: SpeakerGender }) => Promise<void>
+  generate: (args: {
+    transcript: string
+    hostGender: SpeakerGender
+    guestGender: SpeakerGender
+  }) => Promise<GenerateScriptResult>
 }): Promise<ScriptRunResult> {
   if (!args.user) return { status: 401, body: { error: 'Unauthorized' } }
   if (!args.doc) return { status: 404, body: { error: 'Pipeline document not found.' } }
@@ -41,12 +51,32 @@ export async function handleGenerateScriptRequest(args: {
     return { status: 400, body: { error: 'Add a transcript before creating a podcast script.' } }
   }
 
+  const hostGender = isSpeakerGender(args.hostGender)
+    ? args.hostGender
+    : isSpeakerGender(args.doc.hostGender)
+      ? args.doc.hostGender
+      : null
+  const guestGender = isSpeakerGender(args.guestGender)
+    ? args.guestGender
+    : isSpeakerGender(args.doc.guestGender)
+      ? args.doc.guestGender
+      : null
+
+  if (!hostGender || !guestGender) {
+    return {
+      status: 400,
+      body: { error: 'Choose a host gender and a guest gender before creating a podcast script.' },
+    }
+  }
+
   await args.save({
+    hostGender,
+    guestGender,
     scriptStatus: 'processing',
     scriptStatusMessage: 'Generating podcast script…',
   })
 
-  const result = await args.generate(transcript)
+  const result = await args.generate({ transcript, hostGender, guestGender })
   if (!result.ok) {
     await args.save({
       scriptStatus: 'error',

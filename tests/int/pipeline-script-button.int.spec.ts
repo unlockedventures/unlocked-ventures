@@ -5,7 +5,13 @@ import { scriptButtonState } from '@/pipeline/script-button-state'
 describe('scriptButtonState', () => {
   it('asks for a save before the document has an id', () => {
     expect(
-      scriptButtonState({ saved: false, hasTranscript: true, scriptStatus: 'idle' }),
+      scriptButtonState({
+        saved: false,
+        hasTranscript: true,
+        hasHostGender: true,
+        hasGuestGender: true,
+        scriptStatus: 'idle',
+      }),
     ).toEqual({
       disabled: true,
       hint: 'Save this Pipeline document before creating a podcast script.',
@@ -14,22 +20,55 @@ describe('scriptButtonState', () => {
 
   it('asks for a transcript before generating a script', () => {
     expect(
-      scriptButtonState({ saved: true, hasTranscript: false, scriptStatus: 'idle' }),
+      scriptButtonState({
+        saved: true,
+        hasTranscript: false,
+        hasHostGender: true,
+        hasGuestGender: true,
+        scriptStatus: 'idle',
+      }),
     ).toEqual({
       disabled: true,
       hint: 'Generate a transcript before creating a podcast script.',
     })
   })
 
+  it('asks for host and guest genders before generating', () => {
+    expect(
+      scriptButtonState({
+        saved: true,
+        hasTranscript: true,
+        hasHostGender: false,
+        hasGuestGender: true,
+        scriptStatus: 'idle',
+      }),
+    ).toEqual({
+      disabled: true,
+      hint: 'Choose a host gender and a guest gender before creating a podcast script.',
+    })
+  })
+
   it('disables the button while a script run is in progress', () => {
     expect(
-      scriptButtonState({ saved: true, hasTranscript: true, scriptStatus: 'processing' }),
+      scriptButtonState({
+        saved: true,
+        hasTranscript: true,
+        hasHostGender: true,
+        hasGuestGender: true,
+        scriptStatus: 'processing',
+      }),
     ).toEqual({ disabled: true, hint: null })
   })
 
-  it('enables the button for a saved document with a transcript', () => {
+  it('enables the button when transcript and genders are set', () => {
     expect(
-      scriptButtonState({ saved: true, hasTranscript: true, scriptStatus: 'idle' }),
+      scriptButtonState({
+        saved: true,
+        hasTranscript: true,
+        hasHostGender: true,
+        hasGuestGender: true,
+        scriptStatus: 'idle',
+      }),
     ).toEqual({ disabled: false, hint: null })
   })
 })

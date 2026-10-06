@@ -5,7 +5,9 @@ import {
   parseScriptEnvelope,
   ScriptValidationError,
   toPointRows,
+  withAdminSpeakers,
   type ScriptEnvelope,
+  type SpeakerGender,
 } from '@/pipeline/script-schema'
 
 // Prefer a current lite model; older flash IDs are retired for many new keys.
@@ -35,7 +37,8 @@ export type GeminiGenerateFn = (args: {
   prompt: string
 }) => Promise<string>
 
-const SYSTEM_PROMPT = `You turn a raw video transcript into a podcast-video script and analysis.
+function buildSystemPrompt(hostGender: SpeakerGender, guestGender: SpeakerGender) {
+  return `You turn a raw video transcript into a two-person podcast-video script and analysis.
 Return JSON only, no markdown fences.
 
 Shape:
@@ -43,16 +46,22 @@ Shape:
   "script": {
     "format": "podcast_video",
     "title": string,
+    "speakers": {
+      "host": { "role": "host", "gender": "${hostGender}" },
+      "guest": { "role": "guest", "gender": "${guestGender}" }
+    },
     "estimatedWordCount": number,
     "estimatedDurationSeconds": number,
     "sections": [
       {
         "id": string,
         "heading": string,
-        "narration": string,
         "visualCue": string,
         "onScreenText": string,
-        "durationHintSeconds": number
+        "durationHintSeconds": number,
+        "turns": [
+          { "speaker": "host" | "guest", "text": string }
+        ]
       }
     ]
   },
@@ -65,14 +74,18 @@ Shape:
 
 Rules:
 - Use only the provided transcript.
-- Write narration in a clear podcast-host voice for a later narrated video.
-- Target about 2200 words of narration across sections (sum of narration).
+- Write a natural dialogue between a host and a guest for a later two-voice video.
+- Host gender is "${hostGender}". Guest gender is "${guestGender}". Keep speakers.gender exactly those values.
+- Every section must use "turns" (array of { speaker, text }). Do not use "narration".
+- speaker must be only "host" or "guest". Alternate naturally; both should speak in most sections.
+- Target about 2200 words across all turn text combined.
 - mainPoints: at most 10 short bullets.
 - contrastingPoints: contrasts or tensions in the source.
-- disagreementPoints: only explicit disagreements; use [] if none.
+- disagreementPoints: always return at least 2–5 short bullets. Prefer explicit disagreements from the source; if none are clear, infer plausible points of disagreement, tension, or debate raised by the material (still grounded in the transcript). Do not return [].
 - systemOpinion: concise overall assessment, not a repeat of every point.
 - onScreenText may be an empty string.
 - section ids should be unique, like s1, s2, ...`
+}
 
 export async function defaultGeminiGenerate(args: {
   apiKey: string
@@ -91,6 +104,8 @@ export async function defaultGeminiGenerate(args: {
 export async function generateScriptFromTranscript(args: {
   transcript: string
   apiKey: string
+  hostGender: SpeakerGender
+  guestGender: SpeakerGender
   model?: string
   generate?: GeminiGenerateFn
   sleep?: (ms: number) => Promise<void>
@@ -102,7 +117,7 @@ export async function generateScriptFromTranscript(args: {
   const generate = args.generate ?? defaultGeminiGenerate
   const sleep = args.sleep ?? ((ms) => new Promise((resolve) => setTimeout(resolve, ms)))
   const models = uniqueModels([args.model ?? DEFAULT_GEMINI_MODEL, ...FALLBACK_MODELS])
-  const prompt = `${SYSTEM_PROMPT}\n\nTranscript:\n${transcript}`
+  const prompt = `${buildSystemPrompt(args.hostGender, args.guestGender)}\n\nTranscript:\n${transcript}`
 
   let lastError: unknown
   for (const model of models) {
@@ -111,7 +126,10 @@ export async function generateScriptFromTranscript(args: {
         const raw = await generate({ apiKey: args.apiKey, model, prompt })
         const parsed = JSON.parse(raw) as unknown
         const envelope = parseScriptEnvelope(parsed)
-        return envelopeToResult(envelope)
+        return envelopeToResult(envelope, {
+          hostGender: args.hostGender,
+          guestGender: args.guestGender,
+        })
       } catch (error) {
         lastError = error
         if (error instanceof ScriptValidationError) {
@@ -166,10 +184,14 @@ function geminiErrorMessage(error: unknown): string {
   return 'Could not generate a podcast script.'
 }
 
-function envelopeToResult(envelope: ScriptEnvelope): GenerateScriptResult {
+function envelopeToResult(
+  envelope: ScriptEnvelope,
+  genders: { hostGender: SpeakerGender; guestGender: SpeakerGender },
+): GenerateScriptResult {
+  const script = withAdminSpeakers(envelope.script, genders)
   return {
     ok: true,
-    scriptJson: formatScriptJson(envelope.script),
+    scriptJson: formatScriptJson(script),
     summary: envelope.summary,
     mainPoints: toPointRows(envelope.mainPoints),
     contrastingPoints: toPointRows(envelope.contrastingPoints),
