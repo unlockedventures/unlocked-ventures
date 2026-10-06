@@ -65,6 +65,13 @@ def transcribe_url(url, *, run, work_root, timeout_seconds=1800, on_progress=Non
                 str(directory),
                 "--fp16",
                 "False",
+                # Applause / silence often becomes a "Thank you" repetition loop.
+                "--condition_on_previous_text",
+                "False",
+                "--no_speech_threshold",
+                "0.45",
+                "--hallucination_silence_threshold",
+                "2.0",
             ],
             run,
             deadline,
@@ -75,9 +82,54 @@ def transcribe_url(url, *, run, work_root, timeout_seconds=1800, on_progress=Non
         if not transcript_path.is_file():
             raise TranscriptionError("Could not transcribe this video.")
         report(100)
-        return transcript_path.read_text(encoding="utf-8").strip()
+        raw = transcript_path.read_text(encoding="utf-8").strip()
+        return strip_trailing_hallucinations(raw)
     finally:
         shutil.rmtree(directory, ignore_errors=True)
+
+
+_THANKS_LINE = re.compile(
+    r"^(?:thank(?:s|\s+you)(?:\s+so\s+much(?:\s+for\s+it)?)?[.!?]*)+$",
+    re.IGNORECASE,
+)
+
+
+def strip_trailing_hallucinations(text: str) -> str:
+    """Drop trailing repeated thank-you lines Whisper often invents over applause."""
+    lines = [line.rstrip() for line in text.splitlines()]
+    while lines and not lines[-1].strip():
+        lines.pop()
+    if not lines:
+        return ""
+
+    # Drop a trailing run of thank-you variants first (applause hallucinations).
+    thanks_run = 0
+    for line in reversed(lines):
+        if _THANKS_LINE.match(line.strip()):
+            thanks_run += 1
+        else:
+            break
+    if thanks_run >= 3:
+        lines = lines[:-thanks_run]
+    elif thanks_run == 2:
+        lines = lines[:-1]
+
+    # Collapse any remaining identical trailing lines (3+).
+    if lines:
+        last = lines[-1].strip()
+        if last:
+            identical = 0
+            for line in reversed(lines):
+                if line.strip() == last:
+                    identical += 1
+                else:
+                    break
+            if identical >= 3:
+                lines = lines[:-identical]
+
+    while lines and not lines[-1].strip():
+        lines.pop()
+    return "\n".join(lines).strip()
 
 
 def _run(command, run, deadline, failure):

@@ -12,6 +12,7 @@ from server import serve
 from transcribe import (
     TranscriptionError,
     segment_end_seconds,
+    strip_trailing_hallucinations,
     transcribe_url,
     whisper_percent_for_seconds,
 )
@@ -44,6 +45,32 @@ class ProgressParseTests(unittest.TestCase):
         self.assertEqual(whisper_percent_for_seconds(0, 100), 40)
         self.assertEqual(whisper_percent_for_seconds(50, 100), 69)
         self.assertEqual(whisper_percent_for_seconds(100, 100), 99)
+
+
+class HallucinationCleanupTests(unittest.TestCase):
+    def test_strips_trailing_repeated_thank_yous(self):
+        text = "\n".join(
+            [
+                "We cooked faster than the drive-thru.",
+                "Thank you.",
+                "Thank you so much for it.",
+                "Thank you.",
+                "Thank you.",
+                "Thank you.",
+                "Thank you.",
+                "Thank you.",
+            ]
+        )
+        cleaned = strip_trailing_hallucinations(text)
+        self.assertEqual(cleaned, "We cooked faster than the drive-thru.")
+
+    def test_keeps_a_single_closing_thank_you(self):
+        text = "That is the story.\nThank you."
+        self.assertEqual(strip_trailing_hallucinations(text), text)
+
+    def test_strips_identical_trailing_lines(self):
+        text = "Real ending.\nThanks.\nThanks.\nThanks.\nThanks."
+        self.assertEqual(strip_trailing_hallucinations(text), "Real ending.")
 
 
 class TranscribeTests(unittest.TestCase):
