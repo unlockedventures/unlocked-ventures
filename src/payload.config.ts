@@ -12,6 +12,7 @@ import { seedPodcastPage } from './data/seed-podcast-page'
 import { Awards } from './collections/Awards'
 import { CaseStudies } from './collections/CaseStudies'
 import { NewsPosts } from './collections/NewsPosts'
+import { Pipeline } from './collections/Pipeline'
 import { PodcastEpisodes } from './collections/PodcastEpisodes'
 import { TrustedLogos } from './collections/TrustedLogos'
 import { Users } from './collections/Users'
@@ -72,7 +73,7 @@ export default buildConfig({
       },
     },
   },
-  collections: [Users, Media, Awards, NewsPosts, PodcastEpisodes, CaseStudies, TrustedLogos],
+  collections: [Users, Media, Awards, NewsPosts, PodcastEpisodes, CaseStudies, TrustedLogos, Pipeline],
   globals: [
     About,
     AwardsSection,

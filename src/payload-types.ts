@@ -74,6 +74,7 @@ export interface Config {
     'podcast-episodes': PodcastEpisode;
     'case-studies': CaseStudy;
     'trusted-logos': TrustedLogo;
+    pipeline: Pipeline;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -88,6 +89,7 @@ export interface Config {
     'podcast-episodes': PodcastEpisodesSelect<false> | PodcastEpisodesSelect<true>;
     'case-studies': CaseStudiesSelect<false> | CaseStudiesSelect<true>;
     'trusted-logos': TrustedLogosSelect<false> | TrustedLogosSelect<true>;
+    pipeline: PipelineSelect<false> | PipelineSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -372,6 +374,33 @@ export interface TrustedLogo {
   createdAt: string;
 }
 /**
+ * Paste public video links and generate a transcript.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pipeline".
+ */
+export interface Pipeline {
+  id: number;
+  name: string;
+  videoLinks?:
+    | {
+        /**
+         * A public video address, such as YouTube, Vimeo, or Bilibili.
+         */
+        url?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Generated text. You can edit it before saving.
+   */
+  transcript?: string | null;
+  status?: ('idle' | 'processing' | 'ready' | 'error') | null;
+  statusMessage?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -422,6 +451,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'trusted-logos';
         value: number | TrustedLogo;
+      } | null)
+    | ({
+        relationTo: 'pipeline';
+        value: number | Pipeline;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -579,6 +612,24 @@ export interface TrustedLogosSelect<T extends boolean = true> {
   displayWidth?: T;
   displayHeight?: T;
   sortOrder?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pipeline_select".
+ */
+export interface PipelineSelect<T extends boolean = true> {
+  name?: T;
+  videoLinks?:
+    | T
+    | {
+        url?: T;
+        id?: T;
+      };
+  transcript?: T;
+  status?: T;
+  statusMessage?: T;
   updatedAt?: T;
   createdAt?: T;
 }
