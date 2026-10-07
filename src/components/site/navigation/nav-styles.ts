@@ -14,7 +14,7 @@ export const primaryItemSelectedClassName = 'text-[#292F35]'
  * flex-center against the capital letters.
  */
 export const primaryItemNameClassName =
-  'relative inline-flex h-full items-center after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-[2px] after:origin-left after:scale-x-0 after:bg-[#292F35] after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.4,0,0.2,1)] after:content-[""] group-hover/nav-item:after:scale-x-100'
+  'relative inline-flex h-full items-center after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:origin-left after:scale-x-0 after:bg-[#292F35] after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.4,0,0.2,1)] after:content-[""] group-hover/nav-item:after:scale-x-100'
 
 export const primaryItemNameActiveClassName = 'after:scale-x-100!'
 

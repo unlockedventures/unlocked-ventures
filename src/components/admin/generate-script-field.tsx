@@ -3,8 +3,11 @@
 import { Button, useAllFormFields, useDocumentInfo } from '@payloadcms/ui'
 import { useEffect, useRef, useState } from 'react'
 
+import { Skeleton } from '@/components/ui/skeleton'
 import { scriptButtonState } from '@/pipeline/script-button-state'
 import { isSpeakerGender } from '@/pipeline/script-schema'
+
+import './generate-podcast-skeleton.css'
 
 type PointRow = { id?: string | null; point?: string | null }
 
@@ -87,6 +90,7 @@ export function GenerateScriptField() {
   const [watching, setWatching] = useState(false)
   const [pending, setPending] = useState(false)
   const [localMessage, setLocalMessage] = useState<string | null>(null)
+  const rootRef = useRef<HTMLDivElement>(null)
   const scriptStatus = fieldText(fields.scriptStatus?.value) || 'idle'
   const scriptStatusMessage = fieldText(fields.scriptStatusMessage?.value)
   const transcriptStatus = fieldText(fields.status?.value) || 'idle'
@@ -99,6 +103,15 @@ export function GenerateScriptField() {
   const seenProcessingRef = useRef(false)
   statusRef.current = scriptStatus
   fieldsRef.current = fields
+  const transcribing = transcriptStatus === 'processing'
+
+  useEffect(() => {
+    const form = rootRef.current?.closest('form')
+    if (!form) return
+    form.classList.toggle('uv-pipeline-transcribing', transcribing)
+    return () => form.classList.remove('uv-pipeline-transcribing')
+  }, [transcribing])
+
   const button = scriptButtonState({
     saved: id != null && id !== '',
     hasTranscript: transcript.trim() !== '',
@@ -253,11 +266,26 @@ export function GenerateScriptField() {
   const detail = localMessage || button.hint || scriptStatusMessage
 
   return (
-    <div className="field-type ui">
-      <Button buttonStyle="primary" disabled={button.disabled} onClick={() => void onGenerate()}>
-        Generate Podcast Script
-      </Button>
-      {detail ? <p>{detail}</p> : null}
+    <div ref={rootRef} className="field-type ui">
+      {transcribing ? (
+        <div className="uv-podcast-skeleton" role="status" aria-live="polite">
+          <p className="uv-podcast-skeleton__status">Generating the transcript from the video link.</p>
+          <Skeleton className="uv-podcast-skeleton__button" />
+          <Skeleton className="uv-podcast-skeleton__script" />
+          <Skeleton className="uv-podcast-skeleton__summary" />
+          <Skeleton className="uv-podcast-skeleton__line" />
+          <Skeleton className="uv-podcast-skeleton__line" />
+          <Skeleton className="uv-podcast-skeleton__line" />
+          <Skeleton className="uv-podcast-skeleton__opinion" />
+        </div>
+      ) : (
+        <>
+          <Button buttonStyle="primary" disabled={button.disabled} onClick={() => void onGenerate()}>
+            Generate Podcast Script
+          </Button>
+          {detail ? <p>{detail}</p> : null}
+        </>
+      )}
     </div>
   )
 }
