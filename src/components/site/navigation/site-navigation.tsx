@@ -11,7 +11,39 @@ import type { NavItem } from '@/config/navigation'
 
 import { DesktopMenu } from '@/components/site/navigation/desktop-menu'
 import { MobileMenu } from '@/components/site/navigation/mobile-menu'
-import { primaryItemClassName } from '@/components/site/navigation/nav-styles'
+import {
+  isNavItemSelected,
+  navItemHasChildren,
+  primaryItemClassName,
+  primaryItemNameActiveClassName,
+  primaryItemNameClassName,
+  primaryItemOpenClassName,
+  primaryItemSelectedClassName,
+} from '@/components/site/navigation/nav-styles'
+
+/** Small chevron; top edge aligns with nav label cap-height. */
+function NavChevron({ open }: { open: boolean }) {
+  return (
+    <svg
+      aria-hidden
+      viewBox="0 0 12 8"
+      fill="none"
+      className={cn(
+        // Nudge up from vertical center so the icon sits on the cap line (14px / 22px)
+        'h-[6px] w-[10px] shrink-0 -translate-y-[5px] text-current transition-transform duration-300 ease-out',
+        open && 'rotate-180',
+      )}
+    >
+      <path
+        d="M1.25 1.75l4.75 4.5 4.75-4.5"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
 
 export function SiteNavigation({
   items,
@@ -91,31 +123,58 @@ export function SiteNavigation({
         className="mx-8 hidden h-full min-w-0 flex-1 items-stretch justify-center xl:flex"
         onMouseLeave={scheduleClose}
       >
-        {items.map((item) => (
-          <div
-            key={item.href}
-            className="flex cursor-pointer items-center px-3"
-            onMouseEnter={() => showMenu(item.href)}
-            onMouseLeave={() => {
-              if (suppressedHref.current === item.href) suppressedHref.current = null
-            }}
-            onFocus={() => showMenu(item.href)}
-          >
-            <Link
-              href={item.href}
-              aria-expanded={activeHref === item.href}
-              className={cn(
-                primaryItemClassName,
-                activeHref === item.href && 'scale-[1.06] before:scale-x-100! after:scale-x-100!',
-              )}
-              onMouseEnter={() => showMenu(item.href)}
-              onMouseDown={() => dismissMenu(item.href)}
-              onClick={() => dismissMenu(item.href)}
+        {items.map((item) => {
+          const hasChildren = navItemHasChildren(item)
+          const isOpen = activeHref === item.href
+          const isSelected = isNavItemSelected(pathname, item)
+          return (
+            <div
+              key={item.href}
+              className="flex h-full cursor-pointer items-center px-3"
+              onMouseEnter={() => {
+                if (hasChildren) showMenu(item.href)
+              }}
+              onMouseLeave={() => {
+                if (suppressedHref.current === item.href) suppressedHref.current = null
+              }}
+              onFocus={() => {
+                if (hasChildren) showMenu(item.href)
+              }}
             >
-              {item.label}
-            </Link>
-          </div>
-        ))}
+              <Link
+                href={item.href}
+                aria-current={isSelected ? 'page' : undefined}
+                aria-expanded={hasChildren ? isOpen : undefined}
+                aria-haspopup={hasChildren ? 'menu' : undefined}
+                className={cn(
+                  'group/nav-item',
+                  primaryItemClassName,
+                  isOpen && primaryItemOpenClassName,
+                  isSelected && primaryItemSelectedClassName,
+                )}
+                onMouseEnter={() => {
+                  if (hasChildren) showMenu(item.href)
+                }}
+                onMouseDown={() => {
+                  if (hasChildren) dismissMenu(item.href)
+                }}
+                onClick={() => {
+                  if (hasChildren) dismissMenu(item.href)
+                }}
+              >
+                <span
+                  className={cn(
+                    primaryItemNameClassName,
+                    (isOpen || isSelected) && primaryItemNameActiveClassName,
+                  )}
+                >
+                  {item.label}
+                </span>
+                {hasChildren ? <NavChevron open={isOpen} /> : null}
+              </Link>
+            </div>
+          )
+        })}
       </nav>
       {activeItem
         ? createPortal(

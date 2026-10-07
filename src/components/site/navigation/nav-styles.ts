@@ -1,2 +1,48 @@
+import type { NavItem } from '@/config/navigation'
+
+/** Top-level nav row (full header height; underline is on the name span). */
 export const primaryItemClassName =
-  'relative cursor-pointer font-sans text-[14px] leading-[22px] font-medium tracking-normal text-[#5E6572] uppercase antialiased transition-[scale] duration-300 ease-out hover:scale-[1.06] motion-reduce:transition-none motion-reduce:hover:scale-100 before:pointer-events-none before:absolute before:top-[18px] before:left-0 before:h-px before:w-1/2 before:origin-left before:scale-x-0 before:bg-[#292F35] before:transition-transform before:duration-300 before:ease-out hover:before:scale-x-100 after:pointer-events-none after:absolute after:top-[18px] after:right-0 after:h-px after:w-1/2 after:origin-right after:scale-x-0 after:bg-[#292F35] after:transition-transform after:duration-300 after:ease-out hover:after:scale-x-100'
+  'relative inline-flex h-full cursor-pointer items-center gap-1 font-sans text-[14px] leading-[22px] font-medium tracking-normal text-[#5E6572] uppercase antialiased transition-colors duration-300 ease-out hover:text-[#292F35]'
+
+export const primaryItemOpenClassName = 'text-[#292F35]'
+
+export const primaryItemSelectedClassName = 'text-[#292F35]'
+
+/**
+ * Underline under the nav name only — positioned on the header bottom edge.
+ * Width matches the label text, not the chevron or outer padding.
+ */
+export const primaryItemNameClassName =
+  'relative inline-flex h-full items-center after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-[2px] after:origin-left after:scale-x-0 after:bg-[#292F35] after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.4,0,0.2,1)] after:content-[""] group-hover/nav-item:after:scale-x-100'
+
+export const primaryItemNameActiveClassName = 'after:scale-x-100!'
+
+export function navItemHasChildren(item: { groups: { links: unknown[] }[] }) {
+  return item.groups.some((group) => group.links.length > 0)
+}
+
+function pathOnly(href: string) {
+  try {
+    return new URL(href, 'http://local.invalid').pathname.replace(/\/$/, '') || '/'
+  } catch {
+    return href.split(/[?#]/)[0]?.replace(/\/$/, '') || '/'
+  }
+}
+
+/** True when the current route belongs to this top-level nav item or one of its children. */
+export function isNavItemSelected(pathname: string, item: NavItem) {
+  const current = pathname.replace(/\/$/, '') || '/'
+
+  const candidates = [
+    item.href,
+    ...item.groups.flatMap((group) => group.links.filter((link) => !link.external).map((link) => link.href)),
+  ]
+
+  for (const href of candidates) {
+    const path = pathOnly(href)
+    if (path === '/') continue
+    if (current === path || current.startsWith(`${path}/`)) return true
+  }
+
+  return false
+}
