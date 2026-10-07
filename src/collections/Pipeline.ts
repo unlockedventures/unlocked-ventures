@@ -220,7 +220,10 @@ export const Pipeline: CollectionConfig = {
       name: 'summary',
       type: 'textarea',
       label: 'Summary',
-      admin: { description: 'Short episode summary.' },
+      admin: {
+        description:
+          'Episode summary (at least 3 sentences, 30 words, and 150 characters without whitespace).',
+      },
     },
     {
       name: 'mainPoints',

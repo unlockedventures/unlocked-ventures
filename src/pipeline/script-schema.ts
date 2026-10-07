@@ -43,11 +43,59 @@ export type ScriptEnvelope = {
 
 export type PointRow = { point: string }
 
+export const SUMMARY_MIN_SENTENCES = 3
+export const SUMMARY_MIN_CHARS_NO_WHITESPACE = 150
+export const SUMMARY_MIN_WORDS = 30
+
 export class ScriptValidationError extends Error {
   constructor(message: string) {
     super(message)
     this.name = 'ScriptValidationError'
   }
+}
+
+export function countSummarySentences(text: string): number {
+  return text
+    .split(/[.!?]+/)
+    .map((part) => part.trim())
+    .filter((part) => part.length > 0).length
+}
+
+export function countSummaryWords(text: string): number {
+  return text
+    .trim()
+    .split(/\s+/)
+    .filter((part) => part.length > 0).length
+}
+
+export function countSummaryCharsNoWhitespace(text: string): number {
+  return text.replace(/\s+/g, '').length
+}
+
+export function parseSummary(value: unknown): string {
+  const summary = asString(value)?.trim()
+  if (!summary) throw new ScriptValidationError('summary is required.')
+
+  const sentences = countSummarySentences(summary)
+  if (sentences < SUMMARY_MIN_SENTENCES) {
+    throw new ScriptValidationError(
+      `summary must have at least ${SUMMARY_MIN_SENTENCES} sentences.`,
+    )
+  }
+
+  const chars = countSummaryCharsNoWhitespace(summary)
+  if (chars < SUMMARY_MIN_CHARS_NO_WHITESPACE) {
+    throw new ScriptValidationError(
+      `summary must have at least ${SUMMARY_MIN_CHARS_NO_WHITESPACE} characters without whitespace.`,
+    )
+  }
+
+  const words = countSummaryWords(summary)
+  if (words < SUMMARY_MIN_WORDS) {
+    throw new ScriptValidationError(`summary must have at least ${SUMMARY_MIN_WORDS} words.`)
+  }
+
+  return summary
 }
 
 function asRecord(value: unknown): Record<string, unknown> | null {
@@ -200,9 +248,8 @@ export function parseScriptEnvelope(value: unknown): ScriptEnvelope {
   const row = asRecord(value)
   if (!row) throw new ScriptValidationError('Response must be a JSON object.')
 
-  const summary = asString(row.summary)?.trim()
+  const summary = parseSummary(row.summary)
   const systemOpinion = asString(row.systemOpinion)?.trim()
-  if (!summary) throw new ScriptValidationError('summary is required.')
   if (!systemOpinion) throw new ScriptValidationError('systemOpinion is required.')
 
   return {

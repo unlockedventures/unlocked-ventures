@@ -408,7 +408,7 @@ export interface Pipeline {
    */
   scriptJson?: string | null;
   /**
-   * Short episode summary.
+   * Episode summary (at least 3 sentences, 30 words, and 150 characters without whitespace).
    */
   summary?: string | null;
   mainPoints?:

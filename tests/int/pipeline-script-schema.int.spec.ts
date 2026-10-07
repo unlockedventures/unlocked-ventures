@@ -33,7 +33,8 @@ const validEnvelope = {
       },
     ],
   },
-  summary: 'A short summary of the episode.',
+  summary:
+    'This episode explores rising website costs across global markets and why teams feel stuck. The host and guest unpack how legacy tooling no longer scales for modern delivery. They finish with practical steps leaders can take to cut spend without slowing the business.',
   mainPoints: ['Point one', 'Point two'],
   contrastingPoints: ['Old process vs new platform'],
   disagreementPoints: [],
@@ -97,6 +98,15 @@ describe('parseScriptEnvelope', () => {
         mainPoints: Array.from({ length: 11 }, (_, i) => `Point ${i + 1}`),
       }),
     ).toThrow(ScriptValidationError)
+  })
+
+  it('rejects a summary that is too short', () => {
+    expect(() =>
+      parseScriptEnvelope({
+        ...validEnvelope,
+        summary: 'Too short.',
+      }),
+    ).toThrow(/summary must have at least 3 sentences/)
   })
 
   it('allows empty disagreement points', () => {

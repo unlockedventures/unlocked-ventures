@@ -27,7 +27,8 @@ const geminiPayload = {
       },
     ],
   },
-  summary: 'Summary text',
+  summary:
+    'This episode opens with a clear look at the core story from the source video. The host and guest trade perspectives on what matters most for listeners. They close by connecting the main tensions to practical takeaways teams can use.',
   mainPoints: ['One'],
   contrastingPoints: ['Contrast'],
   disagreementPoints: [],
@@ -45,7 +46,7 @@ describe('generateScriptFromTranscript', () => {
     })
     expect(result.ok).toBe(true)
     if (!result.ok) return
-    expect(result.summary).toBe('Summary text')
+    expect(result.summary).toContain('This episode opens')
     expect(result.mainPoints).toEqual([{ point: 'One' }])
     expect(result.scriptJson).toContain('podcast_video')
     expect(result.scriptJson).toContain('"gender": "female"')

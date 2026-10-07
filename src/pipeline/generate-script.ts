@@ -79,6 +79,7 @@ Rules:
 - Every section must use "turns" (array of { speaker, text }). Do not use "narration".
 - speaker must be only "host" or "guest". Alternate naturally; both should speak in most sections.
 - Target about 2200 words across all turn text combined.
+- summary: at least 3 complete sentences, at least 30 words, and at least 150 characters excluding whitespace.
 - mainPoints: at most 10 short bullets.
 - contrastingPoints: contrasts or tensions in the source.
 - disagreementPoints: always return at least 2–5 short bullets. Prefer explicit disagreements from the source; if none are clear, infer plausible points of disagreement, tension, or debate raised by the material (still grounded in the transcript). Do not return [].
