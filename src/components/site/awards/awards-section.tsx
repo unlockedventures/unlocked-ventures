@@ -31,7 +31,7 @@ export function AwardsSection({
         <h2 className="font-sans text-[2rem] leading-10 font-normal tracking-[-0.02em] text-[#33353F] md:text-[3rem] md:leading-[3.5rem] md:tracking-[-1px]">
           {title}
         </h2>
-        <ul className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-6 min-[1440px]:gap-x-6! min-[1440px]:gap-y-[86px]!">
+        <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5 lg:grid-cols-6 lg:gap-6">
           {awards.map((award) => (
             <li
               key={award.name}
