@@ -50,7 +50,7 @@ export function DesktopMenu({
                     <li key={link.href}>
                       <NavAnchor
                         link={link}
-                        className="cursor-pointer font-sans text-[16px] leading-6 font-normal text-[#292F35] antialiased transition-colors hover:text-[#1CACAE]"
+                        className="relative inline-block cursor-pointer font-sans text-[16px] leading-6 font-normal text-[#292F35] antialiased after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:origin-left after:scale-x-0 after:bg-current after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.4,0,0.2,1)] after:content-[''] hover:after:scale-x-100"
                       />
                     </li>
                   ))}
