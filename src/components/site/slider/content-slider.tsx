@@ -32,6 +32,7 @@ export function ContentSlider({
   endFadeClassName,
 }: ContentSliderProps) {
   const scrollerRef = useRef<HTMLDivElement>(null)
+  const [edgesReady, setEdgesReady] = useState(false)
   const [canPrevious, setCanPrevious] = useState(false)
   const [canNext, setCanNext] = useState(false)
 
@@ -41,6 +42,7 @@ export function ContentSlider({
     const maxScroll = scroller.scrollWidth - scroller.clientWidth
     setCanPrevious(scroller.scrollLeft > 2)
     setCanNext(maxScroll > 2 && scroller.scrollLeft < maxScroll - 2)
+    setEdgesReady(true)
   }, [])
 
   useLayoutEffect(() => {
@@ -84,10 +86,15 @@ export function ContentSlider({
         <div className={cn('flex shrink-0 gap-5', controlsClassName)}>
           <SliderControl
             direction="previous"
-            disabled={!canPrevious}
+            // Keep disabled off until scroll metrics exist so SSR HTML matches the first client paint.
+            disabled={edgesReady && !canPrevious}
             onClick={() => scrollBySlide(-1)}
           />
-          <SliderControl direction="next" disabled={!canNext} onClick={() => scrollBySlide(1)} />
+          <SliderControl
+            direction="next"
+            disabled={edgesReady && !canNext}
+            onClick={() => scrollBySlide(1)}
+          />
         </div>
       </div>
       <div className="relative">
@@ -148,7 +155,7 @@ export function SliderControl({
     <button
       type="button"
       aria-label={label}
-      disabled={disabled}
+      disabled={disabled || undefined}
       onClick={onClick}
       className={cn(
         'inline-flex size-12 cursor-pointer items-center justify-center rounded-full border border-[#EBEDF0] text-[#30373F] disabled:cursor-not-allowed disabled:opacity-40',
