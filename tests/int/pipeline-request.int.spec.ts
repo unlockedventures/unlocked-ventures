@@ -56,6 +56,24 @@ describe('requestTranscript', () => {
     expect(result).toEqual({ ok: false, error: 'Video unavailable', stop: false })
   })
 
+  it('stops the run when the transcriber reports out-of-memory', async () => {
+    const result = await requestTranscript({
+      url: 'https://vimeo.com/123456789',
+      endpoint: 'http://transcriber:8080',
+      secret: 'secret',
+      fetchImpl: async () =>
+        jsonResponse(422, {
+          error: 'The transcriber ran out of memory loading Whisper (turbo). Set WHISPER_MODEL=small.',
+          stop: true,
+        }),
+    })
+    expect(result.ok).toBe(false)
+    if (!result.ok) {
+      expect(result.stop).toBe(true)
+      expect(result.error).toMatch(/out of memory/i)
+    }
+  })
+
   it('stops the run when the transcriber cannot be reached', async () => {
     const result = await requestTranscript({
       url: 'https://vimeo.com/123456789',

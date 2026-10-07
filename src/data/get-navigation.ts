@@ -14,18 +14,23 @@ export async function getNavigation(): Promise<NavigationData | null> {
 
   if (!doc.items?.length) return null
 
-  const items: NavItem[] = doc.items.map((item) => ({
-    label: item.label,
-    href: item.href,
-    groups: (item.groups ?? []).map((group) => ({
-      title: group.title || undefined,
-      links: (group.links ?? []).map((link): NavLink => ({
-        label: link.label,
-        href: link.href,
-        ...(link.external ? { external: true } : {}),
+  // Treat missing published as true so existing menu rows stay visible.
+  const items: NavItem[] = doc.items
+    .filter((item) => item.published !== false)
+    .map((item) => ({
+      label: item.label,
+      href: item.href,
+      groups: (item.groups ?? []).map((group) => ({
+        title: group.title || undefined,
+        links: (group.links ?? []).map((link): NavLink => ({
+          label: link.label,
+          href: link.href,
+          ...(link.external ? { external: true } : {}),
+        })),
       })),
-    })),
-  }))
+    }))
+
+  if (!items.length) return null
 
   return {
     exploreLabel: doc.exploreLabel || 'Explore',

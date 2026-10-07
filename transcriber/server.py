@@ -54,7 +54,10 @@ def serve(transcribe, secret, lock, port=0, progress=None):
                 try:
                     transcript = transcribe(url)
                 except TranscriptionError as error:
-                    self._json(422, {"error": str(error)})
+                    payload = {"error": str(error)}
+                    if getattr(error, "stop", False):
+                        payload["stop"] = True
+                    self._json(422, payload)
                     return
                 self._json(200, {"transcript": transcript})
             finally:

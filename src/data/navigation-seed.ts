@@ -3,6 +3,7 @@ export const navigationSeed = {
   items: [
     {
       label: 'Strategic Advisory',
+      published: true,
       href: '/#strategic-advisory',
       groups: [
         {
@@ -33,6 +34,7 @@ export const navigationSeed = {
     },
     {
       label: 'Digital Engineering',
+      published: true,
       href: '/#digital-engineering',
       groups: [
         {
@@ -51,6 +53,7 @@ export const navigationSeed = {
     },
     {
       label: 'Our Successes',
+      published: true,
       href: '/our-successes',
       groups: [
         {
@@ -63,6 +66,7 @@ export const navigationSeed = {
     },
     {
       label: 'Insights',
+      published: true,
       href: '/insights',
       groups: [
         {
@@ -84,6 +88,7 @@ export const navigationSeed = {
     },
     {
       label: 'Podcast',
+      published: true,
       href: '/podcast',
       groups: [
         {
@@ -96,6 +101,7 @@ export const navigationSeed = {
     },
     {
       label: 'About',
+      published: true,
       href: '/about',
       groups: [
         {

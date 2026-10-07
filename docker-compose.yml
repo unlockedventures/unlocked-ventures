@@ -17,6 +17,9 @@ services:
     build: ./transcriber
     environment:
       TRANSCRIBER_SECRET: ${TRANSCRIBER_SECRET:-}
+      # turbo (~large-v3) needs several GB RAM; local Docker often OOMs around 40%.
+      # Override with WHISPER_MODEL=turbo when the host has enough memory.
+      WHISPER_MODEL: ${WHISPER_MODEL:-small}
     volumes:
       - whisper-models:/root/.cache/whisper
     expose:

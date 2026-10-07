@@ -1,3 +1,4 @@
+import os
 import re
 import shutil
 import subprocess
@@ -9,7 +10,15 @@ from pathlib import Path
 
 
 class TranscriptionError(Exception):
-    pass
+    def __init__(self, message, *, stop=False):
+        super().__init__(message)
+        self.stop = stop
+
+
+def whisper_model_name():
+    """Whisper model id. Override with WHISPER_MODEL (e.g. small) when RAM is tight."""
+    name = (os.environ.get("WHISPER_MODEL") or "turbo").strip()
+    return name or "turbo"
 
 
 _SEGMENT_END = re.compile(
@@ -56,7 +65,7 @@ def transcribe_url(url, *, run, work_root, timeout_seconds=1800, on_progress=Non
                 "whisper",
                 str(audio),
                 "--model",
-                "turbo",
+                whisper_model_name(),
                 "--task",
                 "transcribe",
                 "--output_format",
@@ -169,6 +178,18 @@ def _run_with_crawl(command, run, deadline, failure, report, *, start_percent, e
         crawler.join(timeout=1)
 
 
+def _whisper_failure(returncode):
+    # 137 / -9: process was SIGKILL'd — almost always the Linux OOM killer for large models.
+    if returncode in (137, -9):
+        model = whisper_model_name()
+        return TranscriptionError(
+            f"The transcriber ran out of memory loading Whisper ({model}). "
+            "Set WHISPER_MODEL=small (or base) in .env, or free RAM and retry.",
+            stop=True,
+        )
+    return TranscriptionError("Could not transcribe this video.")
+
+
 def _run_whisper(command, run, deadline, report):
     remaining = deadline - time.monotonic()
     if remaining <= 0:
@@ -205,7 +226,7 @@ def _run_whisper(command, run, deadline, report):
             except subprocess.TimeoutExpired as error:
                 raise TranscriptionError("This video took longer than 30 minutes.") from error
         if completed.returncode != 0:
-            raise TranscriptionError("Could not transcribe this video.")
+            raise _whisper_failure(completed.returncode)
         report_at_least(99)
     finally:
         stop_crawl.set()

@@ -1,4 +1,5 @@
 import json
+import os
 import shutil
 import subprocess
 import tempfile
@@ -11,9 +12,11 @@ from pathlib import Path
 from server import serve
 from transcribe import (
     TranscriptionError,
+    _whisper_failure,
     segment_end_seconds,
     strip_trailing_hallucinations,
     transcribe_url,
+    whisper_model_name,
     whisper_percent_for_seconds,
 )
 
@@ -45,6 +48,33 @@ class ProgressParseTests(unittest.TestCase):
         self.assertEqual(whisper_percent_for_seconds(0, 100), 40)
         self.assertEqual(whisper_percent_for_seconds(50, 100), 69)
         self.assertEqual(whisper_percent_for_seconds(100, 100), 99)
+
+    def test_whisper_model_defaults_to_turbo(self):
+        previous = os.environ.pop("WHISPER_MODEL", None)
+        try:
+            self.assertEqual(whisper_model_name(), "turbo")
+            os.environ["WHISPER_MODEL"] = "small"
+            self.assertEqual(whisper_model_name(), "small")
+        finally:
+            if previous is None:
+                os.environ.pop("WHISPER_MODEL", None)
+            else:
+                os.environ["WHISPER_MODEL"] = previous
+
+    def test_oom_kill_is_a_stopping_error(self):
+        previous = os.environ.get("WHISPER_MODEL")
+        os.environ["WHISPER_MODEL"] = "turbo"
+        try:
+            error = _whisper_failure(137)
+            self.assertIsInstance(error, TranscriptionError)
+            self.assertTrue(error.stop)
+            self.assertIn("out of memory", str(error).lower())
+            self.assertIn("turbo", str(error))
+        finally:
+            if previous is None:
+                os.environ.pop("WHISPER_MODEL", None)
+            else:
+                os.environ["WHISPER_MODEL"] = previous
 
 
 class HallucinationCleanupTests(unittest.TestCase):

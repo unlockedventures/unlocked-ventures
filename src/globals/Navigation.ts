@@ -43,6 +43,16 @@ export const Navigation: GlobalConfig = {
           type: 'text',
           required: true,
         },
+        {
+          name: 'published',
+          type: 'checkbox',
+          label: 'Published in header',
+          defaultValue: true,
+          admin: {
+            description:
+              'When on, this item appears in the site header. Turn off to hide it without deleting it.',
+          },
+        },
         linkField(),
         {
           name: 'groups',

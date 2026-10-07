@@ -881,6 +881,10 @@ export interface Navigation {
   items: {
     label: string;
     /**
+     * When on, this item appears in the site header. Turn off to hide it without deleting it.
+     */
+    published?: boolean | null;
+    /**
      * A page on this site, such as /contact, or a full address starting with https://
      */
     href: string;
@@ -1552,6 +1556,7 @@ export interface NavigationSelect<T extends boolean = true> {
     | T
     | {
         label?: T;
+        published?: T;
         href?: T;
         groups?:
           | T

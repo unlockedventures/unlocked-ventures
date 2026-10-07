@@ -269,7 +269,11 @@ export function GenerateScriptField() {
     <div ref={rootRef} className="field-type ui">
       {transcribing ? (
         <div className="uv-podcast-skeleton" role="status" aria-live="polite">
-          <p className="uv-podcast-skeleton__status">Generating the transcript from the video link.</p>
+          <p className="uv-podcast-skeleton__status">
+            Generating the transcript from the video link…
+          </p>
+          <Skeleton className="uv-podcast-skeleton__select" />
+          <Skeleton className="uv-podcast-skeleton__select" />
           <Skeleton className="uv-podcast-skeleton__button" />
           <Skeleton className="uv-podcast-skeleton__script" />
           <Skeleton className="uv-podcast-skeleton__summary" />

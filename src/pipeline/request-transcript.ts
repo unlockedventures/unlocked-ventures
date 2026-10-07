@@ -28,11 +28,11 @@ export async function requestTranscript(args: {
     if (status >= 200 && status < 300 && typeof body?.transcript === 'string') {
       return { ok: true, transcript: body.transcript }
     }
-    return {
-      ok: false,
-      error: typeof body?.error === 'string' ? body.error : 'Transcription failed.',
-      stop: false,
-    }
+    const error = typeof body?.error === 'string' ? body.error : 'Transcription failed.'
+    const stop =
+      body?.stop === true ||
+      /out of memory|not enough memory|WHISPER_MODEL/i.test(error)
+    return { ok: false, error, stop }
   } catch {
     return { ok: false, error: 'The transcriber is unavailable.', stop: true }
   }
@@ -56,6 +56,7 @@ async function fetchTranscribe(args: {
   const body = (await response.json().catch(() => null)) as {
     transcript?: unknown
     error?: unknown
+    stop?: unknown
   } | null
   return { status: response.status, body }
 }
@@ -68,7 +69,7 @@ function postTranscribe(args: { url: string; endpoint: string; secret: string })
 
   return new Promise<{
     status: number
-    body: { transcript?: unknown; error?: unknown } | null
+    body: { transcript?: unknown; error?: unknown; stop?: unknown } | null
   }>((resolve, reject) => {
     const request = lib.request(
       {
@@ -90,9 +91,9 @@ function postTranscribe(args: { url: string; endpoint: string; secret: string })
         })
         response.on('end', () => {
           const text = Buffer.concat(chunks).toString('utf8')
-          let body: { transcript?: unknown; error?: unknown } | null = null
+          let body: { transcript?: unknown; error?: unknown; stop?: unknown } | null = null
           try {
-            body = JSON.parse(text) as { transcript?: unknown; error?: unknown }
+            body = JSON.parse(text) as { transcript?: unknown; error?: unknown; stop?: unknown }
           } catch {
             body = null
           }

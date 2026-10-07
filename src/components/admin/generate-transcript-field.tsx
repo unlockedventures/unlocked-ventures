@@ -60,8 +60,8 @@ export function GenerateTranscriptField() {
     async function pull() {
       try {
         const [docResponse, progressResponse] = await Promise.all([
-          fetch(`/api/pipeline/${id}?depth=0`, { credentials: 'include' }),
-          fetch('/api/pipeline/progress', { credentials: 'include' }),
+          fetch(`/api/pipeline/${id}?depth=0`, { credentials: 'include', cache: 'no-store' }),
+          fetch('/api/pipeline/progress', { credentials: 'include', cache: 'no-store' }),
         ])
         if (!docResponse.ok || cancelled) return
         const doc = (await docResponse.json()) as PipelineResponse
@@ -77,15 +77,13 @@ export function GenerateTranscriptField() {
         if (doc.status === 'processing') {
           seenProcessingRef.current = true
           dispatchFields({ type: 'UPDATE', path: 'transcript', value: doc.transcript ?? '' })
-          dispatchFields({ type: 'UPDATE', path: 'status', value: doc.status ?? 'idle' })
+          dispatchFields({ type: 'UPDATE', path: 'status', value: doc.status })
           dispatchFields({ type: 'UPDATE', path: 'statusMessage', value: doc.statusMessage ?? '' })
           return
         }
 
-        // Stale ready/error from before this click — keep waiting for processing.
-        if ((doc.status === 'ready' || doc.status === 'error') && !seenProcessingRef.current) {
-          return
-        }
+        // Ignore stale/non-processing docs until this run has been processing on the server.
+        if (!seenProcessingRef.current) return
 
         dispatchFields({ type: 'UPDATE', path: 'transcript', value: doc.transcript ?? '' })
         dispatchFields({ type: 'UPDATE', path: 'status', value: doc.status ?? 'idle' })
@@ -197,19 +195,28 @@ export function GenerateTranscriptField() {
 
       seenProcessingRef.current = true
       try {
-        const refresh = await fetch(`/api/pipeline/${id}?depth=0`, { credentials: 'include' })
+        const refresh = await fetch(`/api/pipeline/${id}?depth=0`, {
+          credentials: 'include',
+          cache: 'no-store',
+        })
         if (refresh.ok) {
           const doc = (await refresh.json()) as PipelineResponse
           dispatchFields({ type: 'UPDATE', path: 'transcript', value: doc.transcript ?? '' })
           dispatchFields({ type: 'UPDATE', path: 'status', value: doc.status ?? 'idle' })
           dispatchFields({ type: 'UPDATE', path: 'statusMessage', value: doc.statusMessage ?? '' })
+          if (doc.status === 'ready' || doc.status === 'error') {
+            setPending(false)
+            setWatching(false)
+            setStagePercent(null)
+            return
+          }
         }
       } catch {
         // polling effect will catch up if needed
       }
-      setPending(false)
-      setWatching(false)
-      setStagePercent(null)
+      // Keep polling if the long POST finished while the doc is still settling.
+      setPending(true)
+      setWatching(true)
     } catch {
       // Long Whisper runs can time out the browser fetch while the server keeps working.
       setWatching(true)
