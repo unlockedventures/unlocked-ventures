@@ -39,7 +39,10 @@ services:
     init: true
     extra_hosts:
       - host.docker.internal:host-gateway
-    command: sh /app/scripts/docker-dev.sh
+    # Strip CR so Windows checkouts (CRLF) do not die with: Illegal option -e
+    command: >
+      sh -c "tr -d '\\r' < /app/scripts/docker-dev.sh > /tmp/docker-dev.sh
+      && exec sh /tmp/docker-dev.sh"
     ports:
       - '3000:3000'
     env_file:
