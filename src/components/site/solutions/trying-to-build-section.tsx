@@ -1,6 +1,8 @@
 import Image from 'next/image'
 import Link from 'next/link'
 
+import { ButtonHoverArrow, buttonHoverLabelClassName } from '@/components/site/site-outline-button'
+
 const labelClassName = 'block leading-none'
 
 export type TryingToBuildSectionProps = {
@@ -44,16 +46,12 @@ export function TryingToBuildSection({ title, description, cta }: TryingToBuildS
         </div>
         <Link
           href={cta.href}
-          className="inline-flex h-14 items-center justify-center gap-3 bg-white px-6 font-sans text-base font-semibold text-[#222222]"
+          className="group/cta relative inline-flex h-14 items-center justify-center bg-white px-6 font-sans text-base font-semibold text-[#222222]"
         >
-          <span className={labelClassName}>{cta.label}</span>
-          <Image
-            src="/solutions/strategic-growth/icon-arrow-right.svg"
-            alt=""
-            width={20}
-            height={20}
-            className="size-5 shrink-0"
-          />
+          <span className="inline-flex items-center">
+            <span className={`${labelClassName} ${buttonHoverLabelClassName}`}>{cta.label}</span>
+            <ButtonHoverArrow />
+          </span>
         </Link>
       </div>
     </section>

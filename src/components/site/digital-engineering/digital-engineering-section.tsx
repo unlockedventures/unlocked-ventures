@@ -110,12 +110,8 @@ export function DigitalEngineeringSection({
           <SiteOutlineButton
             href={cta.href}
             text={cta.label}
-            icon={
-              <ArrowUpRight
-                className={cn(arrowMotionClassName, 'group-hover:rotate-45 group-focus-visible:rotate-45')}
-              />
-            }
-            className="group h-[60px] w-fit gap-2.5 rounded-none border border-[#D7EDED] bg-white px-7 text-base text-[#33353F] transition-[background-color,border-color,border-radius,box-shadow,translate,scale] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:scale-[1.06] hover:rounded-full hover:border-[#1CACAE] hover:bg-[#F4FBFA] hover:shadow-[0_20px_40px_-12px_rgba(28,172,174,0.85)] focus-visible:-translate-y-1 focus-visible:scale-[1.06] focus-visible:border-[#1CACAE] focus-visible:bg-[#F4FBFA] focus-visible:shadow-[0_20px_40px_-12px_rgba(28,172,174,0.85)] motion-reduce:transition-none motion-reduce:hover:translate-y-0 motion-reduce:hover:scale-100 motion-reduce:hover:shadow-none sm:h-[60px] sm:px-7 sm:text-base lg:h-[60px] lg:px-7 lg:text-base 2xl:h-[60px] 2xl:px-7 2xl:text-base"
+            hoverArrow
+            className="h-[60px] w-fit rounded-none border border-[#D7EDED] bg-white px-7 text-base text-[#33353F] transition-[background-color,border-color,border-radius,box-shadow,translate,scale] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:scale-[1.06] hover:rounded-full hover:border-[#1CACAE] hover:bg-[#F4FBFA] hover:shadow-[0_20px_40px_-12px_rgba(28,172,174,0.85)] focus-visible:-translate-y-1 focus-visible:scale-[1.06] focus-visible:border-[#1CACAE] focus-visible:bg-[#F4FBFA] focus-visible:shadow-[0_20px_40px_-12px_rgba(28,172,174,0.85)] motion-reduce:transition-none motion-reduce:hover:translate-y-0 motion-reduce:hover:scale-100 motion-reduce:hover:shadow-none sm:h-[60px] sm:px-7 sm:text-base lg:h-[60px] lg:px-7 lg:text-base 2xl:h-[60px] 2xl:px-7 2xl:text-base"
           />
         </div>
         <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-[minmax(0,556fr)_minmax(0,524fr)] lg:gap-12">

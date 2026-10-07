@@ -105,6 +105,7 @@ export function MobileMenu({
         <SiteOutlineButton
           href={cta.href}
           text={cta.label}
+          hoverArrow
           className="w-full"
           onClick={() => {
             if (isSamePage(cta.href)) onClose()

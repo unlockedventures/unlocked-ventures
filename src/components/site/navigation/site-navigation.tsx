@@ -21,27 +21,33 @@ import {
   primaryItemSelectedClassName,
 } from '@/components/site/navigation/nav-styles'
 
-/** Small chevron; top edge aligns with nav label cap-height. */
+/**
+ * Sized to 1cap (capital letter height) and self-end so the extra ascent
+ * above caps is excluded — icon centers between cap-top and baseline.
+ */
 function NavChevron({ open }: { open: boolean }) {
   return (
-    <svg
+    <span
       aria-hidden
-      viewBox="0 0 12 8"
-      fill="none"
-      className={cn(
-        // Nudge up from vertical center so the icon sits on the cap line (14px / 22px)
-        'h-[6px] w-[10px] shrink-0 -translate-y-[5px] text-current transition-transform duration-300 ease-out',
-        open && 'rotate-180',
-      )}
+      className="inline-flex pb-[0.55cap] w-[0.75em] shrink-0 items-center justify-center self-end"
     >
-      <path
-        d="M1.25 1.75l4.75 4.5 4.75-4.5"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
+      <svg
+        viewBox="0 0 10 6"
+        fill="none"
+        className={cn(
+          'block h-[0.55cap] w-full text-current transition-transform duration-300 ease-out',
+          open && 'rotate-180',
+        )}
+      >
+        <path
+          d="M1 1.25 5 4.75 9 1.25"
+          stroke="currentColor"
+          strokeWidth="1.75"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </span>
   )
 }
 
@@ -57,47 +63,12 @@ export function SiteNavigation({
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
   const [activeHref, setActiveHref] = useState<string | null>(null)
-  const closeTimer = useRef<number | null>(null)
-  const suppressedHref = useRef<string | null>(null)
-  const navRef = useRef<HTMLElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
   const activeItem = items.find((item) => item.href === activeHref) ?? null
 
-  const clearCloseTimer = () => {
-    if (closeTimer.current === null) return
-    window.clearTimeout(closeTimer.current)
-    closeTimer.current = null
+  const toggleMenu = (href: string) => {
+    setActiveHref((current) => (current === href ? null : href))
   }
-
-  const pointerIsOverMenu = () =>
-    Boolean(navRef.current?.matches(':hover') || panelRef.current?.matches(':hover'))
-
-  const showMenu = (href: string) => {
-    if (suppressedHref.current === href) return
-    suppressedHref.current = null
-    clearCloseTimer()
-    setActiveHref(href)
-  }
-
-  const dismissMenu = (href: string) => {
-    clearCloseTimer()
-    suppressedHref.current = href
-    setActiveHref(null)
-  }
-
-  const scheduleClose = () => {
-    clearCloseTimer()
-    closeTimer.current = window.setTimeout(() => {
-      if (pointerIsOverMenu()) return
-      setActiveHref(null)
-    }, 200)
-  }
-
-  useEffect(() => {
-    return () => {
-      if (closeTimer.current !== null) window.clearTimeout(closeTimer.current)
-    }
-  }, [])
 
   useEffect(() => {
     setOpen(false)
@@ -117,30 +88,13 @@ export function SiteNavigation({
 
   return (
     <>
-      <nav
-        ref={navRef}
-        aria-label="Primary"
-        className="mx-8 hidden h-full min-w-0 flex-1 items-stretch justify-center xl:flex"
-        onMouseLeave={scheduleClose}
-      >
+      <nav aria-label="Primary" className="mx-8 hidden h-full min-w-0 flex-1 items-stretch justify-center xl:flex">
         {items.map((item) => {
           const hasChildren = navItemHasChildren(item)
           const isOpen = activeHref === item.href
           const isSelected = isNavItemSelected(pathname, item)
           return (
-            <div
-              key={item.href}
-              className="flex h-full cursor-pointer items-center px-3"
-              onMouseEnter={() => {
-                if (hasChildren) showMenu(item.href)
-              }}
-              onMouseLeave={() => {
-                if (suppressedHref.current === item.href) suppressedHref.current = null
-              }}
-              onFocus={() => {
-                if (hasChildren) showMenu(item.href)
-              }}
-            >
+            <div key={item.href} className="flex h-full cursor-pointer items-center px-3">
               <Link
                 href={item.href}
                 aria-current={isSelected ? 'page' : undefined}
@@ -152,14 +106,16 @@ export function SiteNavigation({
                   isOpen && primaryItemOpenClassName,
                   isSelected && primaryItemSelectedClassName,
                 )}
-                onMouseEnter={() => {
-                  if (hasChildren) showMenu(item.href)
+                onClick={(event) => {
+                  if (!hasChildren) return
+                  event.preventDefault()
+                  toggleMenu(item.href)
                 }}
-                onMouseDown={() => {
-                  if (hasChildren) dismissMenu(item.href)
-                }}
-                onClick={() => {
-                  if (hasChildren) dismissMenu(item.href)
+                onKeyDown={(event) => {
+                  if (!hasChildren) return
+                  if (event.key !== 'Enter' && event.key !== ' ') return
+                  event.preventDefault()
+                  toggleMenu(item.href)
                 }}
               >
                 <span
@@ -168,9 +124,11 @@ export function SiteNavigation({
                     (isOpen || isSelected) && primaryItemNameActiveClassName,
                   )}
                 >
-                  {item.label}
+                  <span className="inline-flex items-center gap-1 leading-none">
+                    {item.label}
+                    {hasChildren ? <NavChevron open={isOpen} /> : null}
+                  </span>
                 </span>
-                {hasChildren ? <NavChevron open={isOpen} /> : null}
               </Link>
             </div>
           )
@@ -182,8 +140,6 @@ export function SiteNavigation({
               item={activeItem}
               exploreLabel={exploreLabel}
               panelRef={panelRef}
-              onEnter={() => showMenu(activeItem.href)}
-              onLeave={scheduleClose}
               onClose={() => setActiveHref(null)}
             />,
             document.body,

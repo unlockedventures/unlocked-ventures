@@ -47,6 +47,7 @@ export function SiteHeader({ cta, navigation, exploreLabel }: SiteHeaderProps) {
           <SiteOutlineButton
             href={cta.href}
             text={cta.label}
+            hoverArrow
             className="min-[1440px]:h-10! min-[1440px]:px-4! min-[1440px]:text-[15px]! min-[1440px]:leading-[22px]!"
           />
         </div>

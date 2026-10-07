@@ -9,15 +9,11 @@ export function DesktopMenu({
   item,
   exploreLabel,
   panelRef,
-  onEnter,
-  onLeave,
   onClose,
 }: {
   item: NavItem
   exploreLabel: string
   panelRef: RefObject<HTMLDivElement | null>
-  onEnter: () => void
-  onLeave: () => void
   onClose: () => void
 }) {
   return (
@@ -30,9 +26,7 @@ export function DesktopMenu({
       />
       <div
         ref={panelRef}
-        className="fixed inset-x-0 top-20 z-50 border-b border-[#E4E7EE] bg-[#F8F9FC]/95 shadow-[0_28px_60px_-24px_rgba(17,24,39,0.28)] backdrop-blur-xl before:absolute before:inset-x-0 before:-top-4 before:h-4 before:content-[''] max-xl:hidden min-[1440px]:top-20!"
-        onMouseEnter={onEnter}
-        onMouseLeave={onLeave}
+        className="fixed inset-x-0 top-20 z-50 border-b border-[#E4E7EE] bg-[#F8F9FC]/95 shadow-[0_28px_60px_-24px_rgba(17,24,39,0.28)] backdrop-blur-xl max-xl:hidden min-[1440px]:top-20!"
       >
         <div className="mx-auto flex w-full gap-16 px-4 py-10 sm:px-6 md:px-8 xl:px-14">
           <div className="w-64 shrink-0 border-r border-[#E4E7EE] pr-10">

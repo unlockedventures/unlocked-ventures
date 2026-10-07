@@ -9,6 +9,23 @@ const outlineClassName =
 
 const labelClassName = 'block leading-none'
 
+export const buttonHoverLabelClassName =
+  'transition-transform duration-200 ease-out group-hover/cta:-translate-x-2 group-focus-visible/cta:-translate-x-2 motion-reduce:transition-none'
+
+const hoverArrowClassName =
+  'pointer-events-none absolute top-1/2 right-1.5 inline-flex -translate-y-1/2 opacity-0 transition-opacity duration-200 ease-out group-hover/cta:opacity-100 group-focus-visible/cta:opacity-100 motion-reduce:transition-none'
+
+export function ButtonHoverArrow() {
+  return (
+    <span aria-hidden="true" className={hoverArrowClassName}>
+      <svg viewBox="0 0 13.88 9.42" className="h-2 w-3 shrink-0" fill="none">
+        <path d="M0 4.6h12.7" stroke="currentColor" strokeWidth="1.3" />
+        <path d="M8.34.54 12.79 4.71 8.34 8.87" stroke="currentColor" strokeWidth="1.3" />
+      </svg>
+    </span>
+  )
+}
+
 export function SiteOutlineButton({
   text,
   href,
@@ -17,6 +34,7 @@ export function SiteOutlineButton({
   type = 'button',
   disabled = false,
   icon,
+  hoverArrow = false,
 }: {
   text: string
   href?: string
@@ -25,13 +43,19 @@ export function SiteOutlineButton({
   type?: 'button' | 'submit' | 'reset'
   disabled?: boolean
   icon?: ReactNode
+  hoverArrow?: boolean
 }) {
-  const classNames = cn(outlineClassName, disabled && 'pointer-events-none opacity-50', className)
+  const classNames = cn(
+    outlineClassName,
+    hoverArrow && 'group/cta relative',
+    disabled && 'pointer-events-none opacity-50',
+    className,
+  )
   const label = (
-    <>
-      <span className={labelClassName}>{text}</span>
-      {icon}
-    </>
+    <span className="inline-flex items-center">
+      <span className={cn(labelClassName, hoverArrow && buttonHoverLabelClassName)}>{text}</span>
+      {hoverArrow ? <ButtonHoverArrow /> : icon}
+    </span>
   )
 
   if (href) {

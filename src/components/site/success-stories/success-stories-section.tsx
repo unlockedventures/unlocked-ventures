@@ -28,7 +28,7 @@ const trimmedLabelClassName =
   'block leading-none [text-box-edge:cap_alphabetic] [text-box-trim:trim-both]'
 
 const cardLiftClassName =
-  'transition-[translate,box-shadow] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] hover:z-10 hover:[translate:0_0_24px] hover:shadow-[0_14px_28px_-18px_rgba(23,22,22,0.16)] focus-within:z-10 focus-within:[translate:0_0_24px] focus-within:shadow-[0_14px_28px_-18px_rgba(23,22,22,0.16)] motion-reduce:transition-none motion-reduce:hover:[translate:none] motion-reduce:hover:shadow-none motion-reduce:focus-within:[translate:none] motion-reduce:focus-within:shadow-none'
+  'origin-center transition-transform duration-[400ms] ease hover:z-10 hover:-translate-y-[6px] hover:scale-[1.02] focus-within:z-10 focus-within:-translate-y-[6px] focus-within:scale-[1.02] motion-reduce:transition-none motion-reduce:hover:translate-y-0 motion-reduce:hover:scale-100 motion-reduce:focus-within:translate-y-0 motion-reduce:focus-within:scale-100'
 
 const titleLineBreaks: Record<string, string> = {
   'Automated object detection system': 'Automated object detection\nsystem',
@@ -90,7 +90,6 @@ function StoryImage({ src, className }: { src?: string; className?: string }) {
 
 function FeaturedStory({ story }: { story: SuccessStory }) {
   return (
-    <div className="[perspective:1400px]">
     <article
       className={cn(
         'relative flex min-h-[22rem] items-center overflow-hidden bg-[#F8F8F8] lg:h-[420px]',
@@ -131,16 +130,14 @@ function FeaturedStory({ story }: { story: SuccessStory }) {
         </div>
       </div>
     </article>
-    </div>
   )
 }
 
 function StoryCard({ story }: { story: SuccessStory }) {
   return (
-    <div className="h-full [perspective:1400px]">
     <article
       className={cn(
-        'relative flex min-h-80 flex-col justify-end overflow-hidden bg-[#F8F8F8] md:h-[420px]',
+        'relative flex h-full min-h-80 flex-col justify-end overflow-hidden bg-[#F8F8F8] md:h-[420px]',
         cardLiftClassName,
       )}
     >
@@ -169,7 +166,6 @@ function StoryCard({ story }: { story: SuccessStory }) {
         />
       </div>
     </article>
-    </div>
   )
 }
 

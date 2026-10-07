@@ -100,8 +100,8 @@ export function StrategicAdvisorySection({
           <SiteOutlineButton
             href={cta.href}
             text={cta.label}
-            icon={<ArrowUpRight className={arrowHoverClassName} />}
-            className="group h-[60px] gap-2.5 rounded-none border border-[#484D56] bg-[#484D56] px-5 text-base text-white shadow-none transition-[border-color,background-color,box-shadow] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] hover:border-[#d5d8de] hover:bg-[#555b66] hover:shadow-[0_0_0_6px_rgba(72,77,86,0.08),0_14px_30px_-16px_rgba(72,77,86,0.28)] focus-visible:border-[#d5d8de] focus-visible:bg-[#555b66] focus-visible:shadow-[0_0_0_6px_rgba(72,77,86,0.08),0_14px_30px_-16px_rgba(72,77,86,0.28)] sm:h-[60px] sm:px-5 sm:text-base lg:h-[60px] lg:px-5 lg:text-base 2xl:h-[60px] 2xl:px-5 2xl:text-base"
+            hoverArrow
+            className="h-[60px] rounded-none border border-[#484D56] bg-[#484D56] px-5 text-base text-white shadow-none transition-[border-color,background-color,box-shadow] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] hover:border-[#d5d8de] hover:bg-[#555b66] hover:shadow-[0_0_0_6px_rgba(72,77,86,0.08),0_14px_30px_-16px_rgba(72,77,86,0.28)] focus-visible:border-[#d5d8de] focus-visible:bg-[#555b66] focus-visible:shadow-[0_0_0_6px_rgba(72,77,86,0.08),0_14px_30px_-16px_rgba(72,77,86,0.28)] sm:h-[60px] sm:px-5 sm:text-base lg:h-[60px] lg:px-5 lg:text-base 2xl:h-[60px] 2xl:px-5 2xl:text-base"
           />
         </div>
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
