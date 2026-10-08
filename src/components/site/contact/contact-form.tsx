@@ -216,10 +216,16 @@ export function ContactForm({ content }: { content: ContactFormContent }) {
       </div>
       <button
         type="submit"
-        className="inline-flex h-12 w-fit cursor-pointer items-center gap-2.5 bg-[#484D56] px-5 font-sans text-base leading-6 font-normal text-white"
+        className="group inline-flex h-12 w-fit cursor-pointer items-center gap-2.5 rounded-md bg-[#484D56] px-5 font-sans text-base leading-6 font-normal text-white transition-[background-color,box-shadow,transform] duration-300 ease-out hover:-translate-y-0.5 hover:bg-[#3c4149] hover:shadow-[0_12px_28px_-14px_rgba(72,77,86,0.55)] focus-visible:-translate-y-0.5 focus-visible:bg-[#3c4149] focus-visible:shadow-[0_12px_28px_-14px_rgba(72,77,86,0.55)] focus-visible:outline-none motion-reduce:transition-none motion-reduce:hover:translate-y-0"
       >
         {content.submitLabel}
-        <Image src="/contact/icon-arrow-up-right.svg" alt="" width={24} height={24} />
+        <Image
+          src="/contact/icon-arrow-up-right.svg"
+          alt=""
+          width={24}
+          height={24}
+          className="size-6 shrink-0 transition-transform duration-300 ease-out group-hover:rotate-45 group-focus-visible:rotate-45 motion-reduce:transition-none"
+        />
       </button>
     </form>
   )
