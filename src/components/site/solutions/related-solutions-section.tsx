@@ -16,7 +16,7 @@ export type RelatedSolutionsSectionProps = {
 export function RelatedSolutionsSection({ title, solutions }: RelatedSolutionsSectionProps) {
   return (
     <section className="bg-white">
-      <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-8 px-4 pt-16 pb-16 sm:px-6 md:px-8 md:pt-20 md:pb-20 lg:px-[72px] xl:gap-12 xl:px-[156px] xl:pt-[100px] xl:pb-[120px]">
+      <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-8 px-4 pt-16 pb-16 sm:px-6 md:px-8 md:pt-20 md:pb-20 xl:gap-12 xl:px-14 xl:pt-[100px] xl:pb-[120px]">
         <h2 className="font-sans text-[2rem] leading-[2.4rem] font-normal tracking-[-1px] text-[#171616] sm:text-4xl sm:leading-[2.75rem] lg:text-5xl lg:leading-[56px]">
           {title}
         </h2>

@@ -22,7 +22,22 @@ async function uploadFooterIcon(payload: Payload, file: string, alt: string) {
 
 export async function seedFooter(payload: Payload) {
   const current = await payload.findGlobal({ slug: 'site-footer' })
-  if (current.description) return
+
+  if (current.description) {
+    const pages = (current.pages ?? []).map((page) => {
+      const seeded = footerSeed.pages.find((item) => item.label === page.label)
+      if (!seeded || page.href === seeded.href) return page
+      return { ...page, href: seeded.href }
+    })
+    const needsUpdate = pages.some((page, index) => page.href !== current.pages?.[index]?.href)
+    if (needsUpdate) {
+      await payload.updateGlobal({
+        slug: 'site-footer',
+        data: { pages },
+      })
+    }
+    return
+  }
 
   const contacts = []
   for (const contact of footerSeed.contacts) {

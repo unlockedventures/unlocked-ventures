@@ -1,6 +1,5 @@
 import Link from 'next/link'
 
-import { SiteOutlineButton } from '@/components/site/site-outline-button'
 import { cn } from '@/lib/utils'
 
 export type SuccessStory = {
@@ -27,9 +26,6 @@ export type SuccessStoriesSectionProps = {
 const trimmedLabelClassName =
   'block leading-none [text-box-edge:cap_alphabetic] [text-box-trim:trim-both]'
 
-const cardLiftClassName =
-  'origin-center transition-transform duration-[400ms] ease hover:z-10 hover:-translate-y-[6px] hover:scale-[1.02] focus-within:z-10 focus-within:-translate-y-[6px] focus-within:scale-[1.02] motion-reduce:transition-none motion-reduce:hover:translate-y-0 motion-reduce:hover:scale-100 motion-reduce:focus-within:translate-y-0 motion-reduce:focus-within:scale-100'
-
 const titleLineBreaks: Record<string, string> = {
   'Automated object detection system': 'Automated object detection\nsystem',
   'Dynamic payment solution for telecom providers': 'Dynamic payment solution for\ntelecom providers',
@@ -44,18 +40,11 @@ function storyTitle(title: string) {
   return titleLineBreaks[title] ?? title
 }
 
-function ArrowUpRight({ className }: { className?: string }) {
+function ArrowRight({ className }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-      className={cn(
-        'size-6 shrink-0 transition-transform duration-300 ease-out group-hover:rotate-45 group-focus-visible:rotate-45',
-        className,
-      )}
-    >
+    <svg viewBox="0 0 24 24" aria-hidden="true" className={cn('size-5 shrink-0', className)}>
       <path
-        d="M7 17L17 7M7 7L17 7L17 17"
+        d="M5 12H19M13 6L19 12L13 18"
         fill="none"
         stroke="currentColor"
         strokeLinecap="round"
@@ -65,20 +54,17 @@ function ArrowUpRight({ className }: { className?: string }) {
   )
 }
 
-function StoryLink({
-  href,
-  label,
-  className,
-}: {
-  href: string
-  label: string
-  className?: string
-}) {
+function StoryCta({ label, className }: { label: string; className?: string }) {
   return (
-    <Link href={href} className={cn('group inline-flex items-center gap-2.5 font-sans text-base font-normal', className)}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-2.5 font-sans text-base font-normal text-[#33353F] no-underline transition-colors duration-300 ease-out group-hover:underline group-hover:decoration-[#33353F] group-hover:decoration-1 group-hover:underline-offset-4 group-focus-within:underline group-focus-within:decoration-[#33353F] group-focus-within:decoration-1 group-focus-within:underline-offset-4',
+        className,
+      )}
+    >
       <span className={trimmedLabelClassName}>{label}</span>
-      <ArrowUpRight />
-    </Link>
+      <ArrowRight className="transition-transform duration-300 ease-out group-hover:translate-x-0.5 group-focus-within:translate-x-0.5" />
+    </span>
   )
 }
 
@@ -90,27 +76,22 @@ function StoryImage({ src, className }: { src?: string; className?: string }) {
 
 function FeaturedStory({ story }: { story: SuccessStory }) {
   return (
-    <article
-      className={cn(
-        'relative flex min-h-[22rem] items-center overflow-hidden bg-[#F8F8F8] lg:h-[420px]',
-        cardLiftClassName,
-      )}
-    >
+    <article className="group relative flex min-h-[22rem] cursor-pointer items-center overflow-hidden bg-[#F3FBFA] shadow-none ring-0 ring-[#1CACAE]/0 transition-[box-shadow,ring-color,ring-width] duration-300 ease-out hover:shadow-[0_14px_36px_-20px_rgba(28,172,174,0.45)] hover:ring-2 hover:ring-[#1CACAE]/35 focus-within:shadow-[0_14px_36px_-20px_rgba(28,172,174,0.45)] focus-within:ring-2 focus-within:ring-[#1CACAE]/35 lg:h-[420px]">
+      <Link href={story.href} className="absolute inset-0 z-20" aria-label={story.ctaLabel} />
       {story.imageSrc ? (
         <div className="pointer-events-none absolute inset-y-0 right-0 w-full md:w-[58%] min-[1440px]:inset-auto min-[1440px]:top-0 min-[1440px]:left-[634px] min-[1440px]:h-[449px] min-[1440px]:w-[694px]!">
           <img
             src={story.imageSrc}
             alt=""
-            className="absolute inset-0 h-full w-full object-cover object-top grayscale"
+            className="absolute inset-0 h-full w-full object-cover object-top grayscale-0"
           />
-          <div className="absolute inset-y-0 left-0 w-[73%] bg-gradient-to-r from-[#F8F8F8] to-transparent min-[1440px]:bottom-auto min-[1440px]:h-[420px] min-[1440px]:w-[507px] min-[1440px]:bg-[linear-gradient(270deg,transparent_0%,#F8F8F8_100%)]" />
-          <div className="absolute top-[-4%] -left-[7.2%] h-[115%] w-[26.8%] bg-[#F8F8F8] blur-[100px] min-[1440px]:top-[-17px] min-[1440px]:left-[-50px] min-[1440px]:h-[483px] min-[1440px]:w-[186px] min-[1440px]:blur-[102px]" />
+          <div className="absolute inset-y-0 left-0 w-[78%] bg-[linear-gradient(90deg,#F3FBFA_0%,rgba(243,251,250,0.92)_38%,rgba(28,172,174,0.28)_68%,transparent_100%)] min-[1440px]:bottom-auto min-[1440px]:h-[420px] min-[1440px]:w-[507px] min-[1440px]:bg-[linear-gradient(270deg,transparent_0%,rgba(28,172,174,0.22)_40%,rgba(243,251,250,0.92)_72%,#F3FBFA_100%)]" />
         </div>
       ) : null}
       <div className="relative z-10 w-full px-6 py-10 sm:px-8 lg:px-[70px] lg:py-0 min-[1440px]:absolute min-[1440px]:top-[68px] min-[1440px]:left-[70px] min-[1440px]:w-[572px] min-[1440px]:p-0!">
         <div className="flex max-w-[572px] flex-col gap-6 min-[1440px]:w-full min-[1440px]:max-w-none">
           {story.badge ? (
-            <span className="inline-flex h-10 w-fit items-center bg-white px-5 font-inter text-base leading-[26px] font-normal text-[#231F20] uppercase">
+            <span className="inline-flex h-10 w-fit items-center bg-white px-5 font-inter text-base leading-[26px] font-normal text-[#231F20] uppercase transition-colors duration-300 ease-out group-hover:bg-[#1CACAE] group-hover:text-white group-focus-within:bg-[#1CACAE] group-focus-within:text-white">
               {story.badge}
             </span>
           ) : null}
@@ -125,7 +106,7 @@ function FeaturedStory({ story }: { story: SuccessStory }) {
                 </p>
               ) : null}
             </div>
-            <StoryLink href={story.href} label={story.ctaLabel} className="h-12 text-[#33353F]" />
+            <StoryCta label={story.ctaLabel} className="h-12" />
           </div>
         </div>
       </div>
@@ -135,23 +116,19 @@ function FeaturedStory({ story }: { story: SuccessStory }) {
 
 function StoryCard({ story }: { story: SuccessStory }) {
   return (
-    <article
-      className={cn(
-        'relative flex h-full min-h-80 flex-col justify-end overflow-hidden bg-[#F8F8F8] md:h-[420px]',
-        cardLiftClassName,
-      )}
-    >
-      <StoryImage src={story.imageSrc} className="inset-0 h-full w-full object-top grayscale" />
+    <article className="group relative flex h-full min-h-80 cursor-pointer flex-col justify-end overflow-hidden bg-[#F3FBFA] shadow-none ring-0 ring-[#1CACAE]/0 transition-[box-shadow,ring-color,ring-width] duration-300 ease-out hover:shadow-[0_14px_36px_-20px_rgba(28,172,174,0.45)] hover:ring-2 hover:ring-[#1CACAE]/35 focus-within:shadow-[0_14px_36px_-20px_rgba(28,172,174,0.45)] focus-within:ring-2 focus-within:ring-[#1CACAE]/35 md:h-[420px]">
+      <Link href={story.href} className="absolute inset-0 z-20" aria-label={story.ctaLabel} />
+      <StoryImage src={story.imageSrc} className="inset-0 h-full w-full object-top grayscale-0" />
       {story.imageSrc ? (
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent from-30% to-[#F8F8F8] to-70% min-[1440px]:inset-x-0 min-[1440px]:top-[161px] min-[1440px]:bottom-auto min-[1440px]:h-[259px] min-[1440px]:bg-[linear-gradient(180deg,transparent_0%,#F4F4F4_50%)]" />
-      ) : null}
-      {story.imageSrc ? (
-        <div className="pointer-events-none absolute hidden bg-[#F8F8F8] blur-[102px] min-[1440px]:top-[205px] min-[1440px]:-left-[25px] min-[1440px]:block min-[1440px]:h-[161px] min-[1440px]:w-[707px]" />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,#F3FBFA_0%,rgba(243,251,250,0.96)_24%,rgba(28,172,174,0.42)_52%,rgba(28,172,174,0.16)_74%,transparent_100%)]"
+        />
       ) : null}
       <div className="relative z-10 flex flex-col gap-6 p-6 sm:p-8 lg:p-[30px] min-[1440px]:absolute min-[1440px]:top-[239px] min-[1440px]:left-[30px] min-[1440px]:w-[572px] min-[1440px]:gap-4 min-[1440px]:p-0!">
         <div className="flex flex-col gap-6 min-[1440px]:gap-3">
           {story.category ? (
-            <p className="inline-flex h-8 w-fit items-center bg-white px-3 font-inter text-xs leading-4 font-normal text-[#231F20] uppercase">
+            <p className="inline-flex h-8 w-fit items-center bg-white px-3 font-inter text-xs leading-4 font-normal text-[#231F20] uppercase transition-colors duration-300 ease-out group-hover:bg-[#1CACAE] group-hover:text-white group-focus-within:bg-[#1CACAE] group-focus-within:text-white">
               {story.category}
             </p>
           ) : null}
@@ -159,11 +136,7 @@ function StoryCard({ story }: { story: SuccessStory }) {
             {storyTitle(story.title)}
           </h3>
         </div>
-        <StoryLink
-          href={story.href}
-          label={story.ctaLabel}
-          className="h-6 text-[#222222] min-[1440px]:gap-2 min-[1440px]:text-[rgba(34,34,34,0.7)]"
-        />
+        <StoryCta label={story.ctaLabel} className="h-6 min-[1440px]:gap-2" />
       </div>
     </article>
   )
@@ -183,12 +156,17 @@ export function SuccessStoriesSection({
           <h2 className="font-sans text-[2rem] leading-10 font-normal tracking-[-1px] text-[#33353F] md:text-5xl md:leading-[56px] min-[1440px]:text-[48px] min-[1440px]:leading-[56px] min-[1440px]:text-[#171616]">
             {title}
           </h2>
-          <SiteOutlineButton
+          <Link
             href={cta.href}
-            text={cta.label}
-            icon={<ArrowUpRight />}
-            className="group h-[60px] gap-2.5 border-0 bg-[#484D56] px-5 text-base text-white hover:bg-[#484D56] sm:h-[60px] sm:px-5 sm:text-base lg:h-[60px] lg:px-5 lg:text-base 2xl:h-[60px] 2xl:px-5 2xl:text-base"
-          />
+            className="group/case inline-flex cursor-pointer items-center font-sans text-base leading-6 font-normal text-[#33353F] no-underline"
+          >
+            <span className="underline decoration-transparent underline-offset-4 transition-colors duration-200 ease-out group-hover/case:decoration-[#33353F] group-focus-visible/case:decoration-[#33353F] motion-reduce:transition-none">
+              {cta.label}
+            </span>
+            <span className="inline-flex w-0 overflow-hidden opacity-0 transition-all duration-200 ease-out group-hover/case:ml-2 group-hover/case:w-5 group-hover/case:opacity-100 group-focus-visible/case:ml-2 group-focus-visible/case:w-5 group-focus-visible/case:opacity-100 motion-reduce:transition-none">
+              <ArrowRight className="size-5" />
+            </span>
+          </Link>
         </div>
         <div className="flex flex-col gap-3">
           <FeaturedStory story={feature} />

@@ -5,8 +5,7 @@ import { useEffect, useId, useRef, useState } from 'react'
 
 import type { CaseStudyCard } from '@/data/get-case-studies'
 import { cn } from '@/lib/utils'
-
-const pageSize = 8
+import { useCaseStudiesStore } from '@/stores/case-studies-store'
 
 export type CaseStudiesListingCopy = {
   metaTitle: string
@@ -217,8 +216,10 @@ export function CaseStudiesListing({
   stories: readonly CaseStudyCard[]
   copy: CaseStudiesListingCopy
 }) {
-  const [category, setCategory] = useState('all')
-  const [visibleCount, setVisibleCount] = useState(pageSize)
+  const category = useCaseStudiesStore((state) => state.category)
+  const visibleCount = useCaseStudiesStore((state) => state.visibleCount)
+  const setCategory = useCaseStudiesStore((state) => state.setCategory)
+  const showMore = useCaseStudiesStore((state) => state.showMore)
   const categories = [...new Set(stories.flatMap((story) => (story.category ? [story.category] : [])))]
   const filtered =
     category === 'all' ? stories : stories.filter((story) => story.category === category)
@@ -227,7 +228,7 @@ export function CaseStudiesListing({
 
   return (
     <div className="relative z-10 flex w-full flex-col gap-12 pt-12 md:pt-16 lg:pt-20 xl:gap-[72px]">
-      <div className="flex flex-col items-start justify-between gap-8 px-4 sm:px-6 md:px-8 lg:flex-row lg:max-[1439px]:items-center lg:gap-12 lg:px-[72px] xl:px-[156px] min-[1440px]:items-end">
+      <div className="flex flex-col items-start justify-between gap-8 px-4 sm:px-6 md:px-8 lg:flex-row lg:max-[1439px]:items-center lg:gap-12 xl:px-14 min-[1440px]:items-end">
         <div className="flex max-w-[740px] flex-col gap-8 md:gap-12">
           <p className="font-sans text-base leading-[22px] font-normal text-[#222222]">
             <Link href={copy.homeHref} className="text-[#222222] hover:text-[#1CACAE] min-[1440px]:text-[#919191]">
@@ -253,10 +254,7 @@ export function CaseStudiesListing({
           value={category}
           categoryPrefix={copy.categoryPrefix}
           allLabel={copy.allLabel}
-          onChange={(next) => {
-            setCategory(next)
-            setVisibleCount(pageSize)
-          }}
+          onChange={setCategory}
         />
       </div>
 
@@ -278,7 +276,7 @@ export function CaseStudiesListing({
             <button
               type="button"
               className="inline-flex h-[60px] cursor-pointer items-center gap-2.5 border border-[#484D56] bg-white px-5 font-sans text-base leading-[22px] font-normal text-[#484D56]"
-              onClick={() => setVisibleCount((count) => count + pageSize)}
+              onClick={showMore}
             >
               <span className={trimmedLabelClassName}>{copy.seeMoreLabel}</span>
               <ChevronRight />

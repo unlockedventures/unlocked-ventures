@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { adminGroups } from '@/admin/editor-guide'
+import { adminGroups, linkHint } from '@/admin/editor-guide'
 import { sizeField } from '@/admin/editor-fields'
 
 export const Awards: CollectionConfig = {
@@ -14,7 +14,7 @@ export const Awards: CollectionConfig = {
     description: 'The award logos under Awards & Recognitions on the homepage. Use Create New to add one, open a row to replace its image, and delete a row to remove it. Use Order to choose which logo comes first.',
     hideAPIURL: true,
     useAsTitle: 'name',
-    defaultColumns: ['logo', 'name', 'sortOrder'],
+    defaultColumns: ['logo', 'name', 'href', 'sortOrder'],
   },
   access: {
     read: () => true,
@@ -26,6 +26,15 @@ export const Awards: CollectionConfig = {
       type: 'text',
       label: 'Name',
       required: true,
+    },
+    {
+      name: 'href',
+      type: 'text',
+      label: 'Link',
+      required: true,
+      admin: {
+        description: `${linkHint} Required. Opens in a new tab when someone clicks this award card.`,
+      },
     },
     {
       name: 'logo',

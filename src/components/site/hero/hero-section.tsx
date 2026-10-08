@@ -69,7 +69,7 @@ export function HeroSection({ title, rotatingWords, description, cta, media, cla
           alt=""
           className="pointer-events-none absolute top-0 -z-10 left-[calc(265/1440*100%)] h-auto w-[calc(1475/1440*100%)] max-w-none translate-y-[calc(21/993*100%)] select-none"
         />
-      <div className="flex flex-col gap-10 px-4 py-12 sm:px-6 md:px-8 md:py-16 lg:flex-row lg:items-center lg:justify-between lg:gap-8 lg:px-12 min-[1440px]:block min-[1440px]:px-[156px]! min-[1440px]:pt-[132px]! min-[1440px]:pb-[122px]!">
+      <div className="flex flex-col gap-10 px-4 py-12 sm:px-6 md:px-8 md:py-16 lg:flex-row lg:items-center lg:justify-between lg:gap-8 xl:px-14 min-[1440px]:block min-[1440px]:px-14! min-[1440px]:pt-[132px]! min-[1440px]:pb-[122px]!">
         <div className="relative z-10 w-full lg:max-w-[32rem] lg:shrink-0 min-[1440px]:max-w-[628px]!">
           <h1 className="font-sans text-[2.5rem] leading-[1.15] font-normal text-[#33353F] sm:text-[3.25rem] sm:leading-[1.12] md:text-[4.25rem] md:leading-[1.1] xl:text-[4.375rem] xl:leading-[5rem]">
             <span className="sr-only">{spokenTitle}</span>
@@ -101,7 +101,7 @@ export function HeroSection({ title, rotatingWords, description, cta, media, cla
                   className="size-6 shrink-0 transition-transform duration-300 ease-out group-hover:rotate-45 group-focus-visible:rotate-45"
                 />
               }
-              className="group mt-8 h-12 gap-2.5 border border-[#484D56] bg-[#484D56] px-5 text-base text-white shadow-none transition-[border-color,box-shadow] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] hover:border-[#c5c8ce] hover:bg-[#484D56] hover:shadow-[0_0_0_6px_rgba(72,77,86,0.10),0_12px_28px_-14px_rgba(72,77,86,0.32)] focus-visible:border-[#c5c8ce] focus-visible:bg-[#484D56] focus-visible:shadow-[0_0_0_6px_rgba(72,77,86,0.10),0_12px_28px_-14px_rgba(72,77,86,0.32)] sm:h-12 sm:px-5 sm:text-base md:mt-10 lg:h-12 lg:px-5 lg:text-base 2xl:h-12 2xl:px-5 2xl:text-base"
+              className="group mt-8 h-12 gap-2.5 rounded-md border border-[#484D56] bg-[#484D56] px-5 text-base text-white shadow-none transition-[border-color,box-shadow] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] hover:border-[#c5c8ce] hover:bg-[#484D56] hover:shadow-[0_0_0_6px_rgba(72,77,86,0.10),0_12px_28px_-14px_rgba(72,77,86,0.32)] focus-visible:border-[#c5c8ce] focus-visible:bg-[#484D56] focus-visible:shadow-[0_0_0_6px_rgba(72,77,86,0.10),0_12px_28px_-14px_rgba(72,77,86,0.32)] sm:h-12 sm:px-5 sm:text-base md:mt-10 lg:h-12 lg:px-5 lg:text-base 2xl:h-12 2xl:px-5 2xl:text-base"
             />
           </div>
         </div>

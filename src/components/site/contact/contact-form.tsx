@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
 import Image from 'next/image'
 import { useForm } from 'react-hook-form'
+
+import { useContactStore } from '@/stores/contact-store'
 
 type ContactValues = {
   firstName: string
@@ -47,7 +48,8 @@ export type ContactFormContent = {
 }
 
 export function ContactForm({ content }: { content: ContactFormContent }) {
-  const [sent, setSent] = useState(false)
+  const sent = useContactStore((state) => state.sent)
+  const setSent = useContactStore((state) => state.setSent)
   const {
     register,
     handleSubmit,

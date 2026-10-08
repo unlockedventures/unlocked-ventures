@@ -2,11 +2,11 @@ import type { NavItem } from '@/config/navigation'
 
 /** Top-level nav row (full header height; underline is on the name span). */
 export const primaryItemClassName =
-  'relative inline-flex h-full cursor-pointer items-center font-sans text-[14px] leading-[22px] font-medium tracking-normal text-[#5E6572] uppercase antialiased transition-colors duration-300 ease-out hover:text-[#292F35]'
+  'relative inline-flex h-full cursor-pointer items-center font-sans text-[14px] leading-[22px] font-medium tracking-normal text-[#33353F] uppercase antialiased transition-colors duration-300 ease-out hover:text-[#171616]'
 
-export const primaryItemOpenClassName = 'text-[#292F35]'
+export const primaryItemOpenClassName = 'text-[#171616]'
 
-export const primaryItemSelectedClassName = 'text-[#292F35]'
+export const primaryItemSelectedClassName = 'text-[#171616]'
 
 /**
  * Underline on the header bottom edge.
@@ -14,7 +14,7 @@ export const primaryItemSelectedClassName = 'text-[#292F35]'
  * flex-center against the capital letters.
  */
 export const primaryItemNameClassName =
-  'relative inline-flex h-full items-center after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:origin-left after:scale-x-0 after:bg-[#292F35] after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.4,0,0.2,1)] after:content-[""] group-hover/nav-item:after:scale-x-100'
+  'relative inline-flex h-full items-center after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:origin-left after:scale-x-0 after:bg-[#171616] after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.4,0,0.2,1)] after:content-[""] group-hover/nav-item:after:scale-x-100'
 
 export const primaryItemNameActiveClassName = 'after:scale-x-100!'
 

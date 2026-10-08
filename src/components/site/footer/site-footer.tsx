@@ -53,7 +53,7 @@ export function SiteFooter({
         alt=""
         className="pointer-events-none absolute top-[clamp(1.5rem,6.18vw,89px)] left-0 h-[min(calc(100%-clamp(1.5rem,6.18vw,89px)),calc(100vw*361/1440))] w-full object-cover object-top select-none"
       />
-      <div className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-col px-4 pt-12 pb-8 sm:px-6 md:px-8 md:pt-16 lg:px-12 lg:pt-16 xl:min-h-[488px] xl:px-[156px] xl:pt-20 xl:pb-8">
+      <div className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-col px-4 pt-12 pb-8 sm:px-6 md:px-8 md:pt-16 lg:pt-16 xl:min-h-[488px] xl:px-14 xl:pt-20 xl:pb-8">
         <div className="flex flex-col gap-10 xl:flex-row xl:items-start xl:justify-between">
         <div className="w-full max-w-[344px] shrink-0">
           <Link

@@ -1,4 +1,9 @@
+'use client'
+
+import { useEffect, useRef } from 'react'
+
 import { cn } from '@/lib/utils'
+import { useRevealSection, useRevealStore } from '@/stores/reveal-store'
 
 export type TrustedLogo = {
   name: string
@@ -12,6 +17,8 @@ export type TrustedBySectionProps = {
   logos: readonly TrustedLogo[]
   className?: string
 }
+
+const SECTION_ID = 'trusted-by' as const
 
 function LogoRow({ logos, hidden = false }: { logos: readonly TrustedLogo[]; hidden?: boolean }) {
   const slotWidth = Math.max(...logos.map((logo) => logo.width))
@@ -42,14 +49,44 @@ export function TrustedBySection({
   logos,
   className,
 }: TrustedBySectionProps) {
+  const sectionRef = useRef<HTMLElement>(null)
+  const { visible } = useRevealSection(SECTION_ID)
+  const setInView = useRevealStore((state) => state.setInView)
+
+  useEffect(() => {
+    const node = sectionRef.current
+    if (!node) return
+
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reduced) {
+      setInView(SECTION_ID, true)
+      return
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setInView(SECTION_ID, Boolean(entry?.isIntersecting))
+      },
+      { threshold: 0.2, rootMargin: '0px 0px -5% 0px' },
+    )
+
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [setInView])
+
   return (
-    <section className={cn('overflow-hidden bg-white', className)}>
+    <section ref={sectionRef} className={cn('overflow-hidden bg-white', className)}>
       <div className="flex w-full flex-col items-center gap-10 px-4 py-12 sm:px-6 md:px-8 md:py-16 lg:px-12 xl:px-16 xl:py-[100px] min-[1440px]:mx-auto min-[1440px]:max-w-[1440px] min-[1440px]:px-[156px]! min-[1440px]:py-[100px]">
         <h2 className="text-center font-sans text-[2rem] leading-[3rem] font-normal text-[#171616]">
           {title}
         </h2>
         <div className="relative w-full overflow-hidden min-[1440px]:h-12 min-[1440px]:w-[1328px]! min-[1440px]:max-w-none">
-          <div className="trusted-marquee-track flex w-max items-center">
+          <div
+            className={cn(
+              'trusted-marquee-track flex w-max items-center',
+              visible && 'trusted-marquee-track-running',
+            )}
+          >
             <LogoRow logos={logos} />
             <LogoRow logos={logos} hidden />
           </div>

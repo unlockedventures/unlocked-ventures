@@ -84,17 +84,12 @@ export function ContentSlider({
       >
         <div className="min-w-0">{heading}</div>
         <div className={cn('flex shrink-0 gap-5', controlsClassName)}>
-          <SliderControl
-            direction="previous"
-            // Keep disabled off until scroll metrics exist so SSR HTML matches the first client paint.
-            disabled={edgesReady && !canPrevious}
-            onClick={() => scrollBySlide(-1)}
-          />
-          <SliderControl
-            direction="next"
-            disabled={edgesReady && !canNext}
-            onClick={() => scrollBySlide(1)}
-          />
+          {!edgesReady || canPrevious ? (
+            <SliderControl direction="previous" onClick={() => scrollBySlide(-1)} />
+          ) : null}
+          {!edgesReady || canNext ? (
+            <SliderControl direction="next" onClick={() => scrollBySlide(1)} />
+          ) : null}
         </div>
       </div>
       <div className="relative">

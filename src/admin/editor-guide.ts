@@ -44,6 +44,7 @@ export const adminSlugOrder = [
   'navigation',
   'site-header',
   'site-footer',
+  'solutions',
   'strategic-growth',
   'about',
   'our-successes',

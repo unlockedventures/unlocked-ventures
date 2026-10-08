@@ -144,6 +144,11 @@
 
 .trusted-marquee-track {
   animation: trusted-marquee 45s linear infinite;
+  animation-play-state: paused;
+}
+
+.trusted-marquee-track-running {
+  animation-play-state: running;
 }
 
 @keyframes experience-badge-spin {
@@ -152,6 +157,46 @@
   }
   to {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes locations-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 56px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.locations-stat {
+  opacity: 0;
+  transform: translate3d(0, 56px, 0);
+}
+
+.locations-stat-in {
+  animation: locations-rise 1.05s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.news-card-rise {
+  opacity: 0;
+  transform: translate3d(0, 40px, 0);
+}
+
+.news-card-rise-in {
+  animation: locations-rise 0.95s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .locations-stat,
+  .locations-stat-in,
+  .news-card-rise,
+  .news-card-rise-in {
+    opacity: 1;
+    transform: none;
+    animation: none;
   }
 }
 
@@ -164,9 +209,19 @@
   clip-path: circle(26% at 50% 50%);
 }
 
-.hero-digital-banner {
-  overflow: hidden;
-  mask-image: linear-gradient(to bottom, transparent 0%, #000 14%, #000 86%, transparent 100%);
+@keyframes hero-type-caret-blink {
+  0%,
+  45% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.hero-type-caret {
+  animation: hero-type-caret-blink 1s steps(1, end) infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -197,7 +252,8 @@
     display: none;
   }
 
-  .hero-digital-banner {
-    mask-image: none;
+  .hero-type-caret {
+    animation: none;
+    opacity: 1;
   }
 }

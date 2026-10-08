@@ -13,10 +13,16 @@ export async function seedRecentPodcast(payload: Payload) {
     })
   }
 
-  const existing = await payload.count({ collection: 'podcast-episodes' })
-  if (existing.totalDocs > 0) return
+  const existing = await payload.find({
+    collection: 'podcast-episodes',
+    depth: 0,
+    limit: 100,
+    pagination: false,
+  })
+  const savedHrefs = new Set(existing.docs.map((episode) => episode.href))
 
   for (const [index, episode] of recentPodcastSeed.episodes.entries()) {
+    if (savedHrefs.has(episode.href)) continue
     const filePath = path.join(process.cwd(), 'public', 'podcast', episode.imageFile)
     const data = fs.readFileSync(filePath)
     const media = await payload.create({

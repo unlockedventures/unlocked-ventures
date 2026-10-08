@@ -1,6 +1,10 @@
+'use client'
+
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 
 import { ContentSlider } from '@/components/site/slider/content-slider'
+import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 
 export type PodcastEpisode = {
@@ -18,73 +22,96 @@ export type RecentPodcastSectionProps = {
   className?: string
 }
 
-function PlayIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className="ml-0.5 size-7 sm:size-8 lg:size-9">
-      <path d="M8.5 6.2v11.6L18.2 12 8.5 6.2z" fill="currentColor" />
-    </svg>
-  )
-}
-
-const cardEase = 'duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]'
-
 function PodcastCard({ episode }: { episode: PodcastEpisode }) {
+  const imageRef = useRef<HTMLImageElement>(null)
+  const [imageReady, setImageReady] = useState(false)
+
+  useEffect(() => {
+    const image = imageRef.current
+    if (image?.complete && image.naturalWidth > 0) {
+      setImageReady(true)
+      return
+    }
+    setImageReady(false)
+  }, [episode.imageSrc])
+
   return (
-    <article className="h-full bg-white">
-      <Link href={episode.href} className="group flex h-full cursor-pointer flex-col gap-7">
-        <div className="relative h-[220px] shrink-0 overflow-hidden bg-[#E4E6EA] sm:h-[280px] lg:h-[360px]">
+    <article className="h-full">
+      <Link href={episode.href} className="flex h-full cursor-pointer flex-col">
+        <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-[2px] bg-[#E4E6EA]">
+          {episode.imageSrc && !imageReady ? (
+            <Skeleton className="absolute inset-0 size-full rounded-[2px] bg-[#E4E6EA]" />
+          ) : null}
           {episode.imageSrc ? (
             <img
+              ref={imageRef}
               src={episode.imageSrc}
               alt={episode.imageAlt ?? ''}
+              onLoad={() => setImageReady(true)}
+              onError={() => setImageReady(true)}
               className={cn(
-                'absolute inset-0 h-full w-full object-cover grayscale transition-[transform,filter]',
-                cardEase,
-                'group-hover:scale-[1.035] group-hover:grayscale-[0.15] group-focus-visible:scale-[1.035] group-focus-visible:grayscale-[0.15] motion-reduce:transition-none motion-reduce:group-hover:scale-100',
+                'absolute inset-0 h-full w-full object-cover object-top',
+                imageReady ? 'opacity-100' : 'opacity-0',
               )}
             />
           ) : null}
-          <span
-            aria-hidden="true"
-            className={cn(
-              'pointer-events-none absolute inset-0 bg-[#25282D]/12 transition-opacity',
-              cardEase,
-              'group-hover:opacity-0 group-focus-visible:opacity-0 motion-reduce:transition-none',
-            )}
-          />
-          <span
-            aria-hidden="true"
-            className={cn(
-              'pointer-events-none absolute top-1/2 left-1/2 flex size-14 -translate-x-1/2 -translate-y-1/2 scale-90 items-center justify-center rounded-full bg-[#E7E9F3] text-[#25282D] opacity-0 shadow-[0_10px_24px_-12px_rgba(37,40,45,0.35)] transition-[transform,opacity]',
-              cardEase,
-              'group-hover:scale-100 group-hover:opacity-100 group-focus-visible:scale-100 group-focus-visible:opacity-100 sm:size-16 lg:size-[72px]',
-            )}
-          >
-            <PlayIcon />
-          </span>
+          {episode.meta && (imageReady || !episode.imageSrc) ? (
+            <span className="absolute right-2 bottom-2 rounded-[4px] bg-[#121212] px-1 py-1 font-sans text-[10px] leading-none font-semibold tracking-[0.3px] text-white">
+              {episode.meta}
+            </span>
+          ) : null}
         </div>
-        <div className="flex flex-col gap-3 px-5 pb-5">
-          <p className="font-sans text-base leading-6 font-normal text-[#222222]/68">{episode.meta}</p>
-          <div className="flex flex-col gap-1.5">
-            <h3 className="min-h-[65px] font-sans text-2xl leading-[30px] font-normal tracking-[-0.48px] text-[#25282D]">
-              {episode.title}
-            </h3>
-            <p className="inline-flex h-[43px] w-fit max-w-full items-center bg-[#F3F4F9] px-4 font-sans text-base leading-6 font-normal text-[#222222]/68">
-              {episode.guests}
-            </p>
-          </div>
+        <div className="grid grid-rows-[3rem_1.125rem] gap-1.5 pt-2.5">
+          <h3 className="line-clamp-2 font-sans text-base leading-6 font-medium tracking-[-0.16px] text-[#33353F]">
+            {episode.title}
+          </h3>
+          <p className="truncate font-sans text-xs leading-[18px] font-semibold tracking-[0.48px] text-[#696969] uppercase">
+            {episode.guests}
+          </p>
         </div>
       </Link>
     </article>
   )
 }
 
+const skeletonCardClassName =
+  'w-[calc((100%-0.75rem)/2)] shrink-0 md:w-[calc((100%-2.5rem)/3)] lg:w-[calc((100%-3.75rem)/4)]'
+
+function PodcastCardSkeleton() {
+  return (
+    <div className={skeletonCardClassName}>
+      <Skeleton className="aspect-video w-full rounded-[2px] bg-[#E4E6EA]" />
+      <div className="pt-2.5">
+        <Skeleton className="mb-1.5 h-6 w-4/5 rounded-sm bg-[#E4E6EA]" />
+        <Skeleton className="h-6 w-3/5 rounded-sm bg-[#E4E6EA]" />
+        <Skeleton className="mt-1.5 h-[18px] w-2/5 rounded-sm bg-[#E4E6EA]" />
+      </div>
+    </div>
+  )
+}
+
+export function RecentPodcastSkeleton({ className }: { className?: string }) {
+  return (
+    <section aria-busy="true" aria-label="Loading podcasts" className={cn('bg-[#F3F4F9]', className)}>
+      <div className="w-full px-4 py-8 sm:px-6 md:px-8 md:py-10 lg:px-[56px] lg:py-12 min-[1440px]:mx-auto min-[1440px]:max-w-[1440px]">
+        <Skeleton className="mb-6 h-10 w-64 max-w-full rounded-sm bg-[#E4E6EA] md:h-14" />
+        <div className="flex gap-3 overflow-hidden md:gap-5">
+          {Array.from({ length: 4 }, (_, index) => (
+            <PodcastCardSkeleton key={index} />
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
 export function RecentPodcastSection({ title, episodes, className }: RecentPodcastSectionProps) {
   return (
     <section aria-label={title} className={cn('bg-[#F3F4F9]', className)}>
-      <div className="w-full px-4 py-12 sm:px-6 md:px-8 md:py-16 lg:px-[56px] lg:py-[80px] min-[1440px]:mx-auto min-[1440px]:max-w-[1440px]">
+      <div className="w-full px-4 py-8 sm:px-6 md:px-8 md:py-10 lg:px-[56px] lg:py-12 min-[1440px]:mx-auto min-[1440px]:max-w-[1440px]">
         <ContentSlider
           label={title}
+          className="gap-5 md:gap-6"
           headerClassName="sm:items-center"
           controlsClassName="gap-[21px]"
           heading={
@@ -92,9 +119,10 @@ export function RecentPodcastSection({ title, episodes, className }: RecentPodca
               {title}
             </h2>
           }
-          snapClassName="max-lg:snap-x max-lg:snap-mandatory"
-          slideSnapClassName="max-lg:snap-start"
-          slideClassName="lg:max-[1439px]:w-[calc((100%-2rem)/3)] min-[1440px]:w-[500px]"
+          trackClassName="gap-3 md:gap-5"
+          snapClassName="snap-x snap-mandatory"
+          slideSnapClassName="snap-start"
+          slideClassName="w-[calc((100%-0.75rem)/2)] md:w-[calc((100%-2.5rem)/3)] lg:w-[calc((100%-3.75rem)/4)]"
           endFadeClassName="via-[#F3F4F9] via-45% to-[#F3F4F9] lg:w-16"
         >
           {episodes.map((episode) => (

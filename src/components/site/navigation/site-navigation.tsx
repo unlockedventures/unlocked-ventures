@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
-import { Suspense, useEffect, useRef, useState } from 'react'
+import { Suspense, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { cn } from 'cn'
 
@@ -20,6 +20,7 @@ import {
   primaryItemOpenClassName,
   primaryItemSelectedClassName,
 } from '@/components/site/navigation/nav-styles'
+import { useNavStore } from '@/stores/nav-store'
 
 /**
  * Sized to 1cap (capital letter height) and self-end so the extra ascent
@@ -61,19 +62,19 @@ export function SiteNavigation({
   exploreLabel: string
 }) {
   const pathname = usePathname()
-  const [open, setOpen] = useState(false)
-  const [activeHref, setActiveHref] = useState<string | null>(null)
+  const open = useNavStore((state) => state.open)
+  const activeHref = useNavStore((state) => state.activeHref)
+  const setOpen = useNavStore((state) => state.setOpen)
+  const setActiveHref = useNavStore((state) => state.setActiveHref)
+  const toggleOpen = useNavStore((state) => state.toggleOpen)
+  const toggleActiveHref = useNavStore((state) => state.toggleActiveHref)
+  const reset = useNavStore((state) => state.reset)
   const panelRef = useRef<HTMLDivElement>(null)
   const activeItem = items.find((item) => item.href === activeHref) ?? null
 
-  const toggleMenu = (href: string) => {
-    setActiveHref((current) => (current === href ? null : href))
-  }
-
   useEffect(() => {
-    setOpen(false)
-    setActiveHref(null)
-  }, [pathname])
+    reset()
+  }, [pathname, reset])
 
   useEffect(() => {
     if (!activeHref) return
@@ -84,7 +85,7 @@ export function SiteNavigation({
 
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [activeHref])
+  }, [activeHref, setActiveHref])
 
   return (
     <>
@@ -109,13 +110,13 @@ export function SiteNavigation({
                 onClick={(event) => {
                   if (!hasChildren) return
                   event.preventDefault()
-                  toggleMenu(item.href)
+                  toggleActiveHref(item.href)
                 }}
                 onKeyDown={(event) => {
                   if (!hasChildren) return
                   if (event.key !== 'Enter' && event.key !== ' ') return
                   event.preventDefault()
-                  toggleMenu(item.href)
+                  toggleActiveHref(item.href)
                 }}
               >
                 <span
@@ -150,7 +151,7 @@ export function SiteNavigation({
         className="ml-auto inline-flex size-10 cursor-pointer items-center justify-center text-[#292F35] hover:text-[#292F35]/80 lg:size-11 xl:hidden"
         aria-expanded={open}
         aria-controls="mobile-navigation"
-        onClick={() => setOpen((value) => !value)}
+        onClick={() => toggleOpen()}
       >
         {open ? <X className="size-6 sm:size-7 lg:size-8" /> : <Menu className="size-6 sm:size-7 md:size-8 lg:size-9" />}
         <span className="sr-only">{open ? 'Close menu' : 'Open menu'}</span>

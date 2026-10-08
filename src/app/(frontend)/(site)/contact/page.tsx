@@ -1,10 +1,10 @@
 import type { Metadata } from 'next'
+import { dehydrate, HydrationBoundary } from '@tanstack/react-query'
 
-import { ConversationSection } from '@/components/site/contact/conversation-section'
-import { HelpSection } from '@/components/site/contact/help-section'
-import { LocationsSection } from '@/components/site/locations/locations-section'
+import { ContactPageView } from '@/components/site/views/contact-page-view'
 import { getContact } from '@/data/get-contact'
-import { getLocations } from '@/data/get-locations'
+import { getQueryClient } from '@/lib/query/get-query-client'
+import { prefetchSiteResources } from '@/lib/query/prefetch'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,17 +18,12 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ContactPage() {
-  const [contact, locations] = await Promise.all([getContact(), getLocations()])
+  const queryClient = getQueryClient()
+  await prefetchSiteResources(queryClient, ['contact', 'locations'])
 
   return (
-    <div className="bg-white">
-      {contact ? (
-        <>
-          <ConversationSection {...contact} />
-          <HelpSection title={contact.helpTitle} form={contact.form} />
-        </>
-      ) : null}
-      {locations ? <LocationsSection {...locations} className="bg-white" /> : null}
-    </div>
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <ContactPageView />
+    </HydrationBoundary>
   )
 }

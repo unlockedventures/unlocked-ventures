@@ -73,6 +73,7 @@ export interface Config {
     'news-posts': NewsPost;
     'podcast-episodes': PodcastEpisode;
     'case-studies': CaseStudy;
+    solutions: Solution;
     'trusted-logos': TrustedLogo;
     pipeline: Pipeline;
     'payload-kv': PayloadKv;
@@ -88,6 +89,7 @@ export interface Config {
     'news-posts': NewsPostsSelect<false> | NewsPostsSelect<true>;
     'podcast-episodes': PodcastEpisodesSelect<false> | PodcastEpisodesSelect<true>;
     'case-studies': CaseStudiesSelect<false> | CaseStudiesSelect<true>;
+    solutions: SolutionsSelect<false> | SolutionsSelect<true>;
     'trusted-logos': TrustedLogosSelect<false> | TrustedLogosSelect<true>;
     pipeline: PipelineSelect<false> | PipelineSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -233,6 +235,10 @@ export interface Award {
   id: number;
   name: string;
   /**
+   * A page on this site, such as /contact, or a full address starting with https:// Required. Opens in a new tab when someone clicks this award card.
+   */
+  href: string;
+  /**
    * This picture is shown in the awards row. Choose a different file to replace it.
    */
   logo: number | Media;
@@ -283,13 +289,16 @@ export interface NewsPost {
   createdAt: string;
 }
 /**
- * Every podcast episode. Check Show on the homepage to include an episode there. The box saves when you click it.
+ * Every podcast episode. A new episode appears as a homepage card. Uncheck Show on the homepage to hide it. The box saves when you click it.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "podcast-episodes".
  */
 export interface PodcastEpisode {
   id: number;
+  /**
+   * Shown on the thumbnail, for example 14:22.
+   */
   meta: string;
   title: string;
   guests: string;
@@ -303,7 +312,7 @@ export interface PodcastEpisode {
   image?: (number | null) | Media;
   imageAlt?: string | null;
   /**
-   * Turn this on to include this episode in the homepage Podcast section.
+   * Uncheck this to hide the episode from the homepage.
    */
   featured?: boolean | null;
   /**
@@ -342,6 +351,101 @@ export interface CaseStudy {
    * Lower numbers appear first.
    */
   sortOrder: number;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Service detail pages linked from Strategic Advisory and Digital Engineering menus.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "solutions".
+ */
+export interface Solution {
+  id: number;
+  /**
+   * URL path after /solutions/, such as strategic-growth.
+   */
+  slug: string;
+  category: 'strategic-advisory' | 'digital-engineering';
+  /**
+   * The small links above the title, such as Home and Our solutions.
+   */
+  breadcrumbs?:
+    | {
+        label: string;
+        /**
+         * A page on this site, such as /contact, or a full address starting with https://
+         */
+        href: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * The last step in the path. This is the page people are on, so it is not a link.
+   */
+  current: string;
+  title: string;
+  description: string;
+  /**
+   * Choose a different file to replace this picture.
+   */
+  illustration?: (number | null) | Media;
+  /**
+   * Choose a different file to replace this photo.
+   */
+  heroImage?: (number | null) | Media;
+  heroImageAlt?: string | null;
+  engagementTitle: string;
+  engagementItems?:
+    | {
+        number: string;
+        title: string;
+        body: string;
+        id?: string | null;
+      }[]
+    | null;
+  howWeWorkTitle: string;
+  steps?:
+    | {
+        number: string;
+        title: string;
+        body: string;
+        id?: string | null;
+      }[]
+    | null;
+  ctaTitle: string;
+  ctaDescription: string;
+  cta: {
+    label: string;
+    /**
+     * A page on this site, such as /contact, or a full address starting with https://
+     */
+    href: string;
+  };
+  relatedTitle: string;
+  related?:
+    | {
+        title: string;
+        /**
+         * A page on this site, such as /contact, or a full address starting with https://
+         */
+        href: string;
+        body: string;
+        /**
+         * Choose a different file to replace this icon. Add or remove a solution with the controls on this list.
+         */
+        icon?: (number | null) | Media;
+        /**
+         * Leave this unless the picture looks too big or too small.
+         */
+        iconWidth: number;
+        /**
+         * Leave this unless the picture looks too big or too small.
+         */
+        iconHeight: number;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -492,6 +596,10 @@ export interface PayloadLockedDocument {
         value: number | CaseStudy;
       } | null)
     | ({
+        relationTo: 'solutions';
+        value: number | Solution;
+      } | null)
+    | ({
         relationTo: 'trusted-logos';
         value: number | TrustedLogo;
       } | null)
@@ -589,6 +697,7 @@ export interface MediaSelect<T extends boolean = true> {
  */
 export interface AwardsSelect<T extends boolean = true> {
   name?: T;
+  href?: T;
   logo?: T;
   displayWidth?: T;
   displayHeight?: T;
@@ -642,6 +751,67 @@ export interface CaseStudiesSelect<T extends boolean = true> {
   image?: T;
   featured?: T;
   sortOrder?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "solutions_select".
+ */
+export interface SolutionsSelect<T extends boolean = true> {
+  slug?: T;
+  category?: T;
+  breadcrumbs?:
+    | T
+    | {
+        label?: T;
+        href?: T;
+        id?: T;
+      };
+  current?: T;
+  title?: T;
+  description?: T;
+  illustration?: T;
+  heroImage?: T;
+  heroImageAlt?: T;
+  engagementTitle?: T;
+  engagementItems?:
+    | T
+    | {
+        number?: T;
+        title?: T;
+        body?: T;
+        id?: T;
+      };
+  howWeWorkTitle?: T;
+  steps?:
+    | T
+    | {
+        number?: T;
+        title?: T;
+        body?: T;
+        id?: T;
+      };
+  ctaTitle?: T;
+  ctaDescription?: T;
+  cta?:
+    | T
+    | {
+        label?: T;
+        href?: T;
+      };
+  relatedTitle?: T;
+  related?:
+    | T
+    | {
+        title?: T;
+        href?: T;
+        body?: T;
+        icon?: T;
+        iconWidth?: T;
+        iconHeight?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -914,7 +1084,7 @@ export interface Navigation {
   createdAt?: string | null;
 }
 /**
- * The homepage section with the photo and the list of engineering services.
+ * The homepage section with Enterprise and Early-stage.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "digital-engineering".
@@ -937,10 +1107,7 @@ export interface DigitalEngineering {
   imageAlt?: string | null;
   groups?:
     | {
-        /**
-         * The small number beside the heading, such as 01.
-         */
-        index: string;
+        index?: string | null;
         title: string;
         description?: string | null;
         items?:
@@ -1072,7 +1239,7 @@ export interface Location {
   createdAt?: string | null;
 }
 /**
- * The heading above the podcast episodes. Episodes marked Show on the homepage are listed below.
+ * The heading above the podcast cards. Add, edit, reorder, or remove the cards below.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "recent-podcast".

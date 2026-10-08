@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import React from 'react'
 import { dmSans, helveticaNeueLtPro, inter } from './fonts'
 import './globals.css'
+import { AppProviders } from '@/components/providers/app-providers'
 import { getSite } from '@/data/get-site'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -21,7 +22,9 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
       lang="en"
       className={`${helveticaNeueLtPro.variable} ${dmSans.variable} ${inter.variable}`}
     >
-      <body>{children}</body>
+      <body>
+        <AppProviders>{children}</AppProviders>
+      </body>
     </html>
   )
 }

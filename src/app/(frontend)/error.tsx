@@ -1,9 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-
 import { ErrorScreen } from '@/components/site/error-screen'
-import { getErrorContent } from '@/data/get-error-content'
+import { useErrorContent } from '@/hooks/queries/use-site-queries'
 
 export default function FrontendError({
   error,
@@ -14,11 +12,7 @@ export default function FrontendError({
 }) {
   void error
   void reset
-  const [content, setContent] = useState<Awaited<ReturnType<typeof getErrorContent>>>(null)
-
-  useEffect(() => {
-    void getErrorContent().then(setContent)
-  }, [])
+  const { data: content } = useErrorContent()
 
   if (!content) return null
 

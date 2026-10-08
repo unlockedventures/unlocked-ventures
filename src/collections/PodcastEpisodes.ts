@@ -12,7 +12,7 @@ export const PodcastEpisodes: CollectionConfig = {
   admin: {
     group: adminGroups.podcast,
     description:
-      'Every podcast episode. Check Show on the homepage to include an episode there. The box saves when you click it.',
+      'Every podcast episode. A new episode appears as a homepage card. Uncheck Show on the homepage to hide it. The box saves when you click it.',
     hideAPIURL: true,
     useAsTitle: 'title',
     defaultColumns: ['title', 'featured', 'guests', 'image', 'sortOrder'],
@@ -20,9 +20,36 @@ export const PodcastEpisodes: CollectionConfig = {
   access: {
     read: () => true,
   },
+  hooks: {
+    beforeChange: [
+      async ({ data, operation, req }) => {
+        if (operation !== 'create') return data
+        if (typeof data.featured !== 'boolean') data.featured = true
+
+        const highest = await req.payload.find({
+          collection: 'podcast-episodes',
+          depth: 0,
+          limit: 1,
+          overrideAccess: true,
+          sort: '-sortOrder',
+        })
+        const maxOrder = highest.docs[0]?.sortOrder
+        if (typeof data.sortOrder !== 'number' || data.sortOrder === 0) {
+          data.sortOrder = typeof maxOrder === 'number' ? maxOrder + 1 : 0
+        }
+        return data
+      },
+    ],
+  },
   defaultSort: 'sortOrder',
   fields: [
-    { name: 'meta', type: 'text', label: 'Date and length', required: true },
+    {
+      name: 'meta',
+      type: 'text',
+      label: 'Length',
+      required: true,
+      admin: { description: 'Shown on the thumbnail, for example 14:22.' },
+    },
     { name: 'title', type: 'text', required: true },
     { name: 'guests', type: 'text', required: true },
     linkField(),
@@ -32,10 +59,10 @@ export const PodcastEpisodes: CollectionConfig = {
       name: 'featured',
       type: 'checkbox',
       label: 'Show on the homepage',
-      defaultValue: false,
+      defaultValue: true,
       admin: {
         position: 'sidebar',
-        description: 'Turn this on to include this episode in the homepage Podcast section.',
+        description: 'Uncheck this to hide the episode from the homepage.',
         components: {
           Cell: '@/components/admin/featured-cell#FeaturedCell',
         },

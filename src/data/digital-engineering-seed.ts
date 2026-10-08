@@ -22,6 +22,7 @@ export const digitalEngineeringSeed = {
     {
       index: '02.',
       title: 'Early-stage',
+      items: [{ label: 'Engineering as a Service', href: '/solutions/engineering-as-a-service' }],
     },
   ],
 }

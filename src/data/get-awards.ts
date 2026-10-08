@@ -14,7 +14,8 @@ export async function getAwards(): Promise<Award[]> {
 
   return result.docs.flatMap((award) => {
     const logo = award.logo
-    if (typeof logo === 'number' || !logo.url) return []
+    const href = award.href?.trim()
+    if (typeof logo === 'number' || !logo.url || !href) return []
 
     return [
       {
@@ -22,6 +23,7 @@ export async function getAwards(): Promise<Award[]> {
         src: logo.url,
         width: award.displayWidth,
         height: award.displayHeight,
+        href,
       },
     ]
   })

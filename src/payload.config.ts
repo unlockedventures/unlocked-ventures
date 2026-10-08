@@ -14,6 +14,7 @@ import { CaseStudies } from './collections/CaseStudies'
 import { NewsPosts } from './collections/NewsPosts'
 import { Pipeline } from './collections/Pipeline'
 import { PodcastEpisodes } from './collections/PodcastEpisodes'
+import { Solutions } from './collections/Solutions'
 import { TrustedLogos } from './collections/TrustedLogos'
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
@@ -26,7 +27,7 @@ import { seedNavigation } from './data/seed-navigation'
 import { seedLatestNews } from './data/seed-latest-news'
 import { seedLocations } from './data/seed-locations'
 import { seedRecentPodcast } from './data/seed-recent-podcast'
-import { seedStrategicGrowth } from './data/seed-strategic-growth'
+import { seedSolutions } from './data/seed-solutions'
 import { seedStrategicAdvisory } from './data/seed-strategic-advisory'
 import { seedTrustedBy } from './data/seed-trusted-by'
 import { seedSuccessStories } from './data/seed-success-stories'
@@ -73,7 +74,17 @@ export default buildConfig({
       },
     },
   },
-  collections: [Users, Media, Awards, NewsPosts, PodcastEpisodes, CaseStudies, TrustedLogos, Pipeline],
+  collections: [
+    Users,
+    Media,
+    Awards,
+    NewsPosts,
+    PodcastEpisodes,
+    CaseStudies,
+    Solutions,
+    TrustedLogos,
+    Pipeline,
+  ],
   globals: [
     About,
     AwardsSection,
@@ -106,7 +117,7 @@ export default buildConfig({
     await seedLatestNews(payload)
     await seedLocations(payload)
     await seedRecentPodcast(payload)
-    await seedStrategicGrowth(payload)
+    await seedSolutions(payload)
     await seedStrategicAdvisory(payload)
     await seedTrustedBy(payload)
     await seedSuccessStories(payload)

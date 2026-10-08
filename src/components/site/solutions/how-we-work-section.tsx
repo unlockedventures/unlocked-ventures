@@ -10,7 +10,7 @@ export type HowWeWorkSectionProps = {
 export function HowWeWorkSection({ title, steps }: HowWeWorkSectionProps) {
   return (
     <section className="bg-[#F3F4F9]">
-      <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-8 px-4 py-16 sm:px-6 md:px-8 md:py-20 lg:px-[72px] xl:gap-12 xl:px-[156px] xl:py-[100px]">
+      <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-8 px-4 py-16 sm:px-6 md:px-8 md:py-20 xl:gap-12 xl:px-14 xl:py-[100px]">
         <h2 className="font-sans text-[2rem] leading-[2.4rem] font-normal tracking-[-1px] text-[#33353F] sm:text-4xl sm:leading-[2.75rem] lg:text-5xl lg:leading-[56px]">
           {title}
         </h2>

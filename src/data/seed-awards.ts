@@ -26,6 +26,7 @@ export async function seedAwards(payload: Payload) {
       collection: 'awards',
       data: {
         name: award.name,
+        href: award.href,
         logo: media.id,
         displayWidth: award.displayWidth,
         displayHeight: award.displayHeight,

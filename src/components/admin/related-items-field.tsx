@@ -291,10 +291,7 @@ export function RelatedItemsField({ field }: FieldProps) {
 
   const { config } = useConfig()
   const manageHref = `${config.routes.admin}/collections/${collection}`
-  const readOnly =
-    Boolean(custom?.readOnly) ||
-    custom?.collection === 'case-studies' ||
-    custom?.collection === 'podcast-episodes'
+  const readOnly = Boolean(custom?.readOnly) || custom?.collection === 'case-studies'
   const manageLabel = custom?.manageLabel || (custom?.collection === 'podcast-episodes' ? 'Podcast' : custom?.plural)
 
   if (!custom) return null

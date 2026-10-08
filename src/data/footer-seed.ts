@@ -15,8 +15,8 @@ export const footerSeed = {
   ],
   pagesTitle: 'Pages',
   pages: [
-    { label: 'Strategic Advisory', href: '/strategic-advisory' },
-    { label: 'Digital Engineering', href: '/digital-engineering' },
+    { label: 'Strategic Advisory', href: '/#strategic-advisory' },
+    { label: 'Digital Engineering', href: '/#digital-engineering' },
     { label: 'Our Successes', href: '/our-successes' },
     { label: 'Insights', href: '/insights' },
     { label: 'Podcast', href: '/podcast' },

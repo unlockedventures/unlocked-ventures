@@ -1,17 +1,20 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import { cn } from 'cn'
+import { useEffect, useRef } from 'react'
+import { cn } from '@/lib/utils'
 
 import type { AboutContent } from '@/components/site/about/about-content'
+import { useRevealSection, useRevealStore } from '@/stores/reveal-store'
 
 /** Soft stagger — slower than Pingen’s default for a calmer reveal. */
 const STAGGER_MS = 160
 const BASE_DELAY_MS = 120
+const SECTION_ID = 'about-delivered' as const
 
 export function AboutDelivered({ title, stats }: { title: string; stats: AboutContent['stats'] }) {
   const sectionRef = useRef<HTMLElement>(null)
-  const [visible, setVisible] = useState(false)
+  const { visible } = useRevealSection(SECTION_ID)
+  const setInView = useRevealStore((state) => state.setInView)
 
   useEffect(() => {
     const node = sectionRef.current
@@ -19,22 +22,20 @@ export function AboutDelivered({ title, stats }: { title: string; stats: AboutCo
 
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (reduced) {
-      setVisible(true)
+      setInView(SECTION_ID, true)
       return
     }
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (!entry?.isIntersecting) return
-        setVisible(true)
-        observer.disconnect()
+        setInView(SECTION_ID, Boolean(entry?.isIntersecting))
       },
       { threshold: 0.2 },
     )
 
     observer.observe(node)
     return () => observer.disconnect()
-  }, [])
+  }, [setInView])
 
   return (
     <section ref={sectionRef} id="experience" className="scroll-mt-24 bg-[#F3F4F9] py-[100px]">

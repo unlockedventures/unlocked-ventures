@@ -8,7 +8,7 @@ export const DigitalEngineering: GlobalConfig = {
   label: 'Digital Engineering',
   admin: {
     group: adminGroups.homepage,
-    description: 'The homepage section with the photo and the list of engineering services.',
+    description: 'The homepage section with Enterprise and Early-stage.',
     hideAPIURL: true,
   },
   access: {
@@ -52,9 +52,8 @@ export const DigitalEngineering: GlobalConfig = {
           name: 'index',
           type: 'text',
           label: 'Number',
-          required: true,
           admin: {
-            description: 'The small number beside the heading, such as 01.',
+            hidden: true,
           },
         },
         {

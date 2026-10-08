@@ -2,50 +2,96 @@
 
 import { useEffect, useState } from 'react'
 
-const HOLD_MS = 2400
+const TYPE_MS = 68
+const DELETE_MS = 42
+const HOLD_MS = 4200
+const PAUSE_MS = 380
+
+type Phase = 'typing' | 'holding' | 'deleting' | 'pausing'
 
 export function HeroRotatingWord({ words }: { words: readonly string[] }) {
   const [index, setIndex] = useState(0)
-  const [sliding, setSliding] = useState(false)
+  const [text, setText] = useState('')
+  const [phase, setPhase] = useState<Phase>('typing')
   const [motion, setMotion] = useState(true)
+
+  const word = words[index % words.length] ?? words[0] ?? ''
+  const longest = words.reduce((widest, next) => (next.length > widest.length ? next : widest), words[0] ?? '')
 
   useEffect(() => {
     const media = window.matchMedia('(prefers-reduced-motion: reduce)')
-    if (media.matches) {
-      setMotion(false)
-      return
+    const sync = () => setMotion(!media.matches)
+    sync()
+    media.addEventListener('change', sync)
+    return () => media.removeEventListener('change', sync)
+  }, [])
+
+  useEffect(() => {
+    if (motion || words.length === 0) return
+    setText(words[index % words.length] ?? '')
+  }, [motion, index, words])
+
+  useEffect(() => {
+    if (motion || words.length < 2) return
+
+    const id = window.setInterval(() => {
+      setIndex((value) => (value + 1) % words.length)
+    }, HOLD_MS)
+
+    return () => window.clearInterval(id)
+  }, [motion, words.length])
+
+  useEffect(() => {
+    if (!motion || words.length === 0) return
+
+    if (phase === 'typing') {
+      if (text === word) {
+        const id = window.setTimeout(() => setPhase('holding'), 0)
+        return () => window.clearTimeout(id)
+      }
+
+      const id = window.setTimeout(() => {
+        setText(word.slice(0, text.length + 1))
+      }, TYPE_MS)
+      return () => window.clearTimeout(id)
     }
 
-    if (words.length < 2) return
+    if (phase === 'holding') {
+      if (words.length < 2) return
+      const id = window.setTimeout(() => setPhase('deleting'), HOLD_MS)
+      return () => window.clearTimeout(id)
+    }
 
-    const id = window.setInterval(() => setSliding(true), HOLD_MS)
-    return () => window.clearInterval(id)
-  }, [words.length])
+    if (phase === 'deleting') {
+      if (text.length === 0) {
+        const id = window.setTimeout(() => setPhase('pausing'), 0)
+        return () => window.clearTimeout(id)
+      }
 
-  const current = words[index % words.length] ?? words[0]
-  const upcoming = words[(index + 1) % words.length] ?? current
-  const longest = words.reduce((widest, word) => (word.length > widest.length ? word : widest), words[0])
+      const id = window.setTimeout(() => {
+        setText((value) => value.slice(0, -1))
+      }, DELETE_MS)
+      return () => window.clearTimeout(id)
+    }
+
+    const id = window.setTimeout(() => {
+      setIndex((value) => (value + 1) % words.length)
+      setPhase('typing')
+    }, PAUSE_MS)
+    return () => window.clearTimeout(id)
+  }, [motion, phase, text, word, words.length])
 
   return (
-    <span className="relative block" aria-hidden="true">
-      <span className="invisible block">{longest}</span>
-      <span className="hero-digital-banner absolute inset-0 text-[#1CACAE]">
-        <span
-          className={
-            motion && sliding
-              ? 'block transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]'
-              : 'block'
-          }
-          style={{ transform: sliding ? 'translateY(-50%)' : 'translateY(0)' }}
-          onTransitionEnd={(event) => {
-            if (event.propertyName !== 'transform' || event.target !== event.currentTarget) return
-            setIndex((value) => (value + 1) % words.length)
-            setSliding(false)
-          }}
-        >
-          <span className="block h-[1lh]">{current}</span>
-          <span className="block h-[1lh]">{upcoming}</span>
-        </span>
+    <span className="relative block min-h-[1lh]" aria-hidden="true">
+      <span className="invisible block select-none">{longest}</span>
+      <span className="absolute inset-0 flex items-baseline text-[#167F81]">
+        <span className="whitespace-pre">{text}</span>
+        {motion ? (
+          <span
+            className="hero-type-caret ml-[0.06em] inline-block h-[0.82em] w-[0.08em] shrink-0 translate-y-[0.06em] bg-current"
+            aria-hidden="true"
+          />
+        ) : null}
       </span>
     </span>
   )

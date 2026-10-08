@@ -16,7 +16,7 @@ const categoryClassName =
   'mb-2 font-sans text-[11px] leading-4 font-medium tracking-[0.14em] text-[#1CACAE] uppercase'
 
 const childLinkClassName =
-  'cursor-pointer font-sans text-sm leading-5 text-[#5E6572] transition-colors hover:text-[#1CACAE]'
+  'cursor-pointer font-sans text-sm leading-5 text-[#33353F] transition-colors hover:text-[#1CACAE]'
 
 function isSamePage(href: string) {
   const next = new URL(href, window.location.href)

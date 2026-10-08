@@ -22,7 +22,7 @@ export function ServiceIntroSection({
 }: ServiceIntroSectionProps) {
   return (
     <section className="relative overflow-hidden bg-white">
-      <div className="relative mx-auto mt-8 w-full max-w-[1440px] sm:mt-10 xl:mt-20">
+      <div className="relative mx-auto mt-8 w-full max-w-[1440px] px-4 sm:mt-10 sm:px-6 md:px-8 xl:mt-20 xl:px-14 min-[1440px]:max-w-[1440px]">
         {illustrationSrc ? (
           <Image
             src={illustrationSrc}
@@ -30,11 +30,11 @@ export function ServiceIntroSection({
             width={1475}
             height={993}
             priority
-            className="pointer-events-none absolute top-0 left-[calc(265/1440*100%)] z-0 h-auto w-[calc(1475/1440*100%)] max-w-none -translate-y-[calc(138/993*100%)] select-none"
+            className="pointer-events-none absolute top-0 right-0 z-0 h-auto w-[min(100%,920px)] max-w-none translate-x-[8%] -translate-y-[12%] select-none"
           />
         ) : null}
-        <div className="relative z-10 px-4 sm:px-6 md:px-8 lg:px-[72px] xl:px-[156px]">
-            <div className="flex max-w-[800px] flex-col gap-6 xl:gap-12">
+        <div className="relative z-10">
+          <div className="flex max-w-[800px] flex-col gap-6 xl:gap-12">
             <p className="font-sans text-base leading-[22px] font-normal text-[#222222]">
               {breadcrumbs.map((crumb, index) => (
                 <span key={crumb.href}>
@@ -55,20 +55,20 @@ export function ServiceIntroSection({
                 {description}
               </p>
             </div>
-            </div>
           </div>
-      </div>
-      <div className="relative mt-8 aspect-[1440/560] w-full overflow-hidden bg-[#E8E8E8] md:mt-10 xl:mt-12">
-        {imageSrc ? (
-          <Image
-            src={imageSrc}
-            alt={imageAlt}
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover object-[center_48%]"
-          />
-        ) : null}
+        </div>
+        <div className="relative mt-8 aspect-[1440/560] w-full overflow-hidden bg-[#E8E8E8] md:mt-10 xl:mt-12">
+          {imageSrc ? (
+            <Image
+              src={imageSrc}
+              alt={imageAlt}
+              fill
+              priority
+              sizes="(max-width: 1440px) 100vw, 1440px"
+              className="object-cover object-[center_48%]"
+            />
+          ) : null}
+        </div>
       </div>
     </section>
   )

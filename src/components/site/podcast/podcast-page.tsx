@@ -29,125 +29,115 @@ export type PodcastPageContent = {
   subscribe: { name: string; href: string; logoSrc: string; width: number; height: number }[]
 }
 
-const actionClassName =
-  'inline-flex h-11 cursor-pointer items-center gap-2.5 border border-[#484D56]/36 px-5 font-sans text-base leading-[22px] font-normal text-[#484D56]'
-
-function ActionIcon({ src }: { src: string }) {
-  return <img src={src} alt="" width={20} height={20} />
-}
+const subscribeDescription = 'New episodes every Wednesday, about 25 minutes each.'
 
 export function PodcastPage({ content }: { content: PodcastPageContent }) {
   return (
     <div className="bg-white">
-      <section className="relative overflow-hidden">
-        <img
-          src="/podcast/episode/arcs.png"
-          alt=""
-          width={1174}
-          height={756}
-          className="pointer-events-none absolute top-0 left-[18.47%] hidden w-[81.53%] max-w-none select-none lg:block"
-        />
-        <div className="relative mx-auto w-full max-w-[1440px] px-4 pt-12 sm:px-6 md:px-8 md:pt-16 xl:px-[156px] xl:pt-20">
-          <p className="font-sans text-base leading-[22px] font-normal text-[#222222]">
-            <Link href={content.breadcrumbHomeHref} className="hover:text-[#1CACAE]">
-              {content.breadcrumbHomeLabel}
-            </Link>
-            <span aria-hidden="true"> / </span>
-            <Link href={content.breadcrumbPodcastHref} className="hover:text-[#1CACAE]">
-              {content.breadcrumbPodcastLabel}
-            </Link>
-            <span aria-hidden="true"> / </span>
-            <span>{content.title}</span>
+      <div className="mx-auto w-full max-w-[1440px] px-4 pt-8 pb-16 sm:px-6 md:px-8 md:pt-10 md:pb-20 xl:px-14 xl:pt-12 xl:pb-[100px]">
+        <p className="font-sans text-sm leading-5 font-normal text-[#696969]">
+          <Link href={content.breadcrumbHomeHref} className="hover:text-[#171616]">
+            {content.breadcrumbHomeLabel}
+          </Link>
+          <span aria-hidden="true"> / </span>
+          <Link href={content.breadcrumbPodcastHref} className="hover:text-[#171616]">
+            {content.breadcrumbPodcastLabel}
+          </Link>
+          <span aria-hidden="true"> / </span>
+          <span className="text-[#171616]">{content.title}</span>
+        </p>
+
+        {content.category ? (
+          <p className="mt-6 inline-flex w-fit items-center bg-[#F3F4F9] px-2.5 py-1 font-sans text-[11px] leading-4 font-medium tracking-[0.08em] text-[#33353F] uppercase">
+            {content.category}
           </p>
-        </div>
-        <div className="relative mt-8 xl:mt-12">
-          <EpisodePlayer
-            title={content.title}
-            timeLabel={content.timeLabel}
-            progress={content.progress}
-            imageSrc={content.coverSrc}
-            imageAlt={content.coverAlt}
-          />
-        </div>
-      </section>
+        ) : null}
 
-      <section className="mx-auto flex w-full flex-col gap-12 px-4 py-12 sm:px-6 md:px-8 md:py-16 xl:flex-row xl:items-start xl:gap-8 xl:px-[156px] xl:pt-[80px] xl:pb-20">
-        <div className="flex min-w-0 flex-1 flex-col gap-12">
-          <div className="flex flex-col gap-8">
-            <div className="flex flex-col gap-6">
-              <p className="inline-flex w-fit items-center bg-[#33353F]/8 px-4 py-1.5 font-sans text-sm leading-[26px] font-normal text-[#231F20]">
-                {content.category}
-              </p>
+        <h1 className="mt-4 font-sans text-[2rem] leading-10 font-normal tracking-[-0.5px] text-[#171616] xl:text-[40px] xl:leading-[48px]">
+          {content.title}
+        </h1>
+        <p className="mt-3 font-sans text-sm leading-5 font-normal text-[#696969]">{content.meta}</p>
+
+        <div className="mt-8 grid items-start gap-10 xl:mt-8 xl:grid-cols-[minmax(0,1fr)_340px] xl:gap-8">
+          <div className="flex min-w-0 flex-col gap-10">
+            <EpisodePlayer
+              title={content.title}
+              timeLabel={content.timeLabel}
+              progress={content.progress}
+              imageSrc={content.coverSrc}
+              imageAlt={content.coverAlt}
+            />
+
+            {content.description ? (
+              <p className="font-sans text-base leading-7 font-normal text-[#23313C]">{content.description}</p>
+            ) : null}
+
+            {content.chapters.length > 0 ? (
+              <div className="flex flex-col gap-4">
+                <h2 className="font-sans text-2xl leading-8 font-normal tracking-[-0.4px] text-[#171616]">
+                  {content.chaptersTitle}
+                </h2>
+                <ol className="border-y border-[#171616]/10">
+                  {content.chapters.map((chapter) => (
+                    <li key={`${chapter.time}-${chapter.title}`} className="border-b border-[#171616]/10 last:border-b-0">
+                      <div className="flex items-center gap-6 py-4 sm:gap-10">
+                        <span className="w-[4.5rem] shrink-0 font-sans text-sm leading-5 font-normal text-[#696969] tabular-nums sm:w-[88px]">
+                          {chapter.time}
+                        </span>
+                        <span className="font-sans text-base leading-6 font-normal text-[#171616]">{chapter.title}</span>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            ) : null}
+          </div>
+
+          <aside className="flex w-full flex-col gap-10 xl:w-[340px]">
+            {content.subscribe.length > 0 ? (
+            <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-2">
-                <h1 className="font-sans text-[2rem] leading-10 font-normal tracking-[-1px] text-[#171616] xl:text-[40px] xl:leading-[56px]">
-                  {content.title}
-                </h1>
-                <p className="font-sans text-lg leading-[27px] font-normal tracking-[0.36px] text-[#23313C]">
-                  {content.meta}
-                </p>
+                <h2 className="font-sans text-xl leading-7 font-normal tracking-[-0.3px] text-[#171616]">
+                  {content.subscribeTitle}
+                </h2>
+                <p className="font-sans text-sm leading-5 font-normal text-[#696969]">{subscribeDescription}</p>
               </div>
+              <ul className="grid grid-cols-2 gap-2">
+                {content.subscribe.map((platform) => (
+                  <li key={platform.name}>
+                    <a
+                      href={platform.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex h-11 w-full items-center justify-center rounded-md border border-[#E4E6EA] bg-white px-3"
+                    >
+                      <img
+                        src={platform.logoSrc}
+                        alt={platform.name}
+                        width={platform.width}
+                        height={platform.height}
+                        className="max-h-5 w-auto max-w-full object-contain"
+                      />
+                    </a>
+                  </li>
+                ))}
+              </ul>
             </div>
-            <div className="flex flex-col gap-5">
-              <div className="h-px bg-[#33353F]" />
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex flex-wrap gap-4">
-                  <button type="button" className={actionClassName}>
-                    {content.shareLabel}
-                    <ActionIcon src="/podcast/episode/icons/share.svg" />
-                  </button>
-                  <button type="button" className={actionClassName}>
-                    {content.saveLabel}
-                    <ActionIcon src="/podcast/episode/icons/save.svg" />
-                  </button>
-                  <button type="button" className={actionClassName}>
-                    {content.likeLabel}
-                    <ActionIcon src="/podcast/episode/icons/like.svg" />
-                  </button>
-                </div>
-                <button
-                  type="button"
-                  className="inline-flex h-11 cursor-pointer items-center gap-2.5 bg-[#33353F] px-5 font-sans text-base leading-[22px] font-normal text-white"
-                >
-                  {content.transcriptLabel}
-                  <ActionIcon src="/podcast/episode/icons/transcript.svg" />
-                </button>
-              </div>
-              <div className="h-px bg-[#33353F]" />
-            </div>
-            <p className="font-sans text-lg leading-[27px] font-normal tracking-[0.36px] text-[#23313C]">
-              {content.description}
-            </p>
-          </div>
+            ) : null}
 
-          <div className="flex flex-col gap-6">
-            <h2 className="font-sans text-[2rem] leading-10 font-normal tracking-[-1px] text-[#33353F]">{content.chaptersTitle}</h2>
-            <ol className="border-y border-black/8">
-              {content.chapters.map((chapter) => (
-                <li key={chapter.time} className="border-b border-black/8 last:border-b-0">
-                  <div className="flex items-center gap-6 py-[22px] sm:gap-14">
-                    <span className="w-[4.5rem] shrink-0 font-sans text-base leading-[27px] font-normal text-[#33353F] sm:w-[100px]">
-                      {chapter.time}
-                    </span>
-                    <span className="font-sans text-base leading-[27px] font-normal text-[#33353F]">{chapter.title}</span>
-                  </div>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </div>
-
-        <aside className="flex w-full flex-col gap-12 xl:w-[370px] xl:shrink-0">
-          <div className="flex flex-col gap-4 bg-[#F3F4F9] p-5">
-            <h2 className="font-sans text-2xl leading-10 font-normal tracking-[-1px] text-[#33353F]">{content.listenNextTitle}</h2>
-            <div className="flex flex-col gap-6">
-              <ul className="flex flex-col gap-3">
+            {content.listenNext.length > 0 ? (
+            <div className="flex flex-col gap-4">
+              <h2 className="font-sans text-xl leading-7 font-normal tracking-[-0.3px] text-[#171616]">
+                {content.listenNextTitle}
+              </h2>
+              <ul className="flex flex-col gap-4">
                 {content.listenNext.map((item, index) => (
-                  <li key={`${item.imageSrc}-${index}`}>
-                    <Link href={item.href} className="flex items-center gap-4 bg-white">
-                      <img src={item.imageSrc} alt="" className="size-[120px] shrink-0 object-cover" />
-                      <span className="flex min-w-0 flex-col gap-2 pr-3">
-                        <span className="font-sans text-xs leading-6 font-normal text-[#222222]/85">{item.meta}</span>
-                        <span className="font-sans text-base leading-5 font-medium tracking-[-0.32px] text-[#25282D]">
+                  <li key={`${item.href}-${index}`}>
+                    <Link href={item.href} className="flex items-center gap-3">
+                      <img src={item.imageSrc} alt="" className="size-16 shrink-0 object-cover" />
+                      <span className="flex min-w-0 flex-col gap-1">
+                        <span className="font-sans text-[11px] leading-4 font-normal text-[#696969]">{item.meta}</span>
+                        <span className="line-clamp-2 font-sans text-sm leading-5 font-medium tracking-[-0.16px] text-[#171616]">
                           {item.title}
                         </span>
                       </span>
@@ -157,33 +147,24 @@ export function PodcastPage({ content }: { content: PodcastPageContent }) {
               </ul>
               <Link
                 href={content.allEpisodesHref}
-                className="inline-flex h-11 w-fit items-center gap-2.5 bg-[#33353F] px-5 font-sans text-base leading-[22px] font-normal text-white"
+                className="inline-flex w-fit items-center gap-2 font-sans text-sm leading-5 font-normal text-[#171616]"
               >
                 {content.allEpisodesLabel}
-                <img src="/podcast/episode/icons/arrow-up-right.svg" alt="" width={20} height={20} />
+                <svg viewBox="0 0 20 20" className="size-4" fill="none" aria-hidden="true">
+                  <path
+                    d="M5.833 14.167 14.166 5.833M14.166 14.167V5.833H5.833"
+                    stroke="currentColor"
+                    strokeWidth="1.25"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
               </Link>
             </div>
-          </div>
-
-          <div className="flex flex-col gap-4 bg-[#33353F] p-5">
-            <h2 className="font-sans text-2xl leading-10 font-normal tracking-[-1px] text-white">{content.subscribeTitle}</h2>
-            <ul className="flex flex-wrap gap-2">
-              {content.subscribe.map((platform) => (
-                <li key={platform.name}>
-                  <a
-                    href={platform.href}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex h-11 w-[105px] items-center justify-center bg-white px-5"
-                  >
-                    <img src={platform.logoSrc} alt={platform.name} width={platform.width} height={platform.height} />
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </aside>
-      </section>
+            ) : null}
+          </aside>
+        </div>
+      </div>
     </div>
   )
 }

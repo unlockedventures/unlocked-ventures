@@ -1,6 +1,4 @@
 import Link from 'next/link'
-
-import { SiteOutlineButton } from '@/components/site/site-outline-button'
 import { cn } from '@/lib/utils'
 
 export type AdvisoryOffering = {
@@ -47,28 +45,21 @@ function ArrowUpRight({ className }: { className?: string }) {
 function AdvisoryCard({ group }: { group: AdvisoryGroup }) {
   return (
     <article className="flex h-full min-w-0 flex-col gap-7 overflow-visible bg-[#F3F4F9] px-6 py-10 sm:px-8 sm:py-12 lg:px-10 lg:pt-[60px] lg:pb-12">
-      <img
-        src={group.iconSrc}
-        alt=""
-        width={group.iconWidth}
-        height={group.iconHeight}
-        className="block h-auto w-[4.5rem] max-w-full shrink-0 self-start sm:w-20 lg:w-[90px]"
-      />
       <div className="flex flex-col gap-8">
-        <h3 className="font-sans text-base leading-7 font-normal tracking-normal text-[#25282D] uppercase">
+        <h3 className="font-sans text-[1.5rem] leading-[2rem] font-normal tracking-normal text-[#1cacae] uppercase">
           {group.title}
         </h3>
         <ul className="flex flex-col gap-3">
           {group.items.map((item) => (
-            <li key={`${group.title}-${item.label}`} className="border-b border-[#3C3C43]/15 pb-3">
+            <li key={`${group.title}-${item.label}`}>
               <Link
                 href={item.href}
-                className="group flex cursor-pointer items-center justify-between gap-4 text-[#222222]"
+                className="group flex cursor-pointer items-center justify-between gap-4 border-b border-[#3C3C43]/15 pb-3 text-[#222222] transition-[border-color] duration-300 ease-out hover:border-[#33353F] focus-visible:border-[#33353F]"
               >
                 <span className="font-sans text-xl leading-7 font-normal sm:text-2xl sm:leading-8">
                   {item.label}
                 </span>
-                <span className="inline-flex size-12 shrink-0 items-center justify-center rounded-full bg-white text-[#33353F] transition-colors duration-300 ease-out group-hover:bg-[#33353F] group-hover:text-white group-focus-visible:bg-[#33353F] group-focus-visible:text-white">
+                <span className="inline-flex size-12 shrink-0 items-center justify-center rounded-full bg-white text-[#0b1f3a] transition-colors duration-300 ease-out group-hover:bg-[#0b1f3a] group-hover:text-white group-focus-visible:bg-[#33353F] group-focus-visible:text-white">
                   <ArrowUpRight className={arrowHoverClassName} />
                 </span>
               </Link>
@@ -89,7 +80,7 @@ export function StrategicAdvisorySection({
 }: StrategicAdvisorySectionProps) {
   return (
     <section id="strategic-advisory" aria-label={title} className={cn('scroll-mt-24 bg-white', className)}>
-      <div className="mx-auto flex w-full flex-col gap-8 px-4 py-12 sm:px-6 md:gap-12 md:px-8 md:py-16 xl:px-[156px] xl:py-[100px] min-[1440px]:max-w-[1440px]">
+      <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-8 px-4 py-12 sm:px-6 md:gap-12 md:px-8 md:py-16 xl:px-14 xl:py-[100px]">
         <div className="flex flex-col items-start justify-between gap-5 md:flex-row md:items-end">
           <div className="flex max-w-[610px] flex-col gap-5">
             <h2 className="font-sans text-[2rem] leading-10 font-normal tracking-[-1px] text-[#33353F] md:text-5xl md:leading-[56px]">
@@ -97,12 +88,6 @@ export function StrategicAdvisorySection({
             </h2>
             <p className="font-sans text-base leading-6 font-normal text-[#222222]/[0.68]">{description}</p>
           </div>
-          <SiteOutlineButton
-            href={cta.href}
-            text={cta.label}
-            hoverArrow
-            className="h-[60px] rounded-none border border-[#484D56] bg-[#484D56] px-5 text-base text-white shadow-none transition-[border-color,background-color,box-shadow] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] hover:border-[#d5d8de] hover:bg-[#555b66] hover:shadow-[0_0_0_6px_rgba(72,77,86,0.08),0_14px_30px_-16px_rgba(72,77,86,0.28)] focus-visible:border-[#d5d8de] focus-visible:bg-[#555b66] focus-visible:shadow-[0_0_0_6px_rgba(72,77,86,0.08),0_14px_30px_-16px_rgba(72,77,86,0.28)] sm:h-[60px] sm:px-5 sm:text-base lg:h-[60px] lg:px-5 lg:text-base 2xl:h-[60px] 2xl:px-5 2xl:text-base"
-          />
         </div>
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {groups.map((group) => (
