@@ -121,7 +121,7 @@ const generateScriptEndpoint: Endpoint = {
 
 export const Pipeline: CollectionConfig = {
   slug: 'pipeline',
-  labels: { singular: 'Pipeline', plural: 'Pipeline' },
+  labels: { singular: 'Podcast', plural: 'Podcast' },
   admin: {
     group: adminGroups.pipeline,
     description: 'Paste public video links and generate a transcript.',

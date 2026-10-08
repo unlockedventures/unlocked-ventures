@@ -14,6 +14,7 @@ export type SuccessStory = {
 
 export type SuccessStoriesSectionProps = {
   title: string
+  subtitle?: string
   cta: {
     label: string
     href: string
@@ -21,6 +22,7 @@ export type SuccessStoriesSectionProps = {
   feature: SuccessStory
   stories: readonly SuccessStory[]
   className?: string
+  flushTop?: boolean
 }
 
 const trimmedLabelClassName =
@@ -40,11 +42,18 @@ function storyTitle(title: string) {
   return titleLineBreaks[title] ?? title
 }
 
-function ArrowRight({ className }: { className?: string }) {
+function ArrowUpRight({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className={cn('size-5 shrink-0', className)}>
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className={cn(
+        'size-5 shrink-0 transition-transform duration-300 ease-out group-hover:rotate-45 group-focus-visible:rotate-45 group-hover/case:rotate-45 group-focus-visible/case:rotate-45',
+        className,
+      )}
+    >
       <path
-        d="M5 12H19M13 6L19 12L13 18"
+        d="M7 17L17 7M7 7L17 7L17 17"
         fill="none"
         stroke="currentColor"
         strokeLinecap="round"
@@ -58,40 +67,44 @@ function StoryCta({ label, className }: { label: string; className?: string }) {
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-2.5 font-sans text-base font-normal text-[#33353F] no-underline transition-colors duration-300 ease-out group-hover:underline group-hover:decoration-[#33353F] group-hover:decoration-1 group-hover:underline-offset-4 group-focus-within:underline group-focus-within:decoration-[#33353F] group-focus-within:decoration-1 group-focus-within:underline-offset-4',
+        'inline-flex items-center gap-2.5 font-sans text-base font-normal text-[#222222]',
         className,
       )}
     >
-      <span className={trimmedLabelClassName}>{label}</span>
-      <ArrowRight className="transition-transform duration-300 ease-out group-hover:translate-x-0.5 group-focus-within:translate-x-0.5" />
+      <span
+        className={cn(
+          trimmedLabelClassName,
+          'underline decoration-transparent underline-offset-4 transition-colors duration-200 ease-out group-hover:decoration-[#222222] group-focus-within:decoration-[#222222]',
+        )}
+      >
+        {label}
+      </span>
+      <ArrowUpRight />
     </span>
   )
 }
 
-function StoryImage({ src, className }: { src?: string; className?: string }) {
-  if (!src) return null
-
-  return <img src={src} alt="" className={cn('absolute object-cover', className)} />
-}
-
 function FeaturedStory({ story }: { story: SuccessStory }) {
   return (
-    <article className="group relative flex min-h-[22rem] cursor-pointer items-center overflow-hidden bg-[#F3FBFA] shadow-none ring-0 ring-[#1CACAE]/0 transition-[box-shadow,ring-color,ring-width] duration-300 ease-out hover:shadow-[0_14px_36px_-20px_rgba(28,172,174,0.45)] hover:ring-2 hover:ring-[#1CACAE]/35 focus-within:shadow-[0_14px_36px_-20px_rgba(28,172,174,0.45)] focus-within:ring-2 focus-within:ring-[#1CACAE]/35 lg:h-[420px]">
+    <article className="group relative flex min-h-[22rem] cursor-pointer items-center overflow-hidden bg-[#F8F8F8] lg:h-[420px]">
       <Link href={story.href} className="absolute inset-0 z-20" aria-label={story.ctaLabel} />
       {story.imageSrc ? (
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-full md:w-[58%] min-[1440px]:inset-auto min-[1440px]:top-0 min-[1440px]:left-[634px] min-[1440px]:h-[449px] min-[1440px]:w-[694px]!">
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-full md:w-[62%] min-[1440px]:inset-auto min-[1440px]:top-0 min-[1440px]:left-[634px] min-[1440px]:h-[420px] min-[1440px]:w-[694px]!">
           <img
             src={story.imageSrc}
             alt=""
-            className="absolute inset-0 h-full w-full object-cover object-top grayscale-0"
+            className="absolute inset-0 h-full w-full object-cover object-top grayscale"
           />
-          <div className="absolute inset-y-0 left-0 w-[78%] bg-[linear-gradient(90deg,#F3FBFA_0%,rgba(243,251,250,0.92)_38%,rgba(28,172,174,0.28)_68%,transparent_100%)] min-[1440px]:bottom-auto min-[1440px]:h-[420px] min-[1440px]:w-[507px] min-[1440px]:bg-[linear-gradient(270deg,transparent_0%,rgba(28,172,174,0.22)_40%,rgba(243,251,250,0.92)_72%,#F3FBFA_100%)]" />
+          <div
+            aria-hidden
+            className="absolute inset-y-0 left-0 w-full bg-[linear-gradient(90deg,#F8F8F8_0%,#F8F8F8_28%,rgba(248,248,248,0.72)_48%,rgba(248,248,248,0)_78%)] min-[1440px]:w-[507px] min-[1440px]:bg-[linear-gradient(270deg,rgba(248,248,248,0)_0%,rgba(248,248,248,0.72)_42%,#F8F8F8_72%,#F8F8F8_100%)]"
+          />
         </div>
       ) : null}
       <div className="relative z-10 w-full px-6 py-10 sm:px-8 lg:px-[70px] lg:py-0 min-[1440px]:absolute min-[1440px]:top-[68px] min-[1440px]:left-[70px] min-[1440px]:w-[572px] min-[1440px]:p-0!">
         <div className="flex max-w-[572px] flex-col gap-6 min-[1440px]:w-full min-[1440px]:max-w-none">
           {story.badge ? (
-            <span className="inline-flex h-10 w-fit items-center bg-white px-5 font-inter text-base leading-[26px] font-normal text-[#231F20] uppercase transition-colors duration-300 ease-out group-hover:bg-[#1CACAE] group-hover:text-white group-focus-within:bg-[#1CACAE] group-focus-within:text-white">
+            <span className="inline-flex h-10 w-fit items-center bg-white px-5 font-inter text-base leading-[26px] font-normal text-[#231F20] uppercase">
               {story.badge}
             </span>
           ) : null}
@@ -116,19 +129,25 @@ function FeaturedStory({ story }: { story: SuccessStory }) {
 
 function StoryCard({ story }: { story: SuccessStory }) {
   return (
-    <article className="group relative flex h-full min-h-80 cursor-pointer flex-col justify-end overflow-hidden bg-[#F3FBFA] shadow-none ring-0 ring-[#1CACAE]/0 transition-[box-shadow,ring-color,ring-width] duration-300 ease-out hover:shadow-[0_14px_36px_-20px_rgba(28,172,174,0.45)] hover:ring-2 hover:ring-[#1CACAE]/35 focus-within:shadow-[0_14px_36px_-20px_rgba(28,172,174,0.45)] focus-within:ring-2 focus-within:ring-[#1CACAE]/35 md:h-[420px]">
+    <article className="group relative flex h-full min-h-80 cursor-pointer flex-col justify-end overflow-hidden bg-[#F8F8F8] md:h-[420px]">
       <Link href={story.href} className="absolute inset-0 z-20" aria-label={story.ctaLabel} />
-      <StoryImage src={story.imageSrc} className="inset-0 h-full w-full object-top grayscale-0" />
+      {story.imageSrc ? (
+        <img
+          src={story.imageSrc}
+          alt=""
+          className="absolute top-0 left-0 h-[72%] w-full object-cover object-top grayscale min-[1440px]:top-[-40px] min-[1440px]:h-[377px] min-[1440px]:w-full"
+        />
+      ) : null}
       {story.imageSrc ? (
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,#F3FBFA_0%,rgba(243,251,250,0.96)_24%,rgba(28,172,174,0.42)_52%,rgba(28,172,174,0.16)_74%,transparent_100%)]"
+          className="pointer-events-none absolute inset-x-0 bottom-[28%] h-24 bg-[linear-gradient(180deg,rgba(248,248,248,0)_0%,#F8F8F8_100%)] min-[1440px]:top-[161px] min-[1440px]:bottom-auto min-[1440px]:h-[259px] min-[1440px]:bg-[linear-gradient(180deg,rgba(248,248,248,0)_0%,#F8F8F8_50%)]"
         />
       ) : null}
       <div className="relative z-10 flex flex-col gap-6 p-6 sm:p-8 lg:p-[30px] min-[1440px]:absolute min-[1440px]:top-[239px] min-[1440px]:left-[30px] min-[1440px]:w-[572px] min-[1440px]:gap-4 min-[1440px]:p-0!">
         <div className="flex flex-col gap-6 min-[1440px]:gap-3">
           {story.category ? (
-            <p className="inline-flex h-8 w-fit items-center bg-white px-3 font-inter text-xs leading-4 font-normal text-[#231F20] uppercase transition-colors duration-300 ease-out group-hover:bg-[#1CACAE] group-hover:text-white group-focus-within:bg-[#1CACAE] group-focus-within:text-white">
+            <p className="inline-flex h-8 w-fit items-center bg-white px-3 font-inter text-xs leading-4 font-normal text-[#231F20] uppercase">
               {story.category}
             </p>
           ) : null}
@@ -144,28 +163,40 @@ function StoryCard({ story }: { story: SuccessStory }) {
 
 export function SuccessStoriesSection({
   title,
+  subtitle,
   cta,
   feature,
   stories,
   className,
+  flushTop = false,
 }: SuccessStoriesSectionProps) {
   return (
     <section aria-label={title} className={cn('bg-white', className)}>
-      <div className="mx-auto flex w-full flex-col gap-8 px-4 py-12 sm:px-6 md:gap-12 md:px-8 md:py-16 xl:px-14 xl:py-[100px] min-[1440px]:max-w-[1440px]">
-        <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
-          <h2 className="font-sans text-[2rem] leading-10 font-normal tracking-[-1px] text-[#33353F] md:text-5xl md:leading-[56px] min-[1440px]:text-[48px] min-[1440px]:leading-[56px] min-[1440px]:text-[#171616]">
-            {title}
-          </h2>
+      <div
+        className={cn(
+          'mx-auto flex w-full max-w-[1440px] flex-col gap-12 px-4 py-12 sm:px-6 md:px-8 md:py-16 xl:px-14 xl:pb-[100px]',
+          flushTop ? 'xl:pt-0' : 'xl:pt-[100px]',
+        )}
+      >
+        <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-end">
+          <div className="flex max-w-[610px] flex-col gap-5">
+            <h2 className="font-sans text-[2rem] leading-10 font-normal tracking-[-1px] text-[#33353F] md:text-5xl md:leading-[56px] min-[1440px]:text-[48px] min-[1440px]:leading-[56px] min-[1440px]:text-[#171616]">
+              {title}
+            </h2>
+            {subtitle ? (
+              <p className="font-sans text-base leading-6 font-normal text-[#222222]/[0.68]">
+                {subtitle}
+              </p>
+            ) : null}
+          </div>
           <Link
             href={cta.href}
-            className="group/case inline-flex cursor-pointer items-center font-sans text-base leading-6 font-normal text-[#33353F] no-underline"
+            className="group/case inline-flex shrink-0 cursor-pointer items-center gap-2.5 font-sans text-base leading-6 font-normal text-[#33353F] no-underline"
           >
-            <span className="underline decoration-transparent underline-offset-4 transition-colors duration-200 ease-out group-hover/case:decoration-[#33353F] group-focus-visible/case:decoration-[#33353F] motion-reduce:transition-none">
+            <span className="underline underline-offset-4 decoration-[#33353F]">
               {cta.label}
             </span>
-            <span className="inline-flex w-0 overflow-hidden opacity-0 transition-all duration-200 ease-out group-hover/case:ml-2 group-hover/case:w-5 group-hover/case:opacity-100 group-focus-visible/case:ml-2 group-focus-visible/case:w-5 group-focus-visible/case:opacity-100 motion-reduce:transition-none">
-              <ArrowRight className="size-5" />
-            </span>
+            <ArrowUpRight className="size-5" />
           </Link>
         </div>
         <div className="flex flex-col gap-3">

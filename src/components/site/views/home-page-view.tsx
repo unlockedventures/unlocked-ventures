@@ -38,9 +38,18 @@ export function HomePageView() {
     <>
       {hero.data ? <HeroSection {...hero.data} /> : null}
       {trustedBy.data ? <TrustedBySection {...trustedBy.data} /> : null}
-      {strategicAdvisory.data ? <StrategicAdvisorySection {...strategicAdvisory.data} /> : null}
-      {digitalEngineering.data ? <DigitalEngineeringSection {...digitalEngineering.data} /> : null}
-      {successStories.data ? <SuccessStoriesSection {...successStories.data} /> : null}
+      {strategicAdvisory.data ? (
+        <StrategicAdvisorySection {...strategicAdvisory.data} flushTop={Boolean(trustedBy.data)} />
+      ) : null}
+      {digitalEngineering.data ? (
+        <DigitalEngineeringSection
+          {...digitalEngineering.data}
+          flushTop={Boolean(strategicAdvisory.data)}
+        />
+      ) : null}
+      {successStories.data ? (
+        <SuccessStoriesSection {...successStories.data} flushTop={Boolean(digitalEngineering.data)} />
+      ) : null}
       {awardsSection.data ? (
         <AwardsSection
           title={awardsSection.data.title}

@@ -11,6 +11,9 @@ export const digitalEngineeringSeed = {
     {
       index: '01.',
       title: 'Enterprise',
+      iconFile: 'icon-enterprise.png',
+      iconWidth: 210,
+      iconHeight: 204,
       description:
         "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever",
       items: [
@@ -22,6 +25,9 @@ export const digitalEngineeringSeed = {
     {
       index: '02.',
       title: 'Early-stage',
+      iconFile: 'icon-early-stage.png',
+      iconWidth: 210,
+      iconHeight: 210,
       items: [{ label: 'Engineering as a Service', href: '/solutions/engineering-as-a-service' }],
     },
   ],

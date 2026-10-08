@@ -25,10 +25,23 @@ export async function seedHero(payload: Payload) {
   const rotatingWords = heroSeed.rotatingWords.map((text) => ({ text }))
 
   if (current.title) {
+    const updates: {
+      rotatingWords?: { text: string }[]
+      cta?: { label: string; href: string }
+    } = {}
+
     if (!current.rotatingWords?.length) {
+      updates.rotatingWords = rotatingWords
+    }
+
+    if (current.cta?.href === '/strategic-advisory' || current.cta?.href === '/solutions') {
+      updates.cta = heroSeed.cta
+    }
+
+    if (Object.keys(updates).length) {
       await payload.updateGlobal({
         slug: 'hero',
-        data: { rotatingWords },
+        data: updates,
       })
     }
     return

@@ -121,22 +121,44 @@ export function buildAdminNav(sections: AdminSection[]): AdminNavItem[] {
     })
   }
 
-  for (const section of sections) {
-    if (section.label === adminGroups.homepage || section.label === adminGroups.pages) continue
-    if (
-      (section.label === adminGroups.successStories ||
-        section.label === adminGroups.podcast ||
-        section.label === adminGroups.news) &&
-      section.links.length === 1
-    ) {
+  const dynamicZoneItems: AdminNavItem[] = []
+  for (const label of [adminGroups.podcast, adminGroups.news, adminGroups.successStories] as const) {
+    const section = byLabel.get(label)
+    if (!section || section.links.length === 0) continue
+    if (section.links.length === 1) {
       const [link] = section.links
-      nav.push({
+      dynamicZoneItems.push({
         kind: 'link',
         link: {
           ...link,
-          label: section.label,
+          label,
         },
       })
+      continue
+    }
+    dynamicZoneItems.push({
+      kind: 'group',
+      label,
+      items: section.links.map((link) => ({ kind: 'link', link })),
+    })
+  }
+  if (dynamicZoneItems.length > 0) {
+    nav.push({
+      kind: 'group',
+      label: adminGroups.dynamicZone,
+      items: dynamicZoneItems,
+    })
+  }
+
+  for (const section of sections) {
+    if (
+      section.label === adminGroups.homepage ||
+      section.label === adminGroups.pages ||
+      section.label === adminGroups.podcast ||
+      section.label === adminGroups.news ||
+      section.label === adminGroups.successStories ||
+      section.label === adminGroups.dynamicZone
+    ) {
       continue
     }
     if (section.label === adminGroups.library && section.links.length === 1) {
@@ -186,10 +208,14 @@ export function buildAdminNav(sections: AdminSection[]): AdminNavItem[] {
       })
       continue
     }
+    const label = section.label === adminGroups.pipeline ? 'Podcast' : section.label
     nav.push({
       kind: 'group',
-      label: section.label,
-      items: section.links.map((link) => ({ kind: 'link', link })),
+      label,
+      items: section.links.map((link) => ({
+        kind: 'link',
+        link: section.label === adminGroups.pipeline ? { ...link, label: 'Podcast' } : link,
+      })),
     })
   }
 

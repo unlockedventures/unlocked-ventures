@@ -48,6 +48,7 @@ export async function getSuccessStories(): Promise<
 
   return {
     title: section.title,
+    subtitle: section.subtitle || undefined,
     cta: {
       label: section.cta.label,
       href: section.cta.href,

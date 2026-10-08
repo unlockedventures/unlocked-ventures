@@ -6,7 +6,7 @@ export const PodcastPage: GlobalConfig = {
   slug: 'podcast-page',
   label: 'Podcast page',
   admin: {
-    group: adminGroups.podcast,
+    group: adminGroups.pages,
     description: 'The featured episode, chapters, and subscribe links on the podcast page.',
     hideAPIURL: true,
   },

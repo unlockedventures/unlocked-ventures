@@ -1,7 +1,7 @@
 export const strategicGrowthSeed = {
   breadcrumbs: [
     { label: 'Home', href: '/' },
-    { label: 'Our solutions', href: '/strategic-advisory' },
+    { label: 'Our solutions', href: '/#strategic-advisory' },
   ],
   current: 'Strategic Growth',
   title: 'Advising that holds up once the plan meets the business',

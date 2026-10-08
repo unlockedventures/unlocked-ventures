@@ -75,7 +75,7 @@ export function TrustedBySection({
   }, [setInView])
 
   return (
-    <section ref={sectionRef} className={cn('overflow-hidden bg-white', className)}>
+    <section ref={sectionRef} className={cn('overflow-hidden border-b border-black/16 bg-white', className)}>
       <div className="flex w-full flex-col items-center gap-10 px-4 py-12 sm:px-6 md:px-8 md:py-16 lg:px-12 xl:px-16 xl:py-[100px] min-[1440px]:mx-auto min-[1440px]:max-w-[1440px] min-[1440px]:px-[156px]! min-[1440px]:py-[100px]">
         <h2 className="text-center font-sans text-[2rem] leading-[3rem] font-normal text-[#171616]">
           {title}

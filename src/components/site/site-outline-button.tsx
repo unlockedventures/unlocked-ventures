@@ -1,8 +1,25 @@
 'use client'
 
 import Link from 'next/link'
-import type { ReactNode } from 'react'
+import type { MouseEvent, ReactNode } from 'react'
 import { cn } from 'cn'
+
+function scrollToSamePageHash(href: string, event: MouseEvent<HTMLAnchorElement>) {
+  const next = new URL(href, window.location.href)
+  if (next.pathname !== window.location.pathname || next.search !== window.location.search || !next.hash) {
+    return
+  }
+
+  const target = document.getElementById(decodeURIComponent(next.hash.slice(1)))
+  if (!target) return
+
+  event.preventDefault()
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  target.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' })
+  if (window.location.hash !== next.hash) {
+    window.history.pushState(null, '', `${next.pathname}${next.search}${next.hash}`)
+  }
+}
 
 const outlineClassName =
   'inline-flex h-8 shrink-0 cursor-pointer items-center justify-center rounded-md border border-solid border-[#C8CAD0] bg-transparent px-3 font-sans text-[13px] leading-[18px] font-normal tracking-normal text-[#464646] antialiased hover:bg-[#484D56]/5 sm:h-9 sm:px-3.5 sm:text-[14px] sm:leading-5 lg:h-10 lg:px-4 lg:text-[15px] lg:leading-[22px] 2xl:h-11 2xl:text-[16px] 2xl:leading-6'
@@ -87,6 +104,7 @@ export function SiteOutlineButton({
             event.preventDefault()
             return
           }
+          scrollToSamePageHash(href, event)
           onClick?.()
         }}
       >

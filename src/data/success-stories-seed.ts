@@ -1,5 +1,7 @@
 export const successStoriesSeed = {
   title: 'Our Success Stories',
+  subtitle:
+    'Products, platforms and roadmaps we have built with operators, founders and portfolio companies, and what changed once they shipped.',
   cta: {
     label: 'All case study',
     href: '/our-successes',

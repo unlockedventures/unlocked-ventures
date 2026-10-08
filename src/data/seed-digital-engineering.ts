@@ -33,7 +33,9 @@ export async function seedDigitalEngineering(payload: Payload) {
       description: digitalEngineeringSeed.description,
       cta: digitalEngineeringSeed.cta,
       image: media.id,
-      groups: digitalEngineeringSeed.groups,
+      groups: digitalEngineeringSeed.groups.map(
+        ({ iconFile: _iconFile, iconWidth: _iconWidth, iconHeight: _iconHeight, ...group }) => group,
+      ),
     },
   })
 }

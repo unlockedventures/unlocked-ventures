@@ -7,7 +7,7 @@ export const heroSeed = {
   ],
   cta: {
     label: 'See Our Solutions',
-    href: '/strategic-advisory',
+    href: '/#strategic-advisory',
   },
   badgeAlt: '30 years of experience',
   primaryFile: 'hero-photo-primary.png',

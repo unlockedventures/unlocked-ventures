@@ -22,11 +22,12 @@ async function uploadStoryImage(payload: Payload, file: string, alt: string) {
 
 export async function seedSuccessStories(payload: Payload) {
   const current = await payload.findGlobal({ slug: 'success-stories' })
-  if (!current.title || !current.cta?.label || !current.cta?.href) {
+  if (!current.title || !current.cta?.label || !current.cta?.href || !current.subtitle) {
     await payload.updateGlobal({
       slug: 'success-stories',
       data: {
         title: current.title || successStoriesSeed.title,
+        subtitle: current.subtitle || successStoriesSeed.subtitle,
         cta: {
           label: current.cta?.label || successStoriesSeed.cta.label,
           href: current.cta?.href || successStoriesSeed.cta.href,

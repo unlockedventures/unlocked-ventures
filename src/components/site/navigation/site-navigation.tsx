@@ -89,7 +89,7 @@ export function SiteNavigation({
 
   return (
     <>
-      <nav aria-label="Primary" className="mx-8 hidden h-full min-w-0 flex-1 items-stretch justify-center xl:flex">
+      <nav aria-label="Primary" className="mx-8 hidden h-full min-w-0 flex-1 items-stretch justify-start xl:flex">
         {items.map((item) => {
           const hasChildren = navItemHasChildren(item)
           const isOpen = activeHref === item.href

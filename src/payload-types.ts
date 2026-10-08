@@ -1486,6 +1486,10 @@ export interface StrategicAdvisory {
 export interface SuccessStory {
   id: number;
   title: string;
+  /**
+   * The short line under the heading.
+   */
+  subtitle?: string | null;
   cta: {
     label: string;
     /**
@@ -2062,6 +2066,7 @@ export interface StrategicAdvisorySelect<T extends boolean = true> {
  */
 export interface SuccessStoriesSelect<T extends boolean = true> {
   title?: T;
+  subtitle?: T;
   cta?:
     | T
     | {

@@ -84,7 +84,7 @@ export function HeroRotatingWord({ words }: { words: readonly string[] }) {
   return (
     <span className="relative block min-h-[1lh]" aria-hidden="true">
       <span className="invisible block select-none">{longest}</span>
-      <span className="absolute inset-0 flex items-baseline text-[#167F81]">
+      <span className="absolute inset-0 flex items-baseline text-[#33353F]">
         <span className="whitespace-pre">{text}</span>
         {motion ? (
           <span

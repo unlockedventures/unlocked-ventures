@@ -21,6 +21,14 @@ export const SuccessStories: GlobalConfig = {
       label: 'Heading',
       required: true,
     },
+    {
+      name: 'subtitle',
+      type: 'textarea',
+      label: 'Subtitle',
+      admin: {
+        description: 'The short line under the heading.',
+      },
+    },
     buttonGroup(),
     relatedItemsField({
       name: 'stories',

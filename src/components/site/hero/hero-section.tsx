@@ -93,15 +93,21 @@ export function HeroSection({ title, rotatingWords, description, cta, media, cla
               href={cta.href}
               text={cta.label}
               icon={
-                <img
-                  src="/contact/icon-arrow-up-right.svg"
-                  alt=""
-                  width={24}
-                  height={24}
+                <svg
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
                   className="size-6 shrink-0 transition-transform duration-300 ease-out group-hover:rotate-45 group-focus-visible:rotate-45"
-                />
+                >
+                  <path
+                    d="M7 17L17 7M7 7L17 7L17 17"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
               }
-              className="group mt-8 h-12 gap-2.5 rounded-md border border-[#484D56] bg-[#484D56] px-5 text-base text-white shadow-none transition-[border-color,box-shadow] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] hover:border-[#c5c8ce] hover:bg-[#484D56] hover:shadow-[0_0_0_6px_rgba(72,77,86,0.10),0_12px_28px_-14px_rgba(72,77,86,0.32)] focus-visible:border-[#c5c8ce] focus-visible:bg-[#484D56] focus-visible:shadow-[0_0_0_6px_rgba(72,77,86,0.10),0_12px_28px_-14px_rgba(72,77,86,0.32)] sm:h-12 sm:px-5 sm:text-base md:mt-10 lg:h-12 lg:px-5 lg:text-base 2xl:h-12 2xl:px-5 2xl:text-base"
+              className="group mt-8 h-12 gap-2.5 rounded-md border border-[#C8CAD0] bg-transparent px-5 text-base text-[#464646] shadow-none transition-[border-color,background-color,box-shadow] duration-300 ease-out hover:border-[#484D56] hover:bg-[#484D56]/5 focus-visible:border-[#484D56] focus-visible:bg-[#484D56]/5 sm:h-12 sm:px-5 sm:text-base md:mt-10 lg:h-12 lg:px-5 lg:text-base 2xl:h-12 2xl:px-5 2xl:text-base"
             />
           </div>
         </div>
