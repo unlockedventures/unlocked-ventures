@@ -82,10 +82,22 @@ export async function seedSuccessStories(payload: Payload) {
         href: story.href,
         ctaLabel: story.ctaLabel,
         category: story.category,
+        description: story.description,
         image: image.id,
         featured: index < 4,
         sortOrder: index + 1,
       },
+    })
+  }
+
+  for (const story of successStoriesSeed.stories) {
+    const existingStory = existing.docs.find((doc) => doc.href === story.href)
+    if (!existingStory || existingStory.description || !story.description) continue
+
+    await payload.update({
+      collection: 'case-studies',
+      id: existingStory.id,
+      data: { description: story.description },
     })
   }
 }

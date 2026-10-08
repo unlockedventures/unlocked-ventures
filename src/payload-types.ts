@@ -301,16 +301,69 @@ export interface PodcastEpisode {
    */
   meta: string;
   title: string;
-  guests: string;
   /**
-   * A page on this site, such as /contact, or a full address starting with https://
+   * Opens this episode at /podcast/your-text. Leave blank when creating and it is filled from the title. Put YouTube or audio links in Audio or video link on the Episode page tab.
    */
+  slug: string;
+  guests: string;
   href: string;
   /**
    * The photo on this episode. Choose a different file to replace it.
    */
   image?: (number | null) | Media;
   imageAlt?: string | null;
+  /**
+   * The small label above the title, for example Artificial Intelligence (AI).
+   */
+  category?: string | null;
+  /**
+   * Paste a file address, or a YouTube or Vimeo link. When this is filled in, the play button on the site plays it. Leave it empty to show the picture only.
+   */
+  mediaUrl?: string | null;
+  about?: string | null;
+  /**
+   * The short introduction above the two columns.
+   */
+  reading?: string | null;
+  agree?:
+    | {
+        title: string;
+        body: string;
+        id?: string | null;
+      }[]
+    | null;
+  disagree?:
+    | {
+        title: string;
+        body: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * The paragraph under the heading.
+   */
+  takeIntro?: string | null;
+  take?:
+    | {
+        title: string;
+        body: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Shown when someone clicks Transcript. Add one row per speaker turn.
+   */
+  transcript?:
+    | {
+        /**
+         * For example 2:14.
+         */
+        time: string;
+        speaker: string;
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
   /**
    * Uncheck this to hide the episode from the homepage.
    */
@@ -728,10 +781,45 @@ export interface NewsPostsSelect<T extends boolean = true> {
 export interface PodcastEpisodesSelect<T extends boolean = true> {
   meta?: T;
   title?: T;
+  slug?: T;
   guests?: T;
   href?: T;
   image?: T;
   imageAlt?: T;
+  category?: T;
+  mediaUrl?: T;
+  about?: T;
+  reading?: T;
+  agree?:
+    | T
+    | {
+        title?: T;
+        body?: T;
+        id?: T;
+      };
+  disagree?:
+    | T
+    | {
+        title?: T;
+        body?: T;
+        id?: T;
+      };
+  takeIntro?: T;
+  take?:
+    | T
+    | {
+        title?: T;
+        body?: T;
+        id?: T;
+      };
+  transcript?:
+    | T
+    | {
+        time?: T;
+        speaker?: T;
+        text?: T;
+        id?: T;
+      };
   featured?: T;
   sortOrder?: T;
   updatedAt?: T;

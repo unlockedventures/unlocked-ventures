@@ -17,8 +17,16 @@ export type PodcastPageContent = {
   description: string
   coverSrc: string
   coverAlt: string
+  mediaUrl?: string
   timeLabel: string
   progress: number
+  about?: string
+  reading?: string
+  agree?: { title: string; body: string }[]
+  disagree?: { title: string; body: string }[]
+  takeIntro?: string
+  take?: { title: string; body: string }[]
+  transcript?: { time: string; speaker: string; text: string }[]
   shareLabel: string
   saveLabel: string
   likeLabel: string
@@ -52,7 +60,11 @@ function ListenNext({
         {visible.map((item, index) => (
           <li key={`${item.href}-${index}`}>
             <Link href={item.href} className="flex items-center gap-3">
-              <img src={item.imageSrc} alt="" className="size-16 shrink-0 object-cover" />
+              {item.imageSrc ? (
+                <img src={item.imageSrc} alt="" className="size-16 shrink-0 object-cover" />
+              ) : (
+                <span className="size-16 shrink-0 bg-[#E4E6EA]" aria-hidden="true" />
+              )}
               <span className="flex min-w-0 flex-col gap-1">
                 <span className="font-sans text-[11px] leading-4 font-normal text-[#696969]">{item.meta}</span>
                 <span className="line-clamp-2 font-sans text-sm leading-5 font-medium tracking-[-0.16px] text-[#171616]">
@@ -115,12 +127,20 @@ export function PodcastPage({ content }: { content: PodcastPageContent }) {
                 progress={content.progress}
                 imageSrc={content.coverSrc}
                 imageAlt={content.coverAlt}
+                mediaUrl={content.mediaUrl}
               />
               <EpisodeBrief
                 title={content.title}
                 shareLabel={content.shareLabel}
                 saveLabel={content.saveLabel}
                 likeLabel={content.likeLabel}
+                about={content.about}
+                reading={content.reading}
+                agree={content.agree}
+                disagree={content.disagree}
+                takeIntro={content.takeIntro}
+                take={content.take}
+                transcript={content.transcript}
               />
             </div>
           </div>

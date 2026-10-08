@@ -214,10 +214,12 @@ function StanceList({
 function TranscriptDialog({
   open,
   title,
+  lines,
   onClose,
 }: {
   open: boolean
   title: string
+  lines: { time: string; speaker: string; text: string }[]
   onClose: () => void
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null)
@@ -260,7 +262,7 @@ function TranscriptDialog({
       </div>
       <div className="max-h-[calc(min(40rem,100vh-4rem)-5.5rem)] overflow-y-auto px-6 py-2">
         <ol>
-          {transcript.map((line) => (
+          {lines.map((line) => (
             <li key={line.time} className="grid grid-cols-[4.5rem_minmax(0,1fr)] gap-4 border-b border-[#171616]/10 py-4 last:border-b-0">
               <time className="font-sans text-sm leading-6 text-[#696969] tabular-nums">{line.time}</time>
               <div className="min-w-0">
@@ -280,14 +282,37 @@ export function EpisodeBrief({
   shareLabel,
   saveLabel,
   likeLabel,
+  about: aboutText,
+  reading: readingText,
+  agree: agreeItems,
+  disagree: disagreeItems,
+  takeIntro,
+  take: takeItems,
+  transcript: transcriptLines,
 }: {
   title: string
   shareLabel: string
   saveLabel: string
   likeLabel: string
+  about?: string
+  reading?: string
+  agree?: { title: string; body: string }[]
+  disagree?: { title: string; body: string }[]
+  takeIntro?: string
+  take?: { title: string; body: string }[]
+  transcript?: { time: string; speaker: string; text: string }[]
 }) {
   const [transcriptOpen, setTranscriptOpen] = useState(false)
   const transcriptId = useId()
+  const aboutCopy = aboutText?.trim() || about
+  const readingCopy = readingText?.trim() || reading
+  const agreeCopy = agreeItems?.length ? agreeItems : agree
+  const disagreeCopy = disagreeItems?.length ? disagreeItems : disagree
+  const takeCopy = takeItems?.length ? takeItems : take
+  const takeLead =
+    takeIntro?.trim() ||
+    "The safest career move isn't avoiding AI. It's becoming the person on your team who knows how to put it to work. Here is what we'd do this year."
+  const lines = transcriptLines?.length ? transcriptLines : transcript
 
   return (
     <section>
@@ -307,12 +332,12 @@ export function EpisodeBrief({
       </div>
 
       <div id={transcriptId}>
-        <TranscriptDialog open={transcriptOpen} title={title} onClose={() => setTranscriptOpen(false)} />
+        <TranscriptDialog open={transcriptOpen} title={title} lines={lines} onClose={() => setTranscriptOpen(false)} />
       </div>
 
       <div className="mt-10 flex flex-col gap-4">
         <h2 className="font-sans text-[2rem] leading-10 font-normal text-[#171616]">About this episode</h2>
-        <p className="font-sans text-base leading-7 font-normal text-[#696969]">{about}</p>
+        <p className="font-sans text-base leading-7 font-normal text-[#696969]">{aboutCopy}</p>
       </div>
 
       <div className="mt-10 border-t border-[#171616]/10 pt-10">
@@ -320,7 +345,7 @@ export function EpisodeBrief({
           <h2 className="font-sans text-[2rem] leading-10 font-normal text-[#171616]">
             Where we agree and where we don&apos;t
           </h2>
-          <p className="font-sans text-base leading-7 font-normal text-[#696969]">{reading}</p>
+          <p className="font-sans text-base leading-7 font-normal text-[#696969]">{readingCopy}</p>
         </div>
 
           <div className="mt-8 grid gap-10 md:grid-cols-2 md:gap-8">
@@ -332,7 +357,7 @@ export function EpisodeBrief({
                   <path d="M3.5 9.25 7 12.75 14.5 5.25" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               }
-              items={agree}
+              items={agreeCopy}
             />
             <StanceList
               tone="disagree"
@@ -342,7 +367,7 @@ export function EpisodeBrief({
                   <path d="M4.5 4.5 13.5 13.5M13.5 4.5 4.5 13.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
                 </svg>
               }
-              items={disagree}
+              items={disagreeCopy}
             />
           </div>
       </div>
@@ -350,13 +375,10 @@ export function EpisodeBrief({
       <div className="mt-10 border-t border-[#171616]/10 pt-10">
         <div className="flex max-w-[820px] flex-col gap-4">
           <h2 className="font-sans text-[2rem] leading-10 font-normal text-[#171616]">The Unlocked Ventures take</h2>
-          <p className="font-sans text-base leading-7 font-normal text-[#696969]">
-            The safest career move isn&apos;t avoiding AI. It&apos;s becoming the person on your team who knows how to
-            put it to work. Here is what we&apos;d do this year.
-          </p>
+          <p className="font-sans text-base leading-7 font-normal text-[#696969]">{takeLead}</p>
         </div>
         <ol className="mt-8 flex flex-col border-t border-[#171616]/10">
-          {take.map((step, index) => (
+          {takeCopy.map((step, index) => (
             <li key={step.title} className="flex gap-4 border-b border-[#171616]/10 py-6">
               <span className="flex size-8 shrink-0 items-center justify-center rounded-full border border-[#171616]/30 font-sans text-sm leading-5 text-[#171616]">
                 {index + 1}

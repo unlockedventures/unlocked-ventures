@@ -3,22 +3,24 @@ import { getPayload } from 'payload'
 
 import type { PodcastPageContent } from '@/components/site/podcast/podcast-page'
 import { getPodcastPage } from '@/data/get-podcast-page'
+import { podcastEpisodePath, podcastSlugFromHref, slugifyPodcastTitle } from '@/lib/podcast-slug'
 
 function mediaUrl(value: number | { url?: string | null } | null | undefined) {
   if (!value || typeof value === 'number' || !value.url) return undefined
   return value.url
 }
 
-export function podcastSlugFromHref(href: string) {
-  const path = href.split('?')[0]?.split('#')[0]?.replace(/\/+$/, '') ?? ''
-  const parts = path.split('/').filter(Boolean)
-  if (parts[0] !== 'podcast' || !parts[1]) return null
-  try {
-    return decodeURIComponent(parts[1])
-  } catch {
-    return parts[1]
+function episodeSlug(episode: { slug?: string | null; href?: string | null; title?: string | null }) {
+  if (episode.slug?.trim()) return episode.slug.trim()
+  if (episode.href) {
+    const fromHref = podcastSlugFromHref(episode.href)
+    if (fromHref) return fromHref
   }
+  if (episode.title) return slugifyPodcastTitle(episode.title)
+  return null
 }
+
+export { podcastSlugFromHref }
 
 export async function getPodcastEpisode(slug: string): Promise<PodcastPageContent | null> {
   const payload = await getPayload({ config: configPromise })
@@ -34,29 +36,33 @@ export async function getPodcastEpisode(slug: string): Promise<PodcastPageConten
   ])
 
   const episodes = result.docs.flatMap((episode) => {
-    if (!episode.title || !episode.href) return []
-    const episodeSlug = podcastSlugFromHref(episode.href)
-    if (!episodeSlug) return []
-    return [{ episode, episodeSlug }]
+    if (!episode.title) return []
+    const resolvedSlug = episodeSlug(episode)
+    if (!resolvedSlug) return []
+    return [{ episode, episodeSlug: resolvedSlug }]
   })
 
   const match = episodes.find((item) => item.episodeSlug === slug)
   if (!match) return null
 
   const { episode } = match
-  const coverSrc = mediaUrl(episode.image)
-  if (!coverSrc) return null
+  const coverSrc = mediaUrl(episode.image) || ''
 
-  const listenNext = episodes.flatMap(({ episode: item, episodeSlug }) => {
-    if (episodeSlug === slug) return []
-    const imageSrc = mediaUrl(item.image)
-    if (!item.meta || !item.title || !item.href || !imageSrc) return []
+  const points = (items: { title?: string | null; body?: string | null }[] | null | undefined) =>
+    (items ?? []).flatMap((item) => (item.title && item.body ? [{ title: item.title, body: item.body }] : []))
+  const transcript = (episode.transcript ?? []).flatMap((line) =>
+    line.time && line.speaker && line.text ? [{ time: line.time, speaker: line.speaker, text: line.text }] : [],
+  )
+
+  const listenNext = episodes.flatMap(({ episode: item, episodeSlug: itemSlug }) => {
+    if (itemSlug === slug) return []
+    if (!item.meta || !item.title) return []
     return [
       {
         meta: item.guests ? `${item.meta} · ${item.guests}` : item.meta,
         title: item.title,
-        href: item.href,
-        imageSrc,
+        href: podcastEpisodePath(itemSlug),
+        imageSrc: mediaUrl(item.image) || '',
       },
     ]
   })
@@ -66,13 +72,21 @@ export async function getPodcastEpisode(slug: string): Promise<PodcastPageConten
     breadcrumbHomeHref: '/',
     breadcrumbPodcastLabel: 'Podcast',
     breadcrumbPodcastHref: '/podcast',
-    category: '',
+    category: episode.category || '',
     title: episode.title,
     meta: [episode.meta, episode.guests].filter(Boolean).join(' · '),
-    description: '',
+    description: episode.about || '',
     coverSrc,
     coverAlt: episode.imageAlt || episode.title,
+    mediaUrl: episode.mediaUrl || '',
     timeLabel: episode.meta || '',
+    about: episode.about || '',
+    reading: episode.reading || '',
+    agree: points(episode.agree),
+    disagree: points(episode.disagree),
+    takeIntro: episode.takeIntro || '',
+    take: points(episode.take),
+    transcript,
     progress: 0,
     shareLabel: '',
     saveLabel: '',

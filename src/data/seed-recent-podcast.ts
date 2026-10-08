@@ -3,6 +3,7 @@ import path from 'path'
 import type { Payload } from 'payload'
 
 import { recentPodcastSeed } from '@/data/recent-podcast-seed'
+import { podcastEpisodePath } from '@/lib/podcast-slug'
 
 export async function seedRecentPodcast(payload: Payload) {
   const current = await payload.findGlobal({ slug: 'recent-podcast' })
@@ -19,10 +20,15 @@ export async function seedRecentPodcast(payload: Payload) {
     limit: 100,
     pagination: false,
   })
-  const savedHrefs = new Set(existing.docs.map((episode) => episode.href))
+  const savedSlugs = new Set(
+    existing.docs.flatMap((episode) => {
+      if (episode.slug) return [episode.slug]
+      return []
+    }),
+  )
 
   for (const [index, episode] of recentPodcastSeed.episodes.entries()) {
-    if (savedHrefs.has(episode.href)) continue
+    if (savedSlugs.has(episode.slug)) continue
     const filePath = path.join(process.cwd(), 'public', 'podcast', episode.imageFile)
     const data = fs.readFileSync(filePath)
     const media = await payload.create({
@@ -42,7 +48,8 @@ export async function seedRecentPodcast(payload: Payload) {
         meta: episode.meta,
         title: episode.title,
         guests: episode.guests,
-        href: episode.href,
+        slug: episode.slug,
+        href: podcastEpisodePath(episode.slug),
         image: media.id,
         imageAlt: episode.title,
         featured: true,
