@@ -1198,6 +1198,18 @@ export interface DigitalEngineering {
         index?: string | null;
         title: string;
         description?: string | null;
+        /**
+         * The icon on this card. Choose a different file to replace it.
+         */
+        icon: number | Media;
+        /**
+         * Leave this unless the picture looks too big or too small.
+         */
+        iconWidth: number;
+        /**
+         * Leave this unless the picture looks too big or too small.
+         */
+        iconHeight: number;
         items?:
           | {
               label: string;
@@ -1545,6 +1557,38 @@ export interface PodcastPage {
   saveLabel: string;
   likeLabel: string;
   transcriptLabel: string;
+  about?: string | null;
+  reading?: string | null;
+  agree?:
+    | {
+        title: string;
+        body: string;
+        id?: string | null;
+      }[]
+    | null;
+  disagree?:
+    | {
+        title: string;
+        body: string;
+        id?: string | null;
+      }[]
+    | null;
+  takeIntro?: string | null;
+  take?:
+    | {
+        title: string;
+        body: string;
+        id?: string | null;
+      }[]
+    | null;
+  transcript?:
+    | {
+        time: string;
+        speaker: string;
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
   chaptersTitle: string;
   chapters?:
     | {
@@ -1858,6 +1902,9 @@ export interface DigitalEngineeringSelect<T extends boolean = true> {
         index?: T;
         title?: T;
         description?: T;
+        icon?: T;
+        iconWidth?: T;
+        iconHeight?: T;
         items?:
           | T
           | {
@@ -2117,6 +2164,38 @@ export interface PodcastPageSelect<T extends boolean = true> {
   saveLabel?: T;
   likeLabel?: T;
   transcriptLabel?: T;
+  about?: T;
+  reading?: T;
+  agree?:
+    | T
+    | {
+        title?: T;
+        body?: T;
+        id?: T;
+      };
+  disagree?:
+    | T
+    | {
+        title?: T;
+        body?: T;
+        id?: T;
+      };
+  takeIntro?: T;
+  take?:
+    | T
+    | {
+        title?: T;
+        body?: T;
+        id?: T;
+      };
+  transcript?:
+    | T
+    | {
+        time?: T;
+        speaker?: T;
+        text?: T;
+        id?: T;
+      };
   chaptersTitle?: T;
   chapters?:
     | T

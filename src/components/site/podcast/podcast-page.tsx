@@ -134,6 +134,7 @@ export function PodcastPage({ content }: { content: PodcastPageContent }) {
                 shareLabel={content.shareLabel}
                 saveLabel={content.saveLabel}
                 likeLabel={content.likeLabel}
+                transcriptLabel={content.transcriptLabel}
                 about={content.about}
                 reading={content.reading}
                 agree={content.agree}

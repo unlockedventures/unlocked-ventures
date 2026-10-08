@@ -28,20 +28,6 @@ export type SuccessStoriesSectionProps = {
 const trimmedLabelClassName =
   'block leading-none [text-box-edge:cap_alphabetic] [text-box-trim:trim-both]'
 
-const titleLineBreaks: Record<string, string> = {
-  'Automated object detection system': 'Automated object detection\nsystem',
-  'Dynamic payment solution for telecom providers': 'Dynamic payment solution for\ntelecom providers',
-  'Streamlined operations engine for enterprise teams':
-    'Streamlined operations engine for\nenterprise teams',
-  'Go-to-market roadmap for a fintech startup': 'Go-to-market roadmap for a\nfintech startup',
-  'Innovative patient management system for hospitals':
-    'Innovative patient management system\nfor hospitals',
-}
-
-function storyTitle(title: string) {
-  return titleLineBreaks[title] ?? title
-}
-
 function ArrowUpRight({ className }: { className?: string }) {
   return (
     <svg
@@ -111,7 +97,7 @@ function FeaturedStory({ story }: { story: SuccessStory }) {
           <div className="flex flex-col gap-6 min-[1440px]:gap-8">
             <div className="flex flex-col gap-6 min-[1440px]:gap-3">
               <h3 className="font-sans text-2xl leading-8 font-normal whitespace-pre-line text-[#25282D] md:text-[2rem] md:leading-10 min-[1440px]:text-[32px] min-[1440px]:leading-[40px]">
-                {storyTitle(story.title)}
+                {story.title}
               </h3>
               {story.description ? (
                 <p className="font-sans text-base leading-6 font-normal text-[#222222]/85 min-[1440px]:text-[rgba(34,34,34,0.85)] min-[1440px]:opacity-80">
@@ -152,7 +138,7 @@ function StoryCard({ story }: { story: SuccessStory }) {
             </p>
           ) : null}
           <h3 className="max-w-[36rem] font-sans text-2xl leading-8 font-normal whitespace-pre-line text-[#25282D] md:text-[1.75rem] md:leading-9 min-[1440px]:max-w-none min-[1440px]:text-[28px] min-[1440px]:leading-9">
-            {storyTitle(story.title)}
+            {story.title}
           </h3>
         </div>
         <StoryCta label={story.ctaLabel} className="h-6 min-[1440px]:gap-2" />

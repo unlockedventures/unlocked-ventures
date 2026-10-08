@@ -12,9 +12,9 @@ export type EngineeringGroup = {
   title: string
   description?: string
   items?: readonly EngineeringOffering[]
-  iconSrc: string
-  iconWidth: number
-  iconHeight: number
+  iconSrc?: string
+  iconWidth?: number
+  iconHeight?: number
 }
 
 export type DigitalEngineeringSectionProps = {
@@ -54,13 +54,15 @@ function ArrowUpRight({ className }: { className?: string }) {
 function EngineeringGroupCard({ group }: { group: EngineeringGroup }) {
   return (
     <article className="flex h-full min-w-0 flex-col gap-7 overflow-visible bg-[#F3F4F9] px-6 py-10 sm:px-8 sm:py-12 lg:px-10 lg:pt-[60px] lg:pb-12">
-      <img
-        src={group.iconSrc}
-        alt=""
-        width={group.iconWidth}
-        height={group.iconHeight}
-        className="block h-auto w-[4.5rem] max-w-full shrink-0 self-start object-contain sm:w-20 lg:w-[90px]"
-      />
+      {group.iconSrc ? (
+        <img
+          src={group.iconSrc}
+          alt=""
+          width={group.iconWidth}
+          height={group.iconHeight}
+          className="block h-auto w-[4.5rem] max-w-full shrink-0 self-start object-contain sm:w-20 lg:w-[90px]"
+        />
+      ) : null}
       <div className="flex flex-col gap-8">
         <h3 className="font-sans text-base leading-7 font-normal tracking-normal text-[#25282D] uppercase">
           {group.title}

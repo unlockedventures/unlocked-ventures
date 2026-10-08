@@ -2,57 +2,6 @@
 
 import { useEffect, useId, useRef, useState } from 'react'
 
-const about =
-  'AI is already writing code, answering support tickets and drafting legal briefs. Three voices argue about what that means for the next ten years of work: which roles shrink, which grow, and which skills will still be worth paying for. We look at entry-level jobs, the rise of AI agents in business teams, and what workers in fast-growing markets like South Asia should do differently.'
-
-const reading =
-  'Our reading of the arguments presented in this episode highlights the key ideas, perspectives, and reasoning discussed throughout the conversation, offering a thoughtful interpretation of the main insights and viewpoints.'
-
-const agree = [
-  {
-    title: 'Tasks disappear faster than jobs',
-    body: 'Most roles will be reshaped long before they are removed. The work inside the job changes first.',
-  },
-  {
-    title: 'Entry-level work is most exposed',
-    body: 'Junior tasks like first drafts, data cleanup and basic QA are exactly what AI does well today.',
-  },
-  {
-    title: 'Judgment becomes the premium skill',
-    body: 'Knowing what to ask, what to trust and what to ship matters more when output is cheap.',
-  },
-]
-
-const disagree = [
-  {
-    title: '“Everyone should learn to code”',
-    body: 'Coding alone is losing value. Domain knowledge paired with AI tools is the stronger bet.',
-  },
-  {
-    title: '“New jobs will replace old ones automatically”',
-    body: 'They may, but not for the same people or in the same places without deliberate retraining.',
-  },
-  {
-    title: '“Creative work is safe”',
-    body: 'Creative roles are changing as fast as any other. Taste is safer; production work is not.',
-  },
-]
-
-const take = [
-  {
-    title: 'Map your week',
-    body: 'List the tasks you repeat every week and mark which ones an AI tool could draft for you today.',
-  },
-  {
-    title: 'Pick one tool and go deep',
-    body: 'Use one assistant daily for a month instead of trying ten. Depth beats a long tool list.',
-  },
-  {
-    title: 'Show the result, not the tool',
-    body: 'Share one workflow you sped up with your manager or clients. Measurable time saved is your new portfolio.',
-  },
-]
-
 function ShareIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
@@ -108,49 +57,6 @@ function TranscriptIcon() {
     </svg>
   )
 }
-
-const transcript = [
-  {
-    time: '0:00',
-    speaker: 'Saker Ghani',
-    text: 'AI is already writing code, answering support tickets, and drafting legal briefs. Today we ask what that means for the next ten years of work: which roles shrink, which grow, and which skills will still be worth paying for.',
-  },
-  {
-    time: '2:14',
-    speaker: 'Maya Chen',
-    text: 'The first thing I want to separate is tasks and jobs. Most roles will be reshaped long before they are removed. The work inside the job changes first. A title can stay on the org chart while the day-to-day work is already different.',
-  },
-  {
-    time: '6:40',
-    speaker: 'Omar Hassan',
-    text: 'Entry-level work is the most exposed. First drafts, data cleanup, and basic QA are exactly what these tools do well today. If your first two years were built on that work, you need a new way to become useful.',
-  },
-  {
-    time: '11:05',
-    speaker: 'Saker Ghani',
-    text: 'A line we keep hearing is that everyone should learn to code. I do not think that is the bet. Coding alone is losing value. Domain knowledge paired with AI tools is the stronger position.',
-  },
-  {
-    time: '16:22',
-    speaker: 'Maya Chen',
-    text: 'Judgment becomes the premium skill. Knowing what to ask, what to trust, and what to ship matters more when output is cheap. Taste and review are harder to automate than production.',
-  },
-  {
-    time: '21:48',
-    speaker: 'Omar Hassan',
-    text: 'People say new jobs will replace old ones automatically. They may, but not for the same people or in the same places without deliberate retraining. Waiting for the market to sort itself out is not a plan.',
-  },
-  {
-    time: '27:10',
-    speaker: 'Maya Chen',
-    text: 'Creative work is not a safe harbor either. Creative roles are changing as fast as any other. Taste is safer. Production work is not.',
-  },
-  {
-    time: '32:36',
-    speaker: 'Saker Ghani',
-    text: 'The safest career move is not avoiding AI. It is becoming the person on your team who knows how to put it to work. Map the tasks you repeat, pick one tool and use it daily, and show the result. Measurable time saved is the new portfolio.',
-  },
-]
 
 function Action({
   label,
@@ -282,6 +188,7 @@ export function EpisodeBrief({
   shareLabel,
   saveLabel,
   likeLabel,
+  transcriptLabel,
   about: aboutText,
   reading: readingText,
   agree: agreeItems,
@@ -294,6 +201,7 @@ export function EpisodeBrief({
   shareLabel: string
   saveLabel: string
   likeLabel: string
+  transcriptLabel: string
   about?: string
   reading?: string
   agree?: { title: string; body: string }[]
@@ -304,93 +212,113 @@ export function EpisodeBrief({
 }) {
   const [transcriptOpen, setTranscriptOpen] = useState(false)
   const transcriptId = useId()
-  const aboutCopy = aboutText?.trim() || about
-  const readingCopy = readingText?.trim() || reading
-  const agreeCopy = agreeItems?.length ? agreeItems : agree
-  const disagreeCopy = disagreeItems?.length ? disagreeItems : disagree
-  const takeCopy = takeItems?.length ? takeItems : take
-  const takeLead =
-    takeIntro?.trim() ||
-    "The safest career move isn't avoiding AI. It's becoming the person on your team who knows how to put it to work. Here is what we'd do this year."
-  const lines = transcriptLines?.length ? transcriptLines : transcript
+  const aboutCopy = aboutText?.trim() ?? ''
+  const readingCopy = readingText?.trim() ?? ''
+  const agreeCopy = agreeItems ?? []
+  const disagreeCopy = disagreeItems ?? []
+  const takeCopy = takeItems ?? []
+  const takeLead = takeIntro?.trim() ?? ''
+  const lines = transcriptLines ?? []
+  const showStance = Boolean(readingCopy || agreeCopy.length || disagreeCopy.length)
+  const showTake = Boolean(takeLead || takeCopy.length)
 
   return (
     <section>
       <div className="flex items-center justify-between gap-4 border-b border-[#171616]/10 pb-4">
         <div className="flex items-center gap-6 sm:gap-8">
-          <Action label={shareLabel || 'Share'} icon={<ShareIcon />} />
-          <Action label={saveLabel || 'Save'} icon={<SaveIcon />} />
-          <Action label={likeLabel || 'Like'} icon={<LikeIcon />} />
+          {shareLabel ? <Action label={shareLabel} icon={<ShareIcon />} /> : null}
+          {saveLabel ? <Action label={saveLabel} icon={<SaveIcon />} /> : null}
+          {likeLabel ? <Action label={likeLabel} icon={<LikeIcon />} /> : null}
         </div>
-        <Action
-          label="Transcript"
-          icon={<TranscriptIcon />}
-          expanded={transcriptOpen}
-          controls={transcriptId}
-          onClick={() => setTranscriptOpen((open) => !open)}
-        />
+        {transcriptLabel && lines.length ? (
+          <Action
+            label={transcriptLabel}
+            icon={<TranscriptIcon />}
+            expanded={transcriptOpen}
+            controls={transcriptId}
+            onClick={() => setTranscriptOpen((open) => !open)}
+          />
+        ) : null}
       </div>
 
-      <div id={transcriptId}>
-        <TranscriptDialog open={transcriptOpen} title={title} lines={lines} onClose={() => setTranscriptOpen(false)} />
-      </div>
-
-      <div className="mt-10 flex flex-col gap-4">
-        <h2 className="font-sans text-[2rem] leading-10 font-normal text-[#171616]">About this episode</h2>
-        <p className="font-sans text-base leading-7 font-normal text-[#696969]">{aboutCopy}</p>
-      </div>
-
-      <div className="mt-10 border-t border-[#171616]/10 pt-10">
-        <div className="flex flex-col gap-4">
-          <h2 className="font-sans text-[2rem] leading-10 font-normal text-[#171616]">
-            Where we agree and where we don&apos;t
-          </h2>
-          <p className="font-sans text-base leading-7 font-normal text-[#696969]">{readingCopy}</p>
+      {lines.length ? (
+        <div id={transcriptId}>
+          <TranscriptDialog open={transcriptOpen} title={title} lines={lines} onClose={() => setTranscriptOpen(false)} />
         </div>
+      ) : null}
+
+      {aboutCopy ? (
+        <div className="mt-10 flex flex-col gap-4">
+          <h2 className="font-sans text-[2rem] leading-10 font-normal text-[#171616]">About this episode</h2>
+          <p className="font-sans text-base leading-7 font-normal text-[#696969]">{aboutCopy}</p>
+        </div>
+      ) : null}
+
+      {showStance ? (
+        <div className="mt-10 border-t border-[#171616]/10 pt-10">
+          <div className="flex flex-col gap-4">
+            <h2 className="font-sans text-[2rem] leading-10 font-normal text-[#171616]">
+              Where we agree and where we don&apos;t
+            </h2>
+            {readingCopy ? (
+              <p className="font-sans text-base leading-7 font-normal text-[#696969]">{readingCopy}</p>
+            ) : null}
+          </div>
 
           <div className="mt-8 grid gap-10 md:grid-cols-2 md:gap-8">
-            <StanceList
-              tone="agree"
-              title="We agree"
-              icon={
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-                  <path d="M3.5 9.25 7 12.75 14.5 5.25" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              }
-              items={agreeCopy}
-            />
-            <StanceList
-              tone="disagree"
-              title="We disagree"
-              icon={
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-                  <path d="M4.5 4.5 13.5 13.5M13.5 4.5 4.5 13.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-                </svg>
-              }
-              items={disagreeCopy}
-            />
+            {agreeCopy.length ? (
+              <StanceList
+                tone="agree"
+                title="We agree"
+                icon={
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                    <path d="M3.5 9.25 7 12.75 14.5 5.25" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                }
+                items={agreeCopy}
+              />
+            ) : null}
+            {disagreeCopy.length ? (
+              <StanceList
+                tone="disagree"
+                title="We disagree"
+                icon={
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                    <path d="M4.5 4.5 13.5 13.5M13.5 4.5 4.5 13.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                  </svg>
+                }
+                items={disagreeCopy}
+              />
+            ) : null}
           </div>
-      </div>
-
-      <div className="mt-10 border-t border-[#171616]/10 pt-10">
-        <div className="flex max-w-[820px] flex-col gap-4">
-          <h2 className="font-sans text-[2rem] leading-10 font-normal text-[#171616]">The Unlocked Ventures take</h2>
-          <p className="font-sans text-base leading-7 font-normal text-[#696969]">{takeLead}</p>
         </div>
-        <ol className="mt-8 flex flex-col border-t border-[#171616]/10">
-          {takeCopy.map((step, index) => (
-            <li key={step.title} className="flex gap-4 border-b border-[#171616]/10 py-6">
-              <span className="flex size-8 shrink-0 items-center justify-center rounded-full border border-[#171616]/30 font-sans text-sm leading-5 text-[#171616]">
-                {index + 1}
-              </span>
-              <div className="flex min-w-0 flex-col gap-1">
-                <p className="font-sans text-base leading-6 font-medium text-[#171616]">{step.title}</p>
-                <p className="font-sans text-sm leading-6 font-normal text-[#696969]">{step.body}</p>
-              </div>
-            </li>
-          ))}
-        </ol>
-      </div>
+      ) : null}
+
+      {showTake ? (
+        <div className="mt-10 border-t border-[#171616]/10 pt-10">
+          <div className="flex max-w-[820px] flex-col gap-4">
+            <h2 className="font-sans text-[2rem] leading-10 font-normal text-[#171616]">The Unlocked Ventures take</h2>
+            {takeLead ? (
+              <p className="font-sans text-base leading-7 font-normal text-[#696969]">{takeLead}</p>
+            ) : null}
+          </div>
+          {takeCopy.length ? (
+            <ol className="mt-8 flex flex-col border-t border-[#171616]/10">
+              {takeCopy.map((step, index) => (
+                <li key={step.title} className="flex gap-4 border-b border-[#171616]/10 py-6">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-full border border-[#171616]/30 font-sans text-sm leading-5 text-[#171616]">
+                    {index + 1}
+                  </span>
+                  <div className="flex min-w-0 flex-col gap-1">
+                    <p className="font-sans text-base leading-6 font-medium text-[#171616]">{step.title}</p>
+                    <p className="font-sans text-sm leading-6 font-normal text-[#696969]">{step.body}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          ) : null}
+        </div>
+      ) : null}
     </section>
   )
 }

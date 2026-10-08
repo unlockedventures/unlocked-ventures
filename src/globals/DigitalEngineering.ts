@@ -1,7 +1,7 @@
 import type { GlobalConfig } from 'payload'
 
 import { adminGroups } from '@/admin/editor-guide'
-import { buttonGroup, linkField } from '@/admin/editor-fields'
+import { buttonGroup, linkField, sizeField } from '@/admin/editor-fields'
 
 export const DigitalEngineering: GlobalConfig = {
   slug: 'digital-engineering',
@@ -65,6 +65,18 @@ export const DigitalEngineering: GlobalConfig = {
           name: 'description',
           type: 'textarea',
         },
+        {
+          name: 'icon',
+          type: 'upload',
+          label: 'Icon',
+          relationTo: 'media',
+          required: true,
+          admin: {
+            description: 'The icon on this card. Choose a different file to replace it.',
+          },
+        },
+        sizeField('iconWidth', 'Icon width (pixels)'),
+        sizeField('iconHeight', 'Icon height (pixels)'),
         {
           name: 'items',
           type: 'array',

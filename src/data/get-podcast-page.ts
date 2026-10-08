@@ -40,6 +40,11 @@ export async function getPodcastPage(): Promise<PodcastPageContent | null> {
   const coverSrc = mediaUrl(doc.cover)
   if (!coverSrc) return null
 
+  const points = (items: { title?: string | null; body?: string | null }[] | null | undefined) =>
+    (items ?? []).flatMap((item) => (item.title && item.body ? [{ title: item.title, body: item.body }] : []))
+  const transcript = (doc.transcript ?? []).flatMap((line) =>
+    line.time && line.speaker && line.text ? [{ time: line.time, speaker: line.speaker, text: line.text }] : [],
+  )
   const chapters = (doc.chapters ?? []).flatMap((chapter) =>
     chapter.time && chapter.title ? [{ time: chapter.time, title: chapter.title }] : [],
   )
@@ -73,6 +78,13 @@ export async function getPodcastPage(): Promise<PodcastPageContent | null> {
     saveLabel: doc.saveLabel,
     likeLabel: doc.likeLabel,
     transcriptLabel: doc.transcriptLabel,
+    about: doc.about || '',
+    reading: doc.reading || '',
+    agree: points(doc.agree),
+    disagree: points(doc.disagree),
+    takeIntro: doc.takeIntro || '',
+    take: points(doc.take),
+    transcript,
     chaptersTitle: doc.chaptersTitle,
     chapters,
     listenNextTitle: doc.listenNextTitle,

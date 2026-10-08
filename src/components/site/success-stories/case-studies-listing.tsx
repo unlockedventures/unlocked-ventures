@@ -72,19 +72,6 @@ function ChevronRight() {
   )
 }
 
-const titleLineBreaks: Record<string, string> = {
-  'Dynamic payment solution for telecom providers': 'Dynamic payment solution for\ntelecom providers',
-  'Streamlined operations engine for enterprise teams':
-    'Streamlined operations engine for\nenterprise teams',
-  'Go-to-market roadmap for a fintech startup': 'Go-to-market roadmap for a\nfintech startup',
-  'Innovative patient management system for hospitals':
-    'Innovative patient management system\nfor hospitals',
-}
-
-function storyTitle(title: string) {
-  return titleLineBreaks[title] ?? title
-}
-
 function StoryCard({ story }: { story: CaseStudyCard }) {
   return (
     <article className="relative flex min-h-80 flex-col justify-end overflow-hidden bg-[#F7F7F7] md:h-[calc(100cqi*420/1128)] md:min-h-0 min-[1440px]:h-[420px] min-[1440px]:bg-[#F8F8F8]">
@@ -109,7 +96,7 @@ function StoryCard({ story }: { story: CaseStudyCard }) {
             </p>
           ) : null}
           <h2 className="font-sans text-2xl leading-8 font-normal text-[#25282D] md:text-[1.75rem] md:leading-9 min-[1440px]:w-full min-[1440px]:text-[28px] min-[1440px]:leading-[36px] min-[1440px]:whitespace-pre-line min-[1440px]:line-clamp-2">
-            {storyTitle(story.title)}
+            {story.title}
           </h2>
         </div>
         <Link

@@ -30,6 +30,46 @@ export const PodcastPage: GlobalConfig = {
     { name: 'saveLabel', type: 'text', required: true },
     { name: 'likeLabel', type: 'text', required: true },
     { name: 'transcriptLabel', type: 'text', required: true },
+    { name: 'about', type: 'textarea', label: 'About this episode' },
+    { name: 'reading', type: 'textarea', label: 'Where we agree and where we don’t' },
+    {
+      name: 'agree',
+      type: 'array',
+      label: 'We agree',
+      fields: [
+        { name: 'title', type: 'text', required: true },
+        { name: 'body', type: 'textarea', required: true },
+      ],
+    },
+    {
+      name: 'disagree',
+      type: 'array',
+      label: 'We disagree',
+      fields: [
+        { name: 'title', type: 'text', required: true },
+        { name: 'body', type: 'textarea', required: true },
+      ],
+    },
+    { name: 'takeIntro', type: 'textarea', label: 'The Unlocked Ventures take' },
+    {
+      name: 'take',
+      type: 'array',
+      label: 'Take points',
+      fields: [
+        { name: 'title', type: 'text', required: true },
+        { name: 'body', type: 'textarea', required: true },
+      ],
+    },
+    {
+      name: 'transcript',
+      type: 'array',
+      label: 'Transcript',
+      fields: [
+        { name: 'time', type: 'text', required: true },
+        { name: 'speaker', type: 'text', required: true },
+        { name: 'text', type: 'textarea', required: true },
+      ],
+    },
     { name: 'chaptersTitle', type: 'text', required: true },
     {
       name: 'chapters',

@@ -2,18 +2,11 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
 import type { DigitalEngineeringSectionProps } from '@/components/site/digital-engineering/digital-engineering-section'
-import { digitalEngineeringSeed } from '@/data/digital-engineering-seed'
 
-const groupIcons = Object.fromEntries(
-  digitalEngineeringSeed.groups.map((group) => [
-    group.title.toLowerCase(),
-    {
-      iconSrc: `/digital-engineering/${group.iconFile}`,
-      iconWidth: group.iconWidth,
-      iconHeight: group.iconHeight,
-    },
-  ]),
-)
+function mediaUrl(value: number | { url?: string | null } | null | undefined) {
+  if (!value || typeof value === 'number' || !value.url) return undefined
+  return value.url
+}
 
 export async function getDigitalEngineering(): Promise<DigitalEngineeringSectionProps | null> {
   const payload = await getPayload({ config: configPromise })
@@ -30,21 +23,21 @@ export async function getDigitalEngineering(): Promise<DigitalEngineeringSection
   const groups = (doc.groups ?? []).flatMap((group) => {
     if (!group.title) return []
 
-    const icon = groupIcons[group.title.toLowerCase()]
-    if (!icon) return []
+    const items = group.items?.length
+      ? group.items.flatMap((item) =>
+          item.label && item.href ? [{ label: item.label, href: item.href }] : [],
+        )
+      : undefined
 
     return [
       {
-        index: group.index,
+        index: group.index ?? '',
         title: group.title,
         description: group.description || undefined,
-        ...icon,
-        items: group.items?.length
-          ? group.items.map((item) => ({
-              label: item.label,
-              href: item.href,
-            }))
-          : undefined,
+        iconSrc: mediaUrl(group.icon),
+        iconWidth: group.iconWidth,
+        iconHeight: group.iconHeight,
+        items,
       },
     ]
   })
