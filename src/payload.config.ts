@@ -112,28 +112,39 @@ export default buildConfig({
     Site,
   ],
   onInit: async (payload) => {
-    await seedAwards(payload)
-    await seedAwardsSection(payload)
-    await seedAbout(payload)
-    await seedHero(payload)
-    await seedDigitalEngineering(payload)
-    await seedFooter(payload)
-    await seedHeader(payload)
-    await seedNavigation(payload)
-    await seedLatestNews(payload)
-    await seedLocations(payload)
-    await seedRecentPodcast(payload)
-    await seedSolutions(payload)
-    await seedStrategicAdvisory(payload)
-    await seedTrustedBy(payload)
-    await seedSuccessStories(payload)
-    await seedOurSuccesses(payload)
-    await seedInsights(payload)
-    await seedPodcastListing(payload)
-    await seedPodcastPage(payload)
-    await seedContact(payload)
-    await seedSite(payload)
-    await classifyMedia(payload)
+    const seeds: { name: string; run: () => Promise<void> }[] = [
+      { name: 'awards', run: () => seedAwards(payload) },
+      { name: 'awards-section', run: () => seedAwardsSection(payload) },
+      { name: 'about', run: () => seedAbout(payload) },
+      { name: 'hero', run: () => seedHero(payload) },
+      { name: 'digital-engineering', run: () => seedDigitalEngineering(payload) },
+      { name: 'footer', run: () => seedFooter(payload) },
+      { name: 'header', run: () => seedHeader(payload) },
+      { name: 'navigation', run: () => seedNavigation(payload) },
+      { name: 'latest-news', run: () => seedLatestNews(payload) },
+      { name: 'locations', run: () => seedLocations(payload) },
+      { name: 'recent-podcast', run: () => seedRecentPodcast(payload) },
+      { name: 'solutions', run: () => seedSolutions(payload) },
+      { name: 'strategic-advisory', run: () => seedStrategicAdvisory(payload) },
+      { name: 'trusted-by', run: () => seedTrustedBy(payload) },
+      { name: 'success-stories', run: () => seedSuccessStories(payload) },
+      { name: 'our-successes', run: () => seedOurSuccesses(payload) },
+      { name: 'insights', run: () => seedInsights(payload) },
+      { name: 'podcast-listing', run: () => seedPodcastListing(payload) },
+      { name: 'podcast-page', run: () => seedPodcastPage(payload) },
+      { name: 'contact', run: () => seedContact(payload) },
+      { name: 'site', run: () => seedSite(payload) },
+      { name: 'classify-media', run: () => classifyMedia(payload) },
+    ]
+
+    for (const seed of seeds) {
+      try {
+        await seed.run()
+      } catch (error) {
+        // One seed must not prevent the app from serving after Docker start.
+        payload.logger.error({ err: error, seed: seed.name }, `Seed failed: ${seed.name}`)
+      }
+    }
   },
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
@@ -143,7 +154,10 @@ export default buildConfig({
   db: postgresAdapter({
     // Docker sets this to false after the database exists. A schema warning
     // otherwise waits for a keypress that `docker compose up` cannot provide.
+    // Existing volumes get additive updates from scripts/ensure-schema.sql in
+    // docker-dev.sh (and `pnpm ensure-schema` / `pnpm migrate` outside Docker).
     push: process.env.PAYLOAD_DB_PUSH !== 'false',
+    migrationDir: path.resolve(dirname, 'migrations'),
     pool: {
       connectionString: process.env.DATABASE_URL || '',
     },

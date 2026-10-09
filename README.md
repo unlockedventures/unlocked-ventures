@@ -24,6 +24,32 @@ postgresql://payload:payload@postgres:5432/unlocked_ventures
 
 The first start installs dependencies, creates the database tables, and fills empty content with the built-in site seed. Later starts leave content that already exists.
 
+If the Postgres volume already has tables from an older checkout, Docker applies additive schema updates (`scripts/ensure-schema.sql`) before the app boots. That keeps new code working on old volumes without interactive Payload prompts. Extra columns are additive only, so checking out older code against a newer database remains safe.
+
+Without Docker, after pulling schema changes against an existing database, run:
+
+```bash
+pnpm ensure-schema
+```
+
+Or Payload’s migration runner (`pnpm migrate`), which applies the same additive SQL from `src/migrations`.
+
+### Seed CMS data
+
+After the stack is up, fill or refresh demo content from the app container:
+
+```bash
+docker compose exec app sh -c 'PAYLOAD_DB_PUSH=false npx tsx scripts/seed-all.mts'
+```
+
+Or:
+
+```bash
+docker compose exec app pnpm seed
+```
+
+Seeds are mostly idempotent: they fill empty fields and leave existing editor content alone where possible. Use this after a fresh database, or when podcast / insights demo data is missing.
+
 Open:
 
 - Site: [http://localhost:3000](http://localhost:3000)
@@ -113,9 +139,11 @@ The app listens on port 3000.
 | `pnpm build` | Build for production |
 | `pnpm start` | Serve the production build |
 | `pnpm lint` | Run ESLint |
+| `pnpm seed` | Seed CMS demo content (globals, podcasts, insights, etc.) |
 | `pnpm test` | Run unit tests, then end-to-end tests |
 | `pnpm payload` | Run the Payload CLI |
 | `docker compose up -d` | Start the app and its PostgreSQL container in the background |
+| `docker compose exec app pnpm seed` | Seed CMS data inside the running Docker app container |
 
 End-to-end tests need Playwright browsers:
 

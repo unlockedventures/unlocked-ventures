@@ -28,8 +28,10 @@ fi
 
 # Payload asks before a schema push that would drop tables. `docker compose up`
 # has no terminal, so that question never gets an answer and the app never serves.
-# Create tables on an empty database. Leave an existing database alone.
+# Create tables on an empty database. Leave an existing database alone, then
+# apply additive IF NOT EXISTS updates so older volumes keep working with new code.
 PAYLOAD_DB_PUSH=true
+DB_EXISTS=0
 PG_PKG=$(find /app/node_modules/.pnpm -path '*/node_modules/pg/package.json' | head -n 1)
 if [ -n "$PG_PKG" ] && PG_PKG="$PG_PKG" node --input-type=module <<'EOF'
 import { createRequire } from 'node:module'
@@ -50,8 +52,14 @@ process.exit(1)
 EOF
 then
   PAYLOAD_DB_PUSH=false
+  DB_EXISTS=1
 fi
 export PAYLOAD_DB_PUSH
 echo "PAYLOAD_DB_PUSH=$PAYLOAD_DB_PUSH"
+
+if [ "$DB_EXISTS" -eq 1 ]; then
+  echo "Existing database detected — applying additive schema ensure"
+  PG_PKG="$PG_PKG" node /app/scripts/ensure-schema.mjs
+fi
 
 exec pnpm dev --hostname 0.0.0.0 --port 3000

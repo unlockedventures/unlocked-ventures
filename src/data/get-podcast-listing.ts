@@ -8,25 +8,28 @@ function mediaUrl(value: number | { url?: string | null } | null | undefined) {
   return value.url
 }
 
-function mapEpisode(doc: {
-  title?: string | null
-  meta?: string | null
-  href?: string | null
-  category?: string | null
-  excerpt?: string | null
-  stats?: string | null
-  about?: string | null
-  heroFeatured?: boolean | null
-  featured?: boolean | null
-  image?: number | { url?: string | null } | null
-  imageAlt?: string | null
-}): PodcastListEpisode | null {
+function mapEpisode(
+  doc: {
+    title?: string | null
+    meta?: string | null
+    href?: string | null
+    category?: string | null
+    excerpt?: string | null
+    stats?: string | null
+    about?: string | null
+    heroFeatured?: boolean | null
+    featured?: boolean | null
+    image?: number | { url?: string | null } | null
+    imageAlt?: string | null
+  },
+  uncategorizedLabel: string,
+): PodcastListEpisode | null {
   if (!doc.title || !doc.href) return null
   return {
     title: doc.title,
     href: doc.href,
     duration: doc.meta || '',
-    category: doc.category || 'Podcast',
+    category: doc.category?.trim() || uncategorizedLabel,
     excerpt: doc.excerpt || doc.about || '',
     stats: doc.stats || '',
     imageSrc: mediaUrl(doc.image),
@@ -62,6 +65,9 @@ export async function getPodcastListing(): Promise<PodcastListingCopy | null> {
     !doc.exploreTitle ||
     !doc.sortLabel ||
     !doc.sortAllLabel ||
+    !doc.uncategorizedLabel ||
+    !doc.previousCategoriesLabel ||
+    !doc.nextCategoriesLabel ||
     !doc.seeMoreLabel ||
     !doc.emptyLabel ||
     !doc.subscribeTitle ||
@@ -80,7 +86,7 @@ export async function getPodcastListing(): Promise<PodcastListingCopy | null> {
   })
 
   const episodes = episodesResult.docs.flatMap((item) => {
-    const mapped = mapEpisode(item)
+    const mapped = mapEpisode(item, doc.uncategorizedLabel)
     return mapped ? [mapped] : []
   })
 
@@ -99,6 +105,9 @@ export async function getPodcastListing(): Promise<PodcastListingCopy | null> {
     exploreTitle: doc.exploreTitle,
     sortLabel: doc.sortLabel,
     sortAllLabel: doc.sortAllLabel,
+    uncategorizedLabel: doc.uncategorizedLabel,
+    previousCategoriesLabel: doc.previousCategoriesLabel,
+    nextCategoriesLabel: doc.nextCategoriesLabel,
     seeMoreLabel: doc.seeMoreLabel,
     emptyLabel: doc.emptyLabel,
     subscribeTitle: doc.subscribeTitle,

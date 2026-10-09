@@ -33,6 +33,15 @@ export type PodcastPageContent = {
   saveLabel: string
   likeLabel: string
   transcriptLabel: string
+  transcriptDialogTitle: string
+  closeTranscriptLabel: string
+  aboutTitle: string
+  mainPointsTitle: string
+  stanceTitle: string
+  agreeTitle: string
+  disagreeTitle: string
+  takeTitle: string
+  loadMoreLabel: string
   chaptersTitle: string
   chapters: { time: string; title: string }[]
   listenNextTitle: string
@@ -48,9 +57,11 @@ const listenNextBatch = 3
 function ListenNext({
   title,
   items,
+  loadMoreLabel,
 }: {
   title: string
   items: PodcastPageContent['listenNext']
+  loadMoreLabel: string
 }) {
   const [visibleCount, setVisibleCount] = useState(listenNextBatch)
   const visible = items.slice(0, visibleCount)
@@ -77,13 +88,13 @@ function ListenNext({
           </li>
         ))}
       </ul>
-      {visibleCount < items.length ? (
+      {visibleCount < items.length && loadMoreLabel ? (
         <button
           type="button"
           onClick={() => setVisibleCount((count) => count + listenNextBatch)}
           className="mt-2 inline-flex h-11 w-full cursor-pointer items-center justify-between rounded-lg bg-[#F3F4F9] px-4 font-sans text-sm leading-5 font-normal text-[#0B1F3A] transition-colors duration-200 hover:bg-[#E6E9F2] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0B1F3A]"
         >
-          Load more
+          {loadMoreLabel}
           <svg viewBox="0 0 20 20" className="size-4" fill="none" aria-hidden="true">
             <path d="M5 8.5 10 13.5 15 8.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
@@ -137,6 +148,14 @@ export function PodcastPage({ content }: { content: PodcastPageContent }) {
                 saveLabel={content.saveLabel}
                 likeLabel={content.likeLabel}
                 transcriptLabel={content.transcriptLabel}
+                transcriptDialogTitle={content.transcriptDialogTitle}
+                closeTranscriptLabel={content.closeTranscriptLabel}
+                aboutTitle={content.aboutTitle}
+                mainPointsTitle={content.mainPointsTitle}
+                stanceTitle={content.stanceTitle}
+                agreeTitle={content.agreeTitle}
+                disagreeTitle={content.disagreeTitle}
+                takeTitle={content.takeTitle}
                 about={content.about}
                 summary={content.summary}
                 mainPoints={content.mainPoints}
@@ -152,7 +171,11 @@ export function PodcastPage({ content }: { content: PodcastPageContent }) {
 
           <aside className="flex w-full flex-col gap-10 xl:w-[340px]">
             {content.listenNext.length > 0 ? (
-              <ListenNext title={content.listenNextTitle} items={content.listenNext} />
+              <ListenNext
+                title={content.listenNextTitle}
+                items={content.listenNext}
+                loadMoreLabel={content.loadMoreLabel}
+              />
             ) : null}
           </aside>
         </div>

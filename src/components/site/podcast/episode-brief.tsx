@@ -120,11 +120,15 @@ function StanceList({
 function TranscriptDialog({
   open,
   title,
+  dialogTitle,
+  closeLabel,
   lines,
   onClose,
 }: {
   open: boolean
   title: string
+  dialogTitle: string
+  closeLabel: string
   lines: { time: string; speaker: string; text: string }[]
   onClose: () => void
 }) {
@@ -151,7 +155,7 @@ function TranscriptDialog({
       <div className="flex items-start justify-between gap-4 border-b border-[#171616]/10 px-6 py-4">
         <div className="min-w-0">
           <h2 id={titleId} className="font-sans text-lg leading-7 font-medium text-[#171616]">
-            Transcript
+            {dialogTitle}
           </h2>
           <p className="mt-1 truncate font-sans text-sm leading-5 text-[#696969]">{title}</p>
         </div>
@@ -159,7 +163,7 @@ function TranscriptDialog({
           type="button"
           onClick={onClose}
           className="inline-flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full text-[#484D56] hover:bg-[#F3F4F9]"
-          aria-label="Close transcript"
+          aria-label={closeLabel}
         >
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
             <path d="M3.5 3.5 12.5 12.5M12.5 3.5 3.5 12.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
@@ -189,6 +193,14 @@ export function EpisodeBrief({
   saveLabel,
   likeLabel,
   transcriptLabel,
+  transcriptDialogTitle,
+  closeTranscriptLabel,
+  aboutTitle,
+  mainPointsTitle,
+  stanceTitle,
+  agreeTitle,
+  disagreeTitle,
+  takeTitle,
   about: aboutText,
   summary: summaryText,
   mainPoints: mainPointItems,
@@ -204,6 +216,14 @@ export function EpisodeBrief({
   saveLabel: string
   likeLabel: string
   transcriptLabel: string
+  transcriptDialogTitle: string
+  closeTranscriptLabel: string
+  aboutTitle: string
+  mainPointsTitle: string
+  stanceTitle: string
+  agreeTitle: string
+  disagreeTitle: string
+  takeTitle: string
   about?: string
   summary?: string
   mainPoints?: string[]
@@ -248,20 +268,27 @@ export function EpisodeBrief({
 
       {lines.length ? (
         <div id={transcriptId}>
-          <TranscriptDialog open={transcriptOpen} title={title} lines={lines} onClose={() => setTranscriptOpen(false)} />
+          <TranscriptDialog
+            open={transcriptOpen}
+            title={title}
+            dialogTitle={transcriptDialogTitle}
+            closeLabel={closeTranscriptLabel}
+            lines={lines}
+            onClose={() => setTranscriptOpen(false)}
+          />
         </div>
       ) : null}
 
-      {aboutCopy ? (
+      {aboutCopy && aboutTitle ? (
         <div className="mt-10 flex flex-col gap-4">
-          <h2 className="font-sans text-[2rem] leading-10 font-normal text-[#171616]">About this episode</h2>
+          <h2 className="font-sans text-[2rem] leading-10 font-normal text-[#171616]">{aboutTitle}</h2>
           <p className="font-sans text-base leading-7 font-normal whitespace-pre-line text-[#696969]">{aboutCopy}</p>
         </div>
       ) : null}
 
-      {mainPointsCopy.length > 0 ? (
+      {mainPointsCopy.length > 0 && mainPointsTitle ? (
         <div className="mt-10 flex flex-col gap-4 border-t border-[#171616]/10 pt-10">
-          <h2 className="font-sans text-[2rem] leading-10 font-normal text-[#171616]">Main points</h2>
+          <h2 className="font-sans text-[2rem] leading-10 font-normal text-[#171616]">{mainPointsTitle}</h2>
           <ul className="flex flex-col gap-3">
             {mainPointsCopy.map((point) => (
               <li key={point} className="flex gap-3">
@@ -276,22 +303,20 @@ export function EpisodeBrief({
         </div>
       ) : null}
 
-      {showStance ? (
+      {showStance && stanceTitle ? (
         <div className="mt-10 border-t border-[#171616]/10 pt-10">
           <div className="flex flex-col gap-4">
-            <h2 className="font-sans text-[2rem] leading-10 font-normal text-[#171616]">
-              Where we agree and where we don&apos;t
-            </h2>
+            <h2 className="font-sans text-[2rem] leading-10 font-normal text-[#171616]">{stanceTitle}</h2>
             {readingCopy ? (
               <p className="font-sans text-base leading-7 font-normal text-[#696969]">{readingCopy}</p>
             ) : null}
           </div>
 
           <div className="mt-8 grid gap-10 md:grid-cols-2 md:gap-8">
-            {agreeCopy.length ? (
+            {agreeCopy.length && agreeTitle ? (
               <StanceList
                 tone="agree"
-                title="We agree"
+                title={agreeTitle}
                 icon={
                   <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
                     <path d="M3.5 9.25 7 12.75 14.5 5.25" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
@@ -300,10 +325,10 @@ export function EpisodeBrief({
                 items={agreeCopy}
               />
             ) : null}
-            {disagreeCopy.length ? (
+            {disagreeCopy.length && disagreeTitle ? (
               <StanceList
                 tone="disagree"
-                title="We disagree"
+                title={disagreeTitle}
                 icon={
                   <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
                     <path d="M4.5 4.5 13.5 13.5M13.5 4.5 4.5 13.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
@@ -316,10 +341,10 @@ export function EpisodeBrief({
         </div>
       ) : null}
 
-      {showTake ? (
+      {showTake && takeTitle ? (
         <div className="mt-10 border-t border-[#171616]/10 pt-10">
           <div className="flex max-w-[820px] flex-col gap-4">
-            <h2 className="font-sans text-[2rem] leading-10 font-normal text-[#171616]">The Unlocked Ventures take</h2>
+            <h2 className="font-sans text-[2rem] leading-10 font-normal text-[#171616]">{takeTitle}</h2>
             {takeLead ? (
               <p className="font-sans text-base leading-7 font-normal text-[#696969]">{takeLead}</p>
             ) : null}

@@ -28,6 +28,15 @@ export async function getPodcastPage(): Promise<PodcastPageContent | null> {
     !doc.saveLabel ||
     !doc.likeLabel ||
     !doc.transcriptLabel ||
+    !doc.transcriptDialogTitle ||
+    !doc.closeTranscriptLabel ||
+    !doc.aboutTitle ||
+    !doc.mainPointsTitle ||
+    !doc.stanceTitle ||
+    !doc.agreeTitle ||
+    !doc.disagreeTitle ||
+    !doc.takeTitle ||
+    !doc.loadMoreLabel ||
     !doc.chaptersTitle ||
     !doc.listenNextTitle ||
     !doc.allEpisodesLabel ||
@@ -78,6 +87,15 @@ export async function getPodcastPage(): Promise<PodcastPageContent | null> {
     saveLabel: doc.saveLabel,
     likeLabel: doc.likeLabel,
     transcriptLabel: doc.transcriptLabel,
+    transcriptDialogTitle: doc.transcriptDialogTitle,
+    closeTranscriptLabel: doc.closeTranscriptLabel,
+    aboutTitle: doc.aboutTitle,
+    mainPointsTitle: doc.mainPointsTitle,
+    stanceTitle: doc.stanceTitle,
+    agreeTitle: doc.agreeTitle,
+    disagreeTitle: doc.disagreeTitle,
+    takeTitle: doc.takeTitle,
+    loadMoreLabel: doc.loadMoreLabel,
     about: doc.about || '',
     reading: doc.reading || '',
     agree: points(doc.agree),

@@ -34,6 +34,9 @@ export type PodcastListingCopy = {
   exploreTitle: string
   sortLabel: string
   sortAllLabel: string
+  uncategorizedLabel: string
+  previousCategoriesLabel: string
+  nextCategoriesLabel: string
   seeMoreLabel: string
   emptyLabel: string
   subscribeTitle: string
@@ -216,10 +219,14 @@ function BrowseCategories({
   title,
   categories,
   viewAllLabel,
+  previousLabel,
+  nextLabel,
 }: {
   title: string
   categories: string[]
   viewAllLabel: string
+  previousLabel: string
+  nextLabel: string
 }) {
   const scrollerRef = useRef<HTMLDivElement>(null)
   const [canPrevious, setCanPrevious] = useState(false)
@@ -299,7 +306,7 @@ function BrowseCategories({
           />
           <button
             type="button"
-            aria-label="Previous categories"
+            aria-label={previousLabel}
             disabled={!canPrevious}
             onClick={() => scrollByDirection(-1)}
             className="absolute top-1/2 left-[30px] z-10 hidden size-12 -translate-y-1/2 items-center justify-center rounded-full border border-[rgba(235,237,240,0.16)] text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-30 md:inline-flex"
@@ -308,7 +315,7 @@ function BrowseCategories({
           </button>
           <button
             type="button"
-            aria-label="Next categories"
+            aria-label={nextLabel}
             disabled={!canNext}
             onClick={() => scrollByDirection(1)}
             className="absolute top-1/2 right-[30px] z-10 hidden size-12 -translate-y-1/2 items-center justify-center rounded-full border border-[rgba(235,237,240,0.16)] text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-30 md:inline-flex"
@@ -448,6 +455,8 @@ export function PodcastListing({ copy }: { copy: PodcastListingCopy }) {
         title={copy.browseTitle}
         categories={copy.categories}
         viewAllLabel={copy.viewAllCategoriesLabel}
+        previousLabel={copy.previousCategoriesLabel}
+        nextLabel={copy.nextCategoriesLabel}
       />
 
       {featuredEpisodes.length > 0 ? (

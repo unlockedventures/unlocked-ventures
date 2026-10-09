@@ -1778,6 +1778,12 @@ export interface PodcastListing {
   exploreTitle: string;
   sortLabel: string;
   sortAllLabel: string;
+  /**
+   * Used when an episode has no category set.
+   */
+  uncategorizedLabel: string;
+  previousCategoriesLabel: string;
+  nextCategoriesLabel: string;
   seeMoreLabel: string;
   emptyLabel: string;
   subscribeTitle: string;
@@ -1819,6 +1825,15 @@ export interface PodcastPage {
   saveLabel: string;
   likeLabel: string;
   transcriptLabel: string;
+  transcriptDialogTitle: string;
+  closeTranscriptLabel: string;
+  aboutTitle: string;
+  mainPointsTitle: string;
+  stanceTitle: string;
+  agreeTitle: string;
+  disagreeTitle: string;
+  takeTitle: string;
+  loadMoreLabel: string;
   about?: string | null;
   reading?: string | null;
   agree?:
@@ -2471,6 +2486,9 @@ export interface PodcastListingSelect<T extends boolean = true> {
   exploreTitle?: T;
   sortLabel?: T;
   sortAllLabel?: T;
+  uncategorizedLabel?: T;
+  previousCategoriesLabel?: T;
+  nextCategoriesLabel?: T;
   seeMoreLabel?: T;
   emptyLabel?: T;
   subscribeTitle?: T;
@@ -2510,6 +2528,15 @@ export interface PodcastPageSelect<T extends boolean = true> {
   saveLabel?: T;
   likeLabel?: T;
   transcriptLabel?: T;
+  transcriptDialogTitle?: T;
+  closeTranscriptLabel?: T;
+  aboutTitle?: T;
+  mainPointsTitle?: T;
+  stanceTitle?: T;
+  agreeTitle?: T;
+  disagreeTitle?: T;
+  takeTitle?: T;
+  loadMoreLabel?: T;
   about?: T;
   reading?: T;
   agree?:

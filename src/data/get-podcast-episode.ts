@@ -2,7 +2,7 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
 import type { PodcastPageContent } from '@/components/site/podcast/podcast-page'
-import { getPodcastPage } from '@/data/get-podcast-page'
+import { getPodcastSharedChrome } from '@/data/get-podcast-shared'
 import { podcastEpisodePath, podcastSlugFromHref, slugifyPodcastTitle } from '@/lib/podcast-slug'
 
 function mediaUrl(value: number | { url?: string | null } | null | undefined) {
@@ -32,8 +32,10 @@ export async function getPodcastEpisode(slug: string): Promise<PodcastPageConten
       pagination: false,
       sort: 'sortOrder',
     }),
-    getPodcastPage(),
+    getPodcastSharedChrome(),
   ])
+
+  if (!shared) return null
 
   const episodes = result.docs.flatMap((episode) => {
     if (!episode.title) return []
@@ -74,10 +76,10 @@ export async function getPodcastEpisode(slug: string): Promise<PodcastPageConten
   })
 
   return {
-    breadcrumbHomeLabel: shared?.breadcrumbHomeLabel ?? '',
-    breadcrumbHomeHref: shared?.breadcrumbHomeHref ?? '/',
-    breadcrumbPodcastLabel: shared?.breadcrumbPodcastLabel ?? '',
-    breadcrumbPodcastHref: shared?.breadcrumbPodcastHref ?? '/podcast',
+    breadcrumbHomeLabel: shared.breadcrumbHomeLabel,
+    breadcrumbHomeHref: shared.breadcrumbHomeHref,
+    breadcrumbPodcastLabel: shared.breadcrumbPodcastLabel,
+    breadcrumbPodcastHref: shared.breadcrumbPodcastHref,
     category: episode.category || '',
     title: episode.title,
     meta: [episode.meta, episode.guests].filter(Boolean).join(' · '),
@@ -96,17 +98,26 @@ export async function getPodcastEpisode(slug: string): Promise<PodcastPageConten
     take: points(episode.take),
     transcript,
     progress: 0,
-    shareLabel: shared?.shareLabel ?? '',
-    saveLabel: shared?.saveLabel ?? '',
-    likeLabel: shared?.likeLabel ?? '',
-    transcriptLabel: shared?.transcriptLabel ?? '',
+    shareLabel: shared.shareLabel,
+    saveLabel: shared.saveLabel,
+    likeLabel: shared.likeLabel,
+    transcriptLabel: shared.transcriptLabel,
+    transcriptDialogTitle: shared.transcriptDialogTitle,
+    closeTranscriptLabel: shared.closeTranscriptLabel,
+    aboutTitle: shared.aboutTitle,
+    mainPointsTitle: shared.mainPointsTitle,
+    stanceTitle: shared.stanceTitle,
+    agreeTitle: shared.agreeTitle,
+    disagreeTitle: shared.disagreeTitle,
+    takeTitle: shared.takeTitle,
+    loadMoreLabel: shared.loadMoreLabel,
     chaptersTitle: '',
     chapters: [],
-    listenNextTitle: shared?.listenNextTitle ?? '',
+    listenNextTitle: shared.listenNextTitle,
     listenNext,
-    allEpisodesLabel: shared?.allEpisodesLabel ?? '',
-    allEpisodesHref: shared?.allEpisodesHref ?? '/podcast',
-    subscribeTitle: shared?.subscribeTitle || '',
-    subscribe: shared?.subscribe ?? [],
+    allEpisodesLabel: shared.allEpisodesLabel,
+    allEpisodesHref: shared.allEpisodesHref,
+    subscribeTitle: shared.subscribeTitle,
+    subscribe: shared.subscribe,
   }
 }
