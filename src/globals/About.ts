@@ -55,6 +55,45 @@ export const About: GlobalConfig = {
     { name: 'founderImageAlt', type: 'text', label: 'Founder photo description', required: true },
     { name: 'founderCtaLabel', type: 'text', label: 'Founder button text', required: true },
     { name: 'founderCtaHref', type: 'text', label: 'Founder button link', required: true },
+    {
+      name: 'experienceTitle',
+      type: 'text',
+      label: 'Experience heading',
+      required: true,
+      defaultValue: 'Experience',
+    },
+    {
+      name: 'experienceRoles',
+      type: 'array',
+      label: 'Experience roles',
+      admin: {
+        description: 'Accordion rows on the About page Experience section. The first open row expands by default.',
+      },
+      fields: [
+        { name: 'role', type: 'text', label: 'Role title', required: true },
+        { name: 'company', type: 'text', label: 'Company', required: true },
+        {
+          name: 'dateLabel',
+          type: 'text',
+          label: 'Date label',
+          required: true,
+          admin: { description: 'Shown in the pill, for example: Aug 2023 – Present · 3 yrs 1 mo' },
+        },
+        { name: 'summary', type: 'textarea', label: 'Summary' },
+        {
+          name: 'highlights',
+          type: 'array',
+          label: 'Highlights',
+          fields: [{ name: 'text', type: 'text', required: true }],
+        },
+        {
+          name: 'defaultOpen',
+          type: 'checkbox',
+          label: 'Open by default',
+          defaultValue: false,
+        },
+      ],
+    },
     { name: 'howWeWorkTitle', type: 'text', label: 'How we work heading', required: true },
     {
       name: 'principles',

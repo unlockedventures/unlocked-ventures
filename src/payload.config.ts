@@ -7,7 +7,9 @@ import sharp from 'sharp'
 
 import { seedAbout } from './data/seed-about'
 import { seedAwardsSection } from './data/seed-awards-section'
+import { seedInsights } from './data/seed-insights'
 import { seedOurSuccesses } from './data/seed-our-successes'
+import { seedPodcastListing } from './data/seed-podcast-listing'
 import { seedPodcastPage } from './data/seed-podcast-page'
 import { Awards } from './collections/Awards'
 import { CaseStudies } from './collections/CaseStudies'
@@ -37,7 +39,9 @@ import { seedSite } from './data/seed-site'
 import { About } from './globals/About'
 import { AwardsSection } from './globals/AwardsSection'
 import { Contact } from './globals/Contact'
+import { Insights } from './globals/Insights'
 import { OurSuccesses } from './globals/OurSuccesses'
+import { PodcastListing } from './globals/PodcastListing'
 import { PodcastPage } from './globals/PodcastPage'
 import { DigitalEngineering } from './globals/DigitalEngineering'
 import { Footer } from './globals/Footer'
@@ -100,6 +104,8 @@ export default buildConfig({
     StrategicAdvisory,
     SuccessStories,
     OurSuccesses,
+    Insights,
+    PodcastListing,
     PodcastPage,
     TrustedBy,
     Contact,
@@ -122,6 +128,8 @@ export default buildConfig({
     await seedTrustedBy(payload)
     await seedSuccessStories(payload)
     await seedOurSuccesses(payload)
+    await seedInsights(payload)
+    await seedPodcastListing(payload)
     await seedPodcastPage(payload)
     await seedContact(payload)
     await seedSite(payload)

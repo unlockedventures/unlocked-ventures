@@ -62,16 +62,22 @@ export function ContentSlider({
     const scroller = scrollerRef.current
     const slide = scroller?.querySelector<HTMLElement>('[data-slider-slide]')
     if (!scroller || !slide) return
-    const maxScroll = scroller.scrollWidth - scroller.clientWidth
+    const maxScroll = Math.max(0, scroller.scrollWidth - scroller.clientWidth)
+    if (maxScroll <= 2) return
     if (direction === -1 && scroller.scrollLeft <= 2) return
-    if (direction === 1 && (maxScroll <= 2 || scroller.scrollLeft >= maxScroll - 2)) return
+    if (direction === 1 && scroller.scrollLeft >= maxScroll - 2) return
     const styles = getComputedStyle(scroller)
     const gap = Number.parseFloat(styles.columnGap || styles.gap) || 0
+    const step = slide.offsetWidth + gap
+    if (step <= 0) return
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    scroller.scrollBy({
-      left: direction * (slide.offsetWidth + gap),
-      behavior: reduced ? 'auto' : 'smooth',
-    })
+    const nextLeft = Math.min(maxScroll, Math.max(0, scroller.scrollLeft + direction * step))
+    scroller.scrollTo({ left: nextLeft, behavior: reduced ? 'auto' : 'smooth' })
+    window.setTimeout(() => {
+      if (Math.abs(scroller.scrollLeft - nextLeft) > 2) {
+        scroller.scrollLeft = nextLeft
+      }
+    }, 50)
   }
 
   return (
@@ -109,7 +115,7 @@ export function ContentSlider({
             }
           }}
           className={cn(
-            'flex gap-4 overflow-x-auto scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#484D56] [&::-webkit-scrollbar]:hidden',
+            'flex gap-4 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#484D56] [&::-webkit-scrollbar]:hidden',
             snapClassName,
             trackClassName,
           )}

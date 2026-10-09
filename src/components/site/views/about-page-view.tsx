@@ -1,6 +1,7 @@
 'use client'
 
 import { AboutDelivered } from '@/components/site/about/about-delivered'
+import { AboutExperience } from '@/components/site/about/about-experience'
 import { AboutFounder } from '@/components/site/about/about-founder'
 import { AboutHero } from '@/components/site/about/about-hero'
 import { AboutHowWeWork } from '@/components/site/about/about-how-we-work'
@@ -20,9 +21,11 @@ export function AboutPageView() {
       <AboutHero content={content} />
       <AboutLogoWall title={content.logoTitle} logos={content.logos} />
       <AboutDelivered title={content.deliveredTitle} stats={content.stats} />
+      <AboutLogoWall title={content.logoTitle} logos={content.logos} spaced />
       <AboutFounder content={content} />
+      <AboutExperience title={content.experienceTitle} roles={content.experienceRoles} />
       <AboutHowWeWork title={content.howWeWorkTitle} principles={content.principles} />
-      {locations.data ? <LocationsSection {...locations.data} /> : null}
+      {locations.data ? <LocationsSection {...locations.data} contentInset="page" /> : null}
     </div>
   )
 }

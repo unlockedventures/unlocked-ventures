@@ -14,13 +14,20 @@ export type LocationsSectionProps = {
   stats: readonly LocationStat[]
   mapSrc?: string
   className?: string
+  /** Wider page inset used on About (156px). Default matches the homepage (56px). */
+  contentInset?: 'home' | 'page'
 }
 
 const STAGGER_MS = 160
 const BASE_DELAY_MS = 80
 const SECTION_ID = 'locations' as const
 
-export function LocationsSection({ stats, mapSrc, className }: LocationsSectionProps) {
+export function LocationsSection({
+  stats,
+  mapSrc,
+  className,
+  contentInset = 'home',
+}: LocationsSectionProps) {
   const listRef = useRef<HTMLUListElement>(null)
   const { visible, playId } = useRevealSection(SECTION_ID)
   const setInView = useRevealStore((state) => state.setInView)
@@ -48,7 +55,12 @@ export function LocationsSection({ stats, mapSrc, className }: LocationsSectionP
 
   return (
     <section aria-label="Our locations" className={cn('bg-[#F3F4F9]', className)}>
-      <div className="mx-auto flex w-full max-w-[1440px] flex-col items-start gap-10 px-4 py-12 sm:px-6 md:px-8 md:py-16 xl:flex-row xl:items-center xl:justify-between xl:px-14 xl:py-[73px] min-[1440px]:min-h-[613px] min-[1440px]:items-start!">
+      <div
+        className={cn(
+          'mx-auto flex w-full max-w-[1440px] flex-col items-start gap-10 px-4 py-12 sm:px-6 md:px-8 md:py-16 xl:flex-row xl:items-center xl:justify-between xl:py-[73px] min-[1440px]:min-h-[613px] min-[1440px]:items-start!',
+          contentInset === 'page' ? 'lg:px-12 xl:px-[156px]' : 'xl:px-14',
+        )}
+      >
         <div className="w-full max-w-[748px] bg-white min-[1440px]:w-[747px] min-[1440px]:max-w-none min-[1440px]:shrink-0 min-[1440px]:bg-transparent">
           {mapSrc ? (
             <img

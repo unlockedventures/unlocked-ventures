@@ -5,6 +5,15 @@ export type AboutLogo = {
   height: number
 }
 
+export type AboutExperienceRole = {
+  role: string
+  company: string
+  dateLabel: string
+  summary?: string
+  highlights: string[]
+  defaultOpen?: boolean
+}
+
 export type AboutContent = {
   metaTitle: string
   metaDescription: string
@@ -29,6 +38,8 @@ export type AboutContent = {
   founderImageAlt: string
   founderCtaLabel: string
   founderCtaHref: string
+  experienceTitle: string
+  experienceRoles: AboutExperienceRole[]
   howWeWorkTitle: string
   principles: { title: string; body: string; iconSrc: string; width: number; height: number }[]
 }

@@ -110,6 +110,25 @@ export const PodcastEpisodes: CollectionConfig = {
               admin: { description: 'The small label above the title, for example Artificial Intelligence (AI).' },
             },
             {
+              name: 'excerpt',
+              type: 'textarea',
+              label: 'List excerpt',
+              admin: { description: 'Short summary on the podcast list hero and cards.' },
+            },
+            {
+              name: 'stats',
+              type: 'text',
+              label: 'Plays and date',
+              admin: { description: 'For example: 135K plays · 12 days ago' },
+            },
+            {
+              name: 'heroFeatured',
+              type: 'checkbox',
+              label: 'Show as list hero',
+              defaultValue: false,
+              admin: { description: 'The large featured episode at the top of /podcast.' },
+            },
+            {
               name: 'mediaUrl',
               type: 'text',
               label: 'Audio or video link',

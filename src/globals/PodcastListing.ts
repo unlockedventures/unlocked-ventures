@@ -1,0 +1,53 @@
+import type { GlobalConfig } from 'payload'
+
+import { adminGroups } from '@/admin/editor-guide'
+
+export const PodcastListing: GlobalConfig = {
+  slug: 'podcast-listing',
+  label: 'Podcast list page',
+  admin: {
+    group: adminGroups.podcast,
+    description: 'Heading, categories, and subscribe row for the Podcast list at /podcast.',
+    hideAPIURL: true,
+  },
+  access: {
+    read: () => true,
+  },
+  fields: [
+    { name: 'metaTitle', type: 'text', label: 'Browser tab title', required: true },
+    { name: 'homeLabel', type: 'text', required: true },
+    { name: 'homeHref', type: 'text', required: true },
+    { name: 'currentLabel', type: 'text', label: 'Current page name', required: true },
+    { name: 'title', type: 'text', label: 'Heading', required: true },
+    { name: 'description', type: 'textarea', required: true },
+    { name: 'watchNowLabel', type: 'text', label: 'Hero button', required: true, defaultValue: 'Watch now' },
+    { name: 'browseTitle', type: 'text', label: 'Browse heading', required: true },
+    { name: 'viewAllCategoriesLabel', type: 'text', required: true },
+    {
+      name: 'categories',
+      type: 'array',
+      label: 'Browse categories',
+      fields: [{ name: 'label', type: 'text', required: true }],
+    },
+    { name: 'featuredTitle', type: 'text', label: 'Featured heading', required: true },
+    { name: 'exploreTitle', type: 'text', label: 'Explore heading', required: true },
+    { name: 'sortLabel', type: 'text', required: true, defaultValue: 'Select category' },
+    { name: 'sortAllLabel', type: 'text', required: true, defaultValue: 'All' },
+    { name: 'seeMoreLabel', type: 'text', required: true, defaultValue: 'See more' },
+    { name: 'emptyLabel', type: 'text', required: true, defaultValue: 'No episodes yet.' },
+    { name: 'subscribeTitle', type: 'text', required: true },
+    { name: 'subscribeDescription', type: 'text', required: true },
+    {
+      name: 'subscribe',
+      type: 'array',
+      label: 'Subscribe platforms',
+      fields: [
+        { name: 'name', type: 'text', required: true },
+        { name: 'href', type: 'text', required: true },
+        { name: 'logo', type: 'upload', relationTo: 'media', required: true },
+        { name: 'width', type: 'number', required: true },
+        { name: 'height', type: 'number', required: true },
+      ],
+    },
+  ],
+}

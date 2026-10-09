@@ -46,6 +46,49 @@ export const aboutSeed = {
   founderImageAlt: 'Saker Ghani, Founder and CEO of Unlocked Ventures',
   founderCtaLabel: 'View All Experience',
   founderCtaHref: '#experience',
+  experienceTitle: 'Experience',
+  experienceRoles: [
+    {
+      role: 'Founder',
+      company: 'Unlocked Ventures',
+      dateLabel: 'Aug 2023 – Present · 3 yrs 1 mo',
+      defaultOpen: true,
+      summary:
+        'Digital transformation, corporate innovation, product strategy, and hands-on delivery for operators and portfolio companies.',
+      highlights: [
+        'Led product and technology strategy for a global NGO serving millions of beneficiaries.',
+        'Advised a Malaysian energy company on modernization and digital operating models.',
+        'Guided a Middle Eastern healthcare company through platform and patient-experience initiatives.',
+        'Supported United Nations digital programs spanning data, delivery, and capability building.',
+        'Completed PE due diligence across technology, product, and operating model for growth investments.',
+      ],
+    },
+    {
+      role: 'Chief Digital Officer',
+      company: 'Citrin Cooperman',
+      dateLabel: 'Aug 2023 – Present · 3 yrs 1 mo',
+      summary:
+        'Owns the firm’s digital agenda spanning client experience, internal platforms, and AI-enabled service delivery.',
+      highlights: [
+        'Built the digital operating rhythm across advisory, tax, and assurance practices.',
+        'Stood up product teams for client portals, automation, and data-driven insights.',
+      ],
+    },
+    {
+      role: 'Member of the Board of Advisors',
+      company: 'AtmaSense, Inc.',
+      dateLabel: 'Jul 2026 – Present · 2 mos',
+      summary: 'Advises the leadership team on product strategy, go-to-market, and scaling technology.',
+      highlights: [],
+    },
+    {
+      role: 'Member of the Board of Advisors',
+      company: 'AtmaSense, Inc.',
+      dateLabel: 'Aug 2026 – Present · 1 mo',
+      summary: 'Supports board-level reviews of growth priorities and technology investment decisions.',
+      highlights: [],
+    },
+  ],
   howWeWorkTitle: 'How we work',
   principles: [
     {

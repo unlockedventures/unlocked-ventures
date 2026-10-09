@@ -8,8 +8,10 @@ import type { ContactPageContent } from '@/components/site/contact/conversation-
 import type { DigitalEngineeringSectionProps } from '@/components/site/digital-engineering/digital-engineering-section'
 import type { SiteFooterProps } from '@/components/site/footer/site-footer'
 import type { HeroSectionProps } from '@/components/site/hero/hero-section'
-import type { LatestNewsSectionProps } from '@/components/site/latest-news/latest-news-section'
+import type { InsightsListingCopy } from '@/components/site/insights/insights-listing'
+import type { LatestNewsSectionProps, NewsPost } from '@/components/site/latest-news/latest-news-section'
 import type { LocationsSectionProps } from '@/components/site/locations/locations-section'
+import type { PodcastListingCopy } from '@/components/site/podcast/podcast-listing'
 import type { PodcastPageContent } from '@/components/site/podcast/podcast-page'
 import type { RecentPodcastSectionProps } from '@/components/site/recent-podcast/recent-podcast-section'
 import type { StrategicAdvisorySectionProps } from '@/components/site/strategic-advisory/strategic-advisory-section'
@@ -155,6 +157,27 @@ export function useCaseStudies() {
   return useQuery({
     queryKey: siteKeys.caseStudies(),
     queryFn: () => fetchSiteResource<CaseStudyCard[]>('case-studies'),
+  })
+}
+
+export function useInsights() {
+  return useQuery({
+    queryKey: siteKeys.insights(),
+    queryFn: () => fetchSiteResource<InsightsListingCopy | null>('insights'),
+  })
+}
+
+export function useNewsPosts() {
+  return useQuery({
+    queryKey: siteKeys.newsPosts(),
+    queryFn: () => fetchSiteResource<NewsPost[]>('news-posts'),
+  })
+}
+
+export function usePodcastListing() {
+  return useQuery({
+    queryKey: siteKeys.podcastListing(),
+    queryFn: () => fetchSiteResource<PodcastListingCopy | null>('podcast-listing'),
   })
 }
 

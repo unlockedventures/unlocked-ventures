@@ -49,6 +49,20 @@ export async function getAbout(): Promise<AboutContent | null> {
     if (!item.title || !item.body || !iconSrc || item.iconWidth == null || item.iconHeight == null) return []
     return [{ title: item.title, body: item.body, iconSrc, width: item.iconWidth, height: item.iconHeight }]
   })
+  const experienceRoles = (doc.experienceRoles ?? []).flatMap((item) => {
+    if (!item.role || !item.company || !item.dateLabel) return []
+    const highlights = (item.highlights ?? []).flatMap((row) => (row.text ? [row.text] : []))
+    return [
+      {
+        role: item.role,
+        company: item.company,
+        dateLabel: item.dateLabel,
+        summary: item.summary || undefined,
+        highlights,
+        defaultOpen: Boolean(item.defaultOpen),
+      },
+    ]
+  })
 
   if (!logos.length || !stats.length || !principles.length) return null
 
@@ -76,6 +90,8 @@ export async function getAbout(): Promise<AboutContent | null> {
     founderImageAlt: doc.founderImageAlt,
     founderCtaLabel: doc.founderCtaLabel,
     founderCtaHref: doc.founderCtaHref,
+    experienceTitle: doc.experienceTitle || 'Experience',
+    experienceRoles,
     howWeWorkTitle: doc.howWeWorkTitle,
     principles,
   }

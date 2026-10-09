@@ -5,7 +5,27 @@ import { uploadPublicFile } from '@/data/upload-public-file'
 
 export async function seedAbout(payload: Payload) {
   const current = await payload.findGlobal({ slug: 'about' })
-  if (current.title) return
+  const experienceRoles = aboutSeed.experienceRoles.map((item) => ({
+    role: item.role,
+    company: item.company,
+    dateLabel: item.dateLabel,
+    summary: item.summary,
+    defaultOpen: Boolean(item.defaultOpen),
+    highlights: item.highlights.map((text) => ({ text })),
+  }))
+
+  if (current.title) {
+    if (!current.experienceTitle || !(current.experienceRoles?.length)) {
+      await payload.updateGlobal({
+        slug: 'about',
+        data: {
+          experienceTitle: aboutSeed.experienceTitle,
+          experienceRoles,
+        },
+      })
+    }
+    return
+  }
 
   const [badgeImage, heroImage, founderImage] = await Promise.all([
     uploadPublicFile(payload, aboutSeed.badgeFile, aboutSeed.badgeAlt),
@@ -64,6 +84,8 @@ export async function seedAbout(payload: Payload) {
       founderImageAlt: aboutSeed.founderImageAlt,
       founderCtaLabel: aboutSeed.founderCtaLabel,
       founderCtaHref: aboutSeed.founderCtaHref,
+      experienceTitle: aboutSeed.experienceTitle,
+      experienceRoles,
       howWeWorkTitle: aboutSeed.howWeWorkTitle,
       principles,
     },

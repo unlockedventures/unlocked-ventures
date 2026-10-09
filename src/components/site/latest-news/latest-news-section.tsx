@@ -14,6 +14,12 @@ export type NewsPost = {
   ctaLabel?: string
   imageSrc?: string
   imageAlt?: string
+  featured?: boolean
+  authorName?: string
+  authorImageSrc?: string
+  publishedAt?: string
+  readTime?: string
+  tags?: string[]
 }
 
 export type LatestNewsSectionProps = {

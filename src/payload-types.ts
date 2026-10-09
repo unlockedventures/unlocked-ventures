@@ -116,6 +116,8 @@ export interface Config {
     'strategic-advisory': StrategicAdvisory;
     'success-stories': SuccessStory;
     'our-successes': OurSuccess;
+    insights: Insight;
+    'podcast-listing': PodcastListing;
     'podcast-page': PodcastPage;
     'trusted-by': TrustedBy;
     contact: Contact;
@@ -136,6 +138,8 @@ export interface Config {
     'strategic-advisory': StrategicAdvisorySelect<false> | StrategicAdvisorySelect<true>;
     'success-stories': SuccessStoriesSelect<false> | SuccessStoriesSelect<true>;
     'our-successes': OurSuccessesSelect<false> | OurSuccessesSelect<true>;
+    insights: InsightsSelect<false> | InsightsSelect<true>;
+    'podcast-listing': PodcastListingSelect<false> | PodcastListingSelect<true>;
     'podcast-page': PodcastPageSelect<false> | PodcastPageSelect<true>;
     'trusted-by': TrustedBySelect<false> | TrustedBySelect<true>;
     contact: ContactSelect<false> | ContactSelect<true>;
@@ -278,6 +282,76 @@ export interface NewsPost {
   image?: (number | null) | Media;
   imageAlt?: string | null;
   /**
+   * Shown under the title on the article page.
+   */
+  authorName?: string | null;
+  /**
+   * Circular photo next to the author name.
+   */
+  authorImage?: (number | null) | Media;
+  /**
+   * Shown next to the author, for example Sep 20, 2024.
+   */
+  publishedAt?: string | null;
+  /**
+   * For example: 7 min read
+   */
+  readTime?: string | null;
+  /**
+   * Pill labels at the bottom of the article.
+   */
+  tags?:
+    | {
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * The full article on the Insights detail page. Headings appear in the table of contents.
+   */
+  body?:
+    | (
+        | {
+            text: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'paragraph';
+          }
+        | {
+            /**
+             * Shown in the article and in the “In this article” list.
+             */
+            title: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'heading';
+          }
+        | {
+            text: string;
+            attribution?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'quote';
+          }
+        | {
+            items: {
+              text: string;
+              id?: string | null;
+            }[];
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'list';
+          }
+        | {
+            image: number | Media;
+            imageAlt?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'image';
+          }
+      )[]
+    | null;
+  /**
    * Turn this on to include this article in the homepage News and blogs section.
    */
   featured?: boolean | null;
@@ -316,6 +390,18 @@ export interface PodcastEpisode {
    * The small label above the title, for example Artificial Intelligence (AI).
    */
   category?: string | null;
+  /**
+   * Short summary on the podcast list hero and cards.
+   */
+  excerpt?: string | null;
+  /**
+   * For example: 135K plays · 12 days ago
+   */
+  stats?: string | null;
+  /**
+   * The large featured episode at the top of /podcast.
+   */
+  heroFeatured?: boolean | null;
   /**
    * Paste a file address, or a YouTube or Vimeo link. When this is filled in, the play button on the site plays it. Leave it empty to show the picture only.
    */
@@ -769,6 +855,62 @@ export interface NewsPostsSelect<T extends boolean = true> {
   ctaLabel?: T;
   image?: T;
   imageAlt?: T;
+  authorName?: T;
+  authorImage?: T;
+  publishedAt?: T;
+  readTime?: T;
+  tags?:
+    | T
+    | {
+        label?: T;
+        id?: T;
+      };
+  body?:
+    | T
+    | {
+        paragraph?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+        heading?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+              blockName?: T;
+            };
+        quote?:
+          | T
+          | {
+              text?: T;
+              attribution?: T;
+              id?: T;
+              blockName?: T;
+            };
+        list?:
+          | T
+          | {
+              items?:
+                | T
+                | {
+                    text?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        image?:
+          | T
+          | {
+              image?: T;
+              imageAlt?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   featured?: T;
   sortOrder?: T;
   updatedAt?: T;
@@ -787,6 +929,9 @@ export interface PodcastEpisodesSelect<T extends boolean = true> {
   image?: T;
   imageAlt?: T;
   category?: T;
+  excerpt?: T;
+  stats?: T;
+  heroFeatured?: T;
   mediaUrl?: T;
   about?: T;
   reading?: T;
@@ -1044,6 +1189,29 @@ export interface About {
   founderImageAlt: string;
   founderCtaLabel: string;
   founderCtaHref: string;
+  experienceTitle: string;
+  /**
+   * Accordion rows on the About page Experience section. The first open row expands by default.
+   */
+  experienceRoles?:
+    | {
+        role: string;
+        company: string;
+        /**
+         * Shown in the pill, for example: Aug 2023 – Present · 3 yrs 1 mo
+         */
+        dateLabel: string;
+        summary?: string | null;
+        highlights?:
+          | {
+              text: string;
+              id?: string | null;
+            }[]
+          | null;
+        defaultOpen?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
   howWeWorkTitle: string;
   principles?:
     | {
@@ -1534,6 +1702,77 @@ export interface OurSuccess {
   createdAt?: string | null;
 }
 /**
+ * Heading and introduction for the Insights blog list. Articles themselves are edited under News and blogs.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "insights".
+ */
+export interface Insight {
+  id: number;
+  metaTitle: string;
+  homeLabel: string;
+  homeHref: string;
+  currentLabel: string;
+  title: string;
+  description: string;
+  emptyLabel: string;
+  seeMoreLabel: string;
+  listTitle: string;
+  sortLabel: string;
+  sortAllLabel: string;
+  readArticleLabel: string;
+  featuredTagLabel: string;
+  tocTitle: string;
+  shareTitle: string;
+  relatedTitle: string;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * Heading, categories, and subscribe row for the Podcast list at /podcast.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "podcast-listing".
+ */
+export interface PodcastListing {
+  id: number;
+  metaTitle: string;
+  homeLabel: string;
+  homeHref: string;
+  currentLabel: string;
+  title: string;
+  description: string;
+  watchNowLabel: string;
+  browseTitle: string;
+  viewAllCategoriesLabel: string;
+  categories?:
+    | {
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  featuredTitle: string;
+  exploreTitle: string;
+  sortLabel: string;
+  sortAllLabel: string;
+  seeMoreLabel: string;
+  emptyLabel: string;
+  subscribeTitle: string;
+  subscribeDescription: string;
+  subscribe?:
+    | {
+        name: string;
+        href: string;
+        logo: number | Media;
+        width: number;
+        height: number;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * The featured episode, chapters, and subscribe links on the podcast page.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1792,6 +2031,23 @@ export interface AboutSelect<T extends boolean = true> {
   founderImageAlt?: T;
   founderCtaLabel?: T;
   founderCtaHref?: T;
+  experienceTitle?: T;
+  experienceRoles?:
+    | T
+    | {
+        role?: T;
+        company?: T;
+        dateLabel?: T;
+        summary?: T;
+        highlights?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        defaultOpen?: T;
+        id?: T;
+      };
   howWeWorkTitle?: T;
   principles?:
     | T
@@ -2139,6 +2395,73 @@ export interface OurSuccessesSelect<T extends boolean = true> {
   allLabel?: T;
   emptyLabel?: T;
   seeMoreLabel?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "insights_select".
+ */
+export interface InsightsSelect<T extends boolean = true> {
+  metaTitle?: T;
+  homeLabel?: T;
+  homeHref?: T;
+  currentLabel?: T;
+  title?: T;
+  description?: T;
+  emptyLabel?: T;
+  seeMoreLabel?: T;
+  listTitle?: T;
+  sortLabel?: T;
+  sortAllLabel?: T;
+  readArticleLabel?: T;
+  featuredTagLabel?: T;
+  tocTitle?: T;
+  shareTitle?: T;
+  relatedTitle?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "podcast-listing_select".
+ */
+export interface PodcastListingSelect<T extends boolean = true> {
+  metaTitle?: T;
+  homeLabel?: T;
+  homeHref?: T;
+  currentLabel?: T;
+  title?: T;
+  description?: T;
+  watchNowLabel?: T;
+  browseTitle?: T;
+  viewAllCategoriesLabel?: T;
+  categories?:
+    | T
+    | {
+        label?: T;
+        id?: T;
+      };
+  featuredTitle?: T;
+  exploreTitle?: T;
+  sortLabel?: T;
+  sortAllLabel?: T;
+  seeMoreLabel?: T;
+  emptyLabel?: T;
+  subscribeTitle?: T;
+  subscribeDescription?: T;
+  subscribe?:
+    | T
+    | {
+        name?: T;
+        href?: T;
+        logo?: T;
+        width?: T;
+        height?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

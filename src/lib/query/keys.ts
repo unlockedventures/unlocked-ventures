@@ -18,6 +18,9 @@ export const siteKeys = {
   contact: () => [...siteKeys.all, 'contact'] as const,
   ourSuccesses: () => [...siteKeys.all, 'our-successes'] as const,
   caseStudies: () => [...siteKeys.all, 'case-studies'] as const,
+  insights: () => [...siteKeys.all, 'insights'] as const,
+  newsPosts: () => [...siteKeys.all, 'news-posts'] as const,
+  podcastListing: () => [...siteKeys.all, 'podcast-listing'] as const,
   podcastPage: () => [...siteKeys.all, 'podcast-page'] as const,
   strategicGrowth: () => [...siteKeys.all, 'strategic-growth'] as const,
   solution: (slug: string) => [...siteKeys.all, 'solution', slug] as const,
@@ -43,6 +46,9 @@ export type SiteResource =
   | 'contact'
   | 'our-successes'
   | 'case-studies'
+  | 'insights'
+  | 'news-posts'
+  | 'podcast-listing'
   | 'podcast-page'
   | 'strategic-growth'
   | 'error-content'

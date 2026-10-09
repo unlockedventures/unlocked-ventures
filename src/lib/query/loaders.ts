@@ -8,10 +8,13 @@ import { getErrorContent } from '@/data/get-error-content'
 import { getFooter } from '@/data/get-footer'
 import { getHeader } from '@/data/get-header'
 import { getHero } from '@/data/get-hero'
+import { getInsights } from '@/data/get-insights'
 import { getLatestNews } from '@/data/get-latest-news'
 import { getLocations } from '@/data/get-locations'
 import { getNavigation } from '@/data/get-navigation'
+import { getNewsPosts } from '@/data/get-news-posts'
 import { getOurSuccesses } from '@/data/get-our-successes'
+import { getPodcastListing } from '@/data/get-podcast-listing'
 import { getPodcastPage } from '@/data/get-podcast-page'
 import { getRecentPodcast } from '@/data/get-recent-podcast'
 import { getSite } from '@/data/get-site'
@@ -43,6 +46,9 @@ export const siteLoaders: Record<SiteResource, Loader> = {
   contact: getContact,
   'our-successes': getOurSuccesses,
   'case-studies': getCaseStudies,
+  insights: getInsights,
+  'news-posts': getNewsPosts,
+  'podcast-listing': getPodcastListing,
   'podcast-page': getPodcastPage,
   'strategic-growth': getStrategicGrowth,
   'error-content': getErrorContent,
@@ -67,6 +73,9 @@ export const siteResourceKeys: Record<SiteResource, readonly unknown[]> = {
   contact: siteKeys.contact(),
   'our-successes': siteKeys.ourSuccesses(),
   'case-studies': siteKeys.caseStudies(),
+  insights: siteKeys.insights(),
+  'news-posts': siteKeys.newsPosts(),
+  'podcast-listing': siteKeys.podcastListing(),
   'podcast-page': siteKeys.podcastPage(),
   'strategic-growth': siteKeys.strategicGrowth(),
   'error-content': siteKeys.errorContent(),
