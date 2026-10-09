@@ -50,9 +50,15 @@ export async function getPodcastEpisode(slug: string): Promise<PodcastPageConten
 
   const points = (items: { title?: string | null; body?: string | null }[] | null | undefined) =>
     (items ?? []).flatMap((item) => (item.title && item.body ? [{ title: item.title, body: item.body }] : []))
+  const mainPoints = (episode.mainPoints ?? []).flatMap((item) => {
+    const point = typeof item?.point === 'string' ? item.point.trim() : ''
+    return point ? [point] : []
+  })
   const transcript = (episode.transcript ?? []).flatMap((line) =>
     line.time && line.speaker && line.text ? [{ time: line.time, speaker: line.speaker, text: line.text }] : [],
   )
+  const summary = typeof episode.summary === 'string' ? episode.summary.trim() : ''
+  const about = typeof episode.about === 'string' ? episode.about.trim() : ''
 
   const listenNext = episodes.flatMap(({ episode: item, episodeSlug: itemSlug }) => {
     if (itemSlug === slug) return []
@@ -75,12 +81,14 @@ export async function getPodcastEpisode(slug: string): Promise<PodcastPageConten
     category: episode.category || '',
     title: episode.title,
     meta: [episode.meta, episode.guests].filter(Boolean).join(' · '),
-    description: episode.about || '',
+    description: summary || about || '',
     coverSrc,
     coverAlt: episode.imageAlt || episode.title,
     mediaUrl: episode.mediaUrl || '',
     timeLabel: episode.meta || '',
-    about: episode.about || '',
+    about,
+    summary,
+    mainPoints,
     reading: episode.reading || '',
     agree: points(episode.agree),
     disagree: points(episode.disagree),

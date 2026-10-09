@@ -406,7 +406,23 @@ export interface PodcastEpisode {
    * Paste a file address, or a YouTube or Vimeo link. When this is filled in, the play button on the site plays it. Leave it empty to show the picture only.
    */
   mediaUrl?: string | null;
+  /**
+   * Fallback copy when Summary is empty. Prefer Summary from the Podcast pipeline (Gemini).
+   */
   about?: string | null;
+  /**
+   * Shown in About this episode. Paste from Podcast pipeline after Gemini generate script.
+   */
+  summary?: string | null;
+  /**
+   * Shown under About. Paste from Podcast pipeline after Gemini generate script.
+   */
+  mainPoints?:
+    | {
+        point: string;
+        id?: string | null;
+      }[]
+    | null;
   /**
    * The short introduction above the two columns.
    */
@@ -934,6 +950,13 @@ export interface PodcastEpisodesSelect<T extends boolean = true> {
   heroFeatured?: T;
   mediaUrl?: T;
   about?: T;
+  summary?: T;
+  mainPoints?:
+    | T
+    | {
+        point?: T;
+        id?: T;
+      };
   reading?: T;
   agree?:
     | T

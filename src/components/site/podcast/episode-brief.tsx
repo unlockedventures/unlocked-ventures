@@ -190,6 +190,8 @@ export function EpisodeBrief({
   likeLabel,
   transcriptLabel,
   about: aboutText,
+  summary: summaryText,
+  mainPoints: mainPointItems,
   reading: readingText,
   agree: agreeItems,
   disagree: disagreeItems,
@@ -203,6 +205,8 @@ export function EpisodeBrief({
   likeLabel: string
   transcriptLabel: string
   about?: string
+  summary?: string
+  mainPoints?: string[]
   reading?: string
   agree?: { title: string; body: string }[]
   disagree?: { title: string; body: string }[]
@@ -212,7 +216,8 @@ export function EpisodeBrief({
 }) {
   const [transcriptOpen, setTranscriptOpen] = useState(false)
   const transcriptId = useId()
-  const aboutCopy = aboutText?.trim() ?? ''
+  const aboutCopy = (summaryText?.trim() || aboutText?.trim() || '')
+  const mainPointsCopy = (mainPointItems ?? []).map((point) => point.trim()).filter(Boolean)
   const readingCopy = readingText?.trim() ?? ''
   const agreeCopy = agreeItems ?? []
   const disagreeCopy = disagreeItems ?? []
@@ -250,7 +255,24 @@ export function EpisodeBrief({
       {aboutCopy ? (
         <div className="mt-10 flex flex-col gap-4">
           <h2 className="font-sans text-[2rem] leading-10 font-normal text-[#171616]">About this episode</h2>
-          <p className="font-sans text-base leading-7 font-normal text-[#696969]">{aboutCopy}</p>
+          <p className="font-sans text-base leading-7 font-normal whitespace-pre-line text-[#696969]">{aboutCopy}</p>
+        </div>
+      ) : null}
+
+      {mainPointsCopy.length > 0 ? (
+        <div className="mt-10 flex flex-col gap-4 border-t border-[#171616]/10 pt-10">
+          <h2 className="font-sans text-[2rem] leading-10 font-normal text-[#171616]">Main points</h2>
+          <ul className="flex flex-col gap-3">
+            {mainPointsCopy.map((point) => (
+              <li key={point} className="flex gap-3">
+                <span
+                  className="mt-2.5 size-1.5 shrink-0 rounded-full bg-[#171616]"
+                  aria-hidden="true"
+                />
+                <p className="font-sans text-base leading-7 font-normal text-[#696969]">{point}</p>
+              </li>
+            ))}
+          </ul>
         </div>
       ) : null}
 

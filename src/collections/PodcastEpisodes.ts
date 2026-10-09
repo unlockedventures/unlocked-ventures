@@ -141,6 +141,30 @@ export const PodcastEpisodes: CollectionConfig = {
               name: 'about',
               type: 'textarea',
               label: 'About this episode',
+              admin: {
+                description:
+                  'Fallback copy when Summary is empty. Prefer Summary from the Podcast pipeline (Gemini).',
+              },
+            },
+            {
+              name: 'summary',
+              type: 'textarea',
+              label: 'Summary',
+              admin: {
+                description:
+                  'Shown in About this episode. Paste from Podcast pipeline after Gemini generate script.',
+              },
+            },
+            {
+              name: 'mainPoints',
+              type: 'array',
+              label: 'Main points',
+              labels: { singular: 'Main point', plural: 'Main points' },
+              maxRows: 10,
+              admin: {
+                description: 'Shown under About. Paste from Podcast pipeline after Gemini generate script.',
+              },
+              fields: [{ name: 'point', type: 'text', required: true, label: 'Point' }],
             },
             {
               name: 'reading',

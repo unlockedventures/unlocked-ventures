@@ -21,6 +21,8 @@ export type PodcastPageContent = {
   timeLabel: string
   progress: number
   about?: string
+  summary?: string
+  mainPoints?: string[]
   reading?: string
   agree?: { title: string; body: string }[]
   disagree?: { title: string; body: string }[]
@@ -136,6 +138,8 @@ export function PodcastPage({ content }: { content: PodcastPageContent }) {
                 likeLabel={content.likeLabel}
                 transcriptLabel={content.transcriptLabel}
                 about={content.about}
+                summary={content.summary}
+                mainPoints={content.mainPoints}
                 reading={content.reading}
                 agree={content.agree}
                 disagree={content.disagree}
