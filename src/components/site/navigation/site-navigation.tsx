@@ -89,13 +89,17 @@ export function SiteNavigation({
 
   return (
     <>
-      <nav aria-label="Primary" className="mx-8 hidden h-full min-w-0 flex-1 items-stretch justify-start xl:flex">
+      <nav aria-label="Primary" className="mx-8 hidden h-full min-w-0 flex-1 items-stretch justify-center xl:flex">
         {items.map((item) => {
           const hasChildren = navItemHasChildren(item)
           const isOpen = activeHref === item.href
           const isSelected = isNavItemSelected(pathname, item)
           return (
-            <div key={item.href} className="flex h-full cursor-pointer items-center px-3">
+            <div
+              key={item.href}
+              data-nav-anchor={item.href}
+              className="flex h-full cursor-pointer items-center px-3"
+            >
               <Link
                 href={item.href}
                 aria-current={isSelected ? 'page' : undefined}
@@ -138,6 +142,7 @@ export function SiteNavigation({
       {activeItem
         ? createPortal(
             <DesktopMenu
+              key={activeItem.href}
               item={activeItem}
               exploreLabel={exploreLabel}
               panelRef={panelRef}

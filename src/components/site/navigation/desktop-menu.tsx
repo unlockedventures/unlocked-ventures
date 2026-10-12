@@ -1,4 +1,6 @@
-import type { RefObject } from 'react'
+'use client'
+
+import { useLayoutEffect, useRef, useState, type RefObject } from 'react'
 
 import type { NavItem } from '@/config/navigation'
 import { cn } from 'cn'
@@ -16,6 +18,33 @@ export function DesktopMenu({
   panelRef: RefObject<HTMLDivElement | null>
   onClose: () => void
 }) {
+  const linksSlotRef = useRef<HTMLDivElement>(null)
+  const [linksPad, setLinksPad] = useState(0)
+
+  useLayoutEffect(() => {
+    function sync() {
+      // Always align child links to the first top-level header nav item.
+      const anchor = document.querySelector<HTMLElement>('[data-nav-anchor]')
+      const linksSlot = linksSlotRef.current
+      if (!anchor || !linksSlot) return
+
+      // Border-box left of the links slot stays fixed; padding only shifts content inside.
+      const slotLeft = linksSlot.getBoundingClientRect().left
+      const anchorLeft = anchor.getBoundingClientRect().left
+      const next = Math.max(0, Math.round(anchorLeft - slotLeft))
+      setLinksPad((prev) => (prev === next ? prev : next))
+    }
+
+    sync()
+    // Second pass after fonts/layout settle (centered nav can shift slightly).
+    const raf = window.requestAnimationFrame(sync)
+    window.addEventListener('resize', sync)
+    return () => {
+      window.cancelAnimationFrame(raf)
+      window.removeEventListener('resize', sync)
+    }
+  }, [item.href])
+
   return (
     <>
       <button
@@ -28,7 +57,7 @@ export function DesktopMenu({
         ref={panelRef}
         className="fixed inset-x-0 top-20 z-50 border-b border-[#E4E7EE] bg-[#F8F9FC]/95 shadow-[0_28px_60px_-24px_rgba(17,24,39,0.28)] backdrop-blur-xl max-xl:hidden min-[1440px]:top-20!"
       >
-        {/* Mirrors header: logo | mx-8 nav | CTA */}
+        {/* Explore stays under the logo column; child links align to the first header nav item. */}
         <div className="mx-auto flex w-full px-4 sm:px-6 md:px-8 xl:px-14 min-[1440px]:max-w-[1440px]">
           <div className="flex w-full items-start py-10">
             <div className="w-[205px] shrink-0 border-r border-[#E4E7EE] pr-8">
@@ -39,10 +68,14 @@ export function DesktopMenu({
                 {item.label}
               </p>
             </div>
-            <div className="mx-8 flex min-w-0 flex-1 pl-3">
+            <div
+              ref={linksSlotRef}
+              className="flex min-w-0 flex-1"
+              style={{ paddingLeft: linksPad }}
+            >
               <div
                 className={cn(
-                  'grid w-full gap-x-16 gap-y-10',
+                  'grid w-full max-w-full gap-x-16 gap-y-10',
                   item.groups.length > 1 ? 'grid-cols-2' : 'grid-cols-1',
                 )}
               >
