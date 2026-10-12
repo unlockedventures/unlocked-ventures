@@ -74,7 +74,11 @@ function ChevronRight() {
 
 function StoryCard({ story }: { story: CaseStudyCard }) {
   return (
-    <article className="relative flex min-h-80 flex-col justify-end overflow-hidden bg-[#F7F7F7] md:h-[calc(100cqi*420/1128)] md:min-h-0 min-[1440px]:h-[420px] min-[1440px]:bg-[#F8F8F8]">
+    <Link
+      href={story.href}
+      aria-label={story.title}
+      className="group relative flex min-h-80 flex-col justify-end overflow-hidden bg-[#F7F7F7] outline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#1CACAE] md:h-[calc(100cqi*420/1128)] md:min-h-0 min-[1440px]:h-[420px] min-[1440px]:bg-[#F8F8F8]"
+    >
       {story.imageSrc ? (
         <img
           src={story.imageSrc}
@@ -99,15 +103,12 @@ function StoryCard({ story }: { story: CaseStudyCard }) {
             {story.title}
           </h2>
         </div>
-        <Link
-          href={story.href}
-          className="group inline-flex h-6 items-center gap-2.5 font-sans text-base font-normal text-[#222222] min-[1440px]:text-[rgba(34,34,34,0.7)]"
-        >
+        <span className="inline-flex h-6 items-center gap-2.5 font-sans text-base font-normal text-[#222222] min-[1440px]:text-[rgba(34,34,34,0.7)]">
           <span className={trimmedLabelClassName}>{story.ctaLabel}</span>
           <ArrowUpRight />
-        </Link>
+        </span>
       </div>
-    </article>
+    </Link>
   )
 }
 
