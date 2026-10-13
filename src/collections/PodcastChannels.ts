@@ -11,15 +11,27 @@ export const PodcastChannels: CollectionConfig = {
   },
   admin: {
     group: adminGroups.podcast,
-    description: 'Show or topic for podcast episodes. Every episode must belong to one channel.',
+    description:
+      'Show or topic for podcast episodes. Channels cannot be deleted — turn Active off to hide a channel (and its episodes) on the site.',
     hideAPIURL: true,
     useAsTitle: 'title',
-    defaultColumns: ['title', 'description'],
+    defaultColumns: ['title', 'active', 'description'],
+    components: {
+      beforeListTable: ['@/components/admin/channel-bulk-active-actions#ChannelBulkActiveActions'],
+    },
   },
   access: {
     read: () => true,
+    delete: () => false,
   },
+  disableBulkDelete: true,
+  disableBulkEdit: true,
   hooks: {
+    beforeDelete: [
+      () => {
+        throw new Error('Channels cannot be deleted. Set Active to off to hide the channel on the site.')
+      },
+    ],
     beforeChange: [
       async ({ data, operation, originalDoc, req }) => {
         const title = typeof data.title === 'string' ? data.title : originalDoc?.title
@@ -28,7 +40,12 @@ export const PodcastChannels: CollectionConfig = {
         if (!slug && typeof originalDoc?.slug === 'string') slug = originalDoc.slug
         if (slug) data.slug = slug
 
+        if (typeof data.active !== 'boolean' && typeof originalDoc?.active !== 'boolean') {
+          data.active = true
+        }
+
         if (operation === 'create') {
+          if (typeof data.active !== 'boolean') data.active = true
           if (typeof data.sortOrder !== 'number' || data.sortOrder === 0) {
             const highest = await req.payload.find({
               collection: 'podcast-channels',
@@ -53,6 +70,20 @@ export const PodcastChannels: CollectionConfig = {
       label: 'Channel name',
       required: true,
       admin: { description: 'Shown on episode cards and filters, for example Artificial Intelligence.' },
+    },
+    {
+      name: 'active',
+      type: 'checkbox',
+      label: 'Active',
+      defaultValue: true,
+      admin: {
+        position: 'sidebar',
+        description:
+          'When off, this channel and its episodes are hidden on the public site. Channels cannot be deleted.',
+        components: {
+          Cell: '@/components/admin/boolean-toggle-cell#BooleanToggleCell',
+        },
+      },
     },
     {
       name: 'slug',

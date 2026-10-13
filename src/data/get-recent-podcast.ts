@@ -2,6 +2,7 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
 import type { RecentPodcastSectionProps } from '@/components/site/recent-podcast/recent-podcast-section'
+import { isPodcastChannelActive } from '@/lib/podcast-channel'
 import { podcastCoverSrc } from '@/lib/podcast-cover'
 import { podcastEpisodePath, podcastSlugFromHref, slugifyPodcastTitle } from '@/lib/podcast-slug'
 
@@ -36,6 +37,7 @@ export async function getRecentPodcast(): Promise<RecentPodcastSectionProps | nu
 
   const episodes = result.docs.flatMap((episode) => {
     if (!episode.meta || !episode.title || !episode.guests) return []
+    if (!isPodcastChannelActive(episode.channel)) return []
     const slug = episodeSlug(episode)
     if (!slug) return []
 

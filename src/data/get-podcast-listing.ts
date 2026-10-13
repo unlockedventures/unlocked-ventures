@@ -2,6 +2,7 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
 import type { PodcastListingCopy, PodcastListEpisode } from '@/components/site/podcast/podcast-listing'
+import { isPodcastChannelActive } from '@/lib/podcast-channel'
 import { podcastCoverSrc } from '@/lib/podcast-cover'
 
 function mediaUrl(value: number | { url?: string | null } | null | undefined) {
@@ -24,7 +25,7 @@ function mapEpisode(
     meta?: string | null
     href?: string | null
     category?: string | null
-    channel?: number | { title?: string | null } | null
+    channel?: number | { title?: string | null; active?: boolean | null } | null
     excerpt?: string | null
     about?: string | null
     heroFeatured?: boolean | null
@@ -37,6 +38,7 @@ function mapEpisode(
   uncategorizedLabel: string,
 ): PodcastListEpisode | null {
   if (!doc.title || !doc.href) return null
+  if (!isPodcastChannelActive(doc.channel)) return null
   return {
     title: doc.title,
     href: doc.href,

@@ -1,4 +1,6 @@
 import { FeaturedCell as FeaturedCell_713c6af4da8e270b4b09b2d002943233 } from '@/components/admin/featured-cell'
+import { BooleanToggleCell as BooleanToggleCell_f777bb6bacc0a140ee2d76cb19dce5cc } from '@/components/admin/boolean-toggle-cell'
+import { ChannelBulkActiveActions as ChannelBulkActiveActions_1edd759a7ae23c284e468de246f21f07 } from '@/components/admin/channel-bulk-active-actions'
 import { DirectUploadField as DirectUploadField_d3e9cae98f7356a2cf4ffa1e968e12a8 } from '@/components/admin/direct-upload-field'
 import { GenerateTranscriptField as GenerateTranscriptField_d809db76de84e66ad7e54e5d951facd4 } from '@/components/admin/generate-transcript-field'
 import { GenerateScriptField as GenerateScriptField_bab222324d11fa721dc22069e6402c46 } from '@/components/admin/generate-script-field'
@@ -12,6 +14,8 @@ import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } f
 /** @type import('payload').ImportMap */
 export const importMap = {
   "@/components/admin/featured-cell#FeaturedCell": FeaturedCell_713c6af4da8e270b4b09b2d002943233,
+  "@/components/admin/boolean-toggle-cell#BooleanToggleCell": BooleanToggleCell_f777bb6bacc0a140ee2d76cb19dce5cc,
+  "@/components/admin/channel-bulk-active-actions#ChannelBulkActiveActions": ChannelBulkActiveActions_1edd759a7ae23c284e468de246f21f07,
   "@/components/admin/direct-upload-field#DirectUploadField": DirectUploadField_d3e9cae98f7356a2cf4ffa1e968e12a8,
   "@/components/admin/generate-transcript-field#GenerateTranscriptField": GenerateTranscriptField_d809db76de84e66ad7e54e5d951facd4,
   "@/components/admin/generate-script-field#GenerateScriptField": GenerateScriptField_bab222324d11fa721dc22069e6402c46,

@@ -150,37 +150,50 @@ function TranscriptDialog({
       onClick={(event) => {
         if (event.target === dialogRef.current) onClose()
       }}
-      className="m-auto w-[min(40rem,calc(100vw-2rem))] max-h-[min(40rem,calc(100vh-4rem))] overflow-hidden rounded-lg border border-[#171616]/10 bg-white p-0 text-[#171616] shadow-xl open:flex open:flex-col backdrop:bg-[#171616]/40"
+      className="m-auto w-[min(36rem,calc(100vw-2rem))] max-h-[min(42rem,calc(100vh-3rem))] overflow-hidden rounded-2xl border-0 bg-white p-0 text-[#171616] shadow-[0_24px_64px_rgba(23,22,22,0.18)] open:flex open:flex-col backdrop:bg-[#171616]/45"
     >
-      <div className="flex items-start justify-between gap-4 border-b border-[#171616]/10 px-6 py-4">
-        <div className="min-w-0">
-          <h2 id={titleId} className="font-sans text-lg leading-7 font-medium text-[#171616]">
+      <div className="flex items-start justify-between gap-4 px-6 pt-6 pb-4 sm:px-8 sm:pt-8">
+        <div className="min-w-0 pr-2">
+          <h2 id={titleId} className="font-sans text-[1.75rem] leading-9 font-semibold tracking-tight text-[#171616]">
             {dialogTitle}
           </h2>
-          <p className="mt-1 truncate font-sans text-sm leading-5 text-[#696969]">{title}</p>
+          <p className="mt-1 font-sans text-base leading-6 font-normal text-[#8A8F98]">{title}</p>
         </div>
         <button
           type="button"
           onClick={onClose}
-          className="inline-flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full text-[#484D56] hover:bg-[#F3F4F9]"
+          className="inline-flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full text-[#8A8F98] transition-colors hover:bg-[#F3F4F9] hover:text-[#171616]"
           aria-label={closeLabel}
         >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <path d="M3.5 3.5 12.5 12.5M12.5 3.5 3.5 12.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+          <svg width="18" height="18" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M3.5 3.5 12.5 12.5M12.5 3.5 3.5 12.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
         </button>
       </div>
-      <div className="max-h-[calc(min(40rem,100vh-4rem)-5.5rem)] overflow-y-auto px-6 py-2">
-        <ol>
-          {lines.map((line) => (
-            <li key={line.time} className="grid grid-cols-[4.5rem_minmax(0,1fr)] gap-4 border-b border-[#171616]/10 py-4 last:border-b-0">
-              <time className="font-sans text-sm leading-6 text-[#696969] tabular-nums">{line.time}</time>
-              <div className="min-w-0">
-                <p className="font-sans text-sm leading-6 font-medium text-[#171616]">{line.speaker}</p>
-                <p className="mt-1 font-sans text-sm leading-6 text-[#33353F]">{line.text}</p>
-              </div>
-            </li>
-          ))}
+      <div className="max-h-[calc(min(42rem,100vh-3rem)-7rem)] overflow-y-auto px-6 pb-6 sm:px-8 sm:pb-8">
+        <ol className="divide-y divide-[#E8EAED]">
+          {lines.map((line, index) => {
+            const timeLabel = line.time?.trim() && line.time.trim() !== '—' ? line.time.trim() : ''
+            return (
+              <li
+                key={`${index}-${line.time}-${line.speaker}`}
+                className="grid grid-cols-[3.25rem_minmax(0,1fr)] gap-x-5 gap-y-1 py-5 first:pt-2 last:pb-0 sm:grid-cols-[3.75rem_minmax(0,1fr)]"
+              >
+                <time
+                  className="pt-0.5 font-sans text-sm leading-6 font-medium text-[#9AA0A6] tabular-nums"
+                  dateTime={timeLabel || undefined}
+                >
+                  {timeLabel || '\u00A0'}
+                </time>
+                <div className="min-w-0">
+                  <p className="font-sans text-base leading-6 font-semibold text-[#171616]">{line.speaker}</p>
+                  <p className="mt-1.5 font-sans text-[0.95rem] leading-7 font-normal text-[#3C4048] whitespace-pre-line">
+                    {line.text}
+                  </p>
+                </div>
+              </li>
+            )
+          })}
         </ol>
       </div>
     </dialog>

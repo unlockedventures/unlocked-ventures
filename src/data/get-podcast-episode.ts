@@ -3,6 +3,7 @@ import { getPayload } from 'payload'
 
 import type { PodcastPageContent } from '@/components/site/podcast/podcast-page'
 import { getPodcastSharedChrome } from '@/data/get-podcast-shared'
+import { isPodcastChannelActive } from '@/lib/podcast-channel'
 import { podcastAudioSrc, podcastCoverSrc } from '@/lib/podcast-cover'
 import { podcastEpisodePath, podcastSlugFromHref, slugifyPodcastTitle } from '@/lib/podcast-slug'
 
@@ -35,6 +36,7 @@ export async function getPodcastEpisode(slug: string): Promise<PodcastPageConten
 
   const episodes = result.docs.flatMap((episode) => {
     if (!episode.title) return []
+    if (!isPodcastChannelActive(episode.channel)) return []
     const resolvedSlug = episodeSlug(episode)
     if (!resolvedSlug) return []
     return [{ episode, episodeSlug: resolvedSlug }]

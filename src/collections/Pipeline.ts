@@ -5,6 +5,7 @@ import { generateScriptFromTranscript } from '@/pipeline/generate-script'
 import { requestTranscript } from '@/pipeline/request-transcript'
 import { handleGenerateScriptRequest, type ScriptPipelineDoc } from '@/pipeline/run-generate-script'
 import { handleTranscribeRequest, type PipelineDoc } from '@/pipeline/run-transcription'
+import { syncPipelineToEpisode } from '@/pipeline/sync-episode'
 
 const transcribeEndpoint: Endpoint = {
   path: '/transcribe',
@@ -124,10 +125,11 @@ export const Pipeline: CollectionConfig = {
   labels: { singular: 'Podcast', plural: 'Podcast' },
   admin: {
     group: adminGroups.pipeline,
-    description: 'Paste public video links and generate a transcript.',
+    description:
+      'Paste public video links and generate a transcript. Saving creates or updates the matching episode under the selected channel.',
     hideAPIURL: true,
     useAsTitle: 'name',
-    defaultColumns: ['name', 'status', 'scriptStatus'],
+    defaultColumns: ['name', 'channel', 'status', 'scriptStatus'],
     components: {
       edit: {
         SaveButton: '@/components/admin/pipeline-save-button#PipelineSaveButton',
@@ -140,9 +142,64 @@ export const Pipeline: CollectionConfig = {
     update: ({ req }) => Boolean(req.user),
     delete: ({ req }) => Boolean(req.user),
   },
+  hooks: {
+    afterChange: [
+      async ({ doc, req, context }) => {
+        if (context?.skipEpisodeSync) return doc
+        try {
+          const episodeId = await syncPipelineToEpisode(req, doc)
+          const currentEpisodeId =
+            typeof doc.episode === 'number'
+              ? doc.episode
+              : doc.episode && typeof doc.episode === 'object'
+                ? doc.episode.id
+                : null
+          if (episodeId != null && episodeId !== currentEpisodeId) {
+            await req.payload.update({
+              collection: 'pipeline',
+              id: doc.id,
+              data: { episode: episodeId },
+              depth: 0,
+              overrideAccess: true,
+              context: { skipEpisodeSync: true },
+              req,
+            })
+            return { ...doc, episode: episodeId }
+          }
+        } catch (error) {
+          req.payload.logger.error({ err: error, pipeline: doc.id }, 'Failed to wire pipeline podcast to episode')
+        }
+        return doc
+      },
+    ],
+  },
   endpoints: [transcribeEndpoint, progressEndpoint, generateScriptEndpoint],
   fields: [
+    {
+      name: 'channel',
+      type: 'relationship',
+      relationTo: 'podcast-channels',
+      label: 'Channel',
+      required: true,
+      admin: {
+        description: 'Required. The generated episode is published under this channel.',
+      },
+      filterOptions: {
+        active: { equals: true },
+      },
+    },
     { name: 'name', type: 'text', required: true },
+    {
+      name: 'episode',
+      type: 'relationship',
+      relationTo: 'podcast-episodes',
+      label: 'Linked episode',
+      admin: {
+        position: 'sidebar',
+        readOnly: true,
+        description: 'Created automatically when you save this podcast.',
+      },
+    },
     {
       name: 'videoLinks',
       type: 'array',

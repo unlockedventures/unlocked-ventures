@@ -223,8 +223,11 @@ CREATE UNIQUE INDEX IF NOT EXISTS podcast_channels_slug_idx ON podcast_channels 
 CREATE INDEX IF NOT EXISTS podcast_channels_updated_at_idx ON podcast_channels USING btree (updated_at);
 CREATE INDEX IF NOT EXISTS podcast_channels_created_at_idx ON podcast_channels USING btree (created_at);
 
-INSERT INTO podcast_channels (title, slug, description, sort_order)
-SELECT 'General', 'general', 'Default channel for existing episodes.', 0
+ALTER TABLE podcast_channels ADD COLUMN IF NOT EXISTS active boolean DEFAULT true;
+UPDATE podcast_channels SET active = true WHERE active IS NULL;
+
+INSERT INTO podcast_channels (title, slug, description, sort_order, active)
+SELECT 'General', 'general', 'Default channel for existing episodes.', 0, true
 WHERE NOT EXISTS (SELECT 1 FROM podcast_channels LIMIT 1);
 
 -- ---------------------------------------------------------------------------
@@ -545,4 +548,24 @@ DO $$ BEGIN
 EXCEPTION
   WHEN duplicate_object THEN NULL;
   WHEN undefined_table THEN NULL;
+END $$;
+
+-- ---------------------------------------------------------------------------
+-- pipeline ↔ channel / episode wiring
+-- ---------------------------------------------------------------------------
+ALTER TABLE pipeline ADD COLUMN IF NOT EXISTS channel_id integer;
+ALTER TABLE pipeline ADD COLUMN IF NOT EXISTS episode_id integer;
+CREATE INDEX IF NOT EXISTS pipeline_channel_idx ON pipeline USING btree (channel_id);
+CREATE INDEX IF NOT EXISTS pipeline_episode_idx ON pipeline USING btree (episode_id);
+DO $$ BEGIN
+  ALTER TABLE pipeline
+    ADD CONSTRAINT pipeline_channel_id_podcast_channels_id_fk
+    FOREIGN KEY (channel_id) REFERENCES podcast_channels(id) ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+DO $$ BEGIN
+  ALTER TABLE pipeline
+    ADD CONSTRAINT pipeline_episode_id_podcast_episodes_id_fk
+    FOREIGN KEY (episode_id) REFERENCES podcast_episodes(id) ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;

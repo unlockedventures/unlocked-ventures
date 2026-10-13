@@ -389,7 +389,7 @@ export interface PodcastAudio {
   focalY?: number | null;
 }
 /**
- * Show or topic for podcast episodes. Every episode must belong to one channel.
+ * Show or topic for podcast episodes. Channels cannot be deleted — turn Active off to hide a channel (and its episodes) on the site.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "podcast-channels".
@@ -400,6 +400,10 @@ export interface PodcastChannel {
    * Shown on episode cards and filters, for example Artificial Intelligence.
    */
   title: string;
+  /**
+   * When off, this channel and its episodes are hidden on the public site. Channels cannot be deleted.
+   */
+  active?: boolean | null;
   slug?: string | null;
   /**
    * Optional. Helps editors know what belongs in this channel.
@@ -682,14 +686,22 @@ export interface TrustedLogo {
   createdAt: string;
 }
 /**
- * Paste public video links and generate a transcript.
+ * Paste public video links and generate a transcript. Saving creates or updates the matching episode under the selected channel.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pipeline".
  */
 export interface Pipeline {
   id: number;
+  /**
+   * Required. The generated episode is published under this channel.
+   */
+  channel: number | PodcastChannel;
   name: string;
+  /**
+   * Created automatically when you save this podcast.
+   */
+  episode?: (number | null) | PodcastEpisode;
   videoLinks?:
     | {
         /**
@@ -1013,6 +1025,7 @@ export interface PodcastAudioSelect<T extends boolean = true> {
  */
 export interface PodcastChannelsSelect<T extends boolean = true> {
   title?: T;
+  active?: T;
   slug?: T;
   description?: T;
   sortOrder?: T;
@@ -1181,7 +1194,9 @@ export interface TrustedLogosSelect<T extends boolean = true> {
  * via the `definition` "pipeline_select".
  */
 export interface PipelineSelect<T extends boolean = true> {
+  channel?: T;
   name?: T;
+  episode?: T;
   videoLinks?:
     | T
     | {
