@@ -1,8 +1,14 @@
 import type { CollectionConfig, Endpoint } from 'payload'
 
 import { adminGroups } from '@/admin/editor-guide'
+import { generatePodcastAudioFromScript } from '@/pipeline/generate-audio'
 import { generateScriptFromTranscript } from '@/pipeline/generate-script'
 import { requestTranscript } from '@/pipeline/request-transcript'
+import {
+  attachGeneratedAudioToEpisode,
+  handleGenerateAudioRequest,
+  type AudioPipelineDoc,
+} from '@/pipeline/run-generate-audio'
 import { handleGenerateScriptRequest, type ScriptPipelineDoc } from '@/pipeline/run-generate-script'
 import { handleTranscribeRequest, type PipelineDoc } from '@/pipeline/run-transcription'
 import { syncPipelineToEpisode } from '@/pipeline/sync-episode'
@@ -120,6 +126,73 @@ const generateScriptEndpoint: Endpoint = {
   },
 }
 
+const generateAudioEndpoint: Endpoint = {
+  path: '/generate-audio',
+  method: 'post',
+  handler: async (req) => {
+    if (!req.user) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+
+    try {
+      const body = (
+        req.json ? await req.json().catch(() => null) : null
+      ) as { id?: number | string; hostVoiceId?: unknown; guestVoiceId?: unknown } | null
+      const id = body?.id
+      if (id == null || id === '') {
+        return Response.json({ error: 'Pipeline document not found.' }, { status: 404 })
+      }
+
+      const doc = await req.payload
+        .findByID({ collection: 'pipeline', id, depth: 0, req })
+        .catch(() => null)
+
+      const result = await handleGenerateAudioRequest({
+        user: req.user,
+        doc: doc as AudioPipelineDoc | null,
+        hostVoiceId: body?.hostVoiceId,
+        guestVoiceId: body?.guestVoiceId,
+        save: async (data) => {
+          await req.payload.update({
+            collection: 'pipeline',
+            id,
+            data,
+            depth: 0,
+            req,
+            context: { skipEpisodeSync: true },
+          })
+        },
+        generate: ({ scriptJson, hostVoiceId, guestVoiceId, title }) =>
+          generatePodcastAudioFromScript({
+            scriptJson,
+            hostVoiceId,
+            guestVoiceId,
+            title,
+            apiKey: process.env['ELEVENLABS_API_KEY']?.trim() ?? '',
+            modelId: process.env['ELEVENLABS_MODEL_ID']?.trim() || undefined,
+          }),
+        attachToEpisode: ({ episodeId, buffer, filename, mimeType, title }) =>
+          attachGeneratedAudioToEpisode({
+            payload: req.payload,
+            req,
+            episodeId,
+            buffer,
+            filename,
+            mimeType,
+            title,
+          }),
+      })
+
+      return Response.json(result.body, { status: result.status })
+    } catch (error) {
+      const message =
+        error && typeof error === 'object' && 'message' in error && typeof error.message === 'string'
+          ? error.message
+          : 'Could not generate podcast audio.'
+      req.payload.logger.error({ err: error }, 'generate-audio failed')
+      return Response.json({ error: message }, { status: 500 })
+    }
+  },
+}
+
 export const Pipeline: CollectionConfig = {
   slug: 'pipeline',
   labels: { singular: 'Podcast', plural: 'Podcast' },
@@ -173,7 +246,7 @@ export const Pipeline: CollectionConfig = {
       },
     ],
   },
-  endpoints: [transcribeEndpoint, progressEndpoint, generateScriptEndpoint],
+  endpoints: [transcribeEndpoint, progressEndpoint, generateScriptEndpoint, generateAudioEndpoint],
   fields: [
     {
       name: 'channel',
@@ -315,6 +388,31 @@ export const Pipeline: CollectionConfig = {
       admin: { description: 'Overall assessment of the material.' },
     },
     {
+      name: 'hostVoiceId',
+      type: 'text',
+      label: 'Host ElevenLabs voice ID',
+      admin: {
+        description: 'Paste the ElevenLabs voice ID used for host turns in script.json.',
+      },
+    },
+    {
+      name: 'guestVoiceId',
+      type: 'text',
+      label: 'Guest ElevenLabs voice ID',
+      admin: {
+        description: 'Paste the ElevenLabs voice ID used for guest turns in script.json.',
+      },
+    },
+    {
+      name: 'generateAudio',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '@/components/admin/generate-audio-field#GenerateAudioField',
+        },
+      },
+    },
+    {
       name: 'status',
       type: 'select',
       defaultValue: 'idle',
@@ -349,6 +447,25 @@ export const Pipeline: CollectionConfig = {
       name: 'scriptStatusMessage',
       type: 'text',
       label: 'Script status detail',
+      admin: { position: 'sidebar', readOnly: true },
+    },
+    {
+      name: 'audioStatus',
+      type: 'select',
+      defaultValue: 'idle',
+      label: 'Audio status',
+      options: [
+        { label: 'Idle', value: 'idle' },
+        { label: 'Processing', value: 'processing' },
+        { label: 'Ready', value: 'ready' },
+        { label: 'Error', value: 'error' },
+      ],
+      admin: { position: 'sidebar', readOnly: true },
+    },
+    {
+      name: 'audioStatusMessage',
+      type: 'text',
+      label: 'Audio status detail',
       admin: { position: 'sidebar', readOnly: true },
     },
   ],

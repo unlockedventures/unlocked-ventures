@@ -193,7 +193,7 @@ export async function syncPipelineToEpisode(
       ? formatClock(script.estimatedDurationSeconds)
       : '—'
 
-  const data = {
+  const baseData = {
     channel: channelId,
     title,
     slug,
@@ -207,24 +207,43 @@ export async function syncPipelineToEpisode(
     disagree,
     takeIntro: systemOpinion,
     transcript,
-    mediaUrl: firstVideo || undefined,
-    audioSource: 'url' as const,
     featured: true,
     // Required by Payload create types; beforeChange bump assigns the next order when 0.
     sortOrder: 0,
   }
 
-  const existingId = relationId(doc.episode)
-  if (existingId != null) {
-    await req.payload.update({
+  const videoAudio = {
+    mediaUrl: firstVideo || undefined,
+    audioSource: 'url' as const,
+  }
+
+  async function updateEpisodePreservingGeneratedAudio(episodeId: number) {
+    const existing = await req.payload.findByID({
       collection: 'podcast-episodes',
-      id: existingId,
-      data,
+      id: episodeId,
       depth: 0,
       overrideAccess: true,
       req,
     })
-    return existingId
+    const keepGeneratedAudio =
+      existing?.audioSource === 'upload' ||
+      (typeof existing?.audio === 'number' && existing.audio > 0) ||
+      (existing?.audio && typeof existing.audio === 'object')
+
+    await req.payload.update({
+      collection: 'podcast-episodes',
+      id: episodeId,
+      data: keepGeneratedAudio ? baseData : { ...baseData, ...videoAudio },
+      depth: 0,
+      overrideAccess: true,
+      req,
+    })
+    return episodeId
+  }
+
+  const existingId = relationId(doc.episode)
+  if (existingId != null) {
+    return updateEpisodePreservingGeneratedAudio(existingId)
   }
 
   const bySlug = await req.payload.find({
@@ -236,20 +255,12 @@ export async function syncPipelineToEpisode(
     req,
   })
   if (bySlug.docs[0]?.id) {
-    await req.payload.update({
-      collection: 'podcast-episodes',
-      id: bySlug.docs[0].id,
-      data,
-      depth: 0,
-      overrideAccess: true,
-      req,
-    })
-    return bySlug.docs[0].id
+    return updateEpisodePreservingGeneratedAudio(bySlug.docs[0].id)
   }
 
   const created = await req.payload.create({
     collection: 'podcast-episodes',
-    data,
+    data: { ...baseData, ...videoAudio },
     depth: 0,
     overrideAccess: true,
     req,

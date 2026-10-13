@@ -569,3 +569,11 @@ DO $$ BEGIN
     FOREIGN KEY (episode_id) REFERENCES podcast_episodes(id) ON DELETE SET NULL;
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
+
+-- ---------------------------------------------------------------------------
+-- pipeline ElevenLabs host/guest TTS fields
+-- ---------------------------------------------------------------------------
+ALTER TABLE pipeline ADD COLUMN IF NOT EXISTS host_voice_id varchar;
+ALTER TABLE pipeline ADD COLUMN IF NOT EXISTS guest_voice_id varchar;
+ALTER TABLE pipeline ADD COLUMN IF NOT EXISTS audio_status varchar DEFAULT 'idle';
+ALTER TABLE pipeline ADD COLUMN IF NOT EXISTS audio_status_message varchar;

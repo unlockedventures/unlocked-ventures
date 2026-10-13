@@ -756,10 +756,20 @@ export interface Pipeline {
    * Overall assessment of the material.
    */
   systemOpinion?: string | null;
+  /**
+   * Paste the ElevenLabs voice ID used for host turns in script.json.
+   */
+  hostVoiceId?: string | null;
+  /**
+   * Paste the ElevenLabs voice ID used for guest turns in script.json.
+   */
+  guestVoiceId?: string | null;
   status?: ('idle' | 'processing' | 'ready' | 'error') | null;
   statusMessage?: string | null;
   scriptStatus?: ('idle' | 'processing' | 'ready' | 'error') | null;
   scriptStatusMessage?: string | null;
+  audioStatus?: ('idle' | 'processing' | 'ready' | 'error') | null;
+  audioStatusMessage?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1227,10 +1237,14 @@ export interface PipelineSelect<T extends boolean = true> {
         id?: T;
       };
   systemOpinion?: T;
+  hostVoiceId?: T;
+  guestVoiceId?: T;
   status?: T;
   statusMessage?: T;
   scriptStatus?: T;
   scriptStatusMessage?: T;
+  audioStatus?: T;
+  audioStatusMessage?: T;
   updatedAt?: T;
   createdAt?: T;
 }

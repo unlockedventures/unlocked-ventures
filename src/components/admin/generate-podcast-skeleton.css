@@ -47,11 +47,15 @@
 .uv-pipeline-transcribing .field-type:has(#field-scriptJson),
 .uv-pipeline-transcribing .field-type:has(#field-summary),
 .uv-pipeline-transcribing .field-type:has(#field-systemOpinion),
+.uv-pipeline-transcribing .field-type:has(#field-hostVoiceId),
+.uv-pipeline-transcribing .field-type:has(#field-guestVoiceId),
 .uv-pipeline-transcribing #field-hostGender,
 .uv-pipeline-transcribing #field-guestGender,
 .uv-pipeline-transcribing #field-mainPoints,
 .uv-pipeline-transcribing #field-contrastingPoints,
-.uv-pipeline-transcribing #field-disagreementPoints {
+.uv-pipeline-transcribing #field-disagreementPoints,
+.uv-pipeline-transcribing #field-hostVoiceId,
+.uv-pipeline-transcribing #field-guestVoiceId {
   display: none;
 }
 
