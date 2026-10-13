@@ -15,6 +15,8 @@ import { Awards } from './collections/Awards'
 import { CaseStudies } from './collections/CaseStudies'
 import { NewsPosts } from './collections/NewsPosts'
 import { Pipeline } from './collections/Pipeline'
+import { PodcastAudio } from './collections/PodcastAudio'
+import { PodcastChannels } from './collections/PodcastChannels'
 import { PodcastEpisodes } from './collections/PodcastEpisodes'
 import { Solutions } from './collections/Solutions'
 import { TrustedLogos } from './collections/TrustedLogos'
@@ -83,6 +85,8 @@ export default buildConfig({
     Media,
     Awards,
     NewsPosts,
+    PodcastAudio,
+    PodcastChannels,
     PodcastEpisodes,
     CaseStudies,
     Solutions,

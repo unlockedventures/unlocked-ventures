@@ -7,7 +7,8 @@ export const PodcastListing: GlobalConfig = {
   label: 'Podcast list page',
   admin: {
     group: adminGroups.podcast,
-    description: 'Heading, categories, and subscribe row for the Podcast list at /podcast.',
+    description:
+      'Heading, browse chips, and subscribe row for /podcast. Episode filters use Channels; keep browse chips in sync with channel names if you use them.',
     hideAPIURL: true,
   },
   access: {

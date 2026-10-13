@@ -39,6 +39,7 @@ export const adminSlugOrder = [
   'recent-podcast',
   'podcast-listing',
   'podcast-page',
+  'podcast-channels',
   'podcast-episodes',
   'latest-news',
   'insights',

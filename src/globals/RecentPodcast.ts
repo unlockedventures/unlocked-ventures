@@ -29,7 +29,7 @@ export const RecentPodcast: GlobalConfig = {
       imageField: 'image',
       singular: 'episode',
       plural: 'episodes',
-      help: 'Add an episode to put another card on the homepage. Drag a row to change the order. Open Change to edit it, or remove it.',
+      help: 'Shows episodes marked Featured. Drag a row to change the order. Open Change to edit it, or remove it.',
       where: 'where[featured][equals]=true',
     }),
   ],

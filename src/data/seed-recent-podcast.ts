@@ -2,6 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import type { Payload } from 'payload'
 
+import { ensurePodcastChannel } from '@/data/ensure-podcast-channel'
 import { recentPodcastSeed } from '@/data/recent-podcast-seed'
 import { podcastEpisodePath } from '@/lib/podcast-slug'
 
@@ -13,6 +14,8 @@ export async function seedRecentPodcast(payload: Payload) {
       data: { title: recentPodcastSeed.title },
     })
   }
+
+  const channelId = await ensurePodcastChannel(payload, 'General')
 
   const existing = await payload.find({
     collection: 'podcast-episodes',
@@ -45,6 +48,7 @@ export async function seedRecentPodcast(payload: Payload) {
     await payload.create({
       collection: 'podcast-episodes',
       data: {
+        channel: channelId,
         meta: episode.meta,
         title: episode.title,
         guests: episode.guests,

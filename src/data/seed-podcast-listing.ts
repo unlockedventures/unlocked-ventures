@@ -1,6 +1,7 @@
 import path from 'path'
 import type { Payload } from 'payload'
 
+import { ensurePodcastChannel } from '@/data/ensure-podcast-channel'
 import { uploadPublicFile as createPublicFile } from '@/data/upload-public-file'
 
 const listingSeed = {
@@ -228,11 +229,13 @@ export async function seedPodcastListing(payload: Payload) {
       excerpt: episode.about || episode.title || '',
       stats: '48K plays · 2 weeks ago',
     }
+    const channelId = await ensurePodcastChannel(payload, meta.category)
     await payload.update({
       collection: 'podcast-episodes',
       id: episode.id,
       data: {
         ...(meta.title ? { title: meta.title } : {}),
+        channel: channelId,
         category: meta.category,
         excerpt: meta.excerpt,
         stats: meta.stats,

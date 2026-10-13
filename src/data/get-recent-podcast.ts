@@ -2,12 +2,8 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
 import type { RecentPodcastSectionProps } from '@/components/site/recent-podcast/recent-podcast-section'
+import { podcastCoverSrc } from '@/lib/podcast-cover'
 import { podcastEpisodePath, podcastSlugFromHref, slugifyPodcastTitle } from '@/lib/podcast-slug'
-
-function mediaUrl(value: number | { url?: string | null } | null | undefined) {
-  if (!value || typeof value === 'number' || !value.url) return undefined
-  return value.url
-}
 
 function episodeSlug(episode: { slug?: string | null; href?: string | null; title?: string | null }) {
   if (episode.slug?.trim()) return episode.slug.trim()
@@ -49,7 +45,7 @@ export async function getRecentPodcast(): Promise<RecentPodcastSectionProps | nu
         title: episode.title,
         guests: episode.guests,
         href: podcastEpisodePath(slug),
-        imageSrc: mediaUrl(episode.image),
+        imageSrc: podcastCoverSrc(episode),
         imageAlt: episode.imageAlt || episode.title,
       },
     ]

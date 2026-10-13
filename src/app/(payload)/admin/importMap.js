@@ -1,4 +1,5 @@
 import { FeaturedCell as FeaturedCell_713c6af4da8e270b4b09b2d002943233 } from '@/components/admin/featured-cell'
+import { DirectUploadField as DirectUploadField_d3e9cae98f7356a2cf4ffa1e968e12a8 } from '@/components/admin/direct-upload-field'
 import { GenerateTranscriptField as GenerateTranscriptField_d809db76de84e66ad7e54e5d951facd4 } from '@/components/admin/generate-transcript-field'
 import { GenerateScriptField as GenerateScriptField_bab222324d11fa721dc22069e6402c46 } from '@/components/admin/generate-script-field'
 import { PipelineSaveButton as PipelineSaveButton_405675e8e5ec330655ac73f628096de2 } from '@/components/admin/pipeline-save-button'
@@ -11,6 +12,7 @@ import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } f
 /** @type import('payload').ImportMap */
 export const importMap = {
   "@/components/admin/featured-cell#FeaturedCell": FeaturedCell_713c6af4da8e270b4b09b2d002943233,
+  "@/components/admin/direct-upload-field#DirectUploadField": DirectUploadField_d3e9cae98f7356a2cf4ffa1e968e12a8,
   "@/components/admin/generate-transcript-field#GenerateTranscriptField": GenerateTranscriptField_d809db76de84e66ad7e54e5d951facd4,
   "@/components/admin/generate-script-field#GenerateScriptField": GenerateScriptField_bab222324d11fa721dc22069e6402c46,
   "@/components/admin/pipeline-save-button#PipelineSaveButton": PipelineSaveButton_405675e8e5ec330655ac73f628096de2,

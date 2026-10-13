@@ -2,10 +2,20 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
 import type { PodcastListingCopy, PodcastListEpisode } from '@/components/site/podcast/podcast-listing'
+import { podcastCoverSrc } from '@/lib/podcast-cover'
 
 function mediaUrl(value: number | { url?: string | null } | null | undefined) {
   if (!value || typeof value === 'number' || !value.url) return undefined
   return value.url
+}
+
+function channelLabel(
+  channel: number | { title?: string | null } | null | undefined,
+  category: string | null | undefined,
+  uncategorizedLabel: string,
+) {
+  if (channel && typeof channel === 'object' && channel.title?.trim()) return channel.title.trim()
+  return category?.trim() || uncategorizedLabel
 }
 
 function mapEpisode(
@@ -14,11 +24,13 @@ function mapEpisode(
     meta?: string | null
     href?: string | null
     category?: string | null
+    channel?: number | { title?: string | null } | null
     excerpt?: string | null
-    stats?: string | null
     about?: string | null
     heroFeatured?: boolean | null
     featured?: boolean | null
+    imageSource?: string | null
+    imageUrl?: string | null
     image?: number | { url?: string | null } | null
     imageAlt?: string | null
   },
@@ -29,10 +41,10 @@ function mapEpisode(
     title: doc.title,
     href: doc.href,
     duration: doc.meta || '',
-    category: doc.category?.trim() || uncategorizedLabel,
+    category: channelLabel(doc.channel, doc.category, uncategorizedLabel),
     excerpt: doc.excerpt || doc.about || '',
-    stats: doc.stats || '',
-    imageSrc: mediaUrl(doc.image),
+    stats: '',
+    imageSrc: podcastCoverSrc(doc),
     imageAlt: doc.imageAlt || doc.title,
     heroFeatured: Boolean(doc.heroFeatured),
     featured: Boolean(doc.featured),

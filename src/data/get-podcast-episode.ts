@@ -3,12 +3,8 @@ import { getPayload } from 'payload'
 
 import type { PodcastPageContent } from '@/components/site/podcast/podcast-page'
 import { getPodcastSharedChrome } from '@/data/get-podcast-shared'
+import { podcastAudioSrc, podcastCoverSrc } from '@/lib/podcast-cover'
 import { podcastEpisodePath, podcastSlugFromHref, slugifyPodcastTitle } from '@/lib/podcast-slug'
-
-function mediaUrl(value: number | { url?: string | null } | null | undefined) {
-  if (!value || typeof value === 'number' || !value.url) return undefined
-  return value.url
-}
 
 function episodeSlug(episode: { slug?: string | null; href?: string | null; title?: string | null }) {
   if (episode.slug?.trim()) return episode.slug.trim()
@@ -48,7 +44,7 @@ export async function getPodcastEpisode(slug: string): Promise<PodcastPageConten
   if (!match) return null
 
   const { episode } = match
-  const coverSrc = mediaUrl(episode.image) || ''
+  const coverSrc = podcastCoverSrc(episode) || ''
 
   const points = (items: { title?: string | null; body?: string | null }[] | null | undefined) =>
     (items ?? []).flatMap((item) => (item.title && item.body ? [{ title: item.title, body: item.body }] : []))
@@ -70,7 +66,7 @@ export async function getPodcastEpisode(slug: string): Promise<PodcastPageConten
         meta: item.guests ? `${item.meta} · ${item.guests}` : item.meta,
         title: item.title,
         href: podcastEpisodePath(itemSlug),
-        imageSrc: mediaUrl(item.image) || '',
+        imageSrc: podcastCoverSrc(item) || '',
       },
     ]
   })
@@ -80,13 +76,16 @@ export async function getPodcastEpisode(slug: string): Promise<PodcastPageConten
     breadcrumbHomeHref: shared.breadcrumbHomeHref,
     breadcrumbPodcastLabel: shared.breadcrumbPodcastLabel,
     breadcrumbPodcastHref: shared.breadcrumbPodcastHref,
-    category: episode.category || '',
+    category:
+      episode.channel && typeof episode.channel === 'object' && episode.channel.title
+        ? episode.channel.title
+        : episode.category || '',
     title: episode.title,
     meta: [episode.meta, episode.guests].filter(Boolean).join(' · '),
     description: summary || about || '',
     coverSrc,
     coverAlt: episode.imageAlt || episode.title,
-    mediaUrl: episode.mediaUrl || '',
+    mediaUrl: podcastAudioSrc(episode),
     timeLabel: episode.meta || '',
     about,
     summary,

@@ -71,6 +71,8 @@ export interface Config {
     media: Media;
     awards: Award;
     'news-posts': NewsPost;
+    'podcast-audio': PodcastAudio;
+    'podcast-channels': PodcastChannel;
     'podcast-episodes': PodcastEpisode;
     'case-studies': CaseStudy;
     solutions: Solution;
@@ -87,6 +89,8 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     awards: AwardsSelect<false> | AwardsSelect<true>;
     'news-posts': NewsPostsSelect<false> | NewsPostsSelect<true>;
+    'podcast-audio': PodcastAudioSelect<false> | PodcastAudioSelect<true>;
+    'podcast-channels': PodcastChannelsSelect<false> | PodcastChannelsSelect<true>;
     'podcast-episodes': PodcastEpisodesSelect<false> | PodcastEpisodesSelect<true>;
     'case-studies': CaseStudiesSelect<false> | CaseStudiesSelect<true>;
     solutions: SolutionsSelect<false> | SolutionsSelect<true>;
@@ -363,7 +367,50 @@ export interface NewsPost {
   createdAt: string;
 }
 /**
- * Every podcast episode. A new episode appears as a homepage card. Uncheck Show on the homepage to hide it. The box saves when you click it.
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "podcast-audio".
+ */
+export interface PodcastAudio {
+  id: number;
+  /**
+   * Optional label for this audio file.
+   */
+  alt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * Show or topic for podcast episodes. Every episode must belong to one channel.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "podcast-channels".
+ */
+export interface PodcastChannel {
+  id: number;
+  /**
+   * Shown on episode cards and filters, for example Artificial Intelligence.
+   */
+  title: string;
+  slug?: string | null;
+  /**
+   * Optional. Helps editors know what belongs in this channel.
+   */
+  description?: string | null;
+  sortOrder: number;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Every podcast episode belongs to a channel. Mark Featured to show it in the homepage Newest podcast section.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "podcast-episodes".
@@ -371,52 +418,65 @@ export interface NewsPost {
 export interface PodcastEpisode {
   id: number;
   /**
+   * Required. Create channels under Podcast → Channels.
+   */
+  channel: number | PodcastChannel;
+  title: string;
+  /**
+   * Featured episodes appear in the homepage Newest podcast section.
+   */
+  featured?: boolean | null;
+  slug: string;
+  href: string;
+  category?: string | null;
+  sortOrder: number;
+  /**
    * Shown on the thumbnail, for example 14:22.
    */
   meta: string;
-  title: string;
-  /**
-   * Opens this episode at /podcast/your-text. Leave blank when creating and it is filled from the title. Put YouTube or audio links in Audio or video link on the Episode page tab.
-   */
-  slug: string;
   guests: string;
-  href: string;
   /**
-   * The photo on this episode. Choose a different file to replace it.
+   * Choose how to set the cover photo for the card and episode page.
+   */
+  imageSource?: ('upload' | 'url') | null;
+  /**
+   * Upload or drag and drop a cover photo.
    */
   image?: (number | null) | Media;
+  /**
+   * Paste a direct image address (https://…).
+   */
+  imageUrl?: string | null;
   imageAlt?: string | null;
   /**
-   * The small label above the title, for example Artificial Intelligence (AI).
+   * Episode audio. Uploads are stored on this server for now (S3 later).
    */
-  category?: string | null;
+  audioSource?: ('upload' | 'url') | null;
   /**
-   * Short summary on the podcast list hero and cards.
+   * Upload or drag and drop an audio file (mp3, wav, m4a, …).
    */
-  excerpt?: string | null;
+  audio?: (number | null) | PodcastAudio;
   /**
-   * For example: 135K plays · 12 days ago
-   */
-  stats?: string | null;
-  /**
-   * The large featured episode at the top of /podcast.
-   */
-  heroFeatured?: boolean | null;
-  /**
-   * Paste a file address, or a YouTube or Vimeo link. When this is filled in, the play button on the site plays it. Leave it empty to show the picture only.
+   * Paste an audio file URL, or a YouTube / Vimeo link.
    */
   mediaUrl?: string | null;
   /**
-   * Fallback copy when Summary is empty. Prefer Summary from the Podcast pipeline (Gemini).
+   * Shown on the podcast list and cards.
    */
-  about?: string | null;
+  excerpt?: string | null;
+  stats?: string | null;
   /**
-   * Shown in About this episode. Paste from Podcast pipeline after Gemini generate script.
+   * Large featured episode at the top of /podcast.
+   */
+  heroFeatured?: boolean | null;
+  /**
+   * Main About text. Prefer this over the fallback below.
    */
   summary?: string | null;
   /**
-   * Shown under About. Paste from Podcast pipeline after Gemini generate script.
+   * Used only when Summary is empty.
    */
+  about?: string | null;
   mainPoints?:
     | {
         point: string;
@@ -424,7 +484,7 @@ export interface PodcastEpisode {
       }[]
     | null;
   /**
-   * The short introduction above the two columns.
+   * Short intro above the two columns.
    */
   reading?: string | null;
   agree?:
@@ -441,9 +501,6 @@ export interface PodcastEpisode {
         id?: string | null;
       }[]
     | null;
-  /**
-   * The paragraph under the heading.
-   */
   takeIntro?: string | null;
   take?:
     | {
@@ -453,7 +510,7 @@ export interface PodcastEpisode {
       }[]
     | null;
   /**
-   * Shown when someone clicks Transcript. Add one row per speaker turn.
+   * One row per speaker turn.
    */
   transcript?:
     | {
@@ -466,14 +523,6 @@ export interface PodcastEpisode {
         id?: string | null;
       }[]
     | null;
-  /**
-   * Uncheck this to hide the episode from the homepage.
-   */
-  featured?: boolean | null;
-  /**
-   * Lower numbers appear first.
-   */
-  sortOrder: number;
   updatedAt: string;
   createdAt: string;
 }
@@ -743,6 +792,14 @@ export interface PayloadLockedDocument {
         value: number | NewsPost;
       } | null)
     | ({
+        relationTo: 'podcast-audio';
+        value: number | PodcastAudio;
+      } | null)
+    | ({
+        relationTo: 'podcast-channels';
+        value: number | PodcastChannel;
+      } | null)
+    | ({
         relationTo: 'podcast-episodes';
         value: number | PodcastEpisode;
       } | null)
@@ -934,23 +991,60 @@ export interface NewsPostsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "podcast-audio_select".
+ */
+export interface PodcastAudioSelect<T extends boolean = true> {
+  alt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "podcast-channels_select".
+ */
+export interface PodcastChannelsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  description?: T;
+  sortOrder?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "podcast-episodes_select".
  */
 export interface PodcastEpisodesSelect<T extends boolean = true> {
-  meta?: T;
+  channel?: T;
   title?: T;
+  featured?: T;
   slug?: T;
-  guests?: T;
   href?: T;
-  image?: T;
-  imageAlt?: T;
   category?: T;
+  sortOrder?: T;
+  meta?: T;
+  guests?: T;
+  imageSource?: T;
+  image?: T;
+  imageUrl?: T;
+  imageAlt?: T;
+  audioSource?: T;
+  audio?: T;
+  mediaUrl?: T;
   excerpt?: T;
   stats?: T;
   heroFeatured?: T;
-  mediaUrl?: T;
-  about?: T;
   summary?: T;
+  about?: T;
   mainPoints?:
     | T
     | {
@@ -988,8 +1082,6 @@ export interface PodcastEpisodesSelect<T extends boolean = true> {
         text?: T;
         id?: T;
       };
-  featured?: T;
-  sortOrder?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1752,7 +1844,7 @@ export interface Insight {
   createdAt?: string | null;
 }
 /**
- * Heading, categories, and subscribe row for the Podcast list at /podcast.
+ * Heading, browse chips, and subscribe row for /podcast. Episode filters use Channels; keep browse chips in sync with channel names if you use them.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "podcast-listing".

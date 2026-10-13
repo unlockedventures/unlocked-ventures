@@ -1,21 +1,44 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, PayloadRequest } from 'payload'
 
 import { adminGroups } from '@/admin/editor-guide'
 import { podcastEpisodePath, podcastSlugFromHref, slugifyPodcastTitle } from '@/lib/podcast-slug'
+
+async function channelTitle(
+  req: PayloadRequest,
+  channel: number | { id?: number; title?: string | null } | null | undefined,
+): Promise<string | undefined> {
+  if (!channel) return undefined
+  if (typeof channel === 'object' && typeof channel.title === 'string' && channel.title.trim()) {
+    return channel.title.trim()
+  }
+  const id = typeof channel === 'number' ? channel : channel.id
+  if (typeof id !== 'number') return undefined
+  try {
+    const doc = await req.payload.findByID({
+      collection: 'podcast-channels',
+      id,
+      depth: 0,
+      overrideAccess: true,
+    })
+    return typeof doc?.title === 'string' ? doc.title.trim() : undefined
+  } catch {
+    return undefined
+  }
+}
 
 export const PodcastEpisodes: CollectionConfig = {
   slug: 'podcast-episodes',
   labels: {
     singular: 'Episode',
-    plural: 'Podcast',
+    plural: 'Episodes',
   },
   admin: {
     group: adminGroups.podcast,
     description:
-      'Every podcast episode. A new episode appears as a homepage card. Uncheck Show on the homepage to hide it. The box saves when you click it.',
+      'Every podcast episode belongs to a channel. Mark Featured to show it in the homepage Newest podcast section.',
     hideAPIURL: true,
     useAsTitle: 'title',
-    defaultColumns: ['title', 'slug', 'featured', 'guests', 'image', 'sortOrder'],
+    defaultColumns: ['title', 'channel', 'featured', 'guests'],
   },
   access: {
     read: () => true,
@@ -34,6 +57,52 @@ export const PodcastEpisodes: CollectionConfig = {
         if (slug) {
           data.slug = slug
           data.href = podcastEpisodePath(slug)
+        }
+
+        const channelValue =
+          data.channel !== undefined ? data.channel : (originalDoc?.channel as typeof data.channel)
+        const fromChannel = await channelTitle(req, channelValue)
+        if (fromChannel) data.category = fromChannel
+
+        const imageSource =
+          typeof data.imageSource === 'string'
+            ? data.imageSource
+            : typeof originalDoc?.imageSource === 'string'
+              ? originalDoc.imageSource
+              : 'upload'
+        data.imageSource = imageSource === 'url' ? 'url' : 'upload'
+        if (data.imageSource === 'url') {
+          data.image = null
+        } else if (typeof data.imageUrl === 'string' && !data.imageUrl.trim()) {
+          data.imageUrl = null
+        }
+
+        const audioSource =
+          typeof data.audioSource === 'string'
+            ? data.audioSource
+            : typeof originalDoc?.audioSource === 'string'
+              ? originalDoc.audioSource
+              : 'url'
+        data.audioSource = audioSource === 'upload' ? 'upload' : 'url'
+        if (data.audioSource === 'url') {
+          data.audio = null
+        } else {
+          // Uploaded audio live on disk (podcast-audio); keep mediaUrl in sync for the site player.
+          const audioValue = data.audio !== undefined ? data.audio : originalDoc?.audio
+          const audioId = typeof audioValue === 'number' ? audioValue : audioValue?.id
+          if (typeof audioId === 'number') {
+            try {
+              const audioDoc = await req.payload.findByID({
+                collection: 'podcast-audio',
+                id: audioId,
+                depth: 0,
+                overrideAccess: true,
+              })
+              if (typeof audioDoc?.url === 'string' && audioDoc.url) data.mediaUrl = audioDoc.url
+            } catch {
+              // leave mediaUrl unchanged if lookup fails
+            }
+          }
         }
 
         if (operation !== 'create') return data
@@ -57,181 +126,48 @@ export const PodcastEpisodes: CollectionConfig = {
   defaultSort: 'sortOrder',
   fields: [
     {
-      type: 'tabs',
-      tabs: [
-        {
-          label: 'Card',
-          description: 'The homepage card and the Listen next row.',
-          fields: [
-            {
-              name: 'meta',
-              type: 'text',
-              label: 'Length',
-              required: true,
-              admin: { description: 'Shown on the thumbnail, for example 14:22.' },
-            },
-            { name: 'title', type: 'text', required: true },
-            {
-              name: 'slug',
-              type: 'text',
-              label: 'Page address',
-              required: true,
-              unique: true,
-              admin: {
-                description:
-                  'Opens this episode at /podcast/your-text. Leave blank when creating and it is filled from the title. Put YouTube or audio links in Audio or video link on the Episode page tab.',
-              },
-            },
-            { name: 'guests', type: 'text', required: true },
-            {
-              name: 'href',
-              type: 'text',
-              required: true,
-              admin: { hidden: true },
-            },
-            {
-              name: 'image',
-              type: 'upload',
-              label: 'Picture',
-              relationTo: 'media',
-              admin: { description: 'The photo on this episode. Choose a different file to replace it.' },
-            },
-            { name: 'imageAlt', type: 'text' },
-          ],
-        },
-        {
-          label: 'Episode page',
-          description: 'What people see after they open this episode.',
-          fields: [
-            {
-              name: 'category',
-              type: 'text',
-              label: 'Category',
-              admin: { description: 'The small label above the title, for example Artificial Intelligence (AI).' },
-            },
-            {
-              name: 'excerpt',
-              type: 'textarea',
-              label: 'List excerpt',
-              admin: { description: 'Short summary on the podcast list hero and cards.' },
-            },
-            {
-              name: 'stats',
-              type: 'text',
-              label: 'Plays and date',
-              admin: { description: 'For example: 135K plays · 12 days ago' },
-            },
-            {
-              name: 'heroFeatured',
-              type: 'checkbox',
-              label: 'Show as list hero',
-              defaultValue: false,
-              admin: { description: 'The large featured episode at the top of /podcast.' },
-            },
-            {
-              name: 'mediaUrl',
-              type: 'text',
-              label: 'Audio or video link',
-              admin: {
-                description:
-                  'Paste a file address, or a YouTube or Vimeo link. When this is filled in, the play button on the site plays it. Leave it empty to show the picture only.',
-              },
-            },
-            {
-              name: 'about',
-              type: 'textarea',
-              label: 'About this episode',
-              admin: {
-                description:
-                  'Fallback copy when Summary is empty. Prefer Summary from the Podcast pipeline (Gemini).',
-              },
-            },
-            {
-              name: 'summary',
-              type: 'textarea',
-              label: 'Summary',
-              admin: {
-                description:
-                  'Shown in About this episode. Paste from Podcast pipeline after Gemini generate script.',
-              },
-            },
-            {
-              name: 'mainPoints',
-              type: 'array',
-              label: 'Main points',
-              labels: { singular: 'Main point', plural: 'Main points' },
-              maxRows: 10,
-              admin: {
-                description: 'Shown under About. Paste from Podcast pipeline after Gemini generate script.',
-              },
-              fields: [{ name: 'point', type: 'text', required: true, label: 'Point' }],
-            },
-            {
-              name: 'reading',
-              type: 'textarea',
-              label: 'Where we agree and where we don\'t',
-              admin: { description: 'The short introduction above the two columns.' },
-            },
-            {
-              name: 'agree',
-              type: 'array',
-              label: 'We agree',
-              fields: [
-                { name: 'title', type: 'text', required: true },
-                { name: 'body', type: 'textarea', required: true },
-              ],
-            },
-            {
-              name: 'disagree',
-              type: 'array',
-              label: 'We disagree',
-              fields: [
-                { name: 'title', type: 'text', required: true },
-                { name: 'body', type: 'textarea', required: true },
-              ],
-            },
-            {
-              name: 'takeIntro',
-              type: 'textarea',
-              label: 'The Unlocked Ventures take',
-              admin: { description: 'The paragraph under the heading.' },
-            },
-            {
-              name: 'take',
-              type: 'array',
-              label: 'Steps',
-              fields: [
-                { name: 'title', type: 'text', required: true },
-                { name: 'body', type: 'textarea', required: true },
-              ],
-            },
-            {
-              name: 'transcript',
-              type: 'array',
-              label: 'Transcript',
-              admin: { description: 'Shown when someone clicks Transcript. Add one row per speaker turn.' },
-              fields: [
-                { name: 'time', type: 'text', label: 'Time', required: true, admin: { description: 'For example 2:14.' } },
-                { name: 'speaker', type: 'text', required: true },
-                { name: 'text', type: 'textarea', label: 'What they said', required: true },
-              ],
-            },
-          ],
-        },
-      ],
+      name: 'channel',
+      type: 'relationship',
+      relationTo: 'podcast-channels',
+      label: 'Channel',
+      required: true,
+      admin: {
+        description: 'Required. Create channels under Podcast → Channels.',
+      },
     },
+    { name: 'title', type: 'text', required: true },
     {
       name: 'featured',
       type: 'checkbox',
-      label: 'Show on the homepage',
+      label: 'Featured',
       defaultValue: true,
       admin: {
-        position: 'sidebar',
-        description: 'Uncheck this to hide the episode from the homepage.',
+        description:
+          'Featured episodes appear in the homepage Newest podcast section.',
         components: {
           Cell: '@/components/admin/featured-cell#FeaturedCell',
         },
       },
+    },
+    {
+      name: 'slug',
+      type: 'text',
+      label: 'Page address',
+      required: true,
+      unique: true,
+      admin: { hidden: true },
+    },
+    {
+      name: 'href',
+      type: 'text',
+      required: true,
+      admin: { hidden: true },
+    },
+    {
+      name: 'category',
+      type: 'text',
+      label: 'Category',
+      admin: { hidden: true },
     },
     {
       name: 'sortOrder',
@@ -239,7 +175,221 @@ export const PodcastEpisodes: CollectionConfig = {
       label: 'Order',
       required: true,
       defaultValue: 0,
-      admin: { position: 'sidebar', description: 'Lower numbers appear first.' },
+      admin: { hidden: true },
+    },
+    {
+      name: 'meta',
+      type: 'text',
+      label: 'Length',
+      required: true,
+      admin: { description: 'Shown on the thumbnail, for example 14:22.' },
+    },
+    { name: 'guests', type: 'text', required: true },
+    {
+      name: 'imageSource',
+      type: 'radio',
+      label: 'Picture',
+      defaultValue: 'upload',
+      options: [
+        { label: 'Upload image', value: 'upload' },
+        { label: 'Image URL', value: 'url' },
+      ],
+      admin: {
+        layout: 'horizontal',
+        description: 'Choose how to set the cover photo for the card and episode page.',
+      },
+    },
+    {
+      name: 'image',
+      type: 'upload',
+      label: 'Upload image',
+      relationTo: 'media',
+      admin: {
+        condition: (_data, siblingData) => siblingData?.imageSource !== 'url',
+        description: 'Upload or drag and drop a cover photo.',
+        components: {
+          Field: '@/components/admin/direct-upload-field#DirectUploadField',
+        },
+        custom: {
+          relationTo: 'media',
+          accept: 'image/*',
+          emptyLabel: 'Upload or drag and drop an image',
+        },
+      },
+    },
+    {
+      name: 'imageUrl',
+      type: 'text',
+      label: 'Image URL',
+      admin: {
+        condition: (_data, siblingData) => siblingData?.imageSource === 'url',
+        description: 'Paste a direct image address (https://…).',
+      },
+    },
+    { name: 'imageAlt', type: 'text', label: 'Image alt' },
+    {
+      name: 'audioSource',
+      type: 'radio',
+      label: 'Audio',
+      defaultValue: 'url',
+      options: [
+        { label: 'Upload', value: 'upload' },
+        { label: 'URL', value: 'url' },
+      ],
+      admin: {
+        layout: 'horizontal',
+        description: 'Episode audio. Uploads are stored on this server for now (S3 later).',
+      },
+    },
+    {
+      name: 'audio',
+      type: 'upload',
+      label: 'Upload audio',
+      relationTo: 'podcast-audio',
+      admin: {
+        condition: (_data, siblingData) => siblingData?.audioSource === 'upload',
+        description: 'Upload or drag and drop an audio file (mp3, wav, m4a, …).',
+        components: {
+          Field: '@/components/admin/direct-upload-field#DirectUploadField',
+        },
+        custom: {
+          relationTo: 'podcast-audio',
+          accept: 'audio/*',
+          emptyLabel: 'Upload or drag and drop an audio file',
+        },
+      },
+    },
+    {
+      name: 'mediaUrl',
+      type: 'text',
+      label: 'Audio URL',
+      admin: {
+        condition: (_data, siblingData) => siblingData?.audioSource !== 'upload',
+        description: 'Paste an audio file URL, or a YouTube / Vimeo link.',
+      },
+    },
+    {
+      name: 'excerpt',
+      type: 'textarea',
+      label: 'Short summary',
+      admin: { description: 'Shown on the podcast list and cards.' },
+    },
+    {
+      name: 'stats',
+      type: 'text',
+      label: 'Plays and date',
+      admin: { hidden: true },
+    },
+    {
+      name: 'heroFeatured',
+      type: 'checkbox',
+      label: 'Show as list hero',
+      defaultValue: false,
+      admin: {
+        position: 'sidebar',
+        description: 'Large featured episode at the top of /podcast.',
+      },
+    },
+
+    {
+      type: 'collapsible',
+      label: 'About this episode',
+      admin: { initCollapsed: false },
+      fields: [
+        {
+          name: 'summary',
+          type: 'textarea',
+          label: 'Summary',
+          admin: {
+            description: 'Main About text. Prefer this over the fallback below.',
+          },
+        },
+        {
+          name: 'about',
+          type: 'textarea',
+          label: 'About (fallback)',
+          admin: { description: 'Used only when Summary is empty.' },
+        },
+        {
+          name: 'mainPoints',
+          type: 'array',
+          label: 'Main points',
+          labels: { singular: 'Main point', plural: 'Main points' },
+          maxRows: 10,
+          fields: [{ name: 'point', type: 'text', required: true, label: 'Point' }],
+        },
+      ],
+    },
+
+    {
+      type: 'collapsible',
+      label: 'Agree, disagree, and take',
+      admin: { initCollapsed: true },
+      fields: [
+        {
+          name: 'reading',
+          type: 'textarea',
+          label: 'Where we agree and where we don’t',
+          admin: { description: 'Short intro above the two columns.' },
+        },
+        {
+          name: 'agree',
+          type: 'array',
+          label: 'We agree',
+          fields: [
+            { name: 'title', type: 'text', required: true },
+            { name: 'body', type: 'textarea', required: true },
+          ],
+        },
+        {
+          name: 'disagree',
+          type: 'array',
+          label: 'We disagree',
+          fields: [
+            { name: 'title', type: 'text', required: true },
+            { name: 'body', type: 'textarea', required: true },
+          ],
+        },
+        {
+          name: 'takeIntro',
+          type: 'textarea',
+          label: 'The Unlocked Ventures take',
+        },
+        {
+          name: 'take',
+          type: 'array',
+          label: 'Steps',
+          fields: [
+            { name: 'title', type: 'text', required: true },
+            { name: 'body', type: 'textarea', required: true },
+          ],
+        },
+      ],
+    },
+
+    {
+      type: 'collapsible',
+      label: 'Transcript',
+      admin: { initCollapsed: true },
+      fields: [
+        {
+          name: 'transcript',
+          type: 'array',
+          label: 'Transcript lines',
+          admin: { description: 'One row per speaker turn.' },
+          fields: [
+            {
+              name: 'time',
+              type: 'text',
+              label: 'Time',
+              required: true,
+              admin: { description: 'For example 2:14.' },
+            },
+            { name: 'speaker', type: 'text', required: true },
+            { name: 'text', type: 'textarea', label: 'What they said', required: true },
+          ],
+        },
+      ],
     },
   ],
 }

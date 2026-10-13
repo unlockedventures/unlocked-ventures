@@ -208,9 +208,102 @@ EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
 -- ---------------------------------------------------------------------------
+-- podcast_channels
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS podcast_channels (
+  id serial PRIMARY KEY,
+  title character varying NOT NULL,
+  slug character varying,
+  description character varying,
+  sort_order numeric DEFAULT 0,
+  updated_at timestamp(3) with time zone DEFAULT now() NOT NULL,
+  created_at timestamp(3) with time zone DEFAULT now() NOT NULL
+);
+CREATE UNIQUE INDEX IF NOT EXISTS podcast_channels_slug_idx ON podcast_channels USING btree (slug);
+CREATE INDEX IF NOT EXISTS podcast_channels_updated_at_idx ON podcast_channels USING btree (updated_at);
+CREATE INDEX IF NOT EXISTS podcast_channels_created_at_idx ON podcast_channels USING btree (created_at);
+
+INSERT INTO podcast_channels (title, slug, description, sort_order)
+SELECT 'General', 'general', 'Default channel for existing episodes.', 0
+WHERE NOT EXISTS (SELECT 1 FROM podcast_channels LIMIT 1);
+
+-- ---------------------------------------------------------------------------
 -- podcast_episodes
 -- ---------------------------------------------------------------------------
+ALTER TABLE podcast_episodes ADD COLUMN IF NOT EXISTS channel_id integer;
 ALTER TABLE podcast_episodes ADD COLUMN IF NOT EXISTS category character varying;
+ALTER TABLE podcast_episodes ADD COLUMN IF NOT EXISTS image_source character varying DEFAULT 'upload';
+ALTER TABLE podcast_episodes ADD COLUMN IF NOT EXISTS image_url character varying;
+ALTER TABLE podcast_episodes ADD COLUMN IF NOT EXISTS audio_source character varying DEFAULT 'url';
+ALTER TABLE podcast_episodes ADD COLUMN IF NOT EXISTS audio_id integer;
+
+CREATE TABLE IF NOT EXISTS podcast_audio (
+  id serial PRIMARY KEY,
+  alt character varying,
+  prefix character varying,
+  updated_at timestamp(3) with time zone DEFAULT now() NOT NULL,
+  created_at timestamp(3) with time zone DEFAULT now() NOT NULL,
+  url character varying,
+  thumbnail_u_r_l character varying,
+  filename character varying,
+  mime_type character varying,
+  filesize numeric,
+  width numeric,
+  height numeric,
+  focal_x numeric,
+  focal_y numeric
+);
+CREATE UNIQUE INDEX IF NOT EXISTS podcast_audio_filename_idx ON podcast_audio USING btree (filename);
+CREATE INDEX IF NOT EXISTS podcast_audio_updated_at_idx ON podcast_audio USING btree (updated_at);
+CREATE INDEX IF NOT EXISTS podcast_audio_created_at_idx ON podcast_audio USING btree (created_at);
+
+DO $$ BEGIN
+  ALTER TABLE podcast_episodes
+    ADD CONSTRAINT podcast_episodes_audio_id_podcast_audio_id_fk
+    FOREIGN KEY (audio_id) REFERENCES podcast_audio(id) ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+CREATE INDEX IF NOT EXISTS podcast_episodes_audio_idx ON podcast_episodes USING btree (audio_id);
+
+-- Payload lock/preference relation columns for new collections
+ALTER TABLE payload_locked_documents_rels ADD COLUMN IF NOT EXISTS podcast_audio_id integer;
+ALTER TABLE payload_locked_documents_rels ADD COLUMN IF NOT EXISTS podcast_channels_id integer;
+CREATE INDEX IF NOT EXISTS payload_locked_documents_rels_podcast_audio_id_idx
+  ON payload_locked_documents_rels USING btree (podcast_audio_id);
+CREATE INDEX IF NOT EXISTS payload_locked_documents_rels_podcast_channels_id_idx
+  ON payload_locked_documents_rels USING btree (podcast_channels_id);
+DO $$ BEGIN
+  ALTER TABLE payload_locked_documents_rels
+    ADD CONSTRAINT payload_locked_documents_rels_podcast_audio_fk
+    FOREIGN KEY (podcast_audio_id) REFERENCES podcast_audio(id) ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+DO $$ BEGIN
+  ALTER TABLE payload_locked_documents_rels
+    ADD CONSTRAINT payload_locked_documents_rels_podcast_channels_fk
+    FOREIGN KEY (podcast_channels_id) REFERENCES podcast_channels(id) ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+UPDATE podcast_episodes pe
+SET channel_id = (SELECT id FROM podcast_channels ORDER BY id ASC LIMIT 1)
+WHERE pe.channel_id IS NULL
+  AND EXISTS (SELECT 1 FROM podcast_channels);
+
+UPDATE podcast_episodes pe
+SET category = c.title
+FROM podcast_channels c
+WHERE pe.channel_id = c.id
+  AND (pe.category IS NULL OR trim(pe.category) = '');
+
+DO $$ BEGIN
+  ALTER TABLE podcast_episodes
+    ADD CONSTRAINT podcast_episodes_channel_id_podcast_channels_id_fk
+    FOREIGN KEY (channel_id) REFERENCES podcast_channels(id) ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+CREATE INDEX IF NOT EXISTS podcast_episodes_channel_idx ON podcast_episodes USING btree (channel_id);
 ALTER TABLE podcast_episodes ADD COLUMN IF NOT EXISTS media_url character varying;
 ALTER TABLE podcast_episodes ADD COLUMN IF NOT EXISTS about character varying;
 ALTER TABLE podcast_episodes ADD COLUMN IF NOT EXISTS reading character varying;
