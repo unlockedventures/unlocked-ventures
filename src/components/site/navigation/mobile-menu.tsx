@@ -7,6 +7,7 @@ import type { NavItem } from '@/config/navigation'
 
 import { useHeaderMenuScroll } from '@/components/site/header/header-shell'
 import { NavAnchor } from '@/components/site/navigation/nav-link'
+import { navItemHasChildren } from '@/components/site/navigation/nav-styles'
 import { SiteOutlineButton } from '@/components/site/site-outline-button'
 
 const parentLabelClassName =
@@ -74,31 +75,49 @@ export function MobileMenu({
         onScroll={() => setMenuScrolled((panelRef.current?.scrollTop ?? 0) > 0)}
       >
         <ul className="mx-auto flex w-full flex-col px-4 py-2 sm:px-6 md:px-8 xl:px-14">
-        {items.map((item) => (
-          <li key={item.href} className="py-4">
-            <p className={parentLabelClassName}>{item.label}</p>
-            <div className="mt-3 flex flex-col gap-4 pl-4">
-              {item.groups.map((group) => (
-                <div key={group.title ?? item.href}>
-                  {group.title ? <p className={categoryClassName}>{group.title}</p> : null}
-                  <ul className={group.title ? 'flex flex-col gap-2 pl-3' : 'flex flex-col gap-2'}>
-                    {group.links.map((link) => (
-                      <li key={link.href}>
-                        <NavAnchor
-                          link={link}
-                          onNavigate={() => {
-                            if (link.external || isSamePage(link.href)) onClose()
-                          }}
-                          className={childLinkClassName}
-                        />
-                      </li>
-                    ))}
-                  </ul>
+          {items.map((item) => {
+            const hasChildren = navItemHasChildren(item)
+
+            if (!hasChildren) {
+              return (
+                <li key={item.href} className="py-4">
+                  <NavAnchor
+                    link={{ label: item.label, href: item.href }}
+                    onNavigate={() => {
+                      if (isSamePage(item.href)) onClose()
+                    }}
+                    className={parentLabelClassName}
+                  />
+                </li>
+              )
+            }
+
+            return (
+              <li key={item.href} className="py-4">
+                <p className={parentLabelClassName}>{item.label}</p>
+                <div className="mt-3 flex flex-col gap-4 pl-4">
+                  {item.groups.map((group) => (
+                    <div key={group.title ?? item.href}>
+                      {group.title ? <p className={categoryClassName}>{group.title}</p> : null}
+                      <ul className={group.title ? 'flex flex-col gap-2 pl-3' : 'flex flex-col gap-2'}>
+                        {group.links.map((link) => (
+                          <li key={link.href}>
+                            <NavAnchor
+                              link={link}
+                              onNavigate={() => {
+                                if (link.external || isSamePage(link.href)) onClose()
+                              }}
+                              className={childLinkClassName}
+                            />
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </li>
-        ))}
+              </li>
+            )
+          })}
         </ul>
       </div>
       <div className="mx-auto w-full shrink-0 border-t border-[#E4E7EE] px-4 py-4 sm:px-6 md:px-8 xl:px-14">

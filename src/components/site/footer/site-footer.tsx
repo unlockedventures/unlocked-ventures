@@ -47,7 +47,7 @@ export function SiteFooter({
   socials,
 }: SiteFooterProps) {
   return (
-    <footer className="relative overflow-hidden bg-[#30373F] xl:min-h-[488px]">
+    <footer className="relative z-20 overflow-hidden bg-[#30373F] xl:min-h-[488px]">
       <img
         src="/footer/Footer%20wave.svg"
         alt=""

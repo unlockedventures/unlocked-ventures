@@ -28,14 +28,12 @@ export function SolutionPageView({ slug }: { slug: string }) {
 
   return (
     <div className="bg-white">
-      <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-10 px-4 pt-8 pb-0 sm:px-6 md:gap-12 md:px-8 md:pt-10 xl:flex-row xl:items-start xl:gap-12 xl:px-14 xl:pt-16">
+      <div className="mx-auto grid w-full max-w-[1440px] grid-cols-1 gap-6 px-4 pt-6 pb-0 sm:gap-8 sm:px-6 sm:pt-8 md:gap-10 md:px-8 md:pt-10 xl:grid-cols-[minmax(0,300px)_minmax(0,1fr)] xl:items-start xl:gap-12 xl:px-14 xl:pt-16">
         {sidebarSections.length ? (
-          <aside className="w-full shrink-0 xl:sticky xl:top-24 xl:max-h-[calc(100dvh-6.5rem)] xl:w-[340px] xl:self-start">
-            <SolutionSidebar sections={sidebarSections} activeHref={activeHref} />
-          </aside>
+          <SolutionSidebar sections={sidebarSections} activeHref={activeHref} />
         ) : null}
 
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0">
           <ServiceIntroSection {...content.intro} />
           <EngagementSection {...content.engagement} />
           <HowWeWorkSection {...content.howWeWork} />
