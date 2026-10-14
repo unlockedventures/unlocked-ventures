@@ -77,33 +77,33 @@ function StoryCard({ story }: { story: CaseStudyCard }) {
     <Link
       href={story.href}
       aria-label={story.title}
-      className="group relative flex min-h-80 flex-col justify-end overflow-hidden bg-[#F7F7F7] outline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#1CACAE] md:h-[calc(100cqi*420/1128)] md:min-h-0 min-[1440px]:h-[420px] min-[1440px]:bg-[#F8F8F8]"
+      className="group relative flex min-h-80 flex-col justify-end overflow-hidden bg-[#F7F7F7] outline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#1CACAE] md:h-[420px] md:min-h-0 min-[1440px]:bg-[#F8F8F8]"
     >
       {story.imageSrc ? (
         <img
           src={story.imageSrc}
           alt=""
-          className="absolute top-0 left-0 h-[72%] w-full object-cover object-top grayscale min-[1440px]:top-[-40px] min-[1440px]:h-[377px] min-[1440px]:w-[565px] min-[1440px]:max-w-none"
+          className="absolute top-0 left-0 h-[72%] w-full object-cover object-top grayscale md:top-[-40px] md:h-[377px]"
         />
       ) : null}
       {story.imageSrc ? (
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-[28%] h-24 bg-gradient-to-b from-transparent to-[#F7F7F7] min-[1440px]:top-[161px] min-[1440px]:bottom-auto min-[1440px]:h-[259px] min-[1440px]:bg-[linear-gradient(180deg,transparent_0%,#F8F8F8_50%)]"
+          className="pointer-events-none absolute inset-x-0 bottom-[28%] h-24 bg-gradient-to-b from-transparent to-[#F7F7F7] md:top-[161px] md:bottom-auto md:h-[259px] md:bg-[linear-gradient(180deg,transparent_0%,#F8F8F8_50%)]"
         />
       ) : null}
-      <div className="relative z-10 flex flex-col gap-4 p-6 sm:p-[30px] min-[1440px]:absolute min-[1440px]:top-[239px] min-[1440px]:left-[30px] min-[1440px]:w-[572px] min-[1440px]:p-0!">
+      <div className="relative z-10 flex flex-col gap-4 p-6 sm:p-[30px] md:absolute md:inset-x-[30px] md:top-[239px] md:gap-3 md:p-0!">
         <div className="flex flex-col gap-3">
           {story.category ? (
             <p className="inline-flex h-8 w-fit items-center bg-white px-3 font-inter text-xs leading-4 font-normal text-[#231F20] uppercase">
               {story.category}
             </p>
           ) : null}
-          <h2 className="font-sans text-2xl leading-8 font-normal text-[#25282D] md:text-[1.75rem] md:leading-9 min-[1440px]:w-full min-[1440px]:text-[28px] min-[1440px]:leading-[36px] min-[1440px]:whitespace-pre-line min-[1440px]:line-clamp-2">
+          <h2 className="font-sans text-2xl leading-8 font-normal text-[#25282D] md:w-full md:text-[1.75rem] md:leading-9 md:whitespace-pre-line md:line-clamp-2 min-[1440px]:text-[28px] min-[1440px]:leading-[36px]">
             {story.title}
           </h2>
         </div>
-        <span className="inline-flex h-6 items-center gap-2.5 font-sans text-base font-normal text-[#222222] min-[1440px]:text-[rgba(34,34,34,0.7)]">
+        <span className="inline-flex h-6 items-center gap-2.5 font-sans text-base font-normal text-[#222222] md:text-[rgba(34,34,34,0.7)]">
           <span className={trimmedLabelClassName}>{story.ctaLabel}</span>
           <ArrowUpRight />
         </span>
@@ -246,9 +246,9 @@ export function CaseStudiesListing({
         />
       </div>
 
-      <div className="flex flex-col gap-12 px-4 pb-16 sm:px-6 md:px-8 lg:px-[72px] xl:px-[156px] xl:pb-[100px]">
+      <div className="flex flex-col gap-12 px-4 pb-16 sm:px-6 md:px-8 xl:px-14 xl:pb-[100px]">
         {visible.length > 0 ? (
-          <ul className="grid grid-cols-1 gap-[calc(100vw*1/45)] md:@container md:grid-cols-2 min-[1440px]:gap-3">
+          <ul className="grid grid-cols-1 gap-[calc(100vw*1/45)] md:grid-cols-2 min-[1440px]:gap-3">
             {visible.map((story) => (
               <li key={story.id}>
                 <StoryCard story={story} />

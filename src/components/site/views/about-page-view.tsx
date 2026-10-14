@@ -21,7 +21,6 @@ export function AboutPageView() {
       <AboutHero content={content} />
       <AboutLogoWall title={content.logoTitle} logos={content.logos} />
       <AboutDelivered title={content.deliveredTitle} stats={content.stats} />
-      <AboutLogoWall title={content.logoTitle} logos={content.logos} spaced />
       <AboutFounder content={content} />
       <AboutExperience title={content.experienceTitle} roles={content.experienceRoles} />
       <AboutHowWeWork title={content.howWeWorkTitle} principles={content.principles} />
