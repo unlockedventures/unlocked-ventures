@@ -355,7 +355,7 @@ export function EpisodeBrief({
       ) : null}
 
       {showTake && takeTitle ? (
-        <div className="mt-10 border-t border-[#171616]/10 pt-10">
+        <div className="mt-10 border-t border-[#171616]/10 pt-10 mb-10">
           <div className="flex max-w-[820px] flex-col gap-4">
             <h2 className="font-sans text-[2rem] leading-10 font-normal text-[#171616]">{takeTitle}</h2>
             {takeLead ? (

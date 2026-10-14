@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState, type MouseEvent } from 'react'
+import { useCallback, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react'
 
 function formatTime(seconds: number) {
   if (!Number.isFinite(seconds) || seconds < 0) return '0:00'
@@ -42,13 +42,20 @@ export function EpisodePlayer({
   mediaUrl?: string
 }) {
   const mediaRef = useRef<HTMLMediaElement>(null)
+  const trackRef = useRef<HTMLDivElement>(null)
+  const draggingRef = useRef(false)
   const [playing, setPlaying] = useState(false)
   const [current, setCurrent] = useState(0)
   const [duration, setDuration] = useState(0)
   const [embed, setEmbed] = useState<string | null>(null)
+  const [scrubbing, setScrubbing] = useState(false)
   const source = mediaUrl?.trim() ?? ''
   const kind = source ? fileKind(source) : null
-  const played = duration > 0 ? Math.min(100, Math.max(0, (current / duration) * 100)) : Math.min(100, Math.max(0, progress * 100))
+  const canSeek = Boolean(source && kind !== 'embed' && duration > 0)
+  const played =
+    duration > 0
+      ? Math.min(100, Math.max(0, (current / duration) * 100))
+      : Math.min(100, Math.max(0, progress * 100))
   const clock = duration > 0 ? `${formatTime(current)} / ${formatTime(duration)}` : timeLabel
 
   function toggle() {
@@ -67,12 +74,64 @@ export function EpisodePlayer({
     }
   }
 
-  function seek(event: MouseEvent<HTMLDivElement>) {
+  const seekToClientX = useCallback(
+    (clientX: number) => {
+      const media = mediaRef.current
+      const track = trackRef.current
+      if (!media || !track || !duration) return
+      const bounds = track.getBoundingClientRect()
+      const ratio = Math.min(1, Math.max(0, (clientX - bounds.left) / bounds.width))
+      media.currentTime = ratio * duration
+      setCurrent(ratio * duration)
+    },
+    [duration],
+  )
+
+  function onTrackPointerDown(event: PointerEvent<HTMLDivElement>) {
+    if (!canSeek) return
+    event.preventDefault()
+    draggingRef.current = true
+    setScrubbing(true)
+    event.currentTarget.setPointerCapture(event.pointerId)
+    seekToClientX(event.clientX)
+  }
+
+  function onTrackPointerMove(event: PointerEvent<HTMLDivElement>) {
+    if (!draggingRef.current) return
+    seekToClientX(event.clientX)
+  }
+
+  function onTrackPointerUp(event: PointerEvent<HTMLDivElement>) {
+    if (!draggingRef.current) return
+    draggingRef.current = false
+    setScrubbing(false)
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId)
+    }
+  }
+
+  function onTrackKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    if (!canSeek) return
     const media = mediaRef.current
-    if (!media || !duration) return
-    const bounds = event.currentTarget.getBoundingClientRect()
-    const ratio = Math.min(1, Math.max(0, (event.clientX - bounds.left) / bounds.width))
-    media.currentTime = ratio * duration
+    if (!media) return
+    const step = event.shiftKey ? 10 : 5
+    if (event.key === 'ArrowRight' || event.key === 'ArrowUp') {
+      event.preventDefault()
+      media.currentTime = Math.min(duration, media.currentTime + step)
+      setCurrent(media.currentTime)
+    } else if (event.key === 'ArrowLeft' || event.key === 'ArrowDown') {
+      event.preventDefault()
+      media.currentTime = Math.max(0, media.currentTime - step)
+      setCurrent(media.currentTime)
+    } else if (event.key === 'Home') {
+      event.preventDefault()
+      media.currentTime = 0
+      setCurrent(0)
+    } else if (event.key === 'End') {
+      event.preventDefault()
+      media.currentTime = duration
+      setCurrent(duration)
+    }
   }
 
   return (
@@ -96,7 +155,9 @@ export function EpisodePlayer({
           onPlay={() => setPlaying(true)}
           onPause={() => setPlaying(false)}
           onEnded={() => setPlaying(false)}
-          onTimeUpdate={() => setCurrent(mediaRef.current?.currentTime ?? 0)}
+          onTimeUpdate={() => {
+            if (!draggingRef.current) setCurrent(mediaRef.current?.currentTime ?? 0)
+          }}
           onLoadedMetadata={() => setDuration(mediaRef.current?.duration ?? 0)}
         />
       ) : imageSrc ? (
@@ -112,22 +173,50 @@ export function EpisodePlayer({
           onPlay={() => setPlaying(true)}
           onPause={() => setPlaying(false)}
           onEnded={() => setPlaying(false)}
-          onTimeUpdate={() => setCurrent(mediaRef.current?.currentTime ?? 0)}
+          onTimeUpdate={() => {
+            if (!draggingRef.current) setCurrent(mediaRef.current?.currentTime ?? 0)
+          }}
           onLoadedMetadata={() => setDuration(mediaRef.current?.duration ?? 0)}
         />
       ) : null}
       {embed ? null : (
         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/45 to-transparent px-4 pt-12 pb-3">
           <div
-            className={`relative mb-2.5 h-0.5 w-full bg-white/35 ${source && kind !== 'embed' ? 'cursor-pointer' : ''}`}
-            role="progressbar"
+            ref={trackRef}
+            role="slider"
+            tabIndex={canSeek ? 0 : -1}
             aria-valuemin={0}
-            aria-valuemax={100}
-            aria-valuenow={Math.round(played)}
-            aria-label="Playback progress"
-            onClick={seek}
+            aria-valuemax={Math.round(duration) || 100}
+            aria-valuenow={Math.round(current)}
+            aria-valuetext={clock}
+            aria-label="Seek"
+            aria-disabled={!canSeek}
+            className={`group relative mb-1 flex h-8 w-full items-center touch-none outline-none ${
+              canSeek ? 'cursor-pointer' : 'cursor-default'
+            }`}
+            onPointerDown={onTrackPointerDown}
+            onPointerMove={onTrackPointerMove}
+            onPointerUp={onTrackPointerUp}
+            onPointerCancel={onTrackPointerUp}
+            onKeyDown={onTrackKeyDown}
           >
-            <div className="absolute inset-y-0 left-0 bg-white" style={{ width: `${played}%` }} />
+            <div className="relative h-1 w-full rounded-full bg-white/35 transition-[height] group-hover:h-1.5 group-focus-visible:h-1.5">
+              <div
+                className="absolute inset-y-0 left-0 rounded-full bg-white"
+                style={{ width: `${played}%` }}
+              />
+              <div
+                className={`absolute top-1/2 size-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white shadow-[0_1px_4px_rgba(0,0,0,0.35)] transition-transform ${
+                  canSeek
+                    ? scrubbing
+                      ? 'scale-110'
+                      : 'scale-100 group-hover:scale-110 group-focus-visible:scale-110'
+                    : 'scale-90 opacity-80'
+                }`}
+                style={{ left: `${played}%` }}
+                aria-hidden="true"
+              />
+            </div>
           </div>
           <div className="flex items-center gap-3 text-white">
             <button
