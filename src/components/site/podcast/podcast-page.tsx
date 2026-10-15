@@ -141,6 +141,7 @@ export function PodcastPage({ content }: { content: PodcastPageContent }) {
                 imageSrc={content.coverSrc}
                 imageAlt={content.coverAlt}
                 mediaUrl={content.mediaUrl}
+                transcript={content.transcript}
               />
               <EpisodeBrief
                 title={content.title}
