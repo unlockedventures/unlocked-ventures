@@ -12,16 +12,41 @@ function formatTime(seconds: number) {
   return `${minutes}:${secs}`
 }
 
+function youtubeId(url: string) {
+  const match = url.match(
+    /(?:youtube(?:-nocookie)?\.com\/(?:watch\?(?:[^#]*&)?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([\w-]{11})/i,
+  )
+  return match?.[1] ?? null
+}
+
 function embedSrc(url: string) {
-  const youtube = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})/)
-  if (youtube) return `https://www.youtube.com/embed/${youtube[1]}?autoplay=1`
-  const vimeo = url.match(/vimeo\.com\/(?:video\/)?(\d+)/)
+  const yt = youtubeId(url)
+  if (yt) return `https://www.youtube.com/embed/${yt}?autoplay=1`
+  const vimeo = url.match(/vimeo\.com\/(?:video\/)?(\d+)/i)
   if (vimeo) return `https://player.vimeo.com/video/${vimeo[1]}?autoplay=1`
   return null
 }
 
-function fileKind(url: string) {
+/** Hosts / patterns the browser cannot play in <audio>/<video>. */
+function unsuitableReason(url: string): string | null {
+  if (embedSrc(url)) return null
+  try {
+    const host = new URL(url, 'https://example.invalid').hostname.toLowerCase()
+    if (host.includes('googlevideo.com') || host.includes('youtube.com') || host === 'youtu.be') {
+      return 'Use a YouTube watch/share link, not a direct stream URL.'
+    }
+    if (host.includes('spotify.com') || host.includes('podcasts.apple.com') || host.includes('music.apple.com')) {
+      return 'Platform page links cannot be played here. Upload audio or paste a direct file / YouTube / Vimeo URL.'
+    }
+  } catch {
+    return 'This media link is not a valid URL.'
+  }
+  return null
+}
+
+function fileKind(url: string): 'embed' | 'video' | 'audio' | 'unsupported' {
   if (embedSrc(url)) return 'embed'
+  if (unsuitableReason(url)) return 'unsupported'
   if (/\.(mp4|webm|ogv|mov)(\?|#|$)/i.test(url)) return 'video'
   return 'audio'
 }
@@ -41,7 +66,10 @@ export function EpisodePlayer({
   imageAlt: string
   mediaUrl?: string
 }) {
-  const mediaRef = useRef<HTMLMediaElement>(null)
+  const mediaRef = useRef<HTMLMediaElement | null>(null)
+  const setMediaRef = useCallback((node: HTMLAudioElement | HTMLVideoElement | null) => {
+    mediaRef.current = node
+  }, [])
   const trackRef = useRef<HTMLDivElement>(null)
   const draggingRef = useRef(false)
   const [playing, setPlaying] = useState(false)
@@ -49,17 +77,30 @@ export function EpisodePlayer({
   const [duration, setDuration] = useState(0)
   const [embed, setEmbed] = useState<string | null>(null)
   const [scrubbing, setScrubbing] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const source = mediaUrl?.trim() ?? ''
   const kind = source ? fileKind(source) : null
-  const canSeek = Boolean(source && kind !== 'embed' && duration > 0)
+  const blocked = source ? unsuitableReason(source) : null
+  const canPlay = Boolean(source && kind && kind !== 'unsupported')
+  const canSeek = Boolean(canPlay && kind !== 'embed' && duration > 0)
   const played =
     duration > 0
       ? Math.min(100, Math.max(0, (current / duration) * 100))
       : Math.min(100, Math.max(0, progress * 100))
   const clock = duration > 0 ? `${formatTime(current)} / ${formatTime(duration)}` : timeLabel
+  const statusMessage = error || blocked || (!source ? 'No audio linked for this episode.' : null)
 
-  function toggle() {
-    if (!source) return
+  function onMediaError() {
+    setPlaying(false)
+    setError('This media file could not be played. Check the URL or upload a new audio file.')
+  }
+
+  async function toggle() {
+    if (!canPlay) {
+      setError(blocked || 'No playable media for this episode.')
+      return
+    }
+    setError(null)
     if (kind === 'embed') {
       setEmbed(embedSrc(source))
       setPlaying(true)
@@ -68,7 +109,11 @@ export function EpisodePlayer({
     const media = mediaRef.current
     if (!media) return
     if (media.paused) {
-      void media.play()
+      try {
+        await media.play()
+      } catch {
+        onMediaError()
+      }
     } else {
       media.pause()
     }
@@ -146,15 +191,19 @@ export function EpisodePlayer({
         />
       ) : kind === 'video' ? (
         <video
-          ref={mediaRef}
+          ref={setMediaRef}
           src={source}
           poster={imageSrc}
           playsInline
           preload="metadata"
           className="aspect-[16/9] w-full object-cover"
-          onPlay={() => setPlaying(true)}
+          onPlay={() => {
+            setError(null)
+            setPlaying(true)
+          }}
           onPause={() => setPlaying(false)}
           onEnded={() => setPlaying(false)}
+          onError={onMediaError}
           onTimeUpdate={() => {
             if (!draggingRef.current) setCurrent(mediaRef.current?.currentTime ?? 0)
           }}
@@ -167,12 +216,16 @@ export function EpisodePlayer({
       )}
       {kind === 'audio' ? (
         <audio
-          ref={mediaRef}
+          ref={setMediaRef}
           src={source}
           preload="metadata"
-          onPlay={() => setPlaying(true)}
+          onPlay={() => {
+            setError(null)
+            setPlaying(true)
+          }}
           onPause={() => setPlaying(false)}
           onEnded={() => setPlaying(false)}
+          onError={onMediaError}
           onTimeUpdate={() => {
             if (!draggingRef.current) setCurrent(mediaRef.current?.currentTime ?? 0)
           }}
@@ -222,8 +275,11 @@ export function EpisodePlayer({
             <button
               type="button"
               aria-label={playing ? 'Pause' : 'Play'}
-              onClick={toggle}
-              className="shrink-0 cursor-pointer"
+              aria-disabled={!canPlay}
+              onClick={() => {
+                void toggle()
+              }}
+              className={`shrink-0 ${canPlay ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}
             >
               {playing ? (
                 <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
@@ -234,7 +290,14 @@ export function EpisodePlayer({
                 <img src="/podcast/episode/icons/play.svg" alt="" width={32} height={32} />
               )}
             </button>
-            <p className="min-w-0 flex-1 truncate font-sans text-sm leading-5 font-normal">{title}</p>
+            <div className="min-w-0 flex-1">
+              <p className="truncate font-sans text-sm leading-5 font-normal">{title}</p>
+              {statusMessage ? (
+                <p className="mt-0.5 truncate font-sans text-[11px] leading-4 font-normal text-white/80" role="status">
+                  {statusMessage}
+                </p>
+              ) : null}
+            </div>
             <p className="shrink-0 font-sans text-xs leading-4 font-normal tabular-nums">{clock}</p>
           </div>
         </div>
