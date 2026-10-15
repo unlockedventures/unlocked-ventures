@@ -8,8 +8,8 @@ export type RelatedSolutionsSectionProps = {
     href: string
     body: string
     iconSrc?: string
-    iconWidth: number
-    iconHeight: number
+    iconWidth?: number
+    iconHeight?: number
   }[]
 }
 
@@ -31,8 +31,8 @@ export function RelatedSolutionsSection({ title, solutions }: RelatedSolutionsSe
                   <Image
                     src={solution.iconSrc}
                     alt=""
-                    width={solution.iconWidth}
-                    height={solution.iconHeight}
+                    width={solution.iconWidth || 80}
+                    height={solution.iconHeight || 80}
                     className="h-20 w-auto shrink-0 self-start"
                     style={{ width: 'auto', height: 80 }}
                   />

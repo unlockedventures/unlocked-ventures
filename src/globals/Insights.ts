@@ -6,7 +6,7 @@ export const Insights: GlobalConfig = {
   slug: 'insights',
   label: 'Insights page',
   admin: {
-    group: adminGroups.news,
+    group: adminGroups.pages,
     description:
       'Heading and introduction for the Insights blog list. Articles themselves are edited under News and blogs.',
     hideAPIURL: true,

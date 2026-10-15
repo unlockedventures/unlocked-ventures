@@ -6,7 +6,16 @@ import {
   solutionsAssetPaths,
   solutionsSeed,
 } from '@/data/solutions-seed'
+import { lexicalFromHeadingAndParagraphs } from '@/lib/lexical-plain'
 import { uploadPublicFile } from '@/data/upload-public-file'
+
+function bodyFromSeed(item: (typeof solutionsSeed)[number]) {
+  const paragraphs = [
+    ...item.engagementItems.flatMap((entry) => [`${entry.number}. ${entry.title}`, entry.body]),
+    ...item.steps.flatMap((step) => [`${step.number}. ${step.title}`, step.body]),
+  ]
+  return lexicalFromHeadingAndParagraphs(item.engagementTitle, paragraphs)
+}
 
 export async function seedSolutions(payload: Payload) {
   const existing = await payload.find({
@@ -93,6 +102,7 @@ export async function seedSolutions(payload: Payload) {
         illustration: illustration.id,
         heroImage: heroImage.id,
         heroImageAlt: item.current,
+        body: bodyFromSeed(item),
         engagementTitle: item.engagementTitle,
         engagementItems: [...item.engagementItems],
         howWeWorkTitle: item.howWeWorkTitle,

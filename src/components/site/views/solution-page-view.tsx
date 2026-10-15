@@ -1,19 +1,16 @@
 'use client'
 
-import { EngagementSection } from '@/components/site/solutions/engagement-section'
-import { HowWeWorkSection } from '@/components/site/solutions/how-we-work-section'
-import { ServiceIntroSection } from '@/components/site/solutions/intro-section'
 import { RelatedSolutionsSection } from '@/components/site/solutions/related-solutions-section'
+import { SolutionArticle } from '@/components/site/solutions/solution-article'
 import { SolutionSidebar } from '@/components/site/solutions/solution-sidebar'
 import { TryingToBuildSection } from '@/components/site/solutions/trying-to-build-section'
 import { SuccessStoriesSection } from '@/components/site/success-stories/success-stories-section'
-import { useNavigation, useSolution, useSuccessStories } from '@/hooks/queries/use-site-queries'
+import { useNavigation, useSolution } from '@/hooks/queries/use-site-queries'
 
 const SIDEBAR_LABELS = ['Strategic Advisory', 'Digital Engineering'] as const
 
 export function SolutionPageView({ slug }: { slug: string }) {
   const page = useSolution(slug)
-  const successStories = useSuccessStories()
   const navigation = useNavigation()
   const content = page.data
 
@@ -34,17 +31,20 @@ export function SolutionPageView({ slug }: { slug: string }) {
         ) : null}
 
         <div className="min-w-0">
-          <ServiceIntroSection {...content.intro} />
-          <EngagementSection {...content.engagement} />
-          <HowWeWorkSection {...content.howWeWork} />
-          {successStories.data ? (
+          <SolutionArticle {...content.article} />
+
+          {content.successStories ? (
             <SuccessStoriesSection
-              {...successStories.data}
+              {...content.successStories}
               className="[&>div]:max-w-none [&>div]:px-0"
             />
           ) : null}
+
           <TryingToBuildSection {...content.cta} />
-          <RelatedSolutionsSection {...content.related} />
+
+          {content.related.solutions.length ? (
+            <RelatedSolutionsSection {...content.related} />
+          ) : null}
         </div>
       </div>
     </div>

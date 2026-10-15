@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { adminGroups } from '@/admin/editor-guide'
 import { buttonGroup, linkField, sizeField } from '@/admin/editor-fields'
+import { articleEditor } from '@/fields/lexical/article-editor'
 
 export const Solutions: CollectionConfig = {
   slug: 'solutions',
@@ -10,8 +11,8 @@ export const Solutions: CollectionConfig = {
     plural: 'Solutions',
   },
   admin: {
-    group: adminGroups.pages,
-    description: 'Service detail pages linked from Strategic Advisory and Digital Engineering menus.',
+    group: adminGroups.solutions,
+    description: 'Service articles linked from Strategic Advisory and Digital Engineering menus.',
     hideAPIURL: true,
     useAsTitle: 'current',
     defaultColumns: ['current', 'slug', 'category', 'updatedAt'],
@@ -46,18 +47,18 @@ export const Solutions: CollectionConfig = {
       type: 'tabs',
       tabs: [
         {
-          label: 'Top of the page',
+          label: 'Article',
           fields: [
             {
               name: 'breadcrumbs',
               type: 'array',
-              label: 'Page path',
+              label: 'Breadcrumb path',
               labels: {
                 singular: 'Step',
                 plural: 'Steps',
               },
               admin: {
-                description: 'The small links above the title, such as Home and Our solutions.',
+                description: 'Links above the title, such as Home and Digital Engineering.',
               },
               fields: [
                 {
@@ -72,112 +73,50 @@ export const Solutions: CollectionConfig = {
             {
               name: 'current',
               type: 'text',
+              label: 'Current breadcrumb',
               required: true,
               admin: {
-                description: 'The last step in the path. This is the page people are on, so it is not a link.',
+                description: 'Last breadcrumb step (not a link). Usually the service name.',
               },
             },
             {
               name: 'title',
               type: 'textarea',
+              label: 'Article title',
               required: true,
             },
             {
               name: 'description',
               type: 'textarea',
+              label: 'Short / key description',
               required: true,
-            },
-            {
-              name: 'illustration',
-              type: 'upload',
-              label: 'Illustration',
-              relationTo: 'media',
               admin: {
-                description: 'Choose a different file to replace this picture.',
+                description: 'Shown under the title, before the image.',
               },
             },
             {
               name: 'heroImage',
               type: 'upload',
-              label: 'Photo',
+              label: 'Article image',
               relationTo: 'media',
               admin: {
-                description: 'Choose a different file to replace this photo.',
+                description: 'Main image under the short description.',
               },
             },
             {
               name: 'heroImageAlt',
               type: 'text',
-            },
-          ],
-        },
-        {
-          label: 'Engagement',
-          fields: [
-            {
-              name: 'engagementTitle',
-              type: 'text',
-              required: true,
+              label: 'Article image alt text',
             },
             {
-              name: 'engagementItems',
-              type: 'array',
-              labels: {
-                singular: 'Item',
-                plural: 'Items',
+              name: 'body',
+              type: 'richText',
+              label: 'Article body',
+              editor: articleEditor,
+              admin: {
+                description:
+                  'Write the article here. Use Upload to add an image or video from your device, or insert Image / video link to paste a URL (including YouTube / Vimeo).',
               },
-              fields: [
-                {
-                  name: 'number',
-                  type: 'text',
-                  required: true,
-                },
-                {
-                  name: 'title',
-                  type: 'text',
-                  required: true,
-                },
-                {
-                  name: 'body',
-                  type: 'textarea',
-                  required: true,
-                },
-              ],
-            },
-          ],
-        },
-        {
-          label: 'How we work',
-          fields: [
-            {
-              name: 'howWeWorkTitle',
-              type: 'text',
-              required: true,
-            },
-            {
-              name: 'steps',
-              type: 'array',
-              labels: {
-                singular: 'Step',
-                plural: 'Steps',
-              },
-              fields: [
-                {
-                  name: 'number',
-                  type: 'text',
-                  required: true,
-                },
-                {
-                  name: 'title',
-                  type: 'text',
-                  required: true,
-                },
-                {
-                  name: 'body',
-                  type: 'textarea',
-                  required: true,
-                },
-              ],
             },
           ],
         },
@@ -188,6 +127,7 @@ export const Solutions: CollectionConfig = {
               name: 'ctaTitle',
               type: 'text',
               required: true,
+              defaultValue: 'Tell us what you are trying to build.',
             },
             {
               name: 'ctaDescription',
@@ -204,13 +144,18 @@ export const Solutions: CollectionConfig = {
               name: 'relatedTitle',
               type: 'text',
               required: true,
+              defaultValue: 'Related solutions',
             },
             {
               name: 'related',
               type: 'array',
+              label: 'Related solutions',
               labels: {
                 singular: 'Solution',
                 plural: 'Solutions',
+              },
+              admin: {
+                description: 'Only solutions related to this article. Shown at the bottom of the page.',
               },
               fields: [
                 {
@@ -229,10 +174,6 @@ export const Solutions: CollectionConfig = {
                   type: 'upload',
                   label: 'Icon',
                   relationTo: 'media',
-                  admin: {
-                    description:
-                      'Choose a different file to replace this icon. Add or remove a solution with the controls on this list.',
-                  },
                 },
                 sizeField('iconWidth', 'Icon width (pixels)'),
                 sizeField('iconHeight', 'Icon height (pixels)'),
@@ -240,6 +181,43 @@ export const Solutions: CollectionConfig = {
             },
           ],
         },
+      ],
+    },
+    // Legacy fields kept for existing rows; hidden from editors.
+    {
+      name: 'illustration',
+      type: 'upload',
+      relationTo: 'media',
+      admin: { hidden: true },
+    },
+    {
+      name: 'engagementTitle',
+      type: 'text',
+      admin: { hidden: true },
+    },
+    {
+      name: 'engagementItems',
+      type: 'array',
+      admin: { hidden: true },
+      fields: [
+        { name: 'number', type: 'text' },
+        { name: 'title', type: 'text' },
+        { name: 'body', type: 'textarea' },
+      ],
+    },
+    {
+      name: 'howWeWorkTitle',
+      type: 'text',
+      admin: { hidden: true },
+    },
+    {
+      name: 'steps',
+      type: 'array',
+      admin: { hidden: true },
+      fields: [
+        { name: 'number', type: 'text' },
+        { name: 'title', type: 'text' },
+        { name: 'body', type: 'textarea' },
       ],
     },
   ],

@@ -551,6 +551,25 @@ EXCEPTION
 END $$;
 
 -- ---------------------------------------------------------------------------
+-- case_studies ↔ header nav child
+-- ---------------------------------------------------------------------------
+ALTER TABLE case_studies ADD COLUMN IF NOT EXISTS header_nav_child character varying;
+CREATE INDEX IF NOT EXISTS case_studies_header_nav_child_idx ON case_studies USING btree (header_nav_child);
+
+-- ---------------------------------------------------------------------------
+-- solutions article body (rich text)
+-- ---------------------------------------------------------------------------
+ALTER TABLE solutions ADD COLUMN IF NOT EXISTS body jsonb;
+DO $$ BEGIN
+  ALTER TABLE solutions ALTER COLUMN engagement_title DROP NOT NULL;
+EXCEPTION WHEN others THEN NULL;
+END $$;
+DO $$ BEGIN
+  ALTER TABLE solutions ALTER COLUMN how_we_work_title DROP NOT NULL;
+EXCEPTION WHEN others THEN NULL;
+END $$;
+
+-- ---------------------------------------------------------------------------
 -- pipeline ↔ channel / episode wiring
 -- ---------------------------------------------------------------------------
 ALTER TABLE pipeline ADD COLUMN IF NOT EXISTS channel_id integer;

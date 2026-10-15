@@ -19,6 +19,8 @@ export const Media: CollectionConfig = {
   access: {
     read: () => true,
   },
+  // Allow inserting uploads from the device into Lexical article fields.
+  enableRichTextRelationship: true,
   fields: [
     {
       name: 'kind',

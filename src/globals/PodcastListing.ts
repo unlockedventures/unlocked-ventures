@@ -6,7 +6,7 @@ export const PodcastListing: GlobalConfig = {
   slug: 'podcast-listing',
   label: 'Podcast list page',
   admin: {
-    group: adminGroups.podcast,
+    group: adminGroups.pages,
     description:
       'Heading, browse chips, and subscribe row for /podcast. Episode filters use Channels; keep browse chips in sync with channel names if you use them.',
     hideAPIURL: true,

@@ -538,12 +538,19 @@ export interface PodcastEpisode {
  */
 export interface CaseStudy {
   id: number;
+  /**
+   * Required. Choose a service from Strategic Advisory or Digital Engineering in the Main menu.
+   */
+  headerNavChild: string;
   title: string;
   /**
    * A page on this site, such as /contact, or a full address starting with https://
    */
   href: string;
   ctaLabel: string;
+  /**
+   * Optional badge text on cards.
+   */
   category?: string | null;
   badge?: string | null;
   description?: string | null;
@@ -555,15 +562,12 @@ export interface CaseStudy {
    * Turn this on, then save, to include this story in the homepage Success stories section. The first homepage story is the large one.
    */
   featured?: boolean | null;
-  /**
-   * Lower numbers appear first.
-   */
   sortOrder: number;
   updatedAt: string;
   createdAt: string;
 }
 /**
- * Service detail pages linked from Strategic Advisory and Digital Engineering menus.
+ * Service articles linked from Strategic Advisory and Digital Engineering menus.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "solutions".
@@ -576,7 +580,7 @@ export interface Solution {
   slug: string;
   category: 'strategic-advisory' | 'digital-engineering';
   /**
-   * The small links above the title, such as Home and Our solutions.
+   * Links above the title, such as Home and Digital Engineering.
    */
   breadcrumbs?:
     | {
@@ -589,38 +593,37 @@ export interface Solution {
       }[]
     | null;
   /**
-   * The last step in the path. This is the page people are on, so it is not a link.
+   * Last breadcrumb step (not a link). Usually the service name.
    */
   current: string;
   title: string;
+  /**
+   * Shown under the title, before the image.
+   */
   description: string;
   /**
-   * Choose a different file to replace this picture.
-   */
-  illustration?: (number | null) | Media;
-  /**
-   * Choose a different file to replace this photo.
+   * Main image under the short description.
    */
   heroImage?: (number | null) | Media;
   heroImageAlt?: string | null;
-  engagementTitle: string;
-  engagementItems?:
-    | {
-        number: string;
-        title: string;
-        body: string;
-        id?: string | null;
-      }[]
-    | null;
-  howWeWorkTitle: string;
-  steps?:
-    | {
-        number: string;
-        title: string;
-        body: string;
-        id?: string | null;
-      }[]
-    | null;
+  /**
+   * Write the article here. Use Upload to add an image or video from your device, or insert Image / video link to paste a URL (including YouTube / Vimeo).
+   */
+  body?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   ctaTitle: string;
   ctaDescription: string;
   cta: {
@@ -631,6 +634,9 @@ export interface Solution {
     href: string;
   };
   relatedTitle: string;
+  /**
+   * Only solutions related to this article. Shown at the bottom of the page.
+   */
   related?:
     | {
         title: string;
@@ -639,9 +645,6 @@ export interface Solution {
          */
         href: string;
         body: string;
-        /**
-         * Choose a different file to replace this icon. Add or remove a solution with the controls on this list.
-         */
         icon?: (number | null) | Media;
         /**
          * Leave this unless the picture looks too big or too small.
@@ -651,6 +654,25 @@ export interface Solution {
          * Leave this unless the picture looks too big or too small.
          */
         iconHeight: number;
+        id?: string | null;
+      }[]
+    | null;
+  illustration?: (number | null) | Media;
+  engagementTitle?: string | null;
+  engagementItems?:
+    | {
+        number?: string | null;
+        title?: string | null;
+        body?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  howWeWorkTitle?: string | null;
+  steps?:
+    | {
+        number?: string | null;
+        title?: string | null;
+        body?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -1113,6 +1135,7 @@ export interface PodcastEpisodesSelect<T extends boolean = true> {
  * via the `definition` "case-studies_select".
  */
 export interface CaseStudiesSelect<T extends boolean = true> {
+  headerNavChild?: T;
   title?: T;
   href?: T;
   ctaLabel?: T;
@@ -1142,27 +1165,9 @@ export interface SolutionsSelect<T extends boolean = true> {
   current?: T;
   title?: T;
   description?: T;
-  illustration?: T;
   heroImage?: T;
   heroImageAlt?: T;
-  engagementTitle?: T;
-  engagementItems?:
-    | T
-    | {
-        number?: T;
-        title?: T;
-        body?: T;
-        id?: T;
-      };
-  howWeWorkTitle?: T;
-  steps?:
-    | T
-    | {
-        number?: T;
-        title?: T;
-        body?: T;
-        id?: T;
-      };
+  body?: T;
   ctaTitle?: T;
   ctaDescription?: T;
   cta?:
@@ -1181,6 +1186,25 @@ export interface SolutionsSelect<T extends boolean = true> {
         icon?: T;
         iconWidth?: T;
         iconHeight?: T;
+        id?: T;
+      };
+  illustration?: T;
+  engagementTitle?: T;
+  engagementItems?:
+    | T
+    | {
+        number?: T;
+        title?: T;
+        body?: T;
+        id?: T;
+      };
+  howWeWorkTitle?: T;
+  steps?:
+    | T
+    | {
+        number?: T;
+        title?: T;
+        body?: T;
         id?: T;
       };
   updatedAt?: T;
@@ -2837,6 +2861,23 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MediaEmbedBlock".
+ */
+export interface MediaEmbedBlock {
+  /**
+   * Paste a direct image link, a video file link, or a YouTube / Vimeo URL. To upload from your device, use Upload instead.
+   */
+  url: string;
+  /**
+   * Optional text shown under the media.
+   */
+  caption?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'mediaEmbed';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -122,7 +122,12 @@ export function buildAdminNav(sections: AdminSection[]): AdminNavItem[] {
   }
 
   const dynamicZoneItems: AdminNavItem[] = []
-  for (const label of [adminGroups.podcast, adminGroups.news, adminGroups.successStories] as const) {
+  for (const label of [
+    adminGroups.podcast,
+    adminGroups.news,
+    adminGroups.successStories,
+    adminGroups.solutions,
+  ] as const) {
     const section = byLabel.get(label)
     if (!section || section.links.length === 0) continue
     if (section.links.length === 1) {
@@ -157,6 +162,7 @@ export function buildAdminNav(sections: AdminSection[]): AdminNavItem[] {
       section.label === adminGroups.podcast ||
       section.label === adminGroups.news ||
       section.label === adminGroups.successStories ||
+      section.label === adminGroups.solutions ||
       section.label === adminGroups.dynamicZone
     ) {
       continue

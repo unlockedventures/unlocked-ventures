@@ -15,17 +15,31 @@ export const CaseStudies: CollectionConfig = {
       'Every success story. Check Show on the homepage to include a story there. The box saves when you click it. The first checked story in this list is the large one.',
     hideAPIURL: true,
     useAsTitle: 'title',
-    defaultColumns: ['title', 'featured', 'sortOrder'],
+    defaultColumns: ['title', 'headerNavChild', 'featured'],
   },
   access: {
     read: () => true,
   },
   defaultSort: 'sortOrder',
   fields: [
+    {
+      name: 'headerNavChild',
+      type: 'text',
+      label: 'Success category',
+      required: true,
+      index: true,
+      admin: {
+        description:
+          'Required. Choose a service from Strategic Advisory or Digital Engineering in the Main menu.',
+        components: {
+          Field: '@/components/admin/header-nav-child-field#HeaderNavChildField',
+        },
+      },
+    },
     { name: 'title', type: 'text', required: true },
     linkField(),
     { name: 'ctaLabel', type: 'text', label: 'Button text', required: true },
-    { name: 'category', type: 'text' },
+    { name: 'category', type: 'text', label: 'Category label', admin: { description: 'Optional badge text on cards.' } },
     { name: 'badge', type: 'text' },
     { name: 'description', type: 'textarea' },
     { name: 'image', type: 'upload', label: 'Picture', relationTo: 'media', admin: { description: 'The photo on this story. Choose a different file to replace it.' } },
@@ -48,7 +62,7 @@ export const CaseStudies: CollectionConfig = {
       label: 'Order',
       required: true,
       defaultValue: 0,
-      admin: { position: 'sidebar', description: 'Lower numbers appear first.' },
+      admin: { hidden: true },
     },
   ],
 }

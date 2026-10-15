@@ -1,15 +1,49 @@
+import type { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
-import type { EngagementSectionProps } from '@/components/site/solutions/engagement-section'
-import type { HowWeWorkSectionProps } from '@/components/site/solutions/how-we-work-section'
-import type { ServiceIntroSectionProps } from '@/components/site/solutions/intro-section'
 import type { RelatedSolutionsSectionProps } from '@/components/site/solutions/related-solutions-section'
+import type { SolutionArticleProps } from '@/components/site/solutions/solution-article'
 import type { TryingToBuildSectionProps } from '@/components/site/solutions/trying-to-build-section'
+import type { SuccessStoriesSectionProps } from '@/components/site/success-stories/success-stories-section'
+import { lexicalFromHeadingAndParagraphs } from '@/lib/lexical-plain'
 
 function mediaUrl(value: number | { url?: string | null } | null | undefined) {
   if (!value || typeof value === 'number' || !value.url) return undefined
   return value.url
+}
+
+function asEditorState(value: unknown): DefaultTypedEditorState | null {
+  if (!value || typeof value !== 'object') return null
+  const root = (value as { root?: unknown }).root
+  if (!root || typeof root !== 'object') return null
+  return value as DefaultTypedEditorState
+}
+
+function legacyBodyFromDoc(doc: {
+  engagementTitle?: string | null
+  engagementItems?: Array<{ number?: string | null; title?: string | null; body?: string | null }> | null
+  howWeWorkTitle?: string | null
+  steps?: Array<{ number?: string | null; title?: string | null; body?: string | null }> | null
+}): DefaultTypedEditorState | null {
+  const paragraphs: string[] = []
+
+  for (const item of doc.engagementItems ?? []) {
+    if (!item.title || !item.body) continue
+    paragraphs.push(`${item.number ? `${item.number}. ` : ''}${item.title}`)
+    paragraphs.push(item.body)
+  }
+
+  for (const step of doc.steps ?? []) {
+    if (!step.title || !step.body) continue
+    paragraphs.push(`${step.number ? `${step.number}. ` : ''}${step.title}`)
+    paragraphs.push(step.body)
+  }
+
+  if (!paragraphs.length) return null
+
+  const heading = doc.engagementTitle || doc.howWeWorkTitle || 'Overview'
+  return lexicalFromHeadingAndParagraphs(heading, paragraphs)
 }
 
 export type SolutionContent = {
@@ -17,11 +51,99 @@ export type SolutionContent = {
   category: 'strategic-advisory' | 'digital-engineering'
   current: string
   description: string
-  intro: ServiceIntroSectionProps
-  engagement: EngagementSectionProps
-  howWeWork: HowWeWorkSectionProps
+  article: SolutionArticleProps
   cta: TryingToBuildSectionProps
   related: RelatedSolutionsSectionProps
+  successStories: Omit<SuccessStoriesSectionProps, 'className'> | null
+}
+
+function getRelatedSolutions(doc: {
+  relatedTitle?: string | null
+  related?: Array<{
+    title?: string | null
+    href?: string | null
+    body?: string | null
+    icon?: number | { url?: string | null } | null
+    iconWidth?: number | null
+    iconHeight?: number | null
+  }> | null
+}): RelatedSolutionsSectionProps {
+  const title = doc.relatedTitle || 'Related solutions'
+  const solutions = (doc.related ?? []).flatMap((solution) => {
+    if (!solution.title || !solution.href || !solution.body) return []
+    return [
+      {
+        title: solution.title,
+        href: solution.href,
+        body: solution.body,
+        iconSrc: mediaUrl(solution.icon),
+        iconWidth: solution.iconWidth || 80,
+        iconHeight: solution.iconHeight || 80,
+      },
+    ]
+  })
+
+  return { title, solutions }
+}
+
+async function getSuccessStoriesForSolution(
+  payload: Awaited<ReturnType<typeof getPayload>>,
+  solutionHref: string,
+): Promise<Omit<SuccessStoriesSectionProps, 'className'> | null> {
+  const [section, result] = await Promise.all([
+    payload.findGlobal({ slug: 'success-stories' }),
+    payload.find({
+      collection: 'case-studies',
+      sort: 'sortOrder',
+      limit: 100,
+      depth: 1,
+      where: {
+        and: [
+          { featured: { equals: true } },
+          { headerNavChild: { equals: solutionHref } },
+        ],
+      },
+    }),
+  ])
+
+  const docs = result.docs
+  if (!section.title || !section.cta?.label || !section.cta.href || !docs.length) {
+    return null
+  }
+
+  const feature = docs[0]
+  if (!feature?.title || !feature.ctaLabel || !feature.href) return null
+
+  const stories = docs.flatMap((story) => {
+    if (story.id === feature.id || !story.title || !story.ctaLabel || !story.href) return []
+    return [
+      {
+        title: story.title,
+        href: story.href,
+        ctaLabel: story.ctaLabel,
+        imageSrc: mediaUrl(story.image),
+        category: story.category || undefined,
+      },
+    ]
+  })
+
+  return {
+    title: section.title,
+    subtitle: section.subtitle || undefined,
+    cta: {
+      label: section.cta.label,
+      href: section.cta.href,
+    },
+    feature: {
+      title: feature.title,
+      href: feature.href,
+      ctaLabel: feature.ctaLabel,
+      imageSrc: mediaUrl(feature.image),
+      description: feature.description || undefined,
+      badge: feature.badge || undefined,
+    },
+    stories,
+  }
 }
 
 export async function getSolution(slug: string): Promise<SolutionContent | null> {
@@ -34,7 +156,8 @@ export async function getSolution(slug: string): Promise<SolutionContent | null>
       },
     },
     limit: 1,
-    depth: 1,
+    // Depth 2 so Lexical upload nodes inside body resolve media URLs.
+    depth: 2,
   })
 
   const doc = result.docs[0]
@@ -46,13 +169,10 @@ export async function getSolution(slug: string): Promise<SolutionContent | null>
     !doc.title ||
     !doc.description ||
     !doc.current ||
-    !doc.engagementTitle ||
-    !doc.howWeWorkTitle ||
     !doc.ctaTitle ||
     !doc.ctaDescription ||
     !doc.cta?.label ||
-    !doc.cta.href ||
-    !doc.relatedTitle
+    !doc.cta.href
   ) {
     return null
   }
@@ -62,56 +182,26 @@ export async function getSolution(slug: string): Promise<SolutionContent | null>
     return [{ label: crumb.label, href: crumb.href }]
   })
 
-  const engagementItems = (doc.engagementItems ?? []).flatMap((item) => {
-    if (!item.number || !item.title || !item.body) return []
-    return [{ number: item.number, title: item.title, body: item.body }]
-  })
+  if (!breadcrumbs.length) return null
 
-  const steps = (doc.steps ?? []).flatMap((step) => {
-    if (!step.number || !step.title || !step.body) return []
-    return [{ number: step.number, title: step.title, body: step.body }]
-  })
-
-  const solutions = (doc.related ?? []).flatMap((solution) => {
-    if (!solution.title || !solution.href || !solution.body || !solution.iconWidth || !solution.iconHeight) {
-      return []
-    }
-
-    return [
-      {
-        title: solution.title,
-        href: solution.href,
-        body: solution.body,
-        iconSrc: mediaUrl(solution.icon),
-        iconWidth: solution.iconWidth,
-        iconHeight: solution.iconHeight,
-      },
-    ]
-  })
-
-  if (!breadcrumbs.length || !engagementItems.length || !steps.length || !solutions.length) return null
+  const body = asEditorState(doc.body) ?? legacyBodyFromDoc(doc)
+  const solutionHref = `/solutions/${doc.slug}`
+  const related = getRelatedSolutions(doc)
+  const successStories = await getSuccessStoriesForSolution(payload, solutionHref)
 
   return {
     slug: doc.slug,
     category: doc.category,
     current: doc.current,
     description: doc.description,
-    intro: {
+    article: {
       breadcrumbs,
       current: doc.current,
       title: doc.title,
       description: doc.description,
-      illustrationSrc: mediaUrl(doc.illustration),
       imageSrc: mediaUrl(doc.heroImage),
-      imageAlt: doc.heroImageAlt || '',
-    },
-    engagement: {
-      title: doc.engagementTitle,
-      items: engagementItems,
-    },
-    howWeWork: {
-      title: doc.howWeWorkTitle,
-      steps,
+      imageAlt: doc.heroImageAlt || doc.current || '',
+      body,
     },
     cta: {
       title: doc.ctaTitle,
@@ -121,10 +211,8 @@ export async function getSolution(slug: string): Promise<SolutionContent | null>
         href: doc.cta.href,
       },
     },
-    related: {
-      title: doc.relatedTitle,
-      solutions,
-    },
+    related,
+    successStories,
   }
 }
 

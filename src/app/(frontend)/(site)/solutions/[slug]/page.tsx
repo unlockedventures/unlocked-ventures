@@ -39,14 +39,14 @@ export default async function SolutionPage({ params }: PageProps) {
 
   const [solution] = await Promise.all([
     getSolution(slug),
-    prefetchSiteResources(queryClient, ['success-stories']),
+    prefetchSiteResources(queryClient, ['navigation']),
   ])
 
   if (!solution) notFound()
 
   await queryClient.prefetchQuery({
     queryKey: siteKeys.solution(slug),
-    queryFn: () => getSolution(slug),
+    queryFn: () => Promise.resolve(solution),
   })
 
   return (

@@ -6,7 +6,7 @@ export const OurSuccesses: GlobalConfig = {
   slug: 'our-successes',
   label: 'Our successes page',
   admin: {
-    group: adminGroups.successStories,
+    group: adminGroups.pages,
     description: 'Heading, introduction, and filter labels for the success stories page. The stories themselves are edited under Case studies.',
     hideAPIURL: true,
   },
