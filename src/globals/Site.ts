@@ -1,13 +1,18 @@
 import type { GlobalConfig } from 'payload'
 
 import { adminGroups } from '@/admin/editor-guide'
+import {
+  DEFAULT_CONTACT_EMAIL_HTML,
+  DEFAULT_CONTACT_EMAIL_SUBJECT,
+} from '@/lib/contact/email-template'
 
 export const Site: GlobalConfig = {
   slug: 'site',
   label: 'Browser title and missing pages',
   admin: {
     group: adminGroups.settings,
-    description: 'The name in the browser tab, and the message shown when a page cannot be found.',
+    description:
+      'The name in the browser tab, missing-page copy, and contact-form email settings.',
     hideAPIURL: true,
   },
   access: {
@@ -87,6 +92,47 @@ export const Site: GlobalConfig = {
       admin: {
         description: 'Shown when a page fails to load.',
       },
+    },
+    {
+      type: 'collapsible',
+      label: 'Contact form email',
+      admin: {
+        initCollapsed: false,
+        description:
+          'Where contact-form messages are emailed, and the HTML template used for that email.',
+      },
+      fields: [
+        {
+          name: 'ownerEmail',
+          type: 'email',
+          label: 'Owner email',
+          admin: {
+            description:
+              'Address that receives a copy of every contact-form submission.',
+          },
+        },
+        {
+          name: 'contactEmailSubject',
+          type: 'text',
+          label: 'Email subject template',
+          defaultValue: DEFAULT_CONTACT_EMAIL_SUBJECT,
+          admin: {
+            description:
+              'Use {{firstName}}, {{lastName}}, {{company}}, {{email}}, {{countryCode}}, {{phone}}, {{message}}.',
+          },
+        },
+        {
+          name: 'contactEmailHtml',
+          type: 'textarea',
+          label: 'Email HTML template',
+          defaultValue: DEFAULT_CONTACT_EMAIL_HTML,
+          admin: {
+            description:
+              'HTML body with the same {{placeholders}} as the subject. Leave blank to use the default.',
+            rows: 12,
+          },
+        },
+      ],
     },
   ],
 }

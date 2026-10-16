@@ -78,6 +78,7 @@ export interface Config {
     solutions: Solution;
     'trusted-logos': TrustedLogo;
     pipeline: Pipeline;
+    'contact-messages': ContactMessage;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -96,6 +97,7 @@ export interface Config {
     solutions: SolutionsSelect<false> | SolutionsSelect<true>;
     'trusted-logos': TrustedLogosSelect<false> | TrustedLogosSelect<true>;
     pipeline: PipelineSelect<false> | PipelineSelect<true>;
+    'contact-messages': ContactMessagesSelect<false> | ContactMessagesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -796,6 +798,28 @@ export interface Pipeline {
   createdAt: string;
 }
 /**
+ * Messages sent from the contact page. View only — editing is disabled.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contact-messages".
+ */
+export interface ContactMessage {
+  id: number;
+  firstName: string;
+  lastName: string;
+  company: string;
+  email: string;
+  countryCode?: string | null;
+  phone?: string | null;
+  message: string;
+  /**
+   * Whether the notification email reached the owner address.
+   */
+  emailSent?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -862,6 +886,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'pipeline';
         value: number | Pipeline;
+      } | null)
+    | ({
+        relationTo: 'contact-messages';
+        value: number | ContactMessage;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1269,6 +1297,22 @@ export interface PipelineSelect<T extends boolean = true> {
   scriptStatusMessage?: T;
   audioStatus?: T;
   audioStatusMessage?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contact-messages_select".
+ */
+export interface ContactMessagesSelect<T extends boolean = true> {
+  firstName?: T;
+  lastName?: T;
+  company?: T;
+  email?: T;
+  countryCode?: T;
+  phone?: T;
+  message?: T;
+  emailSent?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2139,7 +2183,7 @@ export interface Contact {
   createdAt?: string | null;
 }
 /**
- * The name in the browser tab, and the message shown when a page cannot be found.
+ * The name in the browser tab, missing-page copy, and contact-form email settings.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site".
@@ -2169,6 +2213,18 @@ export interface Site {
    * Shown when a page fails to load.
    */
   errorDescription?: string | null;
+  /**
+   * Address that receives a copy of every contact-form submission.
+   */
+  ownerEmail?: string | null;
+  /**
+   * Use {{firstName}}, {{lastName}}, {{company}}, {{email}}, {{countryCode}}, {{phone}}, {{message}}.
+   */
+  contactEmailSubject?: string | null;
+  /**
+   * HTML body with the same {{placeholders}} as the subject. Leave blank to use the default.
+   */
+  contactEmailHtml?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -2848,6 +2904,9 @@ export interface SiteSelect<T extends boolean = true> {
   errorLabel?: T;
   errorTitle?: T;
   errorDescription?: T;
+  ownerEmail?: T;
+  contactEmailSubject?: T;
+  contactEmailHtml?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

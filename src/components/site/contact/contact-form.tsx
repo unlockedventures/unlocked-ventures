@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { useContactStore } from '@/stores/contact-store'
@@ -50,10 +51,11 @@ export type ContactFormContent = {
 export function ContactForm({ content }: { content: ContactFormContent }) {
   const sent = useContactStore((state) => state.sent)
   const setSent = useContactStore((state) => state.setSent)
+  const [submitError, setSubmitError] = useState<string | null>(null)
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<ContactValues>({
     defaultValues: {
       firstName: '',
@@ -66,6 +68,33 @@ export function ContactForm({ content }: { content: ContactFormContent }) {
     },
   })
 
+  const onSubmit = async (values: ContactValues) => {
+    setSubmitError(null)
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          firstName: values.firstName.trim(),
+          lastName: values.lastName.trim(),
+          company: values.company.trim(),
+          email: values.email.trim(),
+          countryCode: values.countryCode.trim(),
+          phone: values.phone.trim(),
+          message: values.message.trim(),
+        }),
+      })
+      if (!response.ok) {
+        const data = (await response.json().catch(() => null)) as { error?: string } | null
+        setSubmitError(data?.error || 'Something went wrong. Please try again.')
+        return
+      }
+      setSent(true)
+    } catch {
+      setSubmitError('Something went wrong. Please try again.')
+    }
+  }
+
   if (sent) {
     return (
       <p className="font-sans text-2xl leading-8 font-normal tracking-[-0.5px] text-[#33353F]">
@@ -75,7 +104,7 @@ export function ContactForm({ content }: { content: ContactFormContent }) {
   }
 
   return (
-    <form className="flex flex-col gap-8" noValidate onSubmit={handleSubmit(() => setSent(true))}>
+    <form className="flex flex-col gap-8" noValidate onSubmit={handleSubmit(onSubmit)}>
       <div className="grid grid-cols-1 gap-x-8 gap-y-8 md:grid-cols-2">
         <label className="flex flex-col gap-[11px]">
           <span className={labelClassName}>{content.firstName.label}</span>
@@ -214,9 +243,11 @@ export function ContactForm({ content }: { content: ContactFormContent }) {
           ) : null}
         </label>
       </div>
+      {submitError ? <p className={errorClassName}>{submitError}</p> : null}
       <button
         type="submit"
-        className="group inline-flex h-12 w-fit cursor-pointer items-center gap-2.5 rounded-md bg-[#484D56] px-5 font-sans text-base leading-6 font-normal text-white transition-[background-color,box-shadow,transform] duration-300 ease-out hover:-translate-y-0.5 hover:bg-[#3c4149] hover:shadow-[0_12px_28px_-14px_rgba(72,77,86,0.55)] focus-visible:-translate-y-0.5 focus-visible:bg-[#3c4149] focus-visible:shadow-[0_12px_28px_-14px_rgba(72,77,86,0.55)] focus-visible:outline-none motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+        disabled={isSubmitting}
+        className="group inline-flex h-12 w-fit cursor-pointer items-center gap-2.5 rounded-md bg-[#484D56] px-5 font-sans text-base leading-6 font-normal text-white transition-[background-color,box-shadow,transform] duration-300 ease-out hover:-translate-y-0.5 hover:bg-[#3c4149] hover:shadow-[0_12px_28px_-14px_rgba(72,77,86,0.55)] focus-visible:-translate-y-0.5 focus-visible:bg-[#3c4149] focus-visible:shadow-[0_12px_28px_-14px_rgba(72,77,86,0.55)] focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
       >
         {content.submitLabel}
         <Image

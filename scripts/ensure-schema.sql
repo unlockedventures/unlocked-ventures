@@ -596,3 +596,38 @@ ALTER TABLE pipeline ADD COLUMN IF NOT EXISTS host_voice_id varchar;
 ALTER TABLE pipeline ADD COLUMN IF NOT EXISTS guest_voice_id varchar;
 ALTER TABLE pipeline ADD COLUMN IF NOT EXISTS audio_status varchar DEFAULT 'idle';
 ALTER TABLE pipeline ADD COLUMN IF NOT EXISTS audio_status_message varchar;
+
+-- ---------------------------------------------------------------------------
+-- contact messages + site owner email settings
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS contact_messages (
+  id serial PRIMARY KEY,
+  first_name character varying NOT NULL,
+  last_name character varying NOT NULL,
+  company character varying NOT NULL,
+  email character varying NOT NULL,
+  country_code character varying,
+  phone character varying,
+  message character varying NOT NULL,
+  email_sent boolean DEFAULT false,
+  updated_at timestamp(3) with time zone DEFAULT now() NOT NULL,
+  created_at timestamp(3) with time zone DEFAULT now() NOT NULL
+);
+CREATE INDEX IF NOT EXISTS contact_messages_created_at_idx ON contact_messages USING btree (created_at);
+CREATE INDEX IF NOT EXISTS contact_messages_updated_at_idx ON contact_messages USING btree (updated_at);
+CREATE INDEX IF NOT EXISTS contact_messages_email_idx ON contact_messages USING btree (email);
+
+ALTER TABLE site ADD COLUMN IF NOT EXISTS owner_email character varying;
+ALTER TABLE site ADD COLUMN IF NOT EXISTS contact_email_subject character varying;
+ALTER TABLE site ADD COLUMN IF NOT EXISTS contact_email_html character varying;
+
+-- Payload lock relation column for contact-messages (needed to open a message in admin)
+ALTER TABLE payload_locked_documents_rels ADD COLUMN IF NOT EXISTS contact_messages_id integer;
+CREATE INDEX IF NOT EXISTS payload_locked_documents_rels_contact_messages_id_idx
+  ON payload_locked_documents_rels USING btree (contact_messages_id);
+DO $$ BEGIN
+  ALTER TABLE payload_locked_documents_rels
+    ADD CONSTRAINT payload_locked_documents_rels_contact_messages_fk
+    FOREIGN KEY (contact_messages_id) REFERENCES contact_messages(id) ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;

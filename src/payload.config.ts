@@ -1,4 +1,5 @@
 import { postgresAdapter } from '@payloadcms/db-postgres'
+import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { buildConfig } from 'payload'
@@ -13,6 +14,7 @@ import { seedPodcastListing } from './data/seed-podcast-listing'
 import { seedPodcastPage } from './data/seed-podcast-page'
 import { Awards } from './collections/Awards'
 import { CaseStudies } from './collections/CaseStudies'
+import { ContactMessages } from './collections/ContactMessages'
 import { NewsPosts } from './collections/NewsPosts'
 import { Pipeline } from './collections/Pipeline'
 import { PodcastAudio } from './collections/PodcastAudio'
@@ -92,7 +94,27 @@ export default buildConfig({
     Solutions,
     TrustedLogos,
     Pipeline,
+    ContactMessages,
   ],
+  email: process.env.SMTP_HOST
+    ? await nodemailerAdapter({
+        defaultFromAddress: process.env.SMTP_FROM_ADDRESS || 'noreply@unlockedventures.com',
+        defaultFromName: process.env.SMTP_FROM_NAME || 'Unlocked Ventures',
+        skipVerify: process.env.SMTP_SKIP_VERIFY === 'true',
+        transportOptions: {
+          host: process.env.SMTP_HOST,
+          port: Number(process.env.SMTP_PORT || 587),
+          secure: process.env.SMTP_SECURE === 'true',
+          auth:
+            process.env.SMTP_USER && process.env.SMTP_PASS
+              ? {
+                  user: process.env.SMTP_USER,
+                  pass: process.env.SMTP_PASS,
+                }
+              : undefined,
+        },
+      })
+    : undefined,
   globals: [
     About,
     AwardsSection,

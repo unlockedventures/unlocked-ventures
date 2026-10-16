@@ -11,6 +11,7 @@ export const adminGroups = {
   library: 'Library',
   accounts: 'Accounts',
   settings: 'Settings',
+  inbox: 'Inbox',
 } as const
 
 export const adminGroupOrder = [
@@ -26,6 +27,7 @@ export const adminGroupOrder = [
   adminGroups.library,
   adminGroups.accounts,
   adminGroups.settings,
+  adminGroups.inbox,
 ]
 
 export const adminSlugOrder = [
@@ -59,6 +61,7 @@ export const adminSlugOrder = [
   'media',
   'users',
   'site',
+  'contact-messages',
 ]
 
 export const linkHint =

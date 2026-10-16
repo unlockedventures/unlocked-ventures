@@ -1,3 +1,8 @@
+import {
+  DEFAULT_CONTACT_EMAIL_HTML,
+  DEFAULT_CONTACT_EMAIL_SUBJECT,
+} from '@/lib/contact/email-template'
+
 export const siteSeed = {
   title: 'Unlocked Ventures',
   description: 'Unlocked Ventures',
@@ -10,4 +15,6 @@ export const siteSeed = {
   errorLabel: 'Error',
   errorTitle: 'Something went wrong',
   errorDescription: 'This page could not be loaded.',
+  contactEmailSubject: DEFAULT_CONTACT_EMAIL_SUBJECT,
+  contactEmailHtml: DEFAULT_CONTACT_EMAIL_HTML,
 }
