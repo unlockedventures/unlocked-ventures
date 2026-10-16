@@ -1,0 +1,57 @@
+{
+  "metric": "Time to First Byte (TTFB)",
+  "auditId": "server-response-time",
+  "generatedAt": "2026-10-16T07:03:23.219Z",
+  "baseUrl": "http://127.0.0.1:3000",
+  "formFactor": "desktop",
+  "results": [
+    {
+      "page": "home",
+      "url": "http://127.0.0.1:3000/",
+      "display": "Root document took 310 ms",
+      "numeric": 312,
+      "score": 1,
+      "rating": "good"
+    },
+    {
+      "page": "about",
+      "url": "http://127.0.0.1:3000/about",
+      "display": "Root document took 170 ms",
+      "numeric": 173,
+      "score": 1,
+      "rating": "good"
+    },
+    {
+      "page": "contact",
+      "url": "http://127.0.0.1:3000/contact",
+      "display": "Root document took 150 ms",
+      "numeric": 148,
+      "score": 1,
+      "rating": "good"
+    },
+    {
+      "page": "podcast",
+      "url": "http://127.0.0.1:3000/podcast",
+      "display": "Root document took 290 ms",
+      "numeric": 288,
+      "score": 1,
+      "rating": "good"
+    },
+    {
+      "page": "insights",
+      "url": "http://127.0.0.1:3000/insights",
+      "display": "Root document took 110 ms",
+      "numeric": 111,
+      "score": 1,
+      "rating": "good"
+    },
+    {
+      "page": "our-successes",
+      "url": "http://127.0.0.1:3000/our-successes",
+      "display": "Root document took 110 ms",
+      "numeric": 106,
+      "score": 1,
+      "rating": "good"
+    }
+  ]
+}

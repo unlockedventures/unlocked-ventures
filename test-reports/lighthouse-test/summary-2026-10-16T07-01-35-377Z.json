@@ -1,0 +1,270 @@
+{
+  "generatedAt": "2026-10-16T07:03:23.220Z",
+  "baseUrl": "http://127.0.0.1:3000",
+  "pages": [
+    {
+      "id": "home",
+      "url": "http://127.0.0.1:3000/",
+      "performanceScore": 97,
+      "metrics": {
+        "first-contentful-paint": {
+          "displayValue": "0.4 s",
+          "numericValue": 390.528,
+          "score": 1
+        },
+        "largest-contentful-paint": {
+          "displayValue": "1.2 s",
+          "numericValue": 1241.056,
+          "score": 0.88
+        },
+        "cumulative-layout-shift": {
+          "displayValue": "0",
+          "numericValue": 0,
+          "score": 1
+        },
+        "total-blocking-time": {
+          "displayValue": "0 ms",
+          "numericValue": 2.5,
+          "score": 1
+        },
+        "speed-index": {
+          "displayValue": "0.7 s",
+          "numericValue": 694.1084083488926,
+          "score": 1
+        },
+        "server-response-time": {
+          "displayValue": "Root document took 310 ms",
+          "numericValue": 312,
+          "score": 1
+        },
+        "interaction-to-next-paint": {
+          "displayValue": null,
+          "numericValue": null,
+          "score": null
+        }
+      },
+      "htmlPath": "lighthouse-test/home-2026-10-16T07-01-35-377Z.report.html",
+      "jsonPath": "lighthouse-test/home-2026-10-16T07-01-35-377Z.report.json"
+    },
+    {
+      "id": "about",
+      "url": "http://127.0.0.1:3000/about",
+      "performanceScore": 100,
+      "metrics": {
+        "first-contentful-paint": {
+          "displayValue": "0.3 s",
+          "numericValue": 316.992,
+          "score": 1
+        },
+        "largest-contentful-paint": {
+          "displayValue": "0.7 s",
+          "numericValue": 696.9920000000001,
+          "score": 0.99
+        },
+        "cumulative-layout-shift": {
+          "displayValue": "0",
+          "numericValue": 0,
+          "score": 1
+        },
+        "total-blocking-time": {
+          "displayValue": "0 ms",
+          "numericValue": 0,
+          "score": 1
+        },
+        "speed-index": {
+          "displayValue": "0.5 s",
+          "numericValue": 516.2230260979716,
+          "score": 1
+        },
+        "server-response-time": {
+          "displayValue": "Root document took 170 ms",
+          "numericValue": 173,
+          "score": 1
+        },
+        "interaction-to-next-paint": {
+          "displayValue": null,
+          "numericValue": null,
+          "score": null
+        }
+      },
+      "htmlPath": "lighthouse-test/about-2026-10-16T07-01-35-377Z.report.html",
+      "jsonPath": "lighthouse-test/about-2026-10-16T07-01-35-377Z.report.json"
+    },
+    {
+      "id": "contact",
+      "url": "http://127.0.0.1:3000/contact",
+      "performanceScore": 96,
+      "metrics": {
+        "first-contentful-paint": {
+          "displayValue": "0.3 s",
+          "numericValue": 305.892,
+          "score": 1
+        },
+        "largest-contentful-paint": {
+          "displayValue": "1.4 s",
+          "numericValue": 1358.8380000000002,
+          "score": 0.85
+        },
+        "cumulative-layout-shift": {
+          "displayValue": "0",
+          "numericValue": 0,
+          "score": 1
+        },
+        "total-blocking-time": {
+          "displayValue": "0 ms",
+          "numericValue": 1,
+          "score": 1
+        },
+        "speed-index": {
+          "displayValue": "0.6 s",
+          "numericValue": 605.6020957502694,
+          "score": 1
+        },
+        "server-response-time": {
+          "displayValue": "Root document took 150 ms",
+          "numericValue": 148,
+          "score": 1
+        },
+        "interaction-to-next-paint": {
+          "displayValue": null,
+          "numericValue": null,
+          "score": null
+        }
+      },
+      "htmlPath": "lighthouse-test/contact-2026-10-16T07-01-35-377Z.report.html",
+      "jsonPath": "lighthouse-test/contact-2026-10-16T07-01-35-377Z.report.json"
+    },
+    {
+      "id": "podcast",
+      "url": "http://127.0.0.1:3000/podcast",
+      "performanceScore": 93,
+      "metrics": {
+        "first-contentful-paint": {
+          "displayValue": "0.3 s",
+          "numericValue": 299.017,
+          "score": 1
+        },
+        "largest-contentful-paint": {
+          "displayValue": "1.8 s",
+          "numericValue": 1798.0339999999999,
+          "score": 0.7
+        },
+        "cumulative-layout-shift": {
+          "displayValue": "0",
+          "numericValue": 0,
+          "score": 1
+        },
+        "total-blocking-time": {
+          "displayValue": "0 ms",
+          "numericValue": 0,
+          "score": 1
+        },
+        "speed-index": {
+          "displayValue": "0.6 s",
+          "numericValue": 614.0105201667147,
+          "score": 1
+        },
+        "server-response-time": {
+          "displayValue": "Root document took 290 ms",
+          "numericValue": 288,
+          "score": 1
+        },
+        "interaction-to-next-paint": {
+          "displayValue": null,
+          "numericValue": null,
+          "score": null
+        }
+      },
+      "htmlPath": "lighthouse-test/podcast-2026-10-16T07-01-35-377Z.report.html",
+      "jsonPath": "lighthouse-test/podcast-2026-10-16T07-01-35-377Z.report.json"
+    },
+    {
+      "id": "insights",
+      "url": "http://127.0.0.1:3000/insights",
+      "performanceScore": 93,
+      "metrics": {
+        "first-contentful-paint": {
+          "displayValue": "0.3 s",
+          "numericValue": 299.3,
+          "score": 1
+        },
+        "largest-contentful-paint": {
+          "displayValue": "1.7 s",
+          "numericValue": 1728.2499999999998,
+          "score": 0.72
+        },
+        "cumulative-layout-shift": {
+          "displayValue": "0",
+          "numericValue": 0,
+          "score": 1
+        },
+        "total-blocking-time": {
+          "displayValue": "0 ms",
+          "numericValue": 0,
+          "score": 1
+        },
+        "speed-index": {
+          "displayValue": "0.8 s",
+          "numericValue": 829.7921763335424,
+          "score": 0.99
+        },
+        "server-response-time": {
+          "displayValue": "Root document took 110 ms",
+          "numericValue": 111,
+          "score": 1
+        },
+        "interaction-to-next-paint": {
+          "displayValue": null,
+          "numericValue": null,
+          "score": null
+        }
+      },
+      "htmlPath": "lighthouse-test/insights-2026-10-16T07-01-35-377Z.report.html",
+      "jsonPath": "lighthouse-test/insights-2026-10-16T07-01-35-377Z.report.json"
+    },
+    {
+      "id": "our-successes",
+      "url": "http://127.0.0.1:3000/our-successes",
+      "performanceScore": 91,
+      "metrics": {
+        "first-contentful-paint": {
+          "displayValue": "0.3 s",
+          "numericValue": 306.638,
+          "score": 1
+        },
+        "largest-contentful-paint": {
+          "displayValue": "2.0 s",
+          "numericValue": 2033.2759999999998,
+          "score": 0.62
+        },
+        "cumulative-layout-shift": {
+          "displayValue": "0",
+          "numericValue": 0,
+          "score": 1
+        },
+        "total-blocking-time": {
+          "displayValue": "0 ms",
+          "numericValue": 0,
+          "score": 1
+        },
+        "speed-index": {
+          "displayValue": "0.4 s",
+          "numericValue": 433.74053783330345,
+          "score": 1
+        },
+        "server-response-time": {
+          "displayValue": "Root document took 110 ms",
+          "numericValue": 106,
+          "score": 1
+        },
+        "interaction-to-next-paint": {
+          "displayValue": null,
+          "numericValue": null,
+          "score": null
+        }
+      },
+      "htmlPath": "lighthouse-test/our-successes-2026-10-16T07-01-35-377Z.report.html",
+      "jsonPath": "lighthouse-test/our-successes-2026-10-16T07-01-35-377Z.report.json"
+    }
+  ]
+}

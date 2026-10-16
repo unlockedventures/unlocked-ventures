@@ -1,0 +1,57 @@
+{
+  "metric": "Largest Contentful Paint (LCP)",
+  "auditId": "largest-contentful-paint",
+  "generatedAt": "2026-10-16T07:03:23.218Z",
+  "baseUrl": "http://127.0.0.1:3000",
+  "formFactor": "desktop",
+  "results": [
+    {
+      "page": "home",
+      "url": "http://127.0.0.1:3000/",
+      "display": "1.2 s",
+      "numeric": 1241.056,
+      "score": 0.88,
+      "rating": "needs-improvement"
+    },
+    {
+      "page": "about",
+      "url": "http://127.0.0.1:3000/about",
+      "display": "0.7 s",
+      "numeric": 696.9920000000001,
+      "score": 0.99,
+      "rating": "good"
+    },
+    {
+      "page": "contact",
+      "url": "http://127.0.0.1:3000/contact",
+      "display": "1.4 s",
+      "numeric": 1358.8380000000002,
+      "score": 0.85,
+      "rating": "needs-improvement"
+    },
+    {
+      "page": "podcast",
+      "url": "http://127.0.0.1:3000/podcast",
+      "display": "1.8 s",
+      "numeric": 1798.0339999999999,
+      "score": 0.7,
+      "rating": "needs-improvement"
+    },
+    {
+      "page": "insights",
+      "url": "http://127.0.0.1:3000/insights",
+      "display": "1.7 s",
+      "numeric": 1728.2499999999998,
+      "score": 0.72,
+      "rating": "needs-improvement"
+    },
+    {
+      "page": "our-successes",
+      "url": "http://127.0.0.1:3000/our-successes",
+      "display": "2.0 s",
+      "numeric": 2033.2759999999998,
+      "score": 0.62,
+      "rating": "needs-improvement"
+    }
+  ]
+}

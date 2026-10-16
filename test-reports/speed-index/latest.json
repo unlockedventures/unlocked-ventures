@@ -1,0 +1,57 @@
+{
+  "metric": "Speed Index (SI)",
+  "auditId": "speed-index",
+  "generatedAt": "2026-10-16T07:03:23.218Z",
+  "baseUrl": "http://127.0.0.1:3000",
+  "formFactor": "desktop",
+  "results": [
+    {
+      "page": "home",
+      "url": "http://127.0.0.1:3000/",
+      "display": "0.7 s",
+      "numeric": 694.1084083488926,
+      "score": 1,
+      "rating": "good"
+    },
+    {
+      "page": "about",
+      "url": "http://127.0.0.1:3000/about",
+      "display": "0.5 s",
+      "numeric": 516.2230260979716,
+      "score": 1,
+      "rating": "good"
+    },
+    {
+      "page": "contact",
+      "url": "http://127.0.0.1:3000/contact",
+      "display": "0.6 s",
+      "numeric": 605.6020957502694,
+      "score": 1,
+      "rating": "good"
+    },
+    {
+      "page": "podcast",
+      "url": "http://127.0.0.1:3000/podcast",
+      "display": "0.6 s",
+      "numeric": 614.0105201667147,
+      "score": 1,
+      "rating": "good"
+    },
+    {
+      "page": "insights",
+      "url": "http://127.0.0.1:3000/insights",
+      "display": "0.8 s",
+      "numeric": 829.7921763335424,
+      "score": 0.99,
+      "rating": "good"
+    },
+    {
+      "page": "our-successes",
+      "url": "http://127.0.0.1:3000/our-successes",
+      "display": "0.4 s",
+      "numeric": 433.74053783330345,
+      "score": 1,
+      "rating": "good"
+    }
+  ]
+}

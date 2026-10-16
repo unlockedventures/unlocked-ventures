@@ -1,0 +1,58 @@
+{
+  "metric": "Interaction to Next Paint (INP)",
+  "auditId": "interaction-to-next-paint",
+  "generatedAt": "2026-10-16T07:03:23.219Z",
+  "baseUrl": "http://127.0.0.1:3000",
+  "formFactor": "desktop",
+  "note": "INP is primarily a field metric. Lab Lighthouse may omit it; TBT is the closest lab proxy for interactivity.",
+  "results": [
+    {
+      "page": "home",
+      "url": "http://127.0.0.1:3000/",
+      "display": "n/a",
+      "numeric": null,
+      "score": null,
+      "rating": "n/a"
+    },
+    {
+      "page": "about",
+      "url": "http://127.0.0.1:3000/about",
+      "display": "n/a",
+      "numeric": null,
+      "score": null,
+      "rating": "n/a"
+    },
+    {
+      "page": "contact",
+      "url": "http://127.0.0.1:3000/contact",
+      "display": "n/a",
+      "numeric": null,
+      "score": null,
+      "rating": "n/a"
+    },
+    {
+      "page": "podcast",
+      "url": "http://127.0.0.1:3000/podcast",
+      "display": "n/a",
+      "numeric": null,
+      "score": null,
+      "rating": "n/a"
+    },
+    {
+      "page": "insights",
+      "url": "http://127.0.0.1:3000/insights",
+      "display": "n/a",
+      "numeric": null,
+      "score": null,
+      "rating": "n/a"
+    },
+    {
+      "page": "our-successes",
+      "url": "http://127.0.0.1:3000/our-successes",
+      "display": "n/a",
+      "numeric": null,
+      "score": null,
+      "rating": "n/a"
+    }
+  ]
+}

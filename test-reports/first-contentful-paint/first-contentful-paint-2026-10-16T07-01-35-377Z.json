@@ -1,0 +1,57 @@
+{
+  "metric": "First Contentful Paint (FCP)",
+  "auditId": "first-contentful-paint",
+  "generatedAt": "2026-10-16T07:03:23.217Z",
+  "baseUrl": "http://127.0.0.1:3000",
+  "formFactor": "desktop",
+  "results": [
+    {
+      "page": "home",
+      "url": "http://127.0.0.1:3000/",
+      "display": "0.4 s",
+      "numeric": 390.528,
+      "score": 1,
+      "rating": "good"
+    },
+    {
+      "page": "about",
+      "url": "http://127.0.0.1:3000/about",
+      "display": "0.3 s",
+      "numeric": 316.992,
+      "score": 1,
+      "rating": "good"
+    },
+    {
+      "page": "contact",
+      "url": "http://127.0.0.1:3000/contact",
+      "display": "0.3 s",
+      "numeric": 305.892,
+      "score": 1,
+      "rating": "good"
+    },
+    {
+      "page": "podcast",
+      "url": "http://127.0.0.1:3000/podcast",
+      "display": "0.3 s",
+      "numeric": 299.017,
+      "score": 1,
+      "rating": "good"
+    },
+    {
+      "page": "insights",
+      "url": "http://127.0.0.1:3000/insights",
+      "display": "0.3 s",
+      "numeric": 299.3,
+      "score": 1,
+      "rating": "good"
+    },
+    {
+      "page": "our-successes",
+      "url": "http://127.0.0.1:3000/our-successes",
+      "display": "0.3 s",
+      "numeric": 306.638,
+      "score": 1,
+      "rating": "good"
+    }
+  ]
+}
