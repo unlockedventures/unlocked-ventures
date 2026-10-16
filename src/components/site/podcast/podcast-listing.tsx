@@ -239,7 +239,7 @@ export function PodcastListing({ copy }: { copy: PodcastListingCopy }) {
         className="w-full bg-[#F3F4F9] py-16 md:py-[100px]"
         aria-label={selectedChannel?.title ?? copy.title}
       >
-        <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-10 px-4 sm:px-6 md:gap-12 md:px-8 xl:px-[156px]">
+        <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-10 px-4 sm:px-6 md:gap-12 md:px-8 xl:px-14">
           <ChannelTabs
             channels={channels}
             selectedSlug={selectedSlug}
