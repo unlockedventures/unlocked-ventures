@@ -7,6 +7,7 @@ import { getSolution, getSolutionSlugs } from '@/data/get-solution'
 import { getQueryClient } from '@/lib/query/get-query-client'
 import { siteKeys } from '@/lib/query/keys'
 import { prefetchSiteResources } from '@/lib/query/prefetch'
+import { buildPageMetadata } from '@/lib/seo'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,11 +27,21 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params
   const page = await getSolution(slug)
+  const categoryLabel =
+    page?.category === 'digital-engineering'
+      ? 'Digital Engineering'
+      : page?.category === 'strategic-advisory'
+        ? 'Strategic Advisory'
+        : undefined
 
-  return {
+  return buildPageMetadata({
     title: page?.current ?? 'Solution',
     description: page?.description,
-  }
+    path: `/solutions/${slug}`,
+    image: page?.article?.imageSrc,
+    imageAlt: page?.article?.imageAlt || page?.current,
+    tags: ['solutions', categoryLabel, page?.current, slug.replace(/-/g, ' ')],
+  })
 }
 
 export default async function SolutionPage({ params }: PageProps) {

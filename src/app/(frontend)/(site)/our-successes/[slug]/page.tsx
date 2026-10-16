@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import { CaseStudyPageView } from '@/components/site/views/case-study-page-view'
 import { getCaseStudyBySlug, getCaseStudySlugs } from '@/data/get-case-study'
 import { getOurSuccesses } from '@/data/get-our-successes'
+import { buildPageMetadata } from '@/lib/seo'
 
 export const dynamic = 'force-dynamic'
 
@@ -23,11 +24,16 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params
   const story = await getCaseStudyBySlug(slug)
+  const title = story?.title.replace(/\n/g, ' ') ?? 'Success story'
 
-  return {
-    title: story?.title.replace(/\n/g, ' ') ?? 'Success story',
+  return buildPageMetadata({
+    title,
     description: story?.description,
-  }
+    path: `/our-successes/${slug}`,
+    image: story?.imageSrc,
+    imageAlt: story?.imageAlt || title,
+    tags: ['case study', 'success story', story?.category],
+  })
 }
 
 export default async function CaseStudyPage({ params }: PageProps) {

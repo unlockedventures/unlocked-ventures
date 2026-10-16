@@ -5,15 +5,18 @@ import { OurSuccessesPageView } from '@/components/site/views/our-successes-page
 import { getOurSuccesses } from '@/data/get-our-successes'
 import { getQueryClient } from '@/lib/query/get-query-client'
 import { prefetchSiteResources } from '@/lib/query/prefetch'
+import { buildPageMetadata } from '@/lib/seo'
 
 export const dynamic = 'force-dynamic'
 
 export async function generateMetadata(): Promise<Metadata> {
   const page = await getOurSuccesses()
-  return {
-    title: page?.metaTitle,
+  return buildPageMetadata({
+    title: page?.metaTitle || 'Our Successes',
     description: page?.description,
-  }
+    path: '/our-successes',
+    tags: ['success stories', 'case studies', 'portfolio', 'outcomes'],
+  })
 }
 
 export default async function OurSuccessesPage() {

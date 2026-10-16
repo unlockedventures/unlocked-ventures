@@ -5,15 +5,18 @@ import { InsightsPageView } from '@/components/site/views/insights-page-view'
 import { getInsights } from '@/data/get-insights'
 import { getQueryClient } from '@/lib/query/get-query-client'
 import { prefetchSiteResources } from '@/lib/query/prefetch'
+import { buildPageMetadata } from '@/lib/seo'
 
 export const dynamic = 'force-dynamic'
 
 export async function generateMetadata(): Promise<Metadata> {
   const page = await getInsights()
-  return {
-    title: page?.metaTitle,
+  return buildPageMetadata({
+    title: page?.metaTitle || 'Insights',
     description: page?.description,
-  }
+    path: '/insights',
+    tags: ['insights', 'news', 'blog', 'thought leadership', 'finance'],
+  })
 }
 
 export default async function InsightsPage() {

@@ -5,16 +5,19 @@ import { ContactPageView } from '@/components/site/views/contact-page-view'
 import { getContact } from '@/data/get-contact'
 import { getQueryClient } from '@/lib/query/get-query-client'
 import { prefetchSiteResources } from '@/lib/query/prefetch'
+import { buildPageMetadata } from '@/lib/seo'
 
 export const dynamic = 'force-dynamic'
 
 export async function generateMetadata(): Promise<Metadata> {
   const contact = await getContact()
 
-  return {
-    title: contact?.metaTitle,
+  return buildPageMetadata({
+    title: contact?.metaTitle || 'Contact',
     description: contact?.metaDescription,
-  }
+    path: '/contact',
+    tags: ['contact', 'get in touch', 'inquiry', 'support'],
+  })
 }
 
 export default async function ContactPage() {
