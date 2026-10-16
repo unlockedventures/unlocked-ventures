@@ -4,11 +4,13 @@ import { dmSans, helveticaNeueLtPro, inter } from './fonts'
 import './globals.css'
 import { AppProviders } from '@/components/providers/app-providers'
 import { getSite } from '@/data/get-site'
+import { getSiteURL } from '@/lib/site-url'
 
 export async function generateMetadata(): Promise<Metadata> {
   const site = await getSite()
 
   return {
+    metadataBase: new URL(getSiteURL()),
     description: site?.description,
     title: site?.title,
   }

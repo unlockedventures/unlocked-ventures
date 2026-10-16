@@ -122,3 +122,30 @@ export async function getPodcastEpisode(slug: string): Promise<PodcastPageConten
     subscribe: shared.subscribe,
   }
 }
+
+/** Public episode slugs for sitemap / static params. */
+export async function getPodcastEpisodeSlugs(): Promise<string[]> {
+  const payload = await getPayload({ config: configPromise })
+  const result = await payload.find({
+    collection: 'podcast-episodes',
+    depth: 1,
+    limit: 200,
+    pagination: false,
+    sort: 'sortOrder',
+    select: {
+      title: true,
+      slug: true,
+      href: true,
+      channel: true,
+    },
+  })
+
+  const seen = new Set<string>()
+  for (const episode of result.docs) {
+    if (!episode.title) continue
+    if (!isPodcastChannelActive(episode.channel)) continue
+    const slug = episodeSlug(episode)
+    if (slug) seen.add(slug)
+  }
+  return [...seen]
+}
