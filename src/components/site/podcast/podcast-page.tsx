@@ -15,6 +15,8 @@ export type PodcastPageContent = {
   title: string
   meta: string
   description: string
+  metaTitle?: string
+  metaDescription?: string
   coverSrc: string
   coverAlt: string
   mediaUrl?: string

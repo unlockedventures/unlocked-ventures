@@ -26,8 +26,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const post = await getNewsPostBySlug(slug)
 
   return buildPageMetadata({
-    title: post?.title ?? 'Insights',
-    description: post?.excerpt,
+    title: post?.metaTitle || post?.title || 'Insights',
+    description: post?.metaDescription || post?.excerpt,
     path: `/insights/${slug}`,
     image: post?.imageSrc,
     imageAlt: post?.imageAlt || post?.title,

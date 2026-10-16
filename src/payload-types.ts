@@ -365,6 +365,14 @@ export interface NewsPost {
    * Lower numbers appear first.
    */
   sortOrder: number;
+  /**
+   * Shown in the browser tab and search-result title.
+   */
+  metaTitle?: string | null;
+  /**
+   * One or two sentences search engines can show under the title.
+   */
+  metaDescription?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -529,6 +537,14 @@ export interface PodcastEpisode {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Shown in the browser tab and search-result title.
+   */
+  metaTitle?: string | null;
+  /**
+   * One or two sentences search engines can show under the title.
+   */
+  metaDescription?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -565,6 +581,14 @@ export interface CaseStudy {
    */
   featured?: boolean | null;
   sortOrder: number;
+  /**
+   * Shown in the browser tab and search-result title.
+   */
+  metaTitle?: string | null;
+  /**
+   * One or two sentences search engines can show under the title.
+   */
+  metaDescription?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -659,6 +683,14 @@ export interface Solution {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Shown in the browser tab and search-result title.
+   */
+  metaTitle?: string | null;
+  /**
+   * One or two sentences search engines can show under the title.
+   */
+  metaDescription?: string | null;
   illustration?: (number | null) | Media;
   engagementTitle?: string | null;
   engagementItems?:
@@ -1058,6 +1090,8 @@ export interface NewsPostsSelect<T extends boolean = true> {
       };
   featured?: T;
   sortOrder?: T;
+  metaTitle?: T;
+  metaDescription?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1155,6 +1189,8 @@ export interface PodcastEpisodesSelect<T extends boolean = true> {
         text?: T;
         id?: T;
       };
+  metaTitle?: T;
+  metaDescription?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1173,6 +1209,8 @@ export interface CaseStudiesSelect<T extends boolean = true> {
   image?: T;
   featured?: T;
   sortOrder?: T;
+  metaTitle?: T;
+  metaDescription?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1216,6 +1254,8 @@ export interface SolutionsSelect<T extends boolean = true> {
         iconHeight?: T;
         id?: T;
       };
+  metaTitle?: T;
+  metaDescription?: T;
   illustration?: T;
   engagementTitle?: T;
   engagementItems?:
@@ -1364,7 +1404,13 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  */
 export interface About {
   id: number;
+  /**
+   * Shown in the browser tab and search-result title.
+   */
   metaTitle: string;
+  /**
+   * One or two sentences search engines can show under the title.
+   */
   metaDescription: string;
   breadcrumbHomeLabel: string;
   breadcrumbHomeHref: string;
@@ -1739,6 +1785,14 @@ export interface RecentPodcast {
 export interface StrategicGrowth {
   id: number;
   /**
+   * Shown in the browser tab and search-result title.
+   */
+  metaTitle?: string | null;
+  /**
+   * One or two sentences search engines can show under the title.
+   */
+  metaDescription?: string | null;
+  /**
    * The small links above the title, such as Home and Our solutions.
    */
   breadcrumbs?:
@@ -1900,7 +1954,14 @@ export interface SuccessStory {
  */
 export interface OurSuccess {
   id: number;
+  /**
+   * Shown in the browser tab and search-result title.
+   */
   metaTitle: string;
+  /**
+   * One or two sentences search engines can show under the title.
+   */
+  metaDescription: string;
   homeLabel: string;
   homeHref: string;
   currentLabel: string;
@@ -1921,7 +1982,14 @@ export interface OurSuccess {
  */
 export interface Insight {
   id: number;
+  /**
+   * Shown in the browser tab and search-result title.
+   */
   metaTitle: string;
+  /**
+   * One or two sentences search engines can show under the title.
+   */
+  metaDescription: string;
   homeLabel: string;
   homeHref: string;
   currentLabel: string;
@@ -1948,7 +2016,14 @@ export interface Insight {
  */
 export interface PodcastListing {
   id: number;
+  /**
+   * Shown in the browser tab and search-result title.
+   */
   metaTitle: string;
+  /**
+   * One or two sentences search engines can show under the title.
+   */
+  metaDescription: string;
   homeLabel: string;
   homeHref: string;
   currentLabel: string;
@@ -1998,6 +2073,14 @@ export interface PodcastListing {
  */
 export interface PodcastPage {
   id: number;
+  /**
+   * Shown in the browser tab and search-result title.
+   */
+  metaTitle: string;
+  /**
+   * One or two sentences search engines can show under the title.
+   */
+  metaDescription: string;
   breadcrumbHomeLabel: string;
   breadcrumbHomeHref: string;
   breadcrumbPodcastLabel: string;
@@ -2109,7 +2192,13 @@ export interface TrustedBy {
  */
 export interface Contact {
   id: number;
+  /**
+   * Shown in the browser tab and search-result title.
+   */
   metaTitle: string;
+  /**
+   * One or two sentences search engines can show under the title.
+   */
   metaDescription: string;
   breadcrumbHomeLabel: string;
   /**
@@ -2191,11 +2280,11 @@ export interface Contact {
 export interface Site {
   id: number;
   /**
-   * Shown in the browser tab and in search results.
+   * Shown in the browser tab and search-result title.
    */
   title: string;
   /**
-   * A sentence search engines can show under the site name.
+   * One or two sentences search engines can show under the title.
    */
   description: string;
   notFoundMetaTitle: string;
@@ -2222,7 +2311,25 @@ export interface Site {
    */
   contactEmailSubject?: string | null;
   /**
-   * HTML body with the same {{placeholders}} as the subject. Leave blank to use the default.
+   * Design the email with the toolbar. Keep {{placeholders}} as written text — they are filled when a message is sent.
+   */
+  contactEmailBody?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * Kept for older saved HTML; prefer the rich text template above.
    */
   contactEmailHtml?: string | null;
   updatedAt?: string | null;
@@ -2514,6 +2621,8 @@ export interface RecentPodcastSelect<T extends boolean = true> {
  * via the `definition` "strategic-growth_select".
  */
 export interface StrategicGrowthSelect<T extends boolean = true> {
+  metaTitle?: T;
+  metaDescription?: T;
   breadcrumbs?:
     | T
     | {
@@ -2625,6 +2734,7 @@ export interface SuccessStoriesSelect<T extends boolean = true> {
  */
 export interface OurSuccessesSelect<T extends boolean = true> {
   metaTitle?: T;
+  metaDescription?: T;
   homeLabel?: T;
   homeHref?: T;
   currentLabel?: T;
@@ -2644,6 +2754,7 @@ export interface OurSuccessesSelect<T extends boolean = true> {
  */
 export interface InsightsSelect<T extends boolean = true> {
   metaTitle?: T;
+  metaDescription?: T;
   homeLabel?: T;
   homeHref?: T;
   currentLabel?: T;
@@ -2669,6 +2780,7 @@ export interface InsightsSelect<T extends boolean = true> {
  */
 export interface PodcastListingSelect<T extends boolean = true> {
   metaTitle?: T;
+  metaDescription?: T;
   homeLabel?: T;
   homeHref?: T;
   currentLabel?: T;
@@ -2713,6 +2825,8 @@ export interface PodcastListingSelect<T extends boolean = true> {
  * via the `definition` "podcast-page_select".
  */
 export interface PodcastPageSelect<T extends boolean = true> {
+  metaTitle?: T;
+  metaDescription?: T;
   breadcrumbHomeLabel?: T;
   breadcrumbHomeHref?: T;
   breadcrumbPodcastLabel?: T;
@@ -2906,6 +3020,7 @@ export interface SiteSelect<T extends boolean = true> {
   errorDescription?: T;
   ownerEmail?: T;
   contactEmailSubject?: T;
+  contactEmailBody?: T;
   contactEmailHtml?: T;
   updatedAt?: T;
   createdAt?: T;

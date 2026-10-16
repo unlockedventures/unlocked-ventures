@@ -51,6 +51,8 @@ export type SolutionContent = {
   category: 'strategic-advisory' | 'digital-engineering'
   current: string
   description: string
+  metaTitle?: string
+  metaDescription?: string
   article: SolutionArticleProps
   cta: TryingToBuildSectionProps
   related: RelatedSolutionsSectionProps
@@ -194,6 +196,8 @@ export async function getSolution(slug: string): Promise<SolutionContent | null>
     category: doc.category,
     current: doc.current,
     description: doc.description,
+    metaTitle: doc.metaTitle || undefined,
+    metaDescription: doc.metaDescription || undefined,
     article: {
       breadcrumbs,
       current: doc.current,

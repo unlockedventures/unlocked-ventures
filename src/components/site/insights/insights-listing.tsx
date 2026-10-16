@@ -9,6 +9,7 @@ import { useInsightsStore } from '@/stores/insights-store'
 
 export type InsightsListingCopy = {
   metaTitle: string
+  metaDescription: string
   homeLabel: string
   homeHref: string
   currentLabel: string

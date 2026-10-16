@@ -1,8 +1,9 @@
 import type { GlobalConfig } from 'payload'
 
 import { adminGroups } from '@/admin/editor-guide'
+import { emailTemplateEditor } from '@/fields/lexical/email-template-editor'
 import {
-  DEFAULT_CONTACT_EMAIL_HTML,
+  DEFAULT_CONTACT_EMAIL_BODY,
   DEFAULT_CONTACT_EMAIL_SUBJECT,
 } from '@/lib/contact/email-template'
 
@@ -20,22 +21,33 @@ export const Site: GlobalConfig = {
   },
   fields: [
     {
-      name: 'title',
-      type: 'text',
-      label: 'Browser tab title',
-      required: true,
+      type: 'collapsible',
+      label: 'Homepage SEO',
       admin: {
-        description: 'Shown in the browser tab and in search results.',
+        initCollapsed: false,
+        description: 'Meta title and description for the homepage (/).',
       },
-    },
-    {
-      name: 'description',
-      type: 'textarea',
-      label: 'Short summary',
-      required: true,
-      admin: {
-        description: 'A sentence search engines can show under the site name.',
-      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          label: 'Meta title',
+          required: true,
+          admin: {
+            description: 'Shown in the browser tab and search-result title.',
+          },
+        },
+        {
+          name: 'description',
+          type: 'textarea',
+          label: 'Meta description',
+          required: true,
+          admin: {
+            description: 'One or two sentences search engines can show under the title.',
+            rows: 3,
+          },
+        },
+      ],
     },
     {
       name: 'notFoundMetaTitle',
@@ -122,14 +134,39 @@ export const Site: GlobalConfig = {
           },
         },
         {
+          type: 'row',
+          fields: [
+            {
+              name: 'contactEmailBody',
+              type: 'richText',
+              label: 'Email template',
+              editor: emailTemplateEditor,
+              defaultValue: DEFAULT_CONTACT_EMAIL_BODY,
+              admin: {
+                width: '55%',
+                description:
+                  'Design the email with the toolbar. Keep {{placeholders}} as written text — they are filled when a message is sent.',
+              },
+            },
+            {
+              name: 'contactEmailPreview',
+              type: 'ui',
+              admin: {
+                width: '45%',
+                components: {
+                  Field: '@/components/admin/contact-email-preview-field#ContactEmailPreviewField',
+                },
+              },
+            },
+          ],
+        },
+        {
           name: 'contactEmailHtml',
           type: 'textarea',
-          label: 'Email HTML template',
-          defaultValue: DEFAULT_CONTACT_EMAIL_HTML,
+          label: 'Legacy HTML template',
           admin: {
-            description:
-              'HTML body with the same {{placeholders}} as the subject. Leave blank to use the default.',
-            rows: 12,
+            hidden: true,
+            description: 'Kept for older saved HTML; prefer the rich text template above.',
           },
         },
       ],

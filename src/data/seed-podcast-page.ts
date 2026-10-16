@@ -96,13 +96,22 @@ const episodeBrief = {
   ],
 }
 
+const podcastPageSeo = {
+  metaTitle: podcastPage.episode.title,
+  metaDescription: podcastPage.episode.description,
+}
+
 export async function seedPodcastPage(payload: Payload) {
   const current = await payload.findGlobal({ slug: 'podcast-page' })
   if (current.title) {
-    if (!current.about) {
+    const patch: Record<string, unknown> = {}
+    if (!current.about) Object.assign(patch, episodeBrief)
+    if (!current.metaTitle) patch.metaTitle = podcastPageSeo.metaTitle
+    if (!current.metaDescription) patch.metaDescription = podcastPageSeo.metaDescription
+    if (Object.keys(patch).length > 0) {
       await payload.updateGlobal({
         slug: 'podcast-page',
-        data: episodeBrief,
+        data: patch,
       })
     }
     return
@@ -131,6 +140,7 @@ export async function seedPodcastPage(payload: Payload) {
   await payload.updateGlobal({
     slug: 'podcast-page',
     data: {
+      ...podcastPageSeo,
       breadcrumbHomeLabel: podcastPage.breadcrumb.home.label,
       breadcrumbHomeHref: podcastPage.breadcrumb.home.href,
       breadcrumbPodcastLabel: podcastPage.breadcrumb.podcast.label,

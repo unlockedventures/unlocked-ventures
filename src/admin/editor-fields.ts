@@ -1,6 +1,54 @@
-import type { GroupField, NumberField, TextField, UIField } from 'payload'
+import type { CollapsibleField, Field, GroupField, NumberField, TextField, UIField } from 'payload'
 
 import { linkHint, sizeHint } from '@/admin/editor-guide'
+
+type SeoFieldsOptions = {
+  /** When true, editors must fill both fields (listing/globals). Detail docs stay optional. */
+  required?: boolean
+  /** Start the SEO panel collapsed (useful on long collection forms). */
+  initCollapsed?: boolean
+}
+
+/** Flat meta title + description fields (for tabs or custom layouts). */
+export function seoFieldDefs(options: Pick<SeoFieldsOptions, 'required'> = {}): Field[] {
+  const required = options.required ?? false
+  return [
+    {
+      name: 'metaTitle',
+      type: 'text',
+      label: 'Meta title',
+      required,
+      admin: {
+        description: 'Shown in the browser tab and search-result title.',
+      },
+    },
+    {
+      name: 'metaDescription',
+      type: 'textarea',
+      label: 'Meta description',
+      required,
+      admin: {
+        description: 'One or two sentences search engines can show under the title.',
+        rows: 3,
+      },
+    },
+  ]
+}
+
+/** Shared SEO panel for public pages and content. */
+export function seoFields(options: SeoFieldsOptions = {}): CollapsibleField[] {
+  return [
+    {
+      type: 'collapsible',
+      label: 'SEO',
+      admin: {
+        initCollapsed: options.initCollapsed ?? false,
+        description: 'Browser tab title and the short summary search engines can show.',
+      },
+      fields: seoFieldDefs(options),
+    },
+  ]
+}
 
 export function linkField(): TextField {
   return {

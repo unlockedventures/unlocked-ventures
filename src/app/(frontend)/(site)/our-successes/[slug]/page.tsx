@@ -27,8 +27,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const title = story?.title.replace(/\n/g, ' ') ?? 'Success story'
 
   return buildPageMetadata({
-    title,
-    description: story?.description,
+    title: story?.metaTitle || title,
+    description: story?.metaDescription || story?.description,
     path: `/our-successes/${slug}`,
     image: story?.imageSrc,
     imageAlt: story?.imageAlt || title,

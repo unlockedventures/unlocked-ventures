@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { adminGroups } from '@/admin/editor-guide'
-import { linkField } from '@/admin/editor-fields'
+import { linkField, seoFields } from '@/admin/editor-fields'
 
 export const CaseStudies: CollectionConfig = {
   slug: 'case-studies',
@@ -64,5 +64,8 @@ export const CaseStudies: CollectionConfig = {
       defaultValue: 0,
       admin: { hidden: true },
     },
+    ...seoFields({
+      initCollapsed: true,
+    }),
   ],
 }

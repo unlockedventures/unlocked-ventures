@@ -1,7 +1,7 @@
 import type { GlobalConfig } from 'payload'
 
 import { adminGroups } from '@/admin/editor-guide'
-import { buttonGroup, linkField, sizeField } from '@/admin/editor-fields'
+import { buttonGroup, linkField, seoFields, sizeField } from '@/admin/editor-fields'
 
 export const StrategicGrowth: GlobalConfig = {
   slug: 'strategic-growth',
@@ -15,6 +15,7 @@ export const StrategicGrowth: GlobalConfig = {
     read: () => true,
   },
   fields: [
+    ...seoFields({ initCollapsed: true }),
     {
       type: 'tabs',
       tabs: [

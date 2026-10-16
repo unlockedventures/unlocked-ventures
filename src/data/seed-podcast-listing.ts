@@ -6,6 +6,8 @@ import { uploadPublicFile as createPublicFile } from '@/data/upload-public-file'
 
 const listingSeed = {
   metaTitle: 'Podcast',
+  metaDescription:
+    'Listen to Unlocked Ventures podcasts on healthcare, AI, digital engineering, and growth.',
   homeLabel: 'Home',
   homeHref: '/',
   currentLabel: 'Podcast',

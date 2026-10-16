@@ -1,9 +1,15 @@
 'use client'
 
 import Link from 'next/link'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
+import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
+
+const PAGE_SIZE = 9
+/** Opacity-only crossfade — no layout swap mid-transition. */
+const FADE_MS = 420
+const EASE = 'cubic-bezier(0.33, 1, 0.68, 1)'
 
 export type PodcastListEpisode = {
   title: string
@@ -26,6 +32,7 @@ export type PodcastChannelTab = {
 
 export type PodcastListingCopy = {
   metaTitle: string
+  metaDescription: string
   homeLabel: string
   homeHref: string
   currentLabel: string
@@ -50,8 +57,6 @@ export type PodcastListingCopy = {
   subscribe: { name: string; href: string; logoSrc: string; width: number; height: number }[]
   episodes: PodcastListEpisode[]
 }
-
-const PAGE_SIZE = 9
 
 const categoryColors: Record<string, string> = {
   communication: '#EC6A15',
@@ -124,14 +129,112 @@ function ExploreCard({ episode }: { episode: PodcastListEpisode }) {
   )
 }
 
+function ExploreCardSkeleton() {
+  return (
+    <div className="relative flex h-full flex-col gap-5 bg-white" aria-hidden="true">
+      {/* Same image frame as ExploreCard */}
+      <div className="relative aspect-[368/220] w-full overflow-hidden bg-[#E4E6EA]">
+        <Skeleton className="absolute inset-0 size-full rounded-none bg-[#E4E6EA]" />
+      </div>
+      {/* Same text block: category (leading-[26px]) + title (text-xl / leading-7, ~2 lines) */}
+      <div className="relative flex flex-col gap-3 px-5 pb-6">
+        <Skeleton className="h-[26px] w-[7.5rem] max-w-[45%] rounded-none bg-[#E4E6EA]" />
+        <div className="flex flex-col gap-0">
+          <Skeleton className="h-7 w-full rounded-none bg-[#E4E6EA]" />
+          <Skeleton className="h-7 w-[82%] rounded-none bg-[#E4E6EA]" />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function EpisodeGridSkeleton({ count = 6 }: { count?: number }) {
+  return (
+    <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3" aria-hidden="true">
+      {Array.from({ length: count }, (_, index) => (
+        <li key={index}>
+          <ExploreCardSkeleton />
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+function EpisodeGrid({
+  episodes,
+  emptyLabel,
+}: {
+  episodes: PodcastListEpisode[]
+  emptyLabel: string
+}) {
+  if (episodes.length === 0) {
+    return <p className="font-sans text-base text-[#23313C]">{emptyLabel}</p>
+  }
+
+  return (
+    <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {episodes.map((episode) => (
+        <li key={episode.href}>
+          <ExploreCard episode={episode} />
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+function prefersReducedMotion() {
+  return typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+}
+
+export function PodcastListingSkeleton() {
+  return (
+    <div
+      className="relative isolate flex w-full flex-col items-center bg-white p-0"
+      aria-busy="true"
+      aria-label="Loading podcast"
+    >
+      <div className="relative mx-auto flex w-full max-w-[1440px] flex-col">
+        <div className="relative z-10 flex flex-col gap-12 px-4 pt-12 sm:px-6 md:gap-[48px] md:px-8 md:pt-16 xl:px-14 xl:pt-20">
+          <div className="flex max-w-[800px] flex-col gap-4">
+            <Skeleton className="h-[22px] w-40 rounded-sm bg-[#E4E6EA]" />
+            <div className="flex flex-col gap-4">
+              <Skeleton className="h-10 w-72 max-w-full rounded-sm bg-[#E4E6EA] lg:h-14 lg:w-96" />
+              <Skeleton className="h-6 w-full max-w-[740px] rounded-sm bg-[#E4E6EA]" />
+              <Skeleton className="h-6 w-4/5 max-w-[640px] rounded-sm bg-[#E4E6EA]" />
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-8 pb-4 xl:pb-8">
+            <Skeleton className="aspect-[16/9] w-full rounded-none bg-[#E4E6EA] md:aspect-[1328/593]" />
+          </div>
+        </div>
+      </div>
+
+      <section className="w-full bg-[#F3F4F9] py-16 md:py-[100px]" aria-hidden="true">
+        <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-10 px-4 sm:px-6 md:gap-12 md:px-8 xl:px-14">
+          <div className="flex gap-2 overflow-hidden border-b border-[#D1D6EA]">
+            {Array.from({ length: 4 }, (_, index) => (
+              <Skeleton key={index} className="mb-px h-12 w-28 shrink-0 rounded-none bg-[#E4E6EA]" />
+            ))}
+          </div>
+
+          <EpisodeGridSkeleton />
+        </div>
+      </section>
+    </div>
+  )
+}
+
 function ChannelTabs({
   channels,
   selectedSlug,
   onSelect,
+  disabled,
 }: {
   channels: PodcastChannelTab[]
   selectedSlug: string
   onSelect: (slug: string) => void
+  disabled?: boolean
 }) {
   if (channels.length === 0) return null
 
@@ -149,9 +252,10 @@ function ChannelTabs({
             type="button"
             role="tab"
             aria-selected={selected}
+            disabled={disabled}
             onClick={() => onSelect(channel.slug)}
             className={cn(
-              'shrink-0 cursor-pointer border-b-2 px-4 py-3 font-sans text-base leading-[22px] font-normal transition-colors sm:px-5',
+              'shrink-0 cursor-pointer border-b-2 px-4 py-3 font-sans text-base leading-[22px] font-normal transition-[color,border-color,opacity] duration-200 sm:px-5 disabled:cursor-wait',
               selected
                 ? 'border-[#171616] text-[#171616]'
                 : 'border-transparent text-[#696969] hover:text-[#171616]',
@@ -167,20 +271,68 @@ function ChannelTabs({
 
 export function PodcastListing({ copy }: { copy: PodcastListingCopy }) {
   const channels = copy.channels
-  const [selectedSlug, setSelectedSlug] = useState(channels[0]?.slug ?? '')
+  const initialSlug = channels[0]?.slug ?? ''
+  const [tabSlug, setTabSlug] = useState(initialSlug)
+  const [displaySlug, setDisplaySlug] = useState(initialSlug)
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+  const [fading, setFading] = useState(false)
+  const [lockedHeight, setLockedHeight] = useState<number | undefined>()
+  const gridRef = useRef<HTMLDivElement>(null)
+  const pendingSlugRef = useRef(initialSlug)
+  const timerRef = useRef<number | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current !== null) window.clearTimeout(timerRef.current)
+    }
+  }, [])
 
   const hero =
     copy.episodes.find((episode) => episode.heroFeatured) ?? copy.episodes[0] ?? null
 
   const channelEpisodes = useMemo(() => {
-    if (!selectedSlug) return copy.episodes
-    return copy.episodes.filter((episode) => episode.channelSlug === selectedSlug)
-  }, [copy.episodes, selectedSlug])
+    if (!displaySlug) return copy.episodes
+    return copy.episodes.filter((episode) => episode.channelSlug === displaySlug)
+  }, [copy.episodes, displaySlug])
 
   const visible = channelEpisodes.slice(0, visibleCount)
   const hasMore = visible.length < channelEpisodes.length
-  const selectedChannel = channels.find((channel) => channel.slug === selectedSlug)
+  const selectedChannel = channels.find((channel) => channel.slug === tabSlug)
+  const busy = fading
+
+  const selectChannel = (slug: string) => {
+    if (slug === tabSlug || busy) return
+
+    setTabSlug(slug)
+    pendingSlugRef.current = slug
+    setVisibleCount(PAGE_SIZE)
+
+    if (prefersReducedMotion()) {
+      setDisplaySlug(slug)
+      setFading(false)
+      setLockedHeight(undefined)
+      return
+    }
+
+    if (timerRef.current !== null) window.clearTimeout(timerRef.current)
+
+    // Lock height so the section does not jump while opacity eases.
+    const height = gridRef.current?.getBoundingClientRect().height
+    if (height && height > 0) setLockedHeight(height)
+
+    // Fade current cards out — swap channel data only once fully invisible.
+    setFading(true)
+
+    timerRef.current = window.setTimeout(() => {
+      setDisplaySlug(pendingSlugRef.current)
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setFading(false)
+          timerRef.current = window.setTimeout(() => setLockedHeight(undefined), FADE_MS)
+        })
+      })
+    }, FADE_MS)
+  }
 
   return (
     <div className="relative isolate flex w-full flex-col items-center bg-white p-0">
@@ -238,30 +390,38 @@ export function PodcastListing({ copy }: { copy: PodcastListingCopy }) {
       <section
         className="w-full bg-[#F3F4F9] py-16 md:py-[100px]"
         aria-label={selectedChannel?.title ?? copy.title}
+        aria-busy={busy}
       >
         <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-10 px-4 sm:px-6 md:gap-12 md:px-8 xl:px-14">
           <ChannelTabs
             channels={channels}
-            selectedSlug={selectedSlug}
-            onSelect={(slug) => {
-              setSelectedSlug(slug)
-              setVisibleCount(PAGE_SIZE)
-            }}
+            selectedSlug={tabSlug}
+            disabled={busy}
+            onSelect={selectChannel}
           />
 
-          {visible.length > 0 ? (
-            <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {visible.map((episode) => (
-                <li key={episode.href}>
-                  <ExploreCard episode={episode} />
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="font-sans text-base text-[#23313C]">{copy.emptyLabel}</p>
-          )}
+          <div
+            ref={gridRef}
+            className="relative"
+            style={lockedHeight ? { minHeight: lockedHeight } : undefined}
+            aria-live="polite"
+          >
+            <div
+              className={cn(
+                'transition-opacity will-change-[opacity] motion-reduce:opacity-100 motion-reduce:transition-none',
+                fading ? 'opacity-0' : 'opacity-100',
+              )}
+              style={{ transitionDuration: `${FADE_MS}ms`, transitionTimingFunction: EASE }}
+            >
+              <EpisodeGrid
+                key={displaySlug}
+                episodes={visible}
+                emptyLabel={copy.emptyLabel}
+              />
+            </div>
+          </div>
 
-          {hasMore ? (
+          {hasMore && !busy ? (
             <div className="flex justify-center">
               <button
                 type="button"

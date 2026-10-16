@@ -13,7 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const page = await getOurSuccesses()
   return buildPageMetadata({
     title: page?.metaTitle || 'Our Successes',
-    description: page?.description,
+    description: page?.metaDescription || page?.description,
     path: '/our-successes',
     tags: ['success stories', 'case studies', 'portfolio', 'outcomes'],
   })

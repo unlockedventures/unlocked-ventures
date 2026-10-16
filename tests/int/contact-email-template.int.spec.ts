@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  DEFAULT_CONTACT_EMAIL_BODY,
   DEFAULT_CONTACT_EMAIL_SUBJECT,
+  lexicalEmailToHtml,
   renderContactEmailTemplate,
+  resolveContactEmailHtml,
 } from '@/lib/contact/email-template'
 
 const vars = {
@@ -26,3 +29,13 @@ describe('renderContactEmailTemplate', () => {
     expect(renderContactEmailTemplate('Hi {{missing}}', vars)).toBe('Hi ')
   })
 })
+
+describe('resolveContactEmailHtml', () => {
+  it('converts rich text body to HTML with placeholders intact', () => {
+    const html = resolveContactEmailHtml({ body: DEFAULT_CONTACT_EMAIL_BODY })
+    expect(html).toContain('{{firstName}}')
+    expect(html).toContain('{{message}}')
+    expect(lexicalEmailToHtml(DEFAULT_CONTACT_EMAIL_BODY)).toContain('<p>')
+  })
+})
+

@@ -1,6 +1,7 @@
 import type { CollectionConfig, PayloadRequest } from 'payload'
 
 import { adminGroups } from '@/admin/editor-guide'
+import { seoFields } from '@/admin/editor-fields'
 import { podcastEpisodePath, podcastSlugFromHref, slugifyPodcastTitle } from '@/lib/podcast-slug'
 
 async function channelTitle(
@@ -391,5 +392,8 @@ export const PodcastEpisodes: CollectionConfig = {
         },
       ],
     },
+    ...seoFields({
+      initCollapsed: true,
+    }),
   ],
 }

@@ -155,6 +155,7 @@ export async function getPodcastListing(): Promise<PodcastListingCopy | null> {
 
   return {
     metaTitle: doc.metaTitle,
+    metaDescription: doc.metaDescription || doc.description,
     homeLabel: doc.homeLabel,
     homeHref: doc.homeHref,
     currentLabel: doc.currentLabel,

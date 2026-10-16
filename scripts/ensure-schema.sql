@@ -620,6 +620,24 @@ CREATE INDEX IF NOT EXISTS contact_messages_email_idx ON contact_messages USING 
 ALTER TABLE site ADD COLUMN IF NOT EXISTS owner_email character varying;
 ALTER TABLE site ADD COLUMN IF NOT EXISTS contact_email_subject character varying;
 ALTER TABLE site ADD COLUMN IF NOT EXISTS contact_email_html character varying;
+ALTER TABLE site ADD COLUMN IF NOT EXISTS contact_email_body jsonb;
+
+-- SEO meta description on listing pages and public content
+ALTER TABLE podcast_page ADD COLUMN IF NOT EXISTS meta_title character varying;
+ALTER TABLE podcast_page ADD COLUMN IF NOT EXISTS meta_description character varying;
+ALTER TABLE podcast_listing ADD COLUMN IF NOT EXISTS meta_description character varying;
+ALTER TABLE insights ADD COLUMN IF NOT EXISTS meta_description character varying;
+ALTER TABLE our_successes ADD COLUMN IF NOT EXISTS meta_description character varying;
+ALTER TABLE strategic_growth ADD COLUMN IF NOT EXISTS meta_title character varying;
+ALTER TABLE strategic_growth ADD COLUMN IF NOT EXISTS meta_description character varying;
+ALTER TABLE news_posts ADD COLUMN IF NOT EXISTS meta_title character varying;
+ALTER TABLE news_posts ADD COLUMN IF NOT EXISTS meta_description character varying;
+ALTER TABLE case_studies ADD COLUMN IF NOT EXISTS meta_title character varying;
+ALTER TABLE case_studies ADD COLUMN IF NOT EXISTS meta_description character varying;
+ALTER TABLE solutions ADD COLUMN IF NOT EXISTS meta_title character varying;
+ALTER TABLE solutions ADD COLUMN IF NOT EXISTS meta_description character varying;
+ALTER TABLE podcast_episodes ADD COLUMN IF NOT EXISTS meta_title character varying;
+ALTER TABLE podcast_episodes ADD COLUMN IF NOT EXISTS meta_description character varying;
 
 -- Payload lock relation column for contact-messages (needed to open a message in admin)
 ALTER TABLE payload_locked_documents_rels ADD COLUMN IF NOT EXISTS contact_messages_id integer;

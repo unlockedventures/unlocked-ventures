@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { adminGroups } from '@/admin/editor-guide'
-import { buttonGroup, linkField, sizeField } from '@/admin/editor-fields'
+import { buttonGroup, linkField, seoFieldDefs, sizeField } from '@/admin/editor-fields'
 import { articleEditor } from '@/fields/lexical/article-editor'
 
 export const Solutions: CollectionConfig = {
@@ -180,6 +180,11 @@ export const Solutions: CollectionConfig = {
               ],
             },
           ],
+        },
+        {
+          label: 'SEO',
+          description: 'Optional overrides for the browser tab and search results.',
+          fields: seoFieldDefs(),
         },
       ],
     },

@@ -85,6 +85,8 @@ export async function getPodcastEpisode(slug: string): Promise<PodcastPageConten
     title: episode.title,
     meta: [episode.meta, episode.guests].filter(Boolean).join(' · '),
     description: summary || about || '',
+    metaTitle: episode.metaTitle || undefined,
+    metaDescription: episode.metaDescription || undefined,
     coverSrc,
     coverAlt: episode.imageAlt || episode.title,
     mediaUrl: podcastAudioSrc(episode),

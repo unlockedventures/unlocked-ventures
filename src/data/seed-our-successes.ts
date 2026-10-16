@@ -2,6 +2,7 @@ import type { Payload } from 'payload'
 
 const ourSuccessesSeed = {
   metaTitle: 'Our Success Stories',
+  metaDescription: 'Case studies and outcomes from Unlocked Ventures engagements.',
   homeLabel: 'Home',
   homeHref: '/',
   currentLabel: 'Our success story',
@@ -16,7 +17,15 @@ const ourSuccessesSeed = {
 
 export async function seedOurSuccesses(payload: Payload) {
   const current = await payload.findGlobal({ slug: 'our-successes' })
-  if (current.title) return
+  if (current.title) {
+    if (!current.metaDescription) {
+      await payload.updateGlobal({
+        slug: 'our-successes',
+        data: { metaDescription: ourSuccessesSeed.metaDescription },
+      })
+    }
+    return
+  }
 
   await payload.updateGlobal({
     slug: 'our-successes',

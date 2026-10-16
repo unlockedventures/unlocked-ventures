@@ -25,6 +25,7 @@ export async function getInsights(): Promise<InsightsListingCopy | null> {
 
   return {
     metaTitle: doc.metaTitle,
+    metaDescription: doc.metaDescription || doc.description,
     homeLabel: doc.homeLabel,
     homeHref: doc.homeHref,
     currentLabel: doc.currentLabel,

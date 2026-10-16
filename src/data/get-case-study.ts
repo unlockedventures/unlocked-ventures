@@ -11,6 +11,8 @@ export type CaseStudyDetail = {
   description?: string
   imageSrc?: string
   imageAlt: string
+  metaTitle?: string
+  metaDescription?: string
 }
 
 function mediaUrl(value: number | { url?: string | null } | null | undefined) {
@@ -52,6 +54,8 @@ export async function getCaseStudyBySlug(slug: string): Promise<CaseStudyDetail 
     description: doc.description || undefined,
     imageSrc: mediaUrl(doc.image),
     imageAlt: doc.title,
+    metaTitle: doc.metaTitle || undefined,
+    metaDescription: doc.metaDescription || undefined,
   }
 }
 

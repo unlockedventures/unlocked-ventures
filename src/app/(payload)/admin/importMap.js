@@ -33,6 +33,7 @@ import { GenerateScriptField as GenerateScriptField_bab222324d11fa721dc22069e640
 import { GenerateAudioField as GenerateAudioField_00f96ba655ba0804c9b39d5d182597ac } from '@/components/admin/generate-audio-field'
 import { PipelineSaveButton as PipelineSaveButton_405675e8e5ec330655ac73f628096de2 } from '@/components/admin/pipeline-save-button'
 import { RelatedItemsField as RelatedItemsField_a7098b4589ca4a6f4f719f7d06b509fe } from '@/components/admin/related-items-field'
+import { ContactEmailPreviewField as ContactEmailPreviewField_62446f45008242da925e59025d902cc8 } from '@/components/admin/contact-email-preview-field'
 import { AdminNav as AdminNav_f919f0c6105891138159f6f666f5060d } from '@/components/admin/admin-nav'
 import { AdminHome as AdminHome_8366f70fd7e96f92063886100d2dc824 } from '@/components/admin/admin-home'
 import { LoginView as LoginView_201d7cdee0011492caba4a3c0659926d } from '@/components/admin/login-view'
@@ -75,6 +76,7 @@ export const importMap = {
   "@/components/admin/generate-audio-field#GenerateAudioField": GenerateAudioField_00f96ba655ba0804c9b39d5d182597ac,
   "@/components/admin/pipeline-save-button#PipelineSaveButton": PipelineSaveButton_405675e8e5ec330655ac73f628096de2,
   "@/components/admin/related-items-field#RelatedItemsField": RelatedItemsField_a7098b4589ca4a6f4f719f7d06b509fe,
+  "@/components/admin/contact-email-preview-field#ContactEmailPreviewField": ContactEmailPreviewField_62446f45008242da925e59025d902cc8,
   "@/components/admin/admin-nav#AdminNav": AdminNav_f919f0c6105891138159f6f666f5060d,
   "@/components/admin/admin-home#AdminHome": AdminHome_8366f70fd7e96f92063886100d2dc824,
   "@/components/admin/login-view#LoginView": LoginView_201d7cdee0011492caba4a3c0659926d,

@@ -9,6 +9,7 @@ import { useCaseStudiesStore } from '@/stores/case-studies-store'
 
 export type CaseStudiesListingCopy = {
   metaTitle: string
+  metaDescription: string
   homeLabel: string
   homeHref: string
   currentLabel: string

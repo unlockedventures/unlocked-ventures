@@ -2,6 +2,7 @@ import type { Payload } from 'payload'
 
 const insightsSeed = {
   metaTitle: 'Insights',
+  metaDescription: 'News, blogs, and thought leadership from Unlocked Ventures.',
   homeLabel: 'Home',
   homeHref: '/',
   currentLabel: 'Insights',
@@ -45,6 +46,7 @@ export async function seedInsights(payload: Payload) {
             : current.relatedTitle,
         seeMoreLabel: current.seeMoreLabel || insightsSeed.seeMoreLabel,
         emptyLabel: current.emptyLabel || insightsSeed.emptyLabel,
+        metaDescription: current.metaDescription || insightsSeed.metaDescription,
       },
     })
     return

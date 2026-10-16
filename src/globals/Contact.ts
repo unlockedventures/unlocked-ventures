@@ -1,7 +1,7 @@
 import type { GlobalConfig } from 'payload'
 
 import { adminGroups } from '@/admin/editor-guide'
-import { linkField, sizeField } from '@/admin/editor-fields'
+import { linkField, seoFields, sizeField } from '@/admin/editor-fields'
 
 const labeledField = (name: string, label: string) => ({
   name,
@@ -25,18 +25,7 @@ export const Contact: GlobalConfig = {
     read: () => true,
   },
   fields: [
-    {
-      name: 'metaTitle',
-      type: 'text',
-      label: 'Browser tab title',
-      required: true,
-    },
-    {
-      name: 'metaDescription',
-      type: 'textarea',
-      label: 'Short summary',
-      required: true,
-    },
+    ...seoFields({ required: true }),
     {
       name: 'breadcrumbHomeLabel',
       type: 'text',

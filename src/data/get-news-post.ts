@@ -26,6 +26,8 @@ export type NewsPostDetail = {
   tags: string[]
   body: ArticleBlock[]
   related: NewsPost[]
+  metaTitle?: string
+  metaDescription?: string
 }
 
 function mediaUrl(value: number | { url?: string | null } | null | undefined) {
@@ -167,6 +169,8 @@ export async function getNewsPostBySlug(slug: string): Promise<NewsPostDetail | 
     tags,
     body: mapBody(doc.body),
     related,
+    metaTitle: doc.metaTitle || undefined,
+    metaDescription: doc.metaDescription || undefined,
   }
 }
 

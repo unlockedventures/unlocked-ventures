@@ -1,6 +1,7 @@
 import type { GlobalConfig } from 'payload'
 
 import { adminGroups } from '@/admin/editor-guide'
+import { seoFields } from '@/admin/editor-fields'
 
 export const About: GlobalConfig = {
   slug: 'about',
@@ -14,8 +15,7 @@ export const About: GlobalConfig = {
     read: () => true,
   },
   fields: [
-    { name: 'metaTitle', type: 'text', label: 'Browser tab title', required: true },
-    { name: 'metaDescription', type: 'textarea', label: 'Short summary', required: true },
+    ...seoFields({ required: true }),
     { name: 'breadcrumbHomeLabel', type: 'text', label: 'Home link text', required: true },
     { name: 'breadcrumbHomeHref', type: 'text', label: 'Home link', required: true },
     { name: 'breadcrumbCurrent', type: 'text', label: 'Current page name', required: true },

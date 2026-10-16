@@ -1,6 +1,7 @@
 import type { GlobalConfig } from 'payload'
 
 import { adminGroups } from '@/admin/editor-guide'
+import { seoFields } from '@/admin/editor-fields'
 
 export const Insights: GlobalConfig = {
   slug: 'insights',
@@ -15,7 +16,7 @@ export const Insights: GlobalConfig = {
     read: () => true,
   },
   fields: [
-    { name: 'metaTitle', type: 'text', label: 'Browser tab title', required: true },
+    ...seoFields({ required: true }),
     { name: 'homeLabel', type: 'text', required: true },
     { name: 'homeHref', type: 'text', required: true },
     { name: 'currentLabel', type: 'text', label: 'Current page name', required: true },

@@ -79,6 +79,8 @@ export async function getPodcastPage(): Promise<PodcastPageContent | null> {
     title: doc.title,
     meta: doc.meta,
     description: doc.description,
+    metaTitle: doc.metaTitle || undefined,
+    metaDescription: doc.metaDescription || undefined,
     coverSrc,
     coverAlt: doc.coverAlt,
     timeLabel: doc.timeLabel,

@@ -1,11 +1,13 @@
 import type { Payload } from 'payload'
 
 import {
-  DEFAULT_CONTACT_EMAIL_HTML,
   DEFAULT_CONTACT_EMAIL_SUBJECT,
+  isLexicalEditorState,
   renderContactEmailTemplate,
+  resolveContactEmailHtml,
   type ContactEmailVars,
 } from '@/lib/contact/email-template'
+import { populateLexicalUploadsServer } from '@/lib/contact/populate-lexical-uploads'
 
 export type ContactSubmissionInput = ContactEmailVars
 
@@ -78,8 +80,17 @@ export async function submitContactMessage(
     site.contactEmailSubject?.trim() || DEFAULT_CONTACT_EMAIL_SUBJECT,
     input,
   )
+
+  const emailBody = isLexicalEditorState(site.contactEmailBody)
+    ? await populateLexicalUploadsServer(payload, site.contactEmailBody)
+    : site.contactEmailBody
+
   const html = renderContactEmailTemplate(
-    site.contactEmailHtml?.trim() || DEFAULT_CONTACT_EMAIL_HTML,
+    resolveContactEmailHtml({
+      body: emailBody,
+      legacyHtml: site.contactEmailHtml,
+      absoluteUrls: true,
+    }),
     input,
   )
 

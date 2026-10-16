@@ -1,11 +1,12 @@
 import type { Payload } from 'payload'
 
 import { siteSeed } from '@/data/site-seed'
+import { isLexicalEditorState } from '@/lib/contact/email-template'
 
 export async function seedSite(payload: Payload) {
   const current = await payload.findGlobal({ slug: 'site' })
   if (current.title) {
-    const patch: Record<string, string> = {}
+    const patch: Record<string, unknown> = {}
     if (!current.errorTitle) {
       patch.errorMetaTitle = siteSeed.errorMetaTitle
       patch.errorLabel = siteSeed.errorLabel
@@ -14,6 +15,9 @@ export async function seedSite(payload: Payload) {
     }
     if (!current.contactEmailSubject) {
       patch.contactEmailSubject = siteSeed.contactEmailSubject
+    }
+    if (!isLexicalEditorState(current.contactEmailBody)) {
+      patch.contactEmailBody = siteSeed.contactEmailBody
     }
     if (!current.contactEmailHtml) {
       patch.contactEmailHtml = siteSeed.contactEmailHtml

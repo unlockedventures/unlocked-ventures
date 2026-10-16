@@ -35,8 +35,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         : undefined
 
   return buildPageMetadata({
-    title: page?.current ?? 'Solution',
-    description: page?.description,
+    title: page?.metaTitle || page?.current || 'Solution',
+    description: page?.metaDescription || page?.description,
     path: `/solutions/${slug}`,
     image: page?.article?.imageSrc,
     imageAlt: page?.article?.imageAlt || page?.current,

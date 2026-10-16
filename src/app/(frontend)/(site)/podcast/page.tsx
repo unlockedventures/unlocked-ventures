@@ -13,7 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const content = await getPodcastListing()
   return buildPageMetadata({
     title: content?.metaTitle || 'Podcast',
-    description: content?.description,
+    description: content?.metaDescription || content?.description,
     path: '/podcast',
     tags: ['podcast', 'episodes', 'healthcare', 'AI', 'technology'],
   })

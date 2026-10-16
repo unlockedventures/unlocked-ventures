@@ -1,6 +1,7 @@
 import type { GlobalConfig } from 'payload'
 
 import { adminGroups } from '@/admin/editor-guide'
+import { seoFields } from '@/admin/editor-fields'
 
 export const PodcastPage: GlobalConfig = {
   slug: 'podcast-page',
@@ -14,6 +15,7 @@ export const PodcastPage: GlobalConfig = {
     read: () => true,
   },
   fields: [
+    ...seoFields({ required: true }),
     { name: 'breadcrumbHomeLabel', type: 'text', required: true },
     { name: 'breadcrumbHomeHref', type: 'text', required: true },
     { name: 'breadcrumbPodcastLabel', type: 'text', required: true },
