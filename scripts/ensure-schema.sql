@@ -781,6 +781,47 @@ DO $$ BEGIN
 EXCEPTION WHEN others THEN NULL;
 END $$;
 
+-- Finish linking from renamed legacy column (re-runs safely)
+DO $$ BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'case_studies'
+      AND column_name = 'badge_text_legacy'
+  ) THEN
+    INSERT INTO success_badges (name, name_key, updated_at, created_at)
+    SELECT DISTINCT ON (lower(trim(badge_text_legacy)))
+      trim(badge_text_legacy),
+      lower(trim(badge_text_legacy)),
+      now(),
+      now()
+    FROM case_studies
+    WHERE badge_text_legacy IS NOT NULL AND trim(badge_text_legacy) <> ''
+      AND NOT EXISTS (
+        SELECT 1 FROM success_badges sb
+        WHERE sb.name_key = lower(trim(case_studies.badge_text_legacy))
+      );
+
+    UPDATE case_studies cs
+    SET badge_id = sb.id
+    FROM success_badges sb
+    WHERE cs.badge_id IS NULL
+      AND cs.badge_text_legacy IS NOT NULL
+      AND trim(cs.badge_text_legacy) <> ''
+      AND sb.name_key = lower(trim(cs.badge_text_legacy));
+  END IF;
+EXCEPTION WHEN others THEN NULL;
+END $$;
+
+-- Existing episodes should stay visible on the site after draft/complete lands
+UPDATE podcast_episodes SET episode_status = 'complete' WHERE episode_status IS NULL;
+UPDATE podcast_episodes SET editor_mode = COALESCE(editor_mode, 'manual');
+DO $$ BEGIN
+  ALTER TABLE podcast_episodes ALTER COLUMN episode_status SET DEFAULT 'draft';
+EXCEPTION WHEN others THEN NULL;
+END $$;
+
 ALTER TABLE payload_locked_documents_rels ADD COLUMN IF NOT EXISTS success_badges_id integer;
 CREATE INDEX IF NOT EXISTS payload_locked_documents_rels_success_badges_id_idx
   ON payload_locked_documents_rels USING btree (success_badges_id);

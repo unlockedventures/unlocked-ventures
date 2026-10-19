@@ -59,7 +59,11 @@ echo "PAYLOAD_DB_PUSH=$PAYLOAD_DB_PUSH"
 
 if [ "$DB_EXISTS" -eq 1 ]; then
   echo "Existing database detected — applying additive schema ensure"
-  PG_PKG="$PG_PKG" node /app/scripts/ensure-schema.mjs
+  # Fail the boot if schema ensure fails: teammates pulling develop must get
+  # columns/tables before the app serves, or admin/API will error mid-session.
+  ENSURE_SCHEMA_STRICT=1 PG_PKG="$PG_PKG" node /app/scripts/ensure-schema.mjs
+else
+  echo "Empty database — Payload push will create tables on first boot"
 fi
 
 exec pnpm dev --hostname 0.0.0.0 --port 3000

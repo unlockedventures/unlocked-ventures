@@ -37,6 +37,7 @@ import { seedSolutions } from './data/seed-solutions'
 import { seedStrategicAdvisory } from './data/seed-strategic-advisory'
 import { seedTrustedBy } from './data/seed-trusted-by'
 import { seedSuccessStories } from './data/seed-success-stories'
+import { migrateDevelopData } from './data/migrate-develop-data'
 import { seedContact } from './data/seed-contact'
 import { classifyMedia } from './data/classify-media'
 import { seedSite } from './data/seed-site'
@@ -139,6 +140,8 @@ export default buildConfig({
   ],
   onInit: async (payload) => {
     const seeds: { name: string; run: () => Promise<void> }[] = [
+      // Schema-adjacent data backfill for existing DBs after pulling develop.
+      { name: 'migrate-develop-data', run: () => migrateDevelopData(payload) },
       { name: 'awards', run: () => seedAwards(payload) },
       { name: 'awards-section', run: () => seedAwardsSection(payload) },
       { name: 'about', run: () => seedAbout(payload) },

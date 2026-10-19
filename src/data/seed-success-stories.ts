@@ -93,10 +93,29 @@ export async function seedSuccessStories(payload: Payload) {
     })
   }
 
+  async function ensureBadgeId(name: string | undefined): Promise<number | undefined> {
+    const badgeName = name?.trim()
+    if (!badgeName) return undefined
+    const nameKey = badgeName.toLocaleLowerCase()
+    const found = await payload.find({
+      collection: 'success-badges',
+      where: { nameKey: { equals: nameKey } },
+      limit: 1,
+      depth: 0,
+    })
+    if (typeof found.docs[0]?.id === 'number') return found.docs[0].id
+    const created = await payload.create({
+      collection: 'success-badges',
+      data: { name: badgeName, nameKey },
+    })
+    return typeof created.id === 'number' ? created.id : Number(created.id)
+  }
+
   for (const [index, story] of successStoriesSeed.stories.entries()) {
     if (hrefs.has(story.href)) continue
 
     const image = await uploadStoryImage(payload, story.imageFile, story.title)
+    const badgeId = await ensureBadgeId(story.category)
     await payload.create({
       collection: 'case-studies',
       data: {
@@ -104,6 +123,7 @@ export async function seedSuccessStories(payload: Payload) {
         href: story.href,
         ctaLabel: story.ctaLabel,
         category: story.category,
+        ...(badgeId != null ? { badge: badgeId } : {}),
         description: story.description,
         image: image.id,
         featured: index < 4,
@@ -114,12 +134,23 @@ export async function seedSuccessStories(payload: Payload) {
 
   for (const story of successStoriesSeed.stories) {
     const existingStory = existing.docs.find((doc) => doc.href === story.href)
-    if (!existingStory || existingStory.description || !story.description) continue
+    if (!existingStory) continue
+
+    const data: Record<string, unknown> = {}
+    if (!existingStory.description && story.description) data.description = story.description
+    const hasBadge =
+      typeof existingStory.badge === 'number' ||
+      (existingStory.badge && typeof existingStory.badge === 'object')
+    if (!hasBadge && story.category) {
+      const badgeId = await ensureBadgeId(story.category)
+      if (badgeId != null) data.badge = badgeId
+    }
+    if (Object.keys(data).length === 0) continue
 
     await payload.update({
       collection: 'case-studies',
       id: existingStory.id,
-      data: { description: story.description },
+      data,
     })
   }
 }

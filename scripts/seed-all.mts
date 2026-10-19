@@ -33,6 +33,7 @@ import { seedRecentPodcast } from '../src/data/seed-recent-podcast.ts'
 import { seedSite } from '../src/data/seed-site.ts'
 import { seedSolutions } from '../src/data/seed-solutions.ts'
 import { seedStrategicAdvisory } from '../src/data/seed-strategic-advisory.ts'
+import { migrateDevelopData } from '../src/data/migrate-develop-data.ts'
 import { seedSuccessStories } from '../src/data/seed-success-stories.ts'
 import { seedTrustedBy } from '../src/data/seed-trusted-by.ts'
 
@@ -112,6 +113,7 @@ const episodeBriefDefaults = {
 const payload = await getPayload({ config })
 
 const seeds: { name: string; run: () => Promise<void> }[] = [
+  { name: 'migrate-develop-data', run: () => migrateDevelopData(payload) },
   { name: 'awards', run: () => seedAwards(payload) },
   { name: 'awards-section', run: () => seedAwardsSection(payload) },
   { name: 'about', run: () => seedAbout(payload) },
