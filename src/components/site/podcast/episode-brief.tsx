@@ -305,7 +305,7 @@ export function EpisodeBrief({
               <p className="font-sans text-[11px] leading-4 font-medium tracking-[0.1em] text-[#8A8F98] uppercase">
                 Topic
               </p>
-              <p className="max-w-prose font-sans text-base leading-7 font-normal whitespace-pre-line text-[#2A2D33] sm:text-[17px] sm:leading-8">
+              <p className="max-w-prose font-sans text-base leading-6 font-medium tracking-[-0.01em] whitespace-pre-line text-[#171616] sm:text-[17px] sm:leading-7">
                 {details.topic}
               </p>
             </div>
