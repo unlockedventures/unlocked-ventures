@@ -22,6 +22,12 @@ export type PodcastPageContent = {
   mediaUrl?: string
   timeLabel: string
   progress: number
+  /** Optional Guest / Topic / Duration block above About (admin-controlled). */
+  details?: {
+    guest?: string
+    topic?: string
+    duration?: string
+  } | null
   about?: string
   summary?: string
   mainPoints?: string[]
@@ -159,6 +165,7 @@ export function PodcastPage({ content }: { content: PodcastPageContent }) {
                 agreeTitle={content.agreeTitle}
                 disagreeTitle={content.disagreeTitle}
                 takeTitle={content.takeTitle}
+                details={content.details}
                 about={content.about}
                 summary={content.summary}
                 mainPoints={content.mainPoints}

@@ -214,6 +214,7 @@ export function EpisodeBrief({
   agreeTitle,
   disagreeTitle,
   takeTitle,
+  details,
   about: aboutText,
   summary: summaryText,
   mainPoints: mainPointItems,
@@ -237,6 +238,11 @@ export function EpisodeBrief({
   agreeTitle: string
   disagreeTitle: string
   takeTitle: string
+  details?: {
+    guest?: string
+    topic?: string
+    duration?: string
+  } | null
   about?: string
   summary?: string
   mainPoints?: string[]
@@ -289,6 +295,43 @@ export function EpisodeBrief({
             lines={lines}
             onClose={() => setTranscriptOpen(false)}
           />
+        </div>
+      ) : null}
+
+      {details && (details.guest || details.topic || details.duration) ? (
+        <div className="mt-10 flex flex-col gap-3 border-b border-[#171616]/10 pb-10">
+          {details.topic ? (
+            <div className="flex flex-col gap-2 rounded-xl bg-[#F5F6F8] px-5 py-4">
+              <p className="font-sans text-[11px] leading-4 font-medium tracking-[0.1em] text-[#8A8F98] uppercase">
+                Topic
+              </p>
+              <p className="max-w-prose font-sans text-base leading-7 font-normal whitespace-pre-line text-[#2A2D33] sm:text-[17px] sm:leading-8">
+                {details.topic}
+              </p>
+            </div>
+          ) : null}
+          <div className="grid gap-3 sm:grid-cols-2">
+            {details.guest ? (
+              <div className="flex min-h-[5.5rem] flex-col gap-2 rounded-xl bg-[#F5F6F8] px-5 py-4">
+                <p className="font-sans text-[11px] leading-4 font-medium tracking-[0.1em] text-[#8A8F98] uppercase">
+                  Guest name
+                </p>
+                <p className="font-sans text-base leading-6 font-medium tracking-[-0.01em] text-[#171616] sm:text-[17px] sm:leading-7">
+                  {details.guest}
+                </p>
+              </div>
+            ) : null}
+            {details.duration ? (
+              <div className="flex min-h-[5.5rem] flex-col gap-2 rounded-xl bg-[#F5F6F8] px-5 py-4">
+                <p className="font-sans text-[11px] leading-4 font-medium tracking-[0.1em] text-[#8A8F98] uppercase">
+                  Duration
+                </p>
+                <p className="font-sans text-base leading-6 font-medium tracking-[-0.01em] text-[#171616] tabular-nums sm:text-[17px] sm:leading-7">
+                  {details.duration}
+                </p>
+              </div>
+            ) : null}
+          </div>
         </div>
       ) : null}
 

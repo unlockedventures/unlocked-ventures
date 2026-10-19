@@ -60,6 +60,10 @@ export async function getPodcastEpisode(slug: string): Promise<PodcastPageConten
   )
   const summary = typeof episode.summary === 'string' ? episode.summary.trim() : ''
   const about = typeof episode.about === 'string' ? episode.about.trim() : ''
+  const guestName = typeof episode.guests === 'string' ? episode.guests.trim() : ''
+  const topic = typeof episode.topic === 'string' ? episode.topic.trim() : ''
+  const duration = typeof episode.meta === 'string' ? episode.meta.trim() : ''
+  const showDetails = Boolean(episode.showDetailsSection) && Boolean(guestName || topic || duration)
 
   const listenNext = episodes.flatMap(({ episode: item, episodeSlug: itemSlug }) => {
     if (itemSlug === slug) return []
@@ -92,6 +96,13 @@ export async function getPodcastEpisode(slug: string): Promise<PodcastPageConten
     coverAlt: episode.imageAlt || episode.title,
     mediaUrl: podcastAudioSrc(episode),
     timeLabel: episode.meta || '',
+    details: showDetails
+      ? {
+          ...(guestName ? { guest: guestName } : {}),
+          ...(topic ? { topic } : {}),
+          ...(duration && duration !== '—' ? { duration } : {}),
+        }
+      : null,
     about,
     summary,
     mainPoints,

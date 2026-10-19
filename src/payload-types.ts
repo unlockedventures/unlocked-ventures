@@ -493,10 +493,21 @@ export interface PodcastEpisode {
   category?: string | null;
   sortOrder: number;
   /**
-   * Shown on the thumbnail, for example 14:22.
+   * Turn on to show Guest name, Topic, and Duration above About this episode. Leave off to hide the section.
+   */
+  showDetailsSection?: boolean | null;
+  /**
+   * Shown in the optional details section and on cards when set.
+   */
+  guests?: string | null;
+  /**
+   * Short topic line for the optional details section.
+   */
+  topic?: string | null;
+  /**
+   * Episode length, for example 14:22. Also used on cards and listings.
    */
   meta?: string | null;
-  guests?: string | null;
   /**
    * Choose how to set the cover photo for the card and episode page.
    */
@@ -1150,8 +1161,10 @@ export interface PodcastEpisodesSelect<T extends boolean = true> {
   href?: T;
   category?: T;
   sortOrder?: T;
-  meta?: T;
+  showDetailsSection?: T;
   guests?: T;
+  topic?: T;
+  meta?: T;
   imageSource?: T;
   image?: T;
   imageUrl?: T;

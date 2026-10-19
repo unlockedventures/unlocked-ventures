@@ -458,18 +458,49 @@ export const PodcastEpisodes: CollectionConfig = {
       admin: { hidden: true },
     },
     {
-      name: 'meta',
-      type: 'text',
-      label: 'Length',
+      type: 'collapsible',
+      label: 'Guest, topic, and duration',
       admin: {
-        condition: isManualMode,
-        description: 'Shown on the thumbnail, for example 14:22.',
+        initCollapsed: false,
+        description:
+          'Optional block on the episode page, shown above About this episode when enabled.',
       },
-    },
-    {
-      name: 'guests',
-      type: 'text',
-      admin: { condition: isManualMode },
+      fields: [
+        {
+          name: 'showDetailsSection',
+          type: 'checkbox',
+          label: 'Show Guest / Topic / Duration on episode page',
+          defaultValue: false,
+          admin: {
+            description:
+              'Turn on to show Guest name, Topic, and Duration above About this episode. Leave off to hide the section.',
+          },
+        },
+        {
+          name: 'guests',
+          type: 'text',
+          label: 'Guest name',
+          admin: {
+            description: 'Shown in the optional details section and on cards when set.',
+          },
+        },
+        {
+          name: 'topic',
+          type: 'text',
+          label: 'Topic',
+          admin: {
+            description: 'Short topic line for the optional details section.',
+          },
+        },
+        {
+          name: 'meta',
+          type: 'text',
+          label: 'Duration',
+          admin: {
+            description: 'Episode length, for example 14:22. Also used on cards and listings.',
+          },
+        },
+      ],
     },
     {
       name: 'imageSource',

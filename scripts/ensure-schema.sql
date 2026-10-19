@@ -822,6 +822,10 @@ DO $$ BEGIN
 EXCEPTION WHEN others THEN NULL;
 END $$;
 
+-- Optional Guest / Topic / Duration block on episode page
+ALTER TABLE podcast_episodes ADD COLUMN IF NOT EXISTS show_details_section boolean DEFAULT false;
+ALTER TABLE podcast_episodes ADD COLUMN IF NOT EXISTS topic character varying;
+
 ALTER TABLE payload_locked_documents_rels ADD COLUMN IF NOT EXISTS success_badges_id integer;
 CREATE INDEX IF NOT EXISTS payload_locked_documents_rels_success_badges_id_idx
   ON payload_locked_documents_rels USING btree (success_badges_id);
