@@ -3,6 +3,8 @@ import type { CollectionConfig, PayloadRequest } from 'payload'
 import { adminGroups } from '@/admin/editor-guide'
 import { seoFields } from '@/admin/editor-fields'
 import { podcastEpisodePath, podcastSlugFromHref, slugifyPodcastTitle } from '@/lib/podcast-slug'
+import { applyAiContentToEpisode } from '@/pipeline/apply-ai-content'
+import { episodeAiEndpoints } from '@/pipeline/episode-ai-endpoints'
 
 async function channelTitle(
   req: PayloadRequest,
@@ -27,6 +29,12 @@ async function channelTitle(
   }
 }
 
+const isAiMode = (_data: unknown, siblingData: { editorMode?: string } | undefined) =>
+  siblingData?.editorMode === 'ai'
+
+const isManualMode = (_data: unknown, siblingData: { editorMode?: string } | undefined) =>
+  siblingData?.editorMode !== 'ai'
+
 export const PodcastEpisodes: CollectionConfig = {
   slug: 'podcast-episodes',
   labels: {
@@ -36,20 +44,36 @@ export const PodcastEpisodes: CollectionConfig = {
   admin: {
     group: adminGroups.podcast,
     description:
-      'Every podcast episode belongs to a channel. Mark Featured to show it in the homepage Newest podcast section. Create with AI pastes video links and generates a transcript; Create Manually opens the full episode editor.',
+      'Create with AI (video links → transcript/script) or Create Manually. Save as Draft or Save as Complete. Only Complete episodes appear on the site.',
     hideAPIURL: true,
     useAsTitle: 'title',
-    defaultColumns: ['title', 'channel', 'featured', 'guests'],
+    defaultColumns: ['title', 'channel', 'episodeStatus', 'featured', 'guests'],
     components: {
       beforeList: ['@/components/admin/episode-create-actions#EpisodeCreateActions'],
+      edit: {
+        beforeDocumentControls: [
+          '@/components/admin/episode-editor-mode#EpisodeEditorModeBootstrap',
+        ],
+        SaveButton: '@/components/admin/episode-save-buttons#EpisodeSaveButtons',
+      },
     },
   },
   access: {
     read: () => true,
   },
+  endpoints: episodeAiEndpoints,
   hooks: {
     beforeChange: [
-      async ({ data, operation, originalDoc, req }) => {
+      async ({ data, operation, originalDoc, req, context }) => {
+        if (!data.episodeStatus) {
+          data.episodeStatus =
+            typeof originalDoc?.episodeStatus === 'string' ? originalDoc.episodeStatus : 'draft'
+        }
+        if (!data.editorMode) {
+          data.editorMode =
+            typeof originalDoc?.editorMode === 'string' ? originalDoc.editorMode : 'manual'
+        }
+
         const title = typeof data.title === 'string' ? data.title : originalDoc?.title
         let slug = typeof data.slug === 'string' ? data.slug.trim() : ''
         if (!slug && typeof title === 'string') slug = slugifyPodcastTitle(title)
@@ -58,15 +82,23 @@ export const PodcastEpisodes: CollectionConfig = {
         if (!slug && typeof originalDoc?.href === 'string') {
           slug = podcastSlugFromHref(originalDoc.href) || slugifyPodcastTitle(originalDoc.title || '')
         }
-        if (slug) {
-          data.slug = slug
-          data.href = podcastEpisodePath(slug)
-        }
+        if (!slug) slug = `episode-${Date.now()}`
+        data.slug = slug
+        data.href = podcastEpisodePath(slug)
 
         const channelValue =
           data.channel !== undefined ? data.channel : (originalDoc?.channel as typeof data.channel)
         const fromChannel = await channelTitle(req, channelValue)
         if (fromChannel) data.category = fromChannel
+
+        if (typeof data.meta !== 'string' || !data.meta.trim()) {
+          const prior = typeof originalDoc?.meta === 'string' ? originalDoc.meta : ''
+          data.meta = prior.trim() || '—'
+        }
+        if (typeof data.guests !== 'string' || !data.guests.trim()) {
+          const prior = typeof originalDoc?.guests === 'string' ? originalDoc.guests : ''
+          data.guests = prior.trim() || (data.editorMode === 'ai' ? 'Host & Guest' : 'TBD')
+        }
 
         const imageSource =
           typeof data.imageSource === 'string'
@@ -91,7 +123,6 @@ export const PodcastEpisodes: CollectionConfig = {
         if (data.audioSource === 'url') {
           data.audio = null
         } else {
-          // Uploaded audio live on disk (podcast-audio); keep mediaUrl in sync for the site player.
           const audioValue = data.audio !== undefined ? data.audio : originalDoc?.audio
           const audioId = typeof audioValue === 'number' ? audioValue : audioValue?.id
           if (typeof audioId === 'number') {
@@ -105,6 +136,42 @@ export const PodcastEpisodes: CollectionConfig = {
               if (typeof audioDoc?.url === 'string' && audioDoc.url) data.mediaUrl = audioDoc.url
             } catch {
               // leave mediaUrl unchanged if lookup fails
+            }
+          }
+        }
+
+        if (!context?.skipAiContentSync && data.editorMode === 'ai') {
+          const merged = {
+            sourceTranscript:
+              data.sourceTranscript !== undefined
+                ? data.sourceTranscript
+                : originalDoc?.sourceTranscript,
+            scriptJson: data.scriptJson !== undefined ? data.scriptJson : originalDoc?.scriptJson,
+            summary: data.summary !== undefined ? data.summary : originalDoc?.summary,
+            systemOpinion:
+              data.systemOpinion !== undefined ? data.systemOpinion : originalDoc?.systemOpinion,
+            mainPoints: data.mainPoints !== undefined ? data.mainPoints : originalDoc?.mainPoints,
+            contrastingPoints:
+              data.contrastingPoints !== undefined
+                ? data.contrastingPoints
+                : originalDoc?.contrastingPoints,
+            disagreementPoints:
+              data.disagreementPoints !== undefined
+                ? data.disagreementPoints
+                : originalDoc?.disagreementPoints,
+            videoLinks: data.videoLinks !== undefined ? data.videoLinks : originalDoc?.videoLinks,
+          }
+          Object.assign(data, applyAiContentToEpisode(merged))
+          // Prefer uploaded/generated audio over first video link when already set.
+          if (
+            originalDoc?.audioSource === 'upload' ||
+            data.audioSource === 'upload' ||
+            (typeof originalDoc?.audio === 'number' && originalDoc.audio > 0)
+          ) {
+            data.audioSource = 'upload'
+            if (originalDoc?.audio != null && data.audio === undefined) data.audio = originalDoc.audio
+            if (typeof originalDoc?.mediaUrl === 'string' && originalDoc.mediaUrl) {
+              data.mediaUrl = originalDoc.mediaUrl
             }
           }
         }
@@ -130,6 +197,38 @@ export const PodcastEpisodes: CollectionConfig = {
   defaultSort: 'sortOrder',
   fields: [
     {
+      name: 'editorMode',
+      type: 'select',
+      defaultValue: 'manual',
+      options: [
+        { label: 'Manual', value: 'manual' },
+        { label: 'AI', value: 'ai' },
+      ],
+      admin: {
+        position: 'sidebar',
+        readOnly: true,
+        description: 'Set by Create with AI vs Create Manually.',
+      },
+    },
+    {
+      name: 'episodeStatus',
+      type: 'select',
+      label: 'Status',
+      defaultValue: 'draft',
+      required: true,
+      options: [
+        { label: 'Draft', value: 'draft' },
+        { label: 'Complete', value: 'complete' },
+      ],
+      admin: {
+        position: 'sidebar',
+        description: 'Only Complete episodes appear on the public site.',
+        components: {
+          Cell: '@/components/admin/episode-status-cell#EpisodeStatusCell',
+        },
+      },
+    },
+    {
       name: 'channel',
       type: 'relationship',
       relationTo: 'podcast-channels',
@@ -138,16 +237,193 @@ export const PodcastEpisodes: CollectionConfig = {
       admin: {
         description: 'Required. Create channels under Podcast → Channels.',
       },
+      filterOptions: {
+        active: { equals: true },
+      },
     },
     { name: 'title', type: 'text', required: true },
+
+    // —— AI create (same table) ——
+    {
+      type: 'collapsible',
+      label: 'Create with AI',
+      admin: {
+        initCollapsed: false,
+        condition: isAiMode,
+      },
+      fields: [
+        {
+          name: 'videoLinks',
+          type: 'array',
+          label: 'Video links',
+          labels: { singular: 'Video link', plural: 'Video links' },
+          fields: [
+            {
+              name: 'url',
+              type: 'text',
+              label: 'Video link',
+              admin: {
+                description: 'A public video address, such as YouTube, Vimeo, or Bilibili.',
+              },
+            },
+          ],
+        },
+        {
+          name: 'generateTranscript',
+          type: 'ui',
+          admin: {
+            components: {
+              Field: '@/components/admin/generate-transcript-field#GenerateTranscriptField',
+            },
+          },
+        },
+        {
+          name: 'sourceTranscript',
+          type: 'textarea',
+          label: 'Source transcript',
+          admin: { description: 'Generated text. You can edit it before saving.' },
+        },
+        {
+          name: 'hostGender',
+          type: 'select',
+          label: 'Host gender',
+          options: [
+            { label: 'Male', value: 'male' },
+            { label: 'Female', value: 'female' },
+          ],
+        },
+        {
+          name: 'guestGender',
+          type: 'select',
+          label: 'Guest gender',
+          options: [
+            { label: 'Male', value: 'male' },
+            { label: 'Female', value: 'female' },
+          ],
+        },
+        {
+          name: 'generateScript',
+          type: 'ui',
+          admin: {
+            components: {
+              Field: '@/components/admin/generate-script-field#GenerateScriptField',
+            },
+          },
+        },
+        {
+          name: 'scriptJson',
+          type: 'textarea',
+          label: 'script.json',
+          admin: {
+            description:
+              'Two-person (host/guest) podcast-video script JSON. You can edit it.',
+          },
+        },
+        {
+          name: 'contrastingPoints',
+          type: 'array',
+          label: 'Contrasting points',
+          labels: { singular: 'Contrasting point', plural: 'Contrasting points' },
+          fields: [{ name: 'point', type: 'text', required: true, label: 'Point' }],
+        },
+        {
+          name: 'disagreementPoints',
+          type: 'array',
+          label: 'Disagreement points',
+          labels: { singular: 'Disagreement point', plural: 'Disagreement points' },
+          fields: [{ name: 'point', type: 'text', required: true, label: 'Point' }],
+        },
+        {
+          name: 'systemOpinion',
+          type: 'textarea',
+          label: "System's overall opinion",
+        },
+        {
+          name: 'hostVoiceId',
+          type: 'text',
+          label: 'Host ElevenLabs voice ID',
+        },
+        {
+          name: 'guestVoiceId',
+          type: 'text',
+          label: 'Guest ElevenLabs voice ID',
+        },
+        {
+          name: 'generateAudio',
+          type: 'ui',
+          admin: {
+            components: {
+              Field: '@/components/admin/generate-audio-field#GenerateAudioField',
+            },
+          },
+        },
+      ],
+    },
+    {
+      name: 'status',
+      type: 'select',
+      defaultValue: 'idle',
+      label: 'Transcript job',
+      options: [
+        { label: 'Idle', value: 'idle' },
+        { label: 'Processing', value: 'processing' },
+        { label: 'Ready', value: 'ready' },
+        { label: 'Error', value: 'error' },
+      ],
+      admin: { position: 'sidebar', readOnly: true, condition: isAiMode },
+    },
+    {
+      name: 'statusMessage',
+      type: 'text',
+      label: 'Transcript detail',
+      admin: { position: 'sidebar', readOnly: true, condition: isAiMode },
+    },
+    {
+      name: 'scriptStatus',
+      type: 'select',
+      defaultValue: 'idle',
+      label: 'Script job',
+      options: [
+        { label: 'Idle', value: 'idle' },
+        { label: 'Processing', value: 'processing' },
+        { label: 'Ready', value: 'ready' },
+        { label: 'Error', value: 'error' },
+      ],
+      admin: { position: 'sidebar', readOnly: true, condition: isAiMode },
+    },
+    {
+      name: 'scriptStatusMessage',
+      type: 'text',
+      label: 'Script detail',
+      admin: { position: 'sidebar', readOnly: true, condition: isAiMode },
+    },
+    {
+      name: 'audioStatus',
+      type: 'select',
+      defaultValue: 'idle',
+      label: 'Audio job',
+      options: [
+        { label: 'Idle', value: 'idle' },
+        { label: 'Processing', value: 'processing' },
+        { label: 'Ready', value: 'ready' },
+        { label: 'Error', value: 'error' },
+      ],
+      admin: { position: 'sidebar', readOnly: true, condition: isAiMode },
+    },
+    {
+      name: 'audioStatusMessage',
+      type: 'text',
+      label: 'Audio detail',
+      admin: { position: 'sidebar', readOnly: true, condition: isAiMode },
+    },
+
     {
       name: 'featured',
       type: 'checkbox',
       label: 'Featured',
       defaultValue: true,
       admin: {
-        description:
-          'Featured episodes appear in the homepage Newest podcast section.',
+        description: 'Featured episodes appear in the homepage Newest podcast section.',
         components: {
           Cell: '@/components/admin/featured-cell#FeaturedCell',
         },
@@ -185,10 +461,16 @@ export const PodcastEpisodes: CollectionConfig = {
       name: 'meta',
       type: 'text',
       label: 'Length',
-      required: true,
-      admin: { description: 'Shown on the thumbnail, for example 14:22.' },
+      admin: {
+        condition: isManualMode,
+        description: 'Shown on the thumbnail, for example 14:22.',
+      },
     },
-    { name: 'guests', type: 'text', required: true },
+    {
+      name: 'guests',
+      type: 'text',
+      admin: { condition: isManualMode },
+    },
     {
       name: 'imageSource',
       type: 'radio',
@@ -199,6 +481,7 @@ export const PodcastEpisodes: CollectionConfig = {
         { label: 'Image URL', value: 'url' },
       ],
       admin: {
+        condition: isManualMode,
         layout: 'horizontal',
         description: 'Choose how to set the cover photo for the card and episode page.',
       },
@@ -209,7 +492,8 @@ export const PodcastEpisodes: CollectionConfig = {
       label: 'Upload image',
       relationTo: 'media',
       admin: {
-        condition: (_data, siblingData) => siblingData?.imageSource !== 'url',
+        condition: (_data, siblingData) =>
+          isManualMode(_data, siblingData) && siblingData?.imageSource !== 'url',
         description: 'Upload or drag and drop a cover photo.',
         components: {
           Field: '@/components/admin/direct-upload-field#DirectUploadField',
@@ -226,11 +510,17 @@ export const PodcastEpisodes: CollectionConfig = {
       type: 'text',
       label: 'Image URL',
       admin: {
-        condition: (_data, siblingData) => siblingData?.imageSource === 'url',
+        condition: (_data, siblingData) =>
+          isManualMode(_data, siblingData) && siblingData?.imageSource === 'url',
         description: 'Paste a direct image address (https://…).',
       },
     },
-    { name: 'imageAlt', type: 'text', label: 'Image alt' },
+    {
+      name: 'imageAlt',
+      type: 'text',
+      label: 'Image alt',
+      admin: { condition: isManualMode },
+    },
     {
       name: 'audioSource',
       type: 'radio',
@@ -241,6 +531,7 @@ export const PodcastEpisodes: CollectionConfig = {
         { label: 'URL', value: 'url' },
       ],
       admin: {
+        condition: isManualMode,
         layout: 'horizontal',
         description: 'Episode audio. Uploads are stored on this server for now (S3 later).',
       },
@@ -251,7 +542,8 @@ export const PodcastEpisodes: CollectionConfig = {
       label: 'Upload audio',
       relationTo: 'podcast-audio',
       admin: {
-        condition: (_data, siblingData) => siblingData?.audioSource === 'upload',
+        condition: (_data, siblingData) =>
+          isManualMode(_data, siblingData) && siblingData?.audioSource === 'upload',
         description: 'Upload or drag and drop an audio file (mp3, wav, m4a, …).',
         components: {
           Field: '@/components/admin/direct-upload-field#DirectUploadField',
@@ -268,7 +560,8 @@ export const PodcastEpisodes: CollectionConfig = {
       type: 'text',
       label: 'Audio URL',
       admin: {
-        condition: (_data, siblingData) => siblingData?.audioSource !== 'upload',
+        condition: (_data, siblingData) =>
+          isManualMode(_data, siblingData) && siblingData?.audioSource !== 'upload',
         description: 'Paste an audio file URL, or a YouTube / Vimeo link.',
       },
     },
@@ -276,7 +569,10 @@ export const PodcastEpisodes: CollectionConfig = {
       name: 'excerpt',
       type: 'textarea',
       label: 'Short summary',
-      admin: { description: 'Shown on the podcast list and cards.' },
+      admin: {
+        condition: isManualMode,
+        description: 'Shown on the podcast list and cards.',
+      },
     },
     {
       name: 'stats',
@@ -290,6 +586,7 @@ export const PodcastEpisodes: CollectionConfig = {
       label: 'Show as list hero',
       defaultValue: false,
       admin: {
+        condition: isManualMode,
         position: 'sidebar',
         description: 'Large featured episode at the top of /podcast.',
       },
@@ -305,14 +602,18 @@ export const PodcastEpisodes: CollectionConfig = {
           type: 'textarea',
           label: 'Summary',
           admin: {
-            description: 'Main About text. Prefer this over the fallback below.',
+            description:
+              'Main About text. Filled by AI script generation when using Create with AI.',
           },
         },
         {
           name: 'about',
           type: 'textarea',
           label: 'About (fallback)',
-          admin: { description: 'Used only when Summary is empty.' },
+          admin: {
+            condition: isManualMode,
+            description: 'Used only when Summary is empty.',
+          },
         },
         {
           name: 'mainPoints',
@@ -328,7 +629,7 @@ export const PodcastEpisodes: CollectionConfig = {
     {
       type: 'collapsible',
       label: 'Agree, disagree, and take',
-      admin: { initCollapsed: true },
+      admin: { initCollapsed: true, condition: isManualMode },
       fields: [
         {
           name: 'reading',
@@ -374,7 +675,7 @@ export const PodcastEpisodes: CollectionConfig = {
     {
       type: 'collapsible',
       label: 'Transcript',
-      admin: { initCollapsed: true },
+      admin: { initCollapsed: true, condition: isManualMode },
       fields: [
         {
           name: 'transcript',

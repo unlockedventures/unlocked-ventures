@@ -8,7 +8,7 @@ import { collectVideoLinksFromForm } from '@/pipeline/form-video-links'
 import { overallTranscriptPercent } from '@/pipeline/progress'
 
 type PipelineResponse = {
-  transcript?: string | null
+  sourceTranscript?: string | null
   status?: string | null
   statusMessage?: string | null
   error?: string
@@ -60,8 +60,8 @@ export function GenerateTranscriptField() {
     async function pull() {
       try {
         const [docResponse, progressResponse] = await Promise.all([
-          fetch(`/api/pipeline/${id}?depth=0`, { credentials: 'include', cache: 'no-store' }),
-          fetch('/api/pipeline/progress', { credentials: 'include', cache: 'no-store' }),
+          fetch(`/api/podcast-episodes/${id}?depth=0`, { credentials: 'include', cache: 'no-store' }),
+          fetch('/api/podcast-episodes/progress', { credentials: 'include', cache: 'no-store' }),
         ])
         if (!docResponse.ok || cancelled) return
         const doc = (await docResponse.json()) as PipelineResponse
@@ -76,7 +76,7 @@ export function GenerateTranscriptField() {
 
         if (doc.status === 'processing') {
           seenProcessingRef.current = true
-          dispatchFields({ type: 'UPDATE', path: 'transcript', value: doc.transcript ?? '' })
+          dispatchFields({ type: 'UPDATE', path: 'sourceTranscript', value: doc.sourceTranscript ?? '' })
           dispatchFields({ type: 'UPDATE', path: 'status', value: doc.status })
           dispatchFields({ type: 'UPDATE', path: 'statusMessage', value: doc.statusMessage ?? '' })
           return
@@ -85,7 +85,7 @@ export function GenerateTranscriptField() {
         // Ignore stale/non-processing docs until this run has been processing on the server.
         if (!seenProcessingRef.current) return
 
-        dispatchFields({ type: 'UPDATE', path: 'transcript', value: doc.transcript ?? '' })
+        dispatchFields({ type: 'UPDATE', path: 'sourceTranscript', value: doc.sourceTranscript ?? '' })
         dispatchFields({ type: 'UPDATE', path: 'status', value: doc.status ?? 'idle' })
         dispatchFields({ type: 'UPDATE', path: 'statusMessage', value: doc.statusMessage ?? '' })
         if (doc.status === 'ready' || doc.status === 'error') {
@@ -126,7 +126,7 @@ export function GenerateTranscriptField() {
       value: `Generating transcript for video 1 of ${total}.`,
     })
     try {
-      const response = await fetch('/api/pipeline/transcribe', {
+      const response = await fetch('/api/podcast-episodes/transcribe', {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -161,7 +161,7 @@ export function GenerateTranscriptField() {
         }
         setLocalMessage(body?.error ?? 'Could not generate a transcript.')
         try {
-          const refresh = await fetch(`/api/pipeline/${id}?depth=0`, { credentials: 'include' })
+          const refresh = await fetch(`/api/podcast-episodes/${id}?depth=0`, { credentials: 'include' })
           if (!refresh.ok) {
             if (statusRef.current !== 'processing') {
               setWatching(false)
@@ -172,7 +172,7 @@ export function GenerateTranscriptField() {
           }
           const doc = (await refresh.json()) as PipelineResponse
           if (doc.status === 'processing') seenProcessingRef.current = true
-          dispatchFields({ type: 'UPDATE', path: 'transcript', value: doc.transcript ?? '' })
+          dispatchFields({ type: 'UPDATE', path: 'sourceTranscript', value: doc.sourceTranscript ?? '' })
           dispatchFields({ type: 'UPDATE', path: 'status', value: doc.status ?? 'idle' })
           dispatchFields({ type: 'UPDATE', path: 'statusMessage', value: doc.statusMessage ?? '' })
           if (doc.status === 'processing') {
@@ -195,13 +195,13 @@ export function GenerateTranscriptField() {
 
       seenProcessingRef.current = true
       try {
-        const refresh = await fetch(`/api/pipeline/${id}?depth=0`, {
+        const refresh = await fetch(`/api/podcast-episodes/${id}?depth=0`, {
           credentials: 'include',
           cache: 'no-store',
         })
         if (refresh.ok) {
           const doc = (await refresh.json()) as PipelineResponse
-          dispatchFields({ type: 'UPDATE', path: 'transcript', value: doc.transcript ?? '' })
+          dispatchFields({ type: 'UPDATE', path: 'sourceTranscript', value: doc.sourceTranscript ?? '' })
           dispatchFields({ type: 'UPDATE', path: 'status', value: doc.status ?? 'idle' })
           dispatchFields({ type: 'UPDATE', path: 'statusMessage', value: doc.statusMessage ?? '' })
           if (doc.status === 'ready' || doc.status === 'error') {

@@ -639,6 +639,90 @@ ALTER TABLE solutions ADD COLUMN IF NOT EXISTS meta_description character varyin
 ALTER TABLE podcast_episodes ADD COLUMN IF NOT EXISTS meta_title character varying;
 ALTER TABLE podcast_episodes ADD COLUMN IF NOT EXISTS meta_description character varying;
 
+-- ---------------------------------------------------------------------------
+-- Episodes: draft/complete + AI fields (merged from former pipeline table)
+-- ---------------------------------------------------------------------------
+ALTER TABLE podcast_episodes ADD COLUMN IF NOT EXISTS episode_status character varying DEFAULT 'complete';
+ALTER TABLE podcast_episodes ADD COLUMN IF NOT EXISTS editor_mode character varying DEFAULT 'manual';
+ALTER TABLE podcast_episodes ADD COLUMN IF NOT EXISTS source_transcript character varying;
+ALTER TABLE podcast_episodes ADD COLUMN IF NOT EXISTS script_json character varying;
+ALTER TABLE podcast_episodes ADD COLUMN IF NOT EXISTS system_opinion character varying;
+ALTER TABLE podcast_episodes ADD COLUMN IF NOT EXISTS host_gender character varying;
+ALTER TABLE podcast_episodes ADD COLUMN IF NOT EXISTS guest_gender character varying;
+ALTER TABLE podcast_episodes ADD COLUMN IF NOT EXISTS host_voice_id character varying;
+ALTER TABLE podcast_episodes ADD COLUMN IF NOT EXISTS guest_voice_id character varying;
+ALTER TABLE podcast_episodes ADD COLUMN IF NOT EXISTS status character varying DEFAULT 'idle';
+ALTER TABLE podcast_episodes ADD COLUMN IF NOT EXISTS status_message character varying;
+ALTER TABLE podcast_episodes ADD COLUMN IF NOT EXISTS script_status character varying DEFAULT 'idle';
+ALTER TABLE podcast_episodes ADD COLUMN IF NOT EXISTS script_status_message character varying;
+ALTER TABLE podcast_episodes ADD COLUMN IF NOT EXISTS audio_status character varying DEFAULT 'idle';
+ALTER TABLE podcast_episodes ADD COLUMN IF NOT EXISTS audio_status_message character varying;
+UPDATE podcast_episodes SET episode_status = 'complete' WHERE episode_status IS NULL;
+UPDATE podcast_episodes SET editor_mode = 'manual' WHERE editor_mode IS NULL;
+DO $$ BEGIN
+  ALTER TABLE podcast_episodes ALTER COLUMN meta DROP NOT NULL;
+EXCEPTION WHEN others THEN NULL;
+END $$;
+DO $$ BEGIN
+  ALTER TABLE podcast_episodes ALTER COLUMN guests DROP NOT NULL;
+EXCEPTION WHEN others THEN NULL;
+END $$;
+
+CREATE TABLE IF NOT EXISTS podcast_episodes_video_links (
+  _order integer NOT NULL,
+  _parent_id integer NOT NULL,
+  id character varying NOT NULL,
+  url character varying,
+  CONSTRAINT podcast_episodes_video_links_pkey PRIMARY KEY (id)
+);
+CREATE INDEX IF NOT EXISTS podcast_episodes_video_links_order_idx ON podcast_episodes_video_links USING btree (_order);
+CREATE INDEX IF NOT EXISTS podcast_episodes_video_links_parent_id_idx ON podcast_episodes_video_links USING btree (_parent_id);
+DO $$ BEGIN
+  ALTER TABLE podcast_episodes_video_links
+    ADD CONSTRAINT podcast_episodes_video_links_parent_id_fk
+    FOREIGN KEY (_parent_id) REFERENCES podcast_episodes(id) ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+CREATE TABLE IF NOT EXISTS podcast_episodes_contrasting_points (
+  _order integer NOT NULL,
+  _parent_id integer NOT NULL,
+  id character varying NOT NULL,
+  point character varying NOT NULL,
+  CONSTRAINT podcast_episodes_contrasting_points_pkey PRIMARY KEY (id)
+);
+CREATE INDEX IF NOT EXISTS podcast_episodes_contrasting_points_order_idx ON podcast_episodes_contrasting_points USING btree (_order);
+CREATE INDEX IF NOT EXISTS podcast_episodes_contrasting_points_parent_id_idx ON podcast_episodes_contrasting_points USING btree (_parent_id);
+DO $$ BEGIN
+  ALTER TABLE podcast_episodes_contrasting_points
+    ADD CONSTRAINT podcast_episodes_contrasting_points_parent_id_fk
+    FOREIGN KEY (_parent_id) REFERENCES podcast_episodes(id) ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+CREATE TABLE IF NOT EXISTS podcast_episodes_disagreement_points (
+  _order integer NOT NULL,
+  _parent_id integer NOT NULL,
+  id character varying NOT NULL,
+  point character varying NOT NULL,
+  CONSTRAINT podcast_episodes_disagreement_points_pkey PRIMARY KEY (id)
+);
+CREATE INDEX IF NOT EXISTS podcast_episodes_disagreement_points_order_idx ON podcast_episodes_disagreement_points USING btree (_order);
+CREATE INDEX IF NOT EXISTS podcast_episodes_disagreement_points_parent_id_idx ON podcast_episodes_disagreement_points USING btree (_parent_id);
+DO $$ BEGIN
+  ALTER TABLE podcast_episodes_disagreement_points
+    ADD CONSTRAINT podcast_episodes_disagreement_points_parent_id_fk
+    FOREIGN KEY (_parent_id) REFERENCES podcast_episodes(id) ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+-- Drop redundant pipeline tables (AI create now uses podcast_episodes)
+DROP TABLE IF EXISTS pipeline_video_links CASCADE;
+DROP TABLE IF EXISTS pipeline_main_points CASCADE;
+DROP TABLE IF EXISTS pipeline_contrasting_points CASCADE;
+DROP TABLE IF EXISTS pipeline_disagreement_points CASCADE;
+DROP TABLE IF EXISTS pipeline CASCADE;
+
 -- Payload lock relation column for contact-messages (needed to open a message in admin)
 ALTER TABLE payload_locked_documents_rels ADD COLUMN IF NOT EXISTS contact_messages_id integer;
 CREATE INDEX IF NOT EXISTS payload_locked_documents_rels_contact_messages_id_idx

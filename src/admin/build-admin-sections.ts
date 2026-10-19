@@ -1,7 +1,6 @@
 import { adminGroupOrder, adminGroups, adminSlugOrder } from '@/admin/editor-guide'
 
-/** Pipeline create is reached from Episodes → Create with AI. */
-const hiddenFromNav = new Set(['trusted-logos', 'pipeline'])
+const hiddenFromNav = new Set(['trusted-logos'])
 
 export type AdminLink = {
   slug: string
@@ -215,13 +214,12 @@ export function buildAdminNav(sections: AdminSection[]): AdminNavItem[] {
       })
       continue
     }
-    const label = section.label === adminGroups.pipeline ? 'Podcast' : section.label
     nav.push({
       kind: 'group',
-      label,
+      label: section.label,
       items: section.links.map((link) => ({
         kind: 'link',
-        link: section.label === adminGroups.pipeline ? { ...link, label: 'Podcast' } : link,
+        link,
       })),
     })
   }

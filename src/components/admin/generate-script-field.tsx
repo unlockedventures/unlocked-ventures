@@ -94,7 +94,7 @@ export function GenerateScriptField() {
   const scriptStatus = fieldText(fields.scriptStatus?.value) || 'idle'
   const scriptStatusMessage = fieldText(fields.scriptStatusMessage?.value)
   const transcriptStatus = fieldText(fields.status?.value) || 'idle'
-  const transcript = fieldText(fields.transcript?.value)
+  const transcript = fieldText(fields.sourceTranscript?.value)
   const hostGender = fieldText(fields.hostGender?.value)
   const guestGender = fieldText(fields.guestGender?.value)
   const statusRef = useRef(scriptStatus)
@@ -132,7 +132,7 @@ export function GenerateScriptField() {
 
     async function pull() {
       try {
-        const response = await fetch(`/api/pipeline/${id}?depth=0`, { credentials: 'include' })
+        const response = await fetch(`/api/podcast-episodes/${id}?depth=0`, { credentials: 'include' })
         if (!response.ok || cancelled) return
         const doc = (await response.json()) as PipelineResponse
         if (cancelled) return
@@ -187,7 +187,7 @@ export function GenerateScriptField() {
       value: 'Generating podcast script…',
     })
     try {
-      const response = await fetch('/api/pipeline/generate-script', {
+      const response = await fetch('/api/podcast-episodes/generate-script', {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -217,7 +217,7 @@ export function GenerateScriptField() {
         }
         setLocalMessage(body?.error ?? 'Could not generate a podcast script.')
         try {
-          const refresh = await fetch(`/api/pipeline/${id}?depth=0`, { credentials: 'include' })
+          const refresh = await fetch(`/api/podcast-episodes/${id}?depth=0`, { credentials: 'include' })
           if (!refresh.ok) {
             if (statusRef.current !== 'processing') {
               setWatching(false)
@@ -246,7 +246,7 @@ export function GenerateScriptField() {
 
       seenProcessingRef.current = true
       try {
-        const refresh = await fetch(`/api/pipeline/${id}?depth=0`, { credentials: 'include' })
+        const refresh = await fetch(`/api/podcast-episodes/${id}?depth=0`, { credentials: 'include' })
         if (refresh.ok) {
           const doc = (await refresh.json()) as PipelineResponse
           applyDoc(dispatchFields, fieldsRef.current, doc)

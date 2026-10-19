@@ -4,6 +4,8 @@ import { Button, useConfig } from '@payloadcms/ui'
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 
+import { rememberEpisodeCreateMode } from '@/components/admin/episode-editor-mode'
+
 const HOST_CLASS = 'uv-episode-create-actions'
 const HIDE_STYLE_ID = 'uv-episode-hide-default-create'
 
@@ -12,8 +14,8 @@ export function EpisodeCreateActions() {
   const { config } = useConfig()
   const [host, setHost] = useState<Element | null>(null)
   const adminRoute = config.routes.admin
-  const aiHref = `${adminRoute}/collections/pipeline/create`
-  const manualHref = `${adminRoute}/collections/podcast-episodes/create`
+  const aiHref = `${adminRoute}/collections/podcast-episodes/create?mode=ai`
+  const manualHref = `${adminRoute}/collections/podcast-episodes/create?mode=manual`
 
   useEffect(() => {
     if (!document.getElementById(HIDE_STYLE_ID)) {
@@ -68,6 +70,7 @@ export function EpisodeCreateActions() {
         buttonStyle="pill"
         className="list-create-new-doc__create-new-button"
         el="link"
+        onClick={() => rememberEpisodeCreateMode('ai')}
         size="small"
         to={aiHref}
       >
@@ -78,6 +81,7 @@ export function EpisodeCreateActions() {
         buttonStyle="pill"
         className="list-create-new-doc__create-new-button"
         el="link"
+        onClick={() => rememberEpisodeCreateMode('manual')}
         size="small"
         to={manualHref}
       >

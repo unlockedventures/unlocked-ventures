@@ -77,7 +77,6 @@ export interface Config {
     'case-studies': CaseStudy;
     solutions: Solution;
     'trusted-logos': TrustedLogo;
-    pipeline: Pipeline;
     'contact-messages': ContactMessage;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -96,7 +95,6 @@ export interface Config {
     'case-studies': CaseStudiesSelect<false> | CaseStudiesSelect<true>;
     solutions: SolutionsSelect<false> | SolutionsSelect<true>;
     'trusted-logos': TrustedLogosSelect<false> | TrustedLogosSelect<true>;
-    pipeline: PipelineSelect<false> | PipelineSelect<true>;
     'contact-messages': ContactMessagesSelect<false> | ContactMessagesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -424,7 +422,7 @@ export interface PodcastChannel {
   createdAt: string;
 }
 /**
- * Every podcast episode belongs to a channel. Mark Featured to show it in the homepage Newest podcast section. Create with AI pastes video links and generates a transcript; Create Manually opens the full episode editor.
+ * Create with AI (video links → transcript/script) or Create Manually. Save as Draft or Save as Complete. Only Complete episodes appear on the site.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "podcast-episodes".
@@ -432,10 +430,58 @@ export interface PodcastChannel {
 export interface PodcastEpisode {
   id: number;
   /**
+   * Set by Create with AI vs Create Manually.
+   */
+  editorMode?: ('manual' | 'ai') | null;
+  /**
+   * Only Complete episodes appear on the public site.
+   */
+  episodeStatus: 'draft' | 'complete';
+  /**
    * Required. Create channels under Podcast → Channels.
    */
   channel: number | PodcastChannel;
   title: string;
+  videoLinks?:
+    | {
+        /**
+         * A public video address, such as YouTube, Vimeo, or Bilibili.
+         */
+        url?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Generated text. You can edit it before saving.
+   */
+  sourceTranscript?: string | null;
+  hostGender?: ('male' | 'female') | null;
+  guestGender?: ('male' | 'female') | null;
+  /**
+   * Two-person (host/guest) podcast-video script JSON. You can edit it.
+   */
+  scriptJson?: string | null;
+  contrastingPoints?:
+    | {
+        point: string;
+        id?: string | null;
+      }[]
+    | null;
+  disagreementPoints?:
+    | {
+        point: string;
+        id?: string | null;
+      }[]
+    | null;
+  systemOpinion?: string | null;
+  hostVoiceId?: string | null;
+  guestVoiceId?: string | null;
+  status?: ('idle' | 'processing' | 'ready' | 'error') | null;
+  statusMessage?: string | null;
+  scriptStatus?: ('idle' | 'processing' | 'ready' | 'error') | null;
+  scriptStatusMessage?: string | null;
+  audioStatus?: ('idle' | 'processing' | 'ready' | 'error') | null;
+  audioStatusMessage?: string | null;
   /**
    * Featured episodes appear in the homepage Newest podcast section.
    */
@@ -447,8 +493,8 @@ export interface PodcastEpisode {
   /**
    * Shown on the thumbnail, for example 14:22.
    */
-  meta: string;
-  guests: string;
+  meta?: string | null;
+  guests?: string | null;
   /**
    * Choose how to set the cover photo for the card and episode page.
    */
@@ -484,7 +530,7 @@ export interface PodcastEpisode {
    */
   heroFeatured?: boolean | null;
   /**
-   * Main About text. Prefer this over the fallback below.
+   * Main About text. Filled by AI script generation when using Create with AI.
    */
   summary?: string | null;
   /**
@@ -742,94 +788,6 @@ export interface TrustedLogo {
   createdAt: string;
 }
 /**
- * Paste public video links and generate a transcript. Saving creates or updates the matching episode under the selected channel.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "pipeline".
- */
-export interface Pipeline {
-  id: number;
-  /**
-   * Required. The generated episode is published under this channel.
-   */
-  channel: number | PodcastChannel;
-  name: string;
-  /**
-   * Created automatically when you save this podcast.
-   */
-  episode?: (number | null) | PodcastEpisode;
-  videoLinks?:
-    | {
-        /**
-         * A public video address, such as YouTube, Vimeo, or Bilibili.
-         */
-        url?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Generated text. You can edit it before saving.
-   */
-  transcript?: string | null;
-  /**
-   * Voice/persona for the podcast host in script.json.
-   */
-  hostGender?: ('male' | 'female') | null;
-  /**
-   * Voice/persona for the podcast guest in script.json.
-   */
-  guestGender?: ('male' | 'female') | null;
-  /**
-   * Two-person (host/guest) podcast-video script JSON for a later video generation step. You can edit it.
-   */
-  scriptJson?: string | null;
-  /**
-   * Episode summary (at least 3 sentences, 30 words, and 150 characters without whitespace).
-   */
-  summary?: string | null;
-  mainPoints?:
-    | {
-        point: string;
-        id?: string | null;
-      }[]
-    | null;
-  contrastingPoints?:
-    | {
-        point: string;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Disagreements or debate points from the source. Inferred when the source has no explicit disagreements.
-   */
-  disagreementPoints?:
-    | {
-        point: string;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Overall assessment of the material.
-   */
-  systemOpinion?: string | null;
-  /**
-   * Paste the ElevenLabs voice ID used for host turns in script.json.
-   */
-  hostVoiceId?: string | null;
-  /**
-   * Paste the ElevenLabs voice ID used for guest turns in script.json.
-   */
-  guestVoiceId?: string | null;
-  status?: ('idle' | 'processing' | 'ready' | 'error') | null;
-  statusMessage?: string | null;
-  scriptStatus?: ('idle' | 'processing' | 'ready' | 'error') | null;
-  scriptStatusMessage?: string | null;
-  audioStatus?: ('idle' | 'processing' | 'ready' | 'error') | null;
-  audioStatusMessage?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
  * Messages sent from the contact page. View only — editing is disabled.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -914,10 +872,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'trusted-logos';
         value: number | TrustedLogo;
-      } | null)
-    | ({
-        relationTo: 'pipeline';
-        value: number | Pipeline;
       } | null)
     | ({
         relationTo: 'contact-messages';
@@ -1131,8 +1085,41 @@ export interface PodcastChannelsSelect<T extends boolean = true> {
  * via the `definition` "podcast-episodes_select".
  */
 export interface PodcastEpisodesSelect<T extends boolean = true> {
+  editorMode?: T;
+  episodeStatus?: T;
   channel?: T;
   title?: T;
+  videoLinks?:
+    | T
+    | {
+        url?: T;
+        id?: T;
+      };
+  sourceTranscript?: T;
+  hostGender?: T;
+  guestGender?: T;
+  scriptJson?: T;
+  contrastingPoints?:
+    | T
+    | {
+        point?: T;
+        id?: T;
+      };
+  disagreementPoints?:
+    | T
+    | {
+        point?: T;
+        id?: T;
+      };
+  systemOpinion?: T;
+  hostVoiceId?: T;
+  guestVoiceId?: T;
+  status?: T;
+  statusMessage?: T;
+  scriptStatus?: T;
+  scriptStatusMessage?: T;
+  audioStatus?: T;
+  audioStatusMessage?: T;
   featured?: T;
   slug?: T;
   href?: T;
@@ -1288,55 +1275,6 @@ export interface TrustedLogosSelect<T extends boolean = true> {
   displayWidth?: T;
   displayHeight?: T;
   sortOrder?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "pipeline_select".
- */
-export interface PipelineSelect<T extends boolean = true> {
-  channel?: T;
-  name?: T;
-  episode?: T;
-  videoLinks?:
-    | T
-    | {
-        url?: T;
-        id?: T;
-      };
-  transcript?: T;
-  hostGender?: T;
-  guestGender?: T;
-  scriptJson?: T;
-  summary?: T;
-  mainPoints?:
-    | T
-    | {
-        point?: T;
-        id?: T;
-      };
-  contrastingPoints?:
-    | T
-    | {
-        point?: T;
-        id?: T;
-      };
-  disagreementPoints?:
-    | T
-    | {
-        point?: T;
-        id?: T;
-      };
-  systemOpinion?: T;
-  hostVoiceId?: T;
-  guestVoiceId?: T;
-  status?: T;
-  statusMessage?: T;
-  scriptStatus?: T;
-  scriptStatusMessage?: T;
-  audioStatus?: T;
-  audioStatusMessage?: T;
   updatedAt?: T;
   createdAt?: T;
 }

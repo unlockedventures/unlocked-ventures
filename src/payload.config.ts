@@ -16,7 +16,6 @@ import { Awards } from './collections/Awards'
 import { CaseStudies } from './collections/CaseStudies'
 import { ContactMessages } from './collections/ContactMessages'
 import { NewsPosts } from './collections/NewsPosts'
-import { Pipeline } from './collections/Pipeline'
 import { PodcastAudio } from './collections/PodcastAudio'
 import { PodcastChannels } from './collections/PodcastChannels'
 import { PodcastEpisodes } from './collections/PodcastEpisodes'
@@ -93,7 +92,6 @@ export default buildConfig({
     CaseStudies,
     Solutions,
     TrustedLogos,
-    Pipeline,
     ContactMessages,
   ],
   email: process.env.SMTP_HOST

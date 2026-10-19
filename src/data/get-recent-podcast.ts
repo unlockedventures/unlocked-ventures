@@ -26,9 +26,10 @@ export async function getRecentPodcast(): Promise<RecentPodcastSectionProps | nu
       limit: 100,
       depth: 1,
       where: {
-        featured: {
-          equals: true,
-        },
+        and: [
+          { featured: { equals: true } },
+          { episodeStatus: { equals: 'complete' } },
+        ],
       },
     }),
   ])

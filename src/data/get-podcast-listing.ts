@@ -82,6 +82,7 @@ export async function getPodcastListing(): Promise<PodcastListingCopy | null> {
       sort: 'sortOrder',
       limit: 100,
       depth: 1,
+      where: { episodeStatus: { equals: 'complete' } },
     }),
     payload.find({
       collection: 'podcast-channels',

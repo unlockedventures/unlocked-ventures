@@ -90,7 +90,7 @@ export function GenerateAudioField() {
 
     async function pull() {
       try {
-        const response = await fetch(`/api/pipeline/${id}?depth=0`, { credentials: 'include' })
+        const response = await fetch(`/api/podcast-episodes/${id}?depth=0`, { credentials: 'include' })
         if (!response.ok || cancelled) return
         const doc = (await response.json()) as PipelineResponse
         if (cancelled) return
@@ -147,7 +147,7 @@ export function GenerateAudioField() {
       value: 'Generating host and guest audio…',
     })
     try {
-      const response = await fetch('/api/pipeline/generate-audio', {
+      const response = await fetch('/api/podcast-episodes/generate-audio', {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -175,7 +175,7 @@ export function GenerateAudioField() {
         }
         setLocalMessage(errorFromBody(body, 'Could not generate podcast audio.'))
         try {
-          const refresh = await fetch(`/api/pipeline/${id}?depth=0`, { credentials: 'include' })
+          const refresh = await fetch(`/api/podcast-episodes/${id}?depth=0`, { credentials: 'include' })
           if (!refresh.ok) {
             if (statusRef.current !== 'processing') {
               setWatching(false)
@@ -204,7 +204,7 @@ export function GenerateAudioField() {
 
       seenProcessingRef.current = true
       try {
-        const refresh = await fetch(`/api/pipeline/${id}?depth=0`, { credentials: 'include' })
+        const refresh = await fetch(`/api/podcast-episodes/${id}?depth=0`, { credentials: 'include' })
         if (refresh.ok) {
           const doc = (await refresh.json()) as PipelineResponse
           applyDoc(dispatchFields, doc)

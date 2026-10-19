@@ -28,6 +28,7 @@ export async function getPodcastEpisode(slug: string): Promise<PodcastPageConten
       limit: 100,
       pagination: false,
       sort: 'sortOrder',
+      where: { episodeStatus: { equals: 'complete' } },
     }),
     getPodcastSharedChrome(),
   ])
@@ -134,6 +135,7 @@ export async function getPodcastEpisodeSlugs(): Promise<string[]> {
     limit: 200,
     pagination: false,
     sort: 'sortOrder',
+    where: { episodeStatus: { equals: 'complete' } },
     select: {
       title: true,
       slug: true,
