@@ -57,13 +57,34 @@ export async function seedSuccessStories(payload: Payload) {
       successStoriesSeed.feature.title,
     )
 
+    let badgeId: number | undefined
+    const badgeName = successStoriesSeed.feature.badge?.trim()
+    if (badgeName) {
+      const nameKey = badgeName.toLocaleLowerCase()
+      const existingBadge = await payload.find({
+        collection: 'success-badges',
+        where: { nameKey: { equals: nameKey } },
+        limit: 1,
+        depth: 0,
+      })
+      if (existingBadge.docs[0]?.id) {
+        badgeId = existingBadge.docs[0].id
+      } else {
+        const created = await payload.create({
+          collection: 'success-badges',
+          data: { name: badgeName, nameKey },
+        })
+        badgeId = typeof created.id === 'number' ? created.id : Number(created.id)
+      }
+    }
+
     await payload.create({
       collection: 'case-studies',
       data: {
         title: successStoriesSeed.feature.title,
         href: successStoriesSeed.feature.href,
         ctaLabel: successStoriesSeed.feature.ctaLabel,
-        badge: successStoriesSeed.feature.badge,
+        ...(badgeId != null ? { badge: badgeId } : {}),
         description: successStoriesSeed.feature.description,
         image: featureImage.id,
         featured: true,

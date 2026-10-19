@@ -2,6 +2,7 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
 import type { SuccessStoriesSectionProps } from '@/components/site/success-stories/success-stories-section'
+import { successBadgeLabel } from '@/collections/SuccessBadges'
 
 function mediaUrl(value: number | { url?: string | null } | null | undefined) {
   if (!value || typeof value === 'number' || !value.url) return undefined
@@ -59,7 +60,7 @@ export async function getSuccessStories(): Promise<
       ctaLabel: feature.ctaLabel,
       imageSrc: mediaUrl(feature.image),
       description: feature.description || undefined,
-      badge: feature.badge || undefined,
+      badge: successBadgeLabel(feature.badge),
     },
     stories,
   }

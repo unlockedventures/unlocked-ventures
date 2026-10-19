@@ -5,7 +5,7 @@ import { linkField } from '@/admin/editor-fields'
 
 export const Navigation: GlobalConfig = {
   slug: 'navigation',
-  label: 'Main menu',
+  label: 'Header menu',
   admin: {
     group: adminGroups.menus,
     description: 'The links in the header. This is what people use to move around the site.',

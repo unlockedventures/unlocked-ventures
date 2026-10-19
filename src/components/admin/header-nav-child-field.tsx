@@ -3,8 +3,6 @@
 import { FieldDescription, FieldError, FieldLabel, useConfig, useField } from '@payloadcms/ui'
 import { useEffect, useMemo, useState } from 'react'
 
-const ALLOWED_PARENT_LABELS = new Set(['Strategic Advisory', 'Digital Engineering'])
-
 type NavChildOption = {
   value: string
   label: string
@@ -15,6 +13,7 @@ type NavChildOption = {
 type NavigationDoc = {
   items?: Array<{
     label?: string | null
+    href?: string | null
     groups?: Array<{
       title?: string | null
       links?: Array<{
@@ -26,13 +25,31 @@ type NavigationDoc = {
   }> | null
 }
 
+/** Every Header menu item (and its nested links) as success-category options. */
 function buildOptions(doc: NavigationDoc | null): NavChildOption[] {
   if (!doc?.items?.length) return []
 
   const options: NavChildOption[] = []
+  const seen = new Set<string>()
+
+  const push = (option: NavChildOption) => {
+    if (seen.has(option.value)) return
+    seen.add(option.value)
+    options.push(option)
+  }
+
   for (const item of doc.items) {
     const parentLabel = typeof item.label === 'string' ? item.label.trim() : ''
-    if (!ALLOWED_PARENT_LABELS.has(parentLabel)) continue
+    if (!parentLabel) continue
+
+    const parentHref = typeof item.href === 'string' ? item.href.trim() : ''
+    if (parentHref) {
+      push({
+        value: parentHref,
+        label: parentLabel,
+        parentLabel,
+      })
+    }
 
     for (const group of item.groups ?? []) {
       const groupTitle = typeof group.title === 'string' ? group.title.trim() : ''
@@ -40,7 +57,7 @@ function buildOptions(doc: NavigationDoc | null): NavChildOption[] {
         const label = typeof link.label === 'string' ? link.label.trim() : ''
         const href = typeof link.href === 'string' ? link.href.trim() : ''
         if (!label || !href) continue
-        options.push({
+        push({
           value: href,
           label,
           parentLabel,

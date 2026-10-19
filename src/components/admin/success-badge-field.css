@@ -1,0 +1,119 @@
+.uv-badge-field__row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.uv-badge-field__select {
+  flex: 1;
+  min-width: 0;
+}
+
+.uv-badge-field__add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  border-radius: 0.25rem;
+  border: 1px solid var(--theme-elevation-150);
+  background: var(--theme-elevation-50);
+  color: var(--theme-text);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.uv-badge-field__add:hover:not(:disabled) {
+  background: var(--theme-elevation-100);
+}
+
+.uv-badge-field__add:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.uv-badge-modal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background: color-mix(in srgb, var(--theme-elevation-1000) 55%, transparent);
+}
+
+.uv-badge-modal__card {
+  position: relative;
+  z-index: 1;
+  width: min(26rem, calc(100vw - 2rem));
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--theme-elevation-150);
+  background: var(--theme-elevation-50);
+  box-shadow: 0 16px 40px color-mix(in srgb, var(--theme-elevation-1000) 35%, transparent);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.uv-badge-modal__header h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--theme-text);
+}
+
+.uv-badge-modal__header p {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: var(--theme-elevation-800);
+}
+
+.uv-badge-modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.uv-badge-modal__field > span {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--theme-text);
+}
+
+.uv-badge-modal__field input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.25rem;
+  border: 1px solid var(--theme-elevation-150);
+  background: var(--theme-input-bg, var(--theme-elevation-0));
+  color: var(--theme-text);
+  font: inherit;
+}
+
+.uv-badge-modal__field input:focus {
+  outline: 2px solid var(--theme-success-500, var(--theme-elevation-400));
+  outline-offset: 1px;
+}
+
+.uv-badge-modal__field input:disabled {
+  opacity: 0.7;
+}
+
+.uv-badge-modal__error {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--theme-error-500, #ff7383);
+}
+
+.uv-badge-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.uv-badge-modal__actions .btn {
+  margin: 0;
+}

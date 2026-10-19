@@ -10,6 +10,7 @@ import { EpisodeCreateActions as EpisodeCreateActions_4b5649ad294156dd25a272118c
 import { EpisodeEditorModeBootstrap as EpisodeEditorModeBootstrap_73bce5d0b5b71802817cbd75052a7ce4 } from '@/components/admin/episode-editor-mode'
 import { EpisodeSaveButtons as EpisodeSaveButtons_30741118ebbece47612146faae78497e } from '@/components/admin/episode-save-buttons'
 import { HeaderNavChildField as HeaderNavChildField_5e4deb07483ca5bb99d59979e6db5246 } from '@/components/admin/header-nav-child-field'
+import { SuccessBadgeField as SuccessBadgeField_e64cd04f3e8026f4103b806ae4a2257f } from '@/components/admin/success-badge-field'
 import { RscEntryLexicalCell as RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
 import { RscEntryLexicalField as RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
 import { LexicalDiffComponent as LexicalDiffComponent_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
@@ -56,6 +57,7 @@ export const importMap = {
   "@/components/admin/episode-editor-mode#EpisodeEditorModeBootstrap": EpisodeEditorModeBootstrap_73bce5d0b5b71802817cbd75052a7ce4,
   "@/components/admin/episode-save-buttons#EpisodeSaveButtons": EpisodeSaveButtons_30741118ebbece47612146faae78497e,
   "@/components/admin/header-nav-child-field#HeaderNavChildField": HeaderNavChildField_5e4deb07483ca5bb99d59979e6db5246,
+  "@/components/admin/success-badge-field#SuccessBadgeField": SuccessBadgeField_e64cd04f3e8026f4103b806ae4a2257f,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell": RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalField": RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e,
   "@payloadcms/richtext-lexical/rsc#LexicalDiffComponent": LexicalDiffComponent_44fe37237e0ebf4470c9990d8cb7b07e,

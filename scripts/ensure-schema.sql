@@ -570,32 +570,32 @@ EXCEPTION WHEN others THEN NULL;
 END $$;
 
 -- ---------------------------------------------------------------------------
--- pipeline ↔ channel / episode wiring
+-- Legacy pipeline columns (no-op when pipeline table already removed)
 -- ---------------------------------------------------------------------------
-ALTER TABLE pipeline ADD COLUMN IF NOT EXISTS channel_id integer;
-ALTER TABLE pipeline ADD COLUMN IF NOT EXISTS episode_id integer;
-CREATE INDEX IF NOT EXISTS pipeline_channel_idx ON pipeline USING btree (channel_id);
-CREATE INDEX IF NOT EXISTS pipeline_episode_idx ON pipeline USING btree (episode_id);
 DO $$ BEGIN
-  ALTER TABLE pipeline
-    ADD CONSTRAINT pipeline_channel_id_podcast_channels_id_fk
-    FOREIGN KEY (channel_id) REFERENCES podcast_channels(id) ON DELETE SET NULL;
-EXCEPTION WHEN duplicate_object THEN NULL;
+  IF to_regclass('public.pipeline') IS NOT NULL THEN
+    ALTER TABLE pipeline ADD COLUMN IF NOT EXISTS channel_id integer;
+    ALTER TABLE pipeline ADD COLUMN IF NOT EXISTS episode_id integer;
+    CREATE INDEX IF NOT EXISTS pipeline_channel_idx ON pipeline USING btree (channel_id);
+    CREATE INDEX IF NOT EXISTS pipeline_episode_idx ON pipeline USING btree (episode_id);
+    BEGIN
+      ALTER TABLE pipeline
+        ADD CONSTRAINT pipeline_channel_id_podcast_channels_id_fk
+        FOREIGN KEY (channel_id) REFERENCES podcast_channels(id) ON DELETE SET NULL;
+    EXCEPTION WHEN duplicate_object THEN NULL;
+    END;
+    BEGIN
+      ALTER TABLE pipeline
+        ADD CONSTRAINT pipeline_episode_id_podcast_episodes_id_fk
+        FOREIGN KEY (episode_id) REFERENCES podcast_episodes(id) ON DELETE SET NULL;
+    EXCEPTION WHEN duplicate_object THEN NULL;
+    END;
+    ALTER TABLE pipeline ADD COLUMN IF NOT EXISTS host_voice_id varchar;
+    ALTER TABLE pipeline ADD COLUMN IF NOT EXISTS guest_voice_id varchar;
+    ALTER TABLE pipeline ADD COLUMN IF NOT EXISTS audio_status varchar DEFAULT 'idle';
+    ALTER TABLE pipeline ADD COLUMN IF NOT EXISTS audio_status_message varchar;
+  END IF;
 END $$;
-DO $$ BEGIN
-  ALTER TABLE pipeline
-    ADD CONSTRAINT pipeline_episode_id_podcast_episodes_id_fk
-    FOREIGN KEY (episode_id) REFERENCES podcast_episodes(id) ON DELETE SET NULL;
-EXCEPTION WHEN duplicate_object THEN NULL;
-END $$;
-
--- ---------------------------------------------------------------------------
--- pipeline ElevenLabs host/guest TTS fields
--- ---------------------------------------------------------------------------
-ALTER TABLE pipeline ADD COLUMN IF NOT EXISTS host_voice_id varchar;
-ALTER TABLE pipeline ADD COLUMN IF NOT EXISTS guest_voice_id varchar;
-ALTER TABLE pipeline ADD COLUMN IF NOT EXISTS audio_status varchar DEFAULT 'idle';
-ALTER TABLE pipeline ADD COLUMN IF NOT EXISTS audio_status_message varchar;
 
 -- ---------------------------------------------------------------------------
 -- contact messages + site owner email settings
@@ -722,6 +722,74 @@ DROP TABLE IF EXISTS pipeline_main_points CASCADE;
 DROP TABLE IF EXISTS pipeline_contrasting_points CASCADE;
 DROP TABLE IF EXISTS pipeline_disagreement_points CASCADE;
 DROP TABLE IF EXISTS pipeline CASCADE;
+
+-- ---------------------------------------------------------------------------
+-- Success story badges (unique case-insensitive names)
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS success_badges (
+  id serial PRIMARY KEY,
+  name character varying NOT NULL,
+  name_key character varying NOT NULL,
+  updated_at timestamp(3) with time zone DEFAULT now() NOT NULL,
+  created_at timestamp(3) with time zone DEFAULT now() NOT NULL
+);
+CREATE UNIQUE INDEX IF NOT EXISTS success_badges_name_key_idx ON success_badges USING btree (name_key);
+CREATE INDEX IF NOT EXISTS success_badges_updated_at_idx ON success_badges USING btree (updated_at);
+CREATE INDEX IF NOT EXISTS success_badges_created_at_idx ON success_badges USING btree (created_at);
+
+ALTER TABLE case_studies ADD COLUMN IF NOT EXISTS badge_id integer;
+CREATE INDEX IF NOT EXISTS case_studies_badge_idx ON case_studies USING btree (badge_id);
+DO $$ BEGIN
+  ALTER TABLE case_studies
+    ADD CONSTRAINT case_studies_badge_id_success_badges_id_fk
+    FOREIGN KEY (badge_id) REFERENCES success_badges(id) ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+-- Migrate legacy text badge → success_badges + badge_id
+DO $$ BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'case_studies'
+      AND column_name = 'badge'
+      AND data_type IN ('character varying', 'text')
+  ) THEN
+    INSERT INTO success_badges (name, name_key, updated_at, created_at)
+    SELECT DISTINCT ON (lower(trim(badge)))
+      trim(badge),
+      lower(trim(badge)),
+      now(),
+      now()
+    FROM case_studies
+    WHERE badge IS NOT NULL AND trim(badge) <> ''
+      AND NOT EXISTS (
+        SELECT 1 FROM success_badges sb WHERE sb.name_key = lower(trim(case_studies.badge))
+      );
+
+    UPDATE case_studies cs
+    SET badge_id = sb.id
+    FROM success_badges sb
+    WHERE cs.badge_id IS NULL
+      AND cs.badge IS NOT NULL
+      AND trim(cs.badge) <> ''
+      AND sb.name_key = lower(trim(cs.badge));
+
+    ALTER TABLE case_studies RENAME COLUMN badge TO badge_text_legacy;
+  END IF;
+EXCEPTION WHEN others THEN NULL;
+END $$;
+
+ALTER TABLE payload_locked_documents_rels ADD COLUMN IF NOT EXISTS success_badges_id integer;
+CREATE INDEX IF NOT EXISTS payload_locked_documents_rels_success_badges_id_idx
+  ON payload_locked_documents_rels USING btree (success_badges_id);
+DO $$ BEGIN
+  ALTER TABLE payload_locked_documents_rels
+    ADD CONSTRAINT payload_locked_documents_rels_success_badges_fk
+    FOREIGN KEY (success_badges_id) REFERENCES success_badges(id) ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Payload lock relation column for contact-messages (needed to open a message in admin)
 ALTER TABLE payload_locked_documents_rels ADD COLUMN IF NOT EXISTS contact_messages_id integer;

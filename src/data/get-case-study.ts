@@ -1,6 +1,8 @@
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
+import { successBadgeLabel } from '@/collections/SuccessBadges'
+
 export type CaseStudyDetail = {
   id: number
   slug: string
@@ -50,7 +52,7 @@ export async function getCaseStudyBySlug(slug: string): Promise<CaseStudyDetail 
     title: doc.title,
     href: doc.href,
     ctaLabel: doc.ctaLabel,
-    category: doc.category || doc.badge || undefined,
+    category: doc.category || successBadgeLabel(doc.badge) || undefined,
     description: doc.description || undefined,
     imageSrc: mediaUrl(doc.image),
     imageAlt: doc.title,

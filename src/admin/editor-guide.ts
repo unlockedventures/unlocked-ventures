@@ -36,6 +36,7 @@ export const adminSlugOrder = [
   'digital-engineering',
   'success-stories',
   'case-studies',
+  'success-badges',
   'awards',
   'awards-section',
   'recent-podcast',

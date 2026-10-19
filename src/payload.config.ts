@@ -14,6 +14,7 @@ import { seedPodcastListing } from './data/seed-podcast-listing'
 import { seedPodcastPage } from './data/seed-podcast-page'
 import { Awards } from './collections/Awards'
 import { CaseStudies } from './collections/CaseStudies'
+import { SuccessBadges } from './collections/SuccessBadges'
 import { ContactMessages } from './collections/ContactMessages'
 import { NewsPosts } from './collections/NewsPosts'
 import { PodcastAudio } from './collections/PodcastAudio'
@@ -90,6 +91,7 @@ export default buildConfig({
     PodcastChannels,
     PodcastEpisodes,
     CaseStudies,
+    SuccessBadges,
     Solutions,
     TrustedLogos,
     ContactMessages,

@@ -29,8 +29,7 @@ export const CaseStudies: CollectionConfig = {
       required: true,
       index: true,
       admin: {
-        description:
-          'Required. Choose a service from Strategic Advisory or Digital Engineering in the Main menu.',
+        description: 'Required. Choose a category from a Header menu item.',
         components: {
           Field: '@/components/admin/header-nav-child-field#HeaderNavChildField',
         },
@@ -40,7 +39,18 @@ export const CaseStudies: CollectionConfig = {
     linkField(),
     { name: 'ctaLabel', type: 'text', label: 'Button text', required: true },
     { name: 'category', type: 'text', label: 'Category label', admin: { description: 'Optional badge text on cards.' } },
-    { name: 'badge', type: 'text' },
+    {
+      name: 'badge',
+      type: 'relationship',
+      relationTo: 'success-badges',
+      label: 'Badge',
+      admin: {
+        description: 'Optional. Pick an existing badge or use + to create one. Names are unique ignoring letter case.',
+        components: {
+          Field: '@/components/admin/success-badge-field#SuccessBadgeField',
+        },
+      },
+    },
     { name: 'description', type: 'textarea' },
     { name: 'image', type: 'upload', label: 'Picture', relationTo: 'media', admin: { description: 'The photo on this story. Choose a different file to replace it.' } },
     {

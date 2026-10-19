@@ -19,6 +19,8 @@ export type CaseStudiesListingCopy = {
   allLabel: string
   emptyLabel: string
   seeMoreLabel: string
+  /** From success-badges collection (not derived from stories). */
+  categories: readonly string[]
 }
 
 const trimmedLabelClassName =
@@ -209,9 +211,15 @@ export function CaseStudiesListing({
   const visibleCount = useCaseStudiesStore((state) => state.visibleCount)
   const setCategory = useCaseStudiesStore((state) => state.setCategory)
   const showMore = useCaseStudiesStore((state) => state.showMore)
-  const categories = [...new Set(stories.flatMap((story) => (story.category ? [story.category] : [])))]
+  const categories = copy.categories
   const filtered =
-    category === 'all' ? stories : stories.filter((story) => story.category === category)
+    category === 'all'
+      ? stories
+      : stories.filter((story) => {
+          const badge = story.badge?.trim()
+          if (!badge) return false
+          return badge.toLocaleLowerCase() === category.toLocaleLowerCase()
+        })
   const visible = filtered.slice(0, visibleCount)
   const hasMore = visible.length < filtered.length
 

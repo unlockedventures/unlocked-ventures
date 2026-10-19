@@ -75,6 +75,7 @@ export interface Config {
     'podcast-channels': PodcastChannel;
     'podcast-episodes': PodcastEpisode;
     'case-studies': CaseStudy;
+    'success-badges': SuccessBadge;
     solutions: Solution;
     'trusted-logos': TrustedLogo;
     'contact-messages': ContactMessage;
@@ -93,6 +94,7 @@ export interface Config {
     'podcast-channels': PodcastChannelsSelect<false> | PodcastChannelsSelect<true>;
     'podcast-episodes': PodcastEpisodesSelect<false> | PodcastEpisodesSelect<true>;
     'case-studies': CaseStudiesSelect<false> | CaseStudiesSelect<true>;
+    'success-badges': SuccessBadgesSelect<false> | SuccessBadgesSelect<true>;
     solutions: SolutionsSelect<false> | SolutionsSelect<true>;
     'trusted-logos': TrustedLogosSelect<false> | TrustedLogosSelect<true>;
     'contact-messages': ContactMessagesSelect<false> | ContactMessagesSelect<true>;
@@ -603,7 +605,7 @@ export interface PodcastEpisode {
 export interface CaseStudy {
   id: number;
   /**
-   * Required. Choose a service from Strategic Advisory or Digital Engineering in the Main menu.
+   * Required. Choose a category from a Header menu item.
    */
   headerNavChild: string;
   title: string;
@@ -616,7 +618,10 @@ export interface CaseStudy {
    * Optional badge text on cards.
    */
   category?: string | null;
-  badge?: string | null;
+  /**
+   * Optional. Pick an existing badge or use + to create one. Names are unique ignoring letter case.
+   */
+  badge?: (number | null) | SuccessBadge;
   description?: string | null;
   /**
    * The photo on this story. Choose a different file to replace it.
@@ -635,6 +640,22 @@ export interface CaseStudy {
    * One or two sentences search engines can show under the title.
    */
   metaDescription?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Unique badges for success stories. Create them from the Badge field (+).
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "success-badges".
+ */
+export interface SuccessBadge {
+  id: number;
+  /**
+   * Shown on success story cards. Names are unique ignoring letter case (AI and ai are the same).
+   */
+  name: string;
+  nameKey: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -864,6 +885,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'case-studies';
         value: number | CaseStudy;
+      } | null)
+    | ({
+        relationTo: 'success-badges';
+        value: number | SuccessBadge;
       } | null)
     | ({
         relationTo: 'solutions';
@@ -1198,6 +1223,16 @@ export interface CaseStudiesSelect<T extends boolean = true> {
   sortOrder?: T;
   metaTitle?: T;
   metaDescription?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "success-badges_select".
+ */
+export interface SuccessBadgesSelect<T extends boolean = true> {
+  name?: T;
+  nameKey?: T;
   updatedAt?: T;
   createdAt?: T;
 }

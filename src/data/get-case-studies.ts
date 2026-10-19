@@ -1,12 +1,17 @@
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
+import { successBadgeLabel } from '@/collections/SuccessBadges'
+
 export type CaseStudyCard = {
   id: number
   title: string
   href: string
   ctaLabel: string
+  /** Display chip — prefers badge from DB, then optional category label. */
   category?: string
+  /** Badge name from success-badges (used by category filter). */
+  badge?: string
   imageSrc?: string
 }
 
@@ -27,7 +32,9 @@ export async function getCaseStudies(): Promise<CaseStudyCard[]> {
   return result.docs.flatMap((story) => {
     if (!story.title || !story.ctaLabel || !story.href) return []
 
-    const category = story.category || story.badge || undefined
+    const badge = successBadgeLabel(story.badge)
+    const categoryLabel =
+      typeof story.category === 'string' && story.category.trim() ? story.category.trim() : undefined
 
     return [
       {
@@ -35,7 +42,8 @@ export async function getCaseStudies(): Promise<CaseStudyCard[]> {
         title: story.title,
         href: story.href,
         ctaLabel: story.ctaLabel,
-        category: category || undefined,
+        badge,
+        category: badge || categoryLabel,
         imageSrc: mediaUrl(story.image),
       },
     ]

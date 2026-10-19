@@ -6,6 +6,7 @@ import type { RelatedSolutionsSectionProps } from '@/components/site/solutions/r
 import type { SolutionArticleProps } from '@/components/site/solutions/solution-article'
 import type { TryingToBuildSectionProps } from '@/components/site/solutions/trying-to-build-section'
 import type { SuccessStoriesSectionProps } from '@/components/site/success-stories/success-stories-section'
+import { successBadgeLabel } from '@/collections/SuccessBadges'
 import { lexicalFromHeadingAndParagraphs } from '@/lib/lexical-plain'
 
 function mediaUrl(value: number | { url?: string | null } | null | undefined) {
@@ -142,7 +143,7 @@ async function getSuccessStoriesForSolution(
       ctaLabel: feature.ctaLabel,
       imageSrc: mediaUrl(feature.image),
       description: feature.description || undefined,
-      badge: feature.badge || undefined,
+      badge: successBadgeLabel(feature.badge),
     },
     stories,
   }
