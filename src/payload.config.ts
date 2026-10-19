@@ -61,6 +61,7 @@ import { TrustedBy } from './globals/TrustedBy'
 import { StrategicAdvisory } from './globals/StrategicAdvisory'
 import { Site } from './globals/Site'
 import { SuccessStories } from './globals/SuccessStories'
+import { dashboardStatsHandler } from './endpoints/dashboard-stats'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -193,4 +194,11 @@ export default buildConfig({
   }),
   sharp,
   plugins: [],
+  endpoints: [
+    {
+      path: '/dashboard/stats',
+      method: 'get',
+      handler: dashboardStatsHandler,
+    },
+  ],
 })

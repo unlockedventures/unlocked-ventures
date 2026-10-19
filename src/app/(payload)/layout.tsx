@@ -6,6 +6,8 @@ import type { ServerFunctionClient } from 'payload'
 import { handleServerFunctions, RootLayout } from '@payloadcms/next/layouts'
 import React from 'react'
 
+import { AppProviders } from '@/components/providers/app-providers'
+
 import { importMap } from './admin/importMap.js'
 import './custom.css'
 
@@ -24,7 +26,7 @@ const serverFunction: ServerFunctionClient = async function (args) {
 
 const Layout = ({ children }: Args) => (
   <RootLayout config={config} importMap={importMap} serverFunction={serverFunction}>
-    {children}
+    <AppProviders>{children}</AppProviders>
   </RootLayout>
 )
 
