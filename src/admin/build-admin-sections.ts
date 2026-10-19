@@ -1,6 +1,7 @@
 import { adminGroupOrder, adminGroups, adminSlugOrder } from '@/admin/editor-guide'
 
-const hiddenFromNav = new Set(['trusted-logos'])
+/** Pipeline create is reached from Episodes → Create with AI. */
+const hiddenFromNav = new Set(['trusted-logos', 'pipeline'])
 
 export type AdminLink = {
   slug: string

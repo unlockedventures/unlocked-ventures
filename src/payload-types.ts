@@ -424,7 +424,7 @@ export interface PodcastChannel {
   createdAt: string;
 }
 /**
- * Every podcast episode belongs to a channel. Mark Featured to show it in the homepage Newest podcast section.
+ * Every podcast episode belongs to a channel. Mark Featured to show it in the homepage Newest podcast section. Create with AI pastes video links and generates a transcript; Create Manually opens the full episode editor.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "podcast-episodes".
