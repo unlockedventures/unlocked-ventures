@@ -47,7 +47,7 @@ export const PodcastEpisodes: CollectionConfig = {
       'Create with AI (video links → transcript/script) or Create Manually. Save as Draft or Save as Complete. Only Complete episodes appear on the site.',
     hideAPIURL: true,
     useAsTitle: 'title',
-    defaultColumns: ['title', 'channel', 'episodeStatus', 'featured', 'guests'],
+    defaultColumns: ['title', 'channel', 'editorMode', 'episodeStatus', 'featured', 'guests'],
     components: {
       beforeList: ['@/components/admin/episode-create-actions#EpisodeCreateActions'],
       edit: {
@@ -205,10 +205,11 @@ export const PodcastEpisodes: CollectionConfig = {
     {
       name: 'editorMode',
       type: 'select',
+      label: 'Created by',
       defaultValue: 'manual',
       options: [
         { label: 'Manual', value: 'manual' },
-        { label: 'AI', value: 'ai' },
+        { label: 'AI Generated', value: 'ai' },
       ],
       admin: {
         position: 'sidebar',
