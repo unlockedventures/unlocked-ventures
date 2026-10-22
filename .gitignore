@@ -59,7 +59,6 @@ __pycache__/
 # BEGIN AI-DLC:gitignore
 # AI-DLC: local working files
 aidlc/active-space
-aidlc/.aidlc-active-space-*.tmp
 aidlc/spaces/*/intents/active-intent
 aidlc/.aidlc-clone-id
 aidlc.settings.local.json
@@ -70,8 +69,7 @@ aidlc/.aidlc-unit-participant
 aidlc/.aidlc-claim-registry.json
 aidlc/.aidlc-unit-releases/
 aidlc/.aidlc-unit-merges/
-aidlc/.aidlc-cursor-subagents/
-aidlc/.aidlc-cursor-subagent-*.json
+aidlc/.aidlc-active-space-*.tmp
 aidlc/.aidlc-sessions/
 aidlc/spaces/*/intents/.aidlc-*
 **/aidlc/spaces/*/intents/**/.aidlc-engine/
@@ -81,4 +79,6 @@ aidlc/spaces/*/knowledge/.sources.local.json
 aidlc/spaces/*/intents/*/runtime-graph.json
 aidlc/spaces/*/intents/*/.aidlc-*
 aidlc/diagnostics/
+aidlc/.aidlc-cursor-subagents/
+aidlc/.aidlc-cursor-subagent-*.json
 # END AI-DLC:gitignore
