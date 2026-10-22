@@ -1,10 +1,42 @@
-/* Payload admin overrides. Keep this file as plain CSS.
-   Light login and account use the public-site palette.
-   Dark mode background is #111827. */
+/* Payload admin theme: the public site's Helvetica, navy, and soft gray palette.
+   Keep plain CSS separate from the frontend Tailwind entry point. */
 
-html:not([data-theme='dark']):has(.template-minimal),
-html:not([data-theme='dark']):has(.payload-settings),
-html:not([data-theme='dark']) .template-minimal {
+@font-face {
+  font-family: 'UV Helvetica';
+  src: url('../../assets/fonts/helvetica-neue-lt-pro/HelveticaNeueLTPro-Roman.otf')
+    format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'UV Helvetica';
+  src: url('../../assets/fonts/helvetica-neue-lt-pro/HelveticaNeueLTPro-Md.otf') format('opentype');
+  font-weight: 500 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'UV Helvetica';
+  src: url('../../assets/fonts/helvetica-neue-lt-pro/HelveticaNeueLTPro-Blk.otf') format('opentype');
+  font-weight: 700 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+html {
+  --font-body: 'UV Helvetica', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --uv-brand: #0b1f3a;
+  --uv-brand-hover: #16325a;
+  --uv-surface: #ffffff;
+  --uv-border: #e7e9f3;
+  --uv-selected: #e7e9f3;
+  --uv-focus: #0b1f3a;
+}
+
+html:not([data-theme='dark']) {
   --theme-bg: #f3f4f9;
   --theme-bg-color: #f3f4f9;
   --theme-text: #33353f;
@@ -31,7 +63,7 @@ html:not([data-theme='dark']) .template-minimal {
   --theme-elevation-900: #0b1f3a;
   --theme-elevation-950: #0b1f3a;
   --theme-elevation-1000: #0b1f3a;
-  --theme-success-500: #1cacae;
+  --theme-success-500: #168477;
   --theme-error-500: #b42318;
   background: #f3f4f9;
   color: #33353f;
@@ -106,49 +138,49 @@ html[data-theme='dark'] .uv-login-logo__on-dark {
 }
 
 .login-password__toggle:hover {
-  color: #1cacae;
+  color: var(--uv-brand);
 }
 
 html:not([data-theme='dark']) .template-minimal .field-label,
-html:not([data-theme='dark']):has(.payload-settings) .field-label {
+html:not([data-theme='dark']) .field-label {
   color: #222222;
 }
 
 html:not([data-theme='dark']) .template-minimal .field-label .required,
-html:not([data-theme='dark']):has(.payload-settings) .field-label .required {
+html:not([data-theme='dark']) .field-label .required {
   color: #b42318;
 }
 
 html:not([data-theme='dark']) .template-minimal input,
-html:not([data-theme='dark']):has(.payload-settings) input:not([type='radio']):not([type='checkbox']),
-html:not([data-theme='dark']):has(.payload-settings) select,
-html:not([data-theme='dark']):has(.payload-settings) textarea {
+html:not([data-theme='dark']) input:not([type='radio']):not([type='checkbox']),
+html:not([data-theme='dark']) select,
+html:not([data-theme='dark']) textarea {
   border-color: #c8cad0;
   background: #ffffff;
   color: #25282d;
 }
 
 html:not([data-theme='dark']) .template-minimal input::placeholder,
-html:not([data-theme='dark']):has(.payload-settings) input::placeholder,
-html:not([data-theme='dark']):has(.payload-settings) textarea::placeholder {
+html:not([data-theme='dark']) input::placeholder,
+html:not([data-theme='dark']) textarea::placeholder {
   color: #919191;
 }
 
 html:not([data-theme='dark']) .template-minimal input:hover,
-html:not([data-theme='dark']):has(.payload-settings) input:not([type='radio']):not([type='checkbox']):hover,
-html:not([data-theme='dark']):has(.payload-settings) select:hover,
-html:not([data-theme='dark']):has(.payload-settings) textarea:hover {
+html:not([data-theme='dark']) input:not([type='radio']):not([type='checkbox']):hover,
+html:not([data-theme='dark']) select:hover,
+html:not([data-theme='dark']) textarea:hover {
   border-color: #484d56;
 }
 
 html:not([data-theme='dark']) .template-minimal input:focus,
 html:not([data-theme='dark']) .template-minimal input:focus-visible,
-html:not([data-theme='dark']):has(.payload-settings) input:not([type='radio']):not([type='checkbox']):focus,
-html:not([data-theme='dark']):has(.payload-settings) input:not([type='radio']):not([type='checkbox']):focus-visible,
-html:not([data-theme='dark']):has(.payload-settings) select:focus,
-html:not([data-theme='dark']):has(.payload-settings) textarea:focus {
-  border-color: #1cacae;
-  box-shadow: 0 0 0 1px #1cacae;
+html:not([data-theme='dark']) input:not([type='radio']):not([type='checkbox']):focus,
+html:not([data-theme='dark']) input:not([type='radio']):not([type='checkbox']):focus-visible,
+html:not([data-theme='dark']) select:focus,
+html:not([data-theme='dark']) textarea:focus {
+  border-color: var(--uv-brand);
+  box-shadow: 0 0 0 1px var(--uv-brand);
   outline: none;
 }
 
@@ -163,42 +195,41 @@ html:not([data-theme='dark']):has(.payload-settings) textarea:focus {
 }
 
 html:not([data-theme='dark']) .template-minimal a:not(.btn) {
-  color: #1cacae;
-  text-decoration-color: #1cacae;
+  color: var(--uv-brand);
+  text-decoration-color: var(--uv-brand);
 }
 
 html:not([data-theme='dark']) .template-minimal a:not(.btn):hover {
   color: #0b1f3a;
 }
 
-html:not([data-theme='dark']) .template-minimal .btn--style-primary,
-html:not([data-theme='dark']):has(.payload-settings) .btn--style-primary {
+html:not([data-theme='dark']) .btn--style-primary:not(:disabled):not(.btn--disabled) {
   --color: #ffffff;
-  --bg-color: #484d56;
-  --hover-bg: #30373f;
+  --bg-color: var(--uv-brand);
+  --hover-bg: var(--uv-brand-hover);
   --hover-color: #ffffff;
 }
 
-html:not([data-theme='dark']):has(.payload-settings) .nav {
+html:not([data-theme='dark']) .nav {
   background: #f3f4f9;
   border-right-color: #e7e9f3;
 }
 
-html:not([data-theme='dark']):has(.payload-settings) .nav a {
+html:not([data-theme='dark']) .nav a {
   color: #25282d;
 }
 
-html:not([data-theme='dark']):has(.payload-settings) .nav a:hover,
-html:not([data-theme='dark']):has(.payload-settings) .nav__link:hover {
-  color: #1cacae;
+html:not([data-theme='dark']) .nav a:hover,
+html:not([data-theme='dark']) .nav__link:hover {
+  color: var(--uv-brand);
 }
 
-html:not([data-theme='dark']):has(.payload-settings) .nav__link.active {
+html:not([data-theme='dark']) .nav__link.active {
   color: #0b1f3a;
 }
 
-html:not([data-theme='dark']):has(.payload-settings) .nav__link-indicator {
-  background: #1cacae;
+html:not([data-theme='dark']) .nav__link-indicator {
+  background: var(--uv-brand);
 }
 
 /* Dark admin theme. Page background is #111827. */
@@ -280,7 +311,8 @@ html[data-theme='dark']:has(.payload-settings) textarea::placeholder {
 }
 
 html[data-theme='dark'] .template-minimal input:hover,
-html[data-theme='dark']:has(.payload-settings) input:not([type='radio']):not([type='checkbox']):hover,
+html[data-theme='dark']:has(.payload-settings)
+  input:not([type='radio']):not([type='checkbox']):hover,
 html[data-theme='dark']:has(.payload-settings) select:hover,
 html[data-theme='dark']:has(.payload-settings) textarea:hover {
   border-color: #6b7280;
@@ -288,8 +320,10 @@ html[data-theme='dark']:has(.payload-settings) textarea:hover {
 
 html[data-theme='dark'] .template-minimal input:focus,
 html[data-theme='dark'] .template-minimal input:focus-visible,
-html[data-theme='dark']:has(.payload-settings) input:not([type='radio']):not([type='checkbox']):focus,
-html[data-theme='dark']:has(.payload-settings) input:not([type='radio']):not([type='checkbox']):focus-visible,
+html[data-theme='dark']:has(.payload-settings)
+  input:not([type='radio']):not([type='checkbox']):focus,
+html[data-theme='dark']:has(.payload-settings)
+  input:not([type='radio']):not([type='checkbox']):focus-visible,
 html[data-theme='dark']:has(.payload-settings) select:focus,
 html[data-theme='dark']:has(.payload-settings) textarea:focus {
   border-color: #f3f4f9;
@@ -454,8 +488,8 @@ html[data-theme='dark'] .nav .uv-admin-nav__direct .nav__link-label {
   min-height: 7rem;
   padding: 1rem;
   border: 1px dashed var(--theme-elevation-250);
-  border-radius: 8px;
-  background: var(--theme-elevation-50);
+  border-radius: 12px;
+  background: var(--uv-surface);
   color: var(--theme-elevation-550);
   cursor: pointer;
   text-align: center;
@@ -488,8 +522,8 @@ html[data-theme='dark'] .nav .uv-admin-nav__direct .nav__link-label {
   gap: 0.75rem;
   padding: 0.75rem;
   border: 1px solid var(--theme-elevation-150);
-  border-radius: 8px;
-  background: var(--theme-elevation-50);
+  border-radius: 12px;
+  background: var(--uv-surface);
 }
 
 .uv-direct-upload-field__thumb {
@@ -561,8 +595,8 @@ html[data-theme='dark'] .nav .uv-admin-nav__direct .nav__link-label {
   gap: 0.75rem;
   padding: 0.65rem 0.75rem;
   border: 1px solid var(--theme-elevation-150);
-  border-radius: 8px;
-  background: var(--theme-elevation-50);
+  border-radius: 12px;
+  background: var(--uv-surface);
   cursor: grab;
 }
 
@@ -688,7 +722,7 @@ html[data-theme='dark'] .nav .uv-admin-nav__direct .nav__link-label {
 
 .uv-dashboard-stats__grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
   margin: 0;
   padding: 0;
@@ -709,9 +743,9 @@ html[data-theme='dark'] .nav .uv-admin-nav__direct .nav__link-label {
   height: 100%;
   min-height: 115px;
   padding: 16px;
-  border: 1px solid var(--theme-elevation-300);
-  border-radius: 8px;
-  background: var(--theme-elevation-50);
+  border: 1px solid var(--uv-border);
+  border-radius: 12px;
+  background: var(--uv-surface);
   color: var(--theme-text);
   text-decoration: none;
   box-sizing: border-box;
@@ -760,7 +794,7 @@ html[data-theme='dark'] .nav .uv-admin-nav__direct .nav__link-label {
 
 .uv-admin-home__list {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
   margin: 0;
   padding: 0;
@@ -781,9 +815,9 @@ html[data-theme='dark'] .nav .uv-admin-nav__direct .nav__link-label {
   height: 100%;
   min-height: 110px;
   padding: 16px;
-  border: 1px solid var(--theme-elevation-300);
-  border-radius: 8px;
-  background: var(--theme-elevation-50);
+  border: 1px solid var(--uv-border);
+  border-radius: 12px;
+  background: var(--uv-surface);
   color: var(--theme-text);
   text-decoration: none;
   box-sizing: border-box;
@@ -836,5 +870,271 @@ html[data-theme='dark'] .nav .uv-admin-nav__direct .nav__link-label {
   .uv-dashboard-stats__grid,
   .uv-admin-home__list {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Shared brand treatment for navigation, dashboard cards, and keyboard focus. */
+html[data-theme='dark'] {
+  --uv-brand: #dce7f5;
+  --uv-brand-hover: #ffffff;
+  --uv-surface: #1f2937;
+  --uv-border: #374151;
+  --uv-selected: #26364e;
+  --uv-focus: #dce7f5;
+}
+
+html:not([data-theme='dark']) .template-default {
+  background: var(--theme-bg);
+}
+
+html:not([data-theme='dark']) .nav {
+  background: var(--uv-surface);
+}
+
+.nav__link {
+  border-radius: 6px;
+}
+
+.nav__link:has(.nav__link-indicator) {
+  background: var(--uv-selected);
+  color: var(--uv-brand);
+  font-weight: 600;
+}
+
+html .nav__link-indicator {
+  background: var(--uv-brand);
+}
+
+.uv-admin-home__intro h1,
+.uv-dashboard-stats__value,
+.uv-admin-home__card strong {
+  color: var(--uv-brand);
+}
+
+.uv-dashboard-stats__card:hover,
+.uv-admin-home__card:hover {
+  border-color: var(--uv-brand);
+  background: var(--uv-selected);
+}
+
+:where(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--uv-focus);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .uv-dashboard-stats__card,
+  .uv-admin-home__card {
+    transition: none;
+  }
+}
+
+/* Comfortable editor spacing without changing Payload's responsive shell. */
+.uv-admin-home__intro {
+  margin-bottom: 2rem;
+  padding: clamp(1.25rem, 3vw, 2rem);
+  border: 1px solid var(--uv-border);
+  border-radius: 20px;
+  background: linear-gradient(120deg, #0b1f3a, #16325a);
+  box-shadow: 0 8px 28px rgb(11 31 58 / 8%);
+}
+
+.uv-admin-home__eyebrow {
+  display: block;
+  margin-bottom: 1rem;
+  color: #c6d5e9;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.uv-admin-home .uv-admin-home__intro h1 {
+  color: #ffffff;
+}
+
+.uv-admin-home .uv-admin-home__intro p {
+  color: #dce7f5;
+}
+
+.uv-admin-home__intro h1 {
+  font-size: clamp(1.75rem, 3vw, 2.25rem);
+  font-weight: 500;
+  letter-spacing: -0.035em;
+}
+
+.uv-admin-home__intro p {
+  line-height: 1.6;
+}
+
+.uv-dashboard-stats__grid,
+.uv-admin-home__list {
+  gap: 16px;
+}
+
+.uv-dashboard-stats__card,
+.uv-admin-home__card {
+  padding: 20px;
+  box-shadow: 0 2px 8px rgb(11 31 58 / 3%);
+}
+
+.uv-dashboard-stats__card {
+  min-height: 200px;
+  gap: 12px;
+  border-radius: 16px;
+  transition:
+    border-color 150ms ease,
+    background-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.uv-dashboard-stats__card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 4px;
+}
+
+.uv-dashboard-stats__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--uv-selected);
+  color: var(--uv-brand);
+}
+
+.uv-dashboard-stats__arrow {
+  color: var(--theme-elevation-500);
+}
+
+.uv-dashboard-stats__card:is(:hover, :focus-visible) {
+  box-shadow: 0 8px 24px rgb(11 31 58 / 10%);
+}
+
+.uv-dashboard-stats__card:is(:hover, :focus-visible) .uv-dashboard-stats__arrow {
+  color: var(--uv-brand);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .uv-dashboard-stats__card {
+    transition: none;
+  }
+}
+
+.uv-dashboard-stats__label {
+  color: var(--theme-elevation-600);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.uv-dashboard-stats__value {
+  font-size: 34px;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.uv-dashboard-stats__description {
+  margin-top: auto;
+}
+
+.uv-dashboard-stats h2 {
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.nav .nav__link,
+.nav .uv-admin-nav__page-button,
+.nav .uv-admin-nav__direct {
+  min-height: 40px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+.nav .nav__link {
+  display: flex;
+  align-items: center;
+  position: relative;
+  margin-block: 3px;
+  line-height: 1.4;
+}
+
+.nav .nav__link-label {
+  overflow-wrap: anywhere;
+}
+
+.nav .uv-admin-nav__items {
+  margin-left: 6px;
+  padding-left: 10px;
+  border-left: 1px solid var(--uv-border);
+}
+
+.nav .uv-admin-nav__group-button {
+  min-height: 44px;
+  padding: 16px 12px 8px;
+  font-size: 11px;
+  letter-spacing: 0.09em;
+  color: var(--theme-elevation-500);
+}
+
+.nav .nav__link:hover,
+.nav .uv-admin-nav__page-button:hover {
+  background: var(--uv-selected);
+}
+
+.nav .nav__link:has(.nav__link-indicator) .nav__link-label {
+  color: var(--uv-brand);
+}
+
+.nav .nav__link-indicator {
+  left: 0;
+  top: 25%;
+  height: 50%;
+  width: 3px;
+  border-radius: 3px;
+}
+
+/* Text-entry fields only: uploads, checkboxes, and sliders keep native behavior. */
+:where(.text, .email, .password, .number, .textarea) :is(input, textarea) {
+  border-radius: 8px;
+}
+
+.field-description {
+  line-height: 1.6;
+}
+
+.collection-list .table {
+  border: 1px solid var(--uv-border);
+  border-radius: 12px;
+  background: var(--uv-surface);
+}
+
+.collection-list .table td {
+  padding-block: 14px;
+}
+
+.collection-list .table tbody tr:hover {
+  background: var(--uv-selected);
+}
+
+.login .login__brand {
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 700px) {
+  .uv-dashboard-stats__grid,
+  .uv-admin-home__list {
+    gap: 12px;
+  }
+
+  .uv-dashboard-stats__card,
+  .uv-admin-home__card {
+    padding: 16px;
   }
 }

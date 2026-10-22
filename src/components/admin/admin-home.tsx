@@ -1,6 +1,17 @@
 'use client'
 
 import { Gutter, Link, useAuth, useConfig } from '@payloadcms/ui'
+import {
+  ArrowUpRight,
+  Award,
+  Headphones,
+  Image,
+  Mail,
+  Mic,
+  Newspaper,
+  Radio,
+  Users,
+} from 'lucide-react'
 
 import { buildAdminNav, buildAdminSections, type AdminNavItem } from '@/admin/build-admin-sections'
 
@@ -66,31 +77,36 @@ function AdminHomeLinks({ items, stats }: { items: AdminNavItem[]; stats?: Dashb
 }
 
 const statItems = [
-  { key: 'users', label: 'Users', href: '/admin/collections/users' },
-  { key: 'media', label: 'Media', href: '/admin/collections/media' },
-  { key: 'awards', label: 'Awards', href: '/admin/collections/awards' },
+  { key: 'users', icon: Users, label: 'Users', href: '/admin/collections/users' },
+  { key: 'media', icon: Image, label: 'Media', href: '/admin/collections/media' },
+  { key: 'awards', icon: Award, label: 'Awards', href: '/admin/collections/awards' },
   {
     key: 'news-posts',
+    icon: Newspaper,
     label: 'News Posts',
     href: '/admin/collections/news-posts',
   },
   {
     key: 'podcast-audio',
+    icon: Headphones,
     label: 'Podcast Audio',
     href: '/admin/collections/podcast-audio',
   },
   {
     key: 'podcast-channels',
+    icon: Radio,
     label: 'Podcast Channels',
     href: '/admin/collections/podcast-channels',
   },
   {
     key: 'podcast-episodes',
+    icon: Mic,
     label: 'Podcast Episodes',
     href: '/admin/collections/podcast-episodes',
   },
   {
     key: 'contact-messages',
+    icon: Mail,
     label: 'Contact Messages',
     href: '/admin/collections/contact-messages',
   },
@@ -114,7 +130,9 @@ export function AdminHome() {
   return (
     <Gutter className="dashboard uv-admin-home">
       <header className="uv-admin-home__intro">
+        <span className="uv-admin-home__eyebrow">Unlocked Ventures · Content studio</span>
         <h1>Dashboard</h1>
+        <p>Manage your website content, media, and podcast episodes in one place.</p>
       </header>
 
       {/* Overview Statistics */}
@@ -122,7 +140,7 @@ export function AdminHome() {
         <h2 id="dashboard-stats-heading">Overview</h2>
 
         {isPending ? (
-          <p>Loading dashboard statistics...</p>
+          <p role="status">Loading dashboard statistics...</p>
         ) : isError ? (
           <div role="alert">
             <p>Unable to load dashboard statistics.</p>
@@ -137,10 +155,17 @@ export function AdminHome() {
           <ul className="uv-dashboard-stats__grid">
             {statItems.map((item) => {
               const count = stats[item.key]
+              const Icon = item.icon
 
               return (
                 <li key={item.key} className="uv-dashboard-stats__item">
                   <Link href={item.href} prefetch={false} className="uv-dashboard-stats__card">
+                    <span className="uv-dashboard-stats__card-top" aria-hidden="true">
+                      <span className="uv-dashboard-stats__icon">
+                        <Icon size={20} strokeWidth={1.6} />
+                      </span>
+                      <ArrowUpRight className="uv-dashboard-stats__arrow" size={18} />
+                    </span>
                     <strong className="uv-dashboard-stats__label">{item.label}</strong>
 
                     <span className="uv-dashboard-stats__value">{count.toLocaleString()}</span>
