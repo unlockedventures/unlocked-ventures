@@ -7,7 +7,7 @@ export function transcriptButtonState(args: {
   if (!args.saved) {
     return {
       disabled: true,
-      hint: 'Save this Pipeline document before generating a transcript.',
+      hint: 'Choose a channel, enter a title and video link, then select Save video links to create a draft. You can generate the transcript after saving.',
     }
   }
   if (args.scriptStatus === 'processing') {

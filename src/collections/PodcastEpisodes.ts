@@ -5,6 +5,7 @@ import { seoFields } from '@/admin/editor-fields'
 import { podcastEpisodePath, podcastSlugFromHref, slugifyPodcastTitle } from '@/lib/podcast-slug'
 import { applyAiContentToEpisode } from '@/pipeline/apply-ai-content'
 import { episodeAiEndpoints } from '@/pipeline/episode-ai-endpoints'
+import { reconcileVideoResources } from '@/pipeline/video-resources'
 
 async function channelTitle(
   req: PayloadRequest,
@@ -62,6 +63,9 @@ export const PodcastEpisodes: CollectionConfig = {
   hooks: {
     beforeChange: [
       async ({ data, operation, originalDoc, req, context }) => {
+        if (Array.isArray(data.videoLinks) && !context?.transcriptionUpdate) {
+          data.videoLinks = reconcileVideoResources(data.videoLinks, originalDoc?.videoLinks ?? [])
+        }
         if (!data.episodeStatus) {
           data.episodeStatus =
             typeof originalDoc?.episodeStatus === 'string' ? originalDoc.episodeStatus : 'draft'
@@ -77,7 +81,8 @@ export const PodcastEpisodes: CollectionConfig = {
         if (!slug && typeof data.href === 'string') slug = podcastSlugFromHref(data.href) || ''
         if (!slug && typeof originalDoc?.slug === 'string') slug = originalDoc.slug
         if (!slug && typeof originalDoc?.href === 'string') {
-          slug = podcastSlugFromHref(originalDoc.href) || slugifyPodcastTitle(originalDoc.title || '')
+          slug =
+            podcastSlugFromHref(originalDoc.href) || slugifyPodcastTitle(originalDoc.title || '')
         }
         if (!slug) slug = `episode-${Date.now()}`
         data.slug = slug
@@ -166,7 +171,8 @@ export const PodcastEpisodes: CollectionConfig = {
             (typeof originalDoc?.audio === 'number' && originalDoc.audio > 0)
           ) {
             data.audioSource = 'upload'
-            if (originalDoc?.audio != null && data.audio === undefined) data.audio = originalDoc.audio
+            if (originalDoc?.audio != null && data.audio === undefined)
+              data.audio = originalDoc.audio
             if (typeof originalDoc?.mediaUrl === 'string' && originalDoc.mediaUrl) {
               data.mediaUrl = originalDoc.mediaUrl
             }
@@ -273,6 +279,36 @@ export const PodcastEpisodes: CollectionConfig = {
                 description: 'A public video address, such as YouTube, Vimeo, or Bilibili.',
               },
             },
+            {
+              name: 'transcriptionStatus',
+              type: 'select',
+              label: 'Transcription status',
+              defaultValue: 'pending',
+              options: [
+                { label: 'Pending', value: 'pending' },
+                { label: 'Processing', value: 'processing' },
+                { label: 'Completed', value: 'completed' },
+                { label: 'Failed', value: 'failed' },
+              ],
+              admin: {
+                readOnly: true,
+                description:
+                  'Completed videos are skipped. Changing the URL resets its transcription.',
+              },
+            },
+            {
+              name: 'videoTranscript',
+              type: 'textarea',
+              label: 'Video transcript',
+              admin: { readOnly: true },
+            },
+            {
+              name: 'transcriptionError',
+              type: 'text',
+              label: 'Transcription error',
+              admin: { readOnly: true },
+            },
+            { name: 'transcribedUrl', type: 'text', admin: { hidden: true } },
           ],
         },
         {
@@ -322,8 +358,7 @@ export const PodcastEpisodes: CollectionConfig = {
           type: 'textarea',
           label: 'script.json',
           admin: {
-            description:
-              'Two-person (host/guest) podcast-video script JSON. You can edit it.',
+            description: 'Two-person (host/guest) podcast-video script JSON. You can edit it.',
           },
         },
         {

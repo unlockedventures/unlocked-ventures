@@ -1,5 +1,6 @@
 import type { Endpoint, PayloadRequest } from 'payload'
 import { hasPermission } from '@/access/rbac'
+import type { VideoResource } from '@/pipeline/video-resources'
 
 import { generatePodcastAudioFromScript } from '@/pipeline/generate-audio'
 import { generateScriptFromTranscript } from '@/pipeline/generate-script'
@@ -22,7 +23,7 @@ type EpisodeAiDoc = {
   guestGender?: string | null
   hostVoiceId?: string | null
   guestVoiceId?: string | null
-  videoLinks?: { url?: string | null }[] | null
+  videoLinks?: VideoResource[] | null
   status?: string | null
   statusMessage?: string | null
   scriptStatus?: string | null
@@ -94,7 +95,7 @@ export const episodeAiEndpoints: Endpoint[] = [
             depth: 0,
             req,
             overrideAccess: false,
-            context: { skipAiContentSync: true },
+            context: { skipAiContentSync: true, transcriptionUpdate: true },
           })
         },
         transcribe: (url) =>

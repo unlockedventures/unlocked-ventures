@@ -40,6 +40,7 @@ import { InlineToolbarFeatureClient as InlineToolbarFeatureClient_e70f5e05f09f93
 import { RelatedItemsField as RelatedItemsField_a7098b4589ca4a6f4f719f7d06b509fe } from '@/components/admin/related-items-field'
 import { ContactEmailPreviewField as ContactEmailPreviewField_62446f45008242da925e59025d902cc8 } from '@/components/admin/contact-email-preview-field'
 import { AdminNav as AdminNav_f919f0c6105891138159f6f666f5060d } from '@/components/admin/admin-nav'
+import { AdminHydrationProvider as AdminHydrationProvider_d428e8b895a8c31f197cf4d645f25b8f } from '@/components/admin/admin-hydration-provider'
 import { AdminHome as AdminHome_8366f70fd7e96f92063886100d2dc824 } from '@/components/admin/admin-home'
 import { LoginView as LoginView_201d7cdee0011492caba4a3c0659926d } from '@/components/admin/login-view'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
@@ -88,6 +89,7 @@ export const importMap = {
   "@/components/admin/related-items-field#RelatedItemsField": RelatedItemsField_a7098b4589ca4a6f4f719f7d06b509fe,
   "@/components/admin/contact-email-preview-field#ContactEmailPreviewField": ContactEmailPreviewField_62446f45008242da925e59025d902cc8,
   "@/components/admin/admin-nav#AdminNav": AdminNav_f919f0c6105891138159f6f666f5060d,
+  "@/components/admin/admin-hydration-provider#AdminHydrationProvider": AdminHydrationProvider_d428e8b895a8c31f197cf4d645f25b8f,
   "@/components/admin/admin-home#AdminHome": AdminHome_8366f70fd7e96f92063886100d2dc824,
   "@/components/admin/login-view#LoginView": LoginView_201d7cdee0011492caba4a3c0659926d,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1

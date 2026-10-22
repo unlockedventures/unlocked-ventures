@@ -6,7 +6,7 @@ describe('transcriptButtonState', () => {
   it('asks for a save before the document has an id', () => {
     expect(transcriptButtonState({ saved: false, status: 'idle' })).toEqual({
       disabled: true,
-      hint: 'Save this Pipeline document before generating a transcript.',
+      hint: 'Choose a channel, enter a title and video link, then select Save video links to create a draft. You can generate the transcript after saving.',
     })
   })
 

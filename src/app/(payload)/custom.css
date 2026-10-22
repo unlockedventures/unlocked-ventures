@@ -686,6 +686,15 @@ html[data-theme='dark'] .nav .uv-admin-nav__direct .nav__link-label {
   color: var(--theme-error-500);
 }
 
+.uv-admin-loading {
+  display: grid;
+  min-height: 50vh;
+  padding: 2rem;
+  place-items: center;
+  color: var(--theme-text);
+  font-size: 1rem;
+}
+
 .uv-admin-home {
   display: grid;
   gap: 0;

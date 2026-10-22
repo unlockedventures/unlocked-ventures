@@ -486,6 +486,13 @@ export interface PodcastEpisode {
          * A public video address, such as YouTube, Vimeo, or Bilibili.
          */
         url?: string | null;
+        /**
+         * Completed videos are skipped. Changing the URL resets its transcription.
+         */
+        transcriptionStatus?: ('pending' | 'processing' | 'completed' | 'failed') | null;
+        videoTranscript?: string | null;
+        transcriptionError?: string | null;
+        transcribedUrl?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -1183,6 +1190,10 @@ export interface PodcastEpisodesSelect<T extends boolean = true> {
     | T
     | {
         url?: T;
+        transcriptionStatus?: T;
+        videoTranscript?: T;
+        transcriptionError?: T;
+        transcribedUrl?: T;
         id?: T;
       };
   sourceTranscript?: T;

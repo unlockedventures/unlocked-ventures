@@ -41,14 +41,14 @@
   line-height: 1.4;
 }
 
-/* Hide the real podcast fields while transcript generation is in progress. */
-.uv-pipeline-transcribing .field-type:has(#field-hostGender),
-.uv-pipeline-transcribing .field-type:has(#field-guestGender),
-.uv-pipeline-transcribing .field-type:has(#field-scriptJson),
-.uv-pipeline-transcribing .field-type:has(#field-summary),
-.uv-pipeline-transcribing .field-type:has(#field-systemOpinion),
-.uv-pipeline-transcribing .field-type:has(#field-hostVoiceId),
-.uv-pipeline-transcribing .field-type:has(#field-guestVoiceId),
+/* Match leaf inputs only: collapsible ancestors also contain these IDs. */
+.uv-pipeline-transcribing .field-type.select:has(#field-hostGender),
+.uv-pipeline-transcribing .field-type.select:has(#field-guestGender),
+.uv-pipeline-transcribing .field-type.textarea:has(#field-scriptJson),
+.uv-pipeline-transcribing .field-type.textarea:has(#field-summary),
+.uv-pipeline-transcribing .field-type.textarea:has(#field-systemOpinion),
+.uv-pipeline-transcribing .field-type.text:has(#field-hostVoiceId),
+.uv-pipeline-transcribing .field-type.text:has(#field-guestVoiceId),
 .uv-pipeline-transcribing #field-hostGender,
 .uv-pipeline-transcribing #field-guestGender,
 .uv-pipeline-transcribing #field-mainPoints,

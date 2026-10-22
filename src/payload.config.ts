@@ -75,6 +75,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
     components: {
+      providers: ['@/components/admin/admin-hydration-provider#AdminHydrationProvider'],
       Nav: '@/components/admin/admin-nav#AdminNav',
       views: {
         dashboard: {

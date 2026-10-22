@@ -1,13 +1,24 @@
 'use client'
 
-import { Button, useAuth, useAllFormFields, useDocumentInfo } from '@payloadcms/ui'
+import {
+  Button,
+  FormSubmit,
+  useAuth,
+  useAllFormFields,
+  useDocumentInfo,
+  useForm,
+  useFormProcessing,
+} from '@payloadcms/ui'
 import { useEffect, useRef, useState } from 'react'
 
 import { transcriptButtonState } from '@/pipeline/button-state'
 import { collectVideoLinksFromForm } from '@/pipeline/form-video-links'
 import { overallTranscriptPercent } from '@/pipeline/progress'
+import { syncVideoProgress } from '@/pipeline/sync-video-progress'
+import type { VideoResource } from '@/pipeline/video-resources'
 
 type PipelineResponse = {
+  videoLinks?: VideoResource[] | null
   sourceTranscript?: string | null
   status?: string | null
   statusMessage?: string | null
@@ -21,8 +32,15 @@ function fieldText(value: unknown) {
 export function GenerateTranscriptField() {
   const { id } = useDocumentInfo()
   const { permissions } = useAuth()
+  const { submit } = useForm()
+  const processing = useFormProcessing()
+  const saved = id != null && id !== ''
+  const grants = permissions?.collections?.['podcast-episodes']
+  const canSave = saved ? grants?.update === true : grants?.create === true
   const canGenerate = permissions?.collections?.['podcast-episodes']?.update === true
   const [fields, dispatchFields] = useAllFormFields()
+  const fieldsRef = useRef(fields)
+  fieldsRef.current = fields
   const [watching, setWatching] = useState(false)
   const [pending, setPending] = useState(false)
   const [localMessage, setLocalMessage] = useState<string | null>(null)
@@ -35,7 +53,7 @@ export function GenerateTranscriptField() {
   const seenProcessingRef = useRef(false)
   statusRef.current = status
   const button = transcriptButtonState({
-    saved: id != null && id !== '',
+    saved,
     status,
     scriptStatus,
     pending,
@@ -71,6 +89,7 @@ export function GenerateTranscriptField() {
         if (!docResponse.ok || cancelled) return
         const doc = (await docResponse.json()) as PipelineResponse
         if (cancelled) return
+        syncVideoProgress(fieldsRef.current, doc.videoLinks, dispatchFields)
 
         if (progressResponse.ok) {
           const progress = (await progressResponse.json()) as { percent?: number }
@@ -126,7 +145,6 @@ export function GenerateTranscriptField() {
       setLocalMessage('Add at least one video link.')
       return
     }
-    const total = urls.length
     setLocalMessage(null)
     setPending(true)
     seenProcessingRef.current = false
@@ -136,7 +154,7 @@ export function GenerateTranscriptField() {
     dispatchFields({
       type: 'UPDATE',
       path: 'statusMessage',
-      value: `Generating transcript for video 1 of ${total}.`,
+      value: 'Checking video links for missing transcripts…',
     })
     try {
       const response = await fetch('/api/podcast-episodes/transcribe', {
@@ -187,6 +205,7 @@ export function GenerateTranscriptField() {
             return
           }
           const doc = (await refresh.json()) as PipelineResponse
+          syncVideoProgress(fieldsRef.current, doc.videoLinks, dispatchFields)
           if (doc.status === 'processing') seenProcessingRef.current = true
           dispatchFields({
             type: 'UPDATE',
@@ -221,6 +240,7 @@ export function GenerateTranscriptField() {
         })
         if (refresh.ok) {
           const doc = (await refresh.json()) as PipelineResponse
+          syncVideoProgress(fieldsRef.current, doc.videoLinks, dispatchFields)
           dispatchFields({
             type: 'UPDATE',
             path: 'sourceTranscript',
@@ -248,16 +268,42 @@ export function GenerateTranscriptField() {
     }
   }
 
-  if (!canGenerate) return null
+  if (!canGenerate && !canSave) return null
 
   const detail = localMessage || button.hint || statusMessage
+  const savingDisabled =
+    processing ||
+    pending ||
+    status === 'processing' ||
+    scriptStatus === 'processing' ||
+    fields.audioStatus?.value === 'processing' ||
+    collectVideoLinksFromForm(fields).length === 0
 
   return (
     <div className="field-type ui">
-      <Button buttonStyle="primary" disabled={button.disabled} onClick={() => void onGenerate()}>
-        Generate Transcript
-      </Button>
-      {detail ? <p>{detail}</p> : null}
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.75rem' }}>
+        {canSave ? (
+          <FormSubmit
+            type="button"
+            buttonStyle="secondary"
+            disabled={savingDisabled}
+            onClick={() => void submit(saved ? {} : { overrides: { episodeStatus: 'draft' } })}
+          >
+            Save video links
+          </FormSubmit>
+        ) : null}
+        {canGenerate ? (
+          <Button
+            type="button"
+            buttonStyle="primary"
+            disabled={button.disabled || processing}
+            onClick={() => void onGenerate()}
+          >
+            Generate Transcript
+          </Button>
+        ) : null}
+      </div>
+      {detail ? <p role="status">{detail}</p> : null}
       {percent != null ? <p>{percent}%</p> : null}
     </div>
   )

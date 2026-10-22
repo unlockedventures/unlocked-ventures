@@ -206,6 +206,27 @@ pnpm exec playwright install
 pnpm test
 ```
 
+## Per-video transcription tracking
+
+Each AI episode video link stores a transcription status (Pending, Processing,
+Completed, or Failed), its generated result, the URL used for that result, and any
+error. Generate Transcript processes only resources without a completed result
+for their current URL. It preserves previously generated combined transcript text,
+retries failed resources, and saves each video's completion before continuing.
+Changing a video URL resets that row to Pending and clears its old result on save.
+Job fields are read only and ordinary editor saves cannot forge their values.
+
+Run `pnpm ensure-schema` or `pnpm migrate` before serving this schema change.
+Existing rows without recorded statuses start Pending; their combined transcript
+is preserved, but their next generation records explicit per-video results. The
+system no longer infers completion from editable transcript headings.
+
+Database smoke checks use synthetic results and remove their temporary episode:
+
+```bash
+docker compose exec -T -e PAYLOAD_DB_PUSH=false app pnpm exec tsx scripts/verify-video-transcription.mts
+```
+
 ## Admin roles and permissions
 
 Super Admins manage accounts under **Accounts → Portal users** and permissions

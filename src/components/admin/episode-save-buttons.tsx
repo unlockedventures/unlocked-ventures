@@ -7,7 +7,6 @@ import {
   useDocumentInfo,
   useEditDepth,
   useForm,
-  useFormModified,
   useHotkey,
   useOperation,
 } from '@payloadcms/ui'
@@ -21,7 +20,6 @@ function fieldText(value: unknown) {
 export function EpisodeSaveButtons() {
   const { uploadStatus } = useDocumentInfo()
   const { submit } = useForm()
-  const modified = useFormModified()
   const [fields] = useAllFormFields()
   const draftRef = useRef<HTMLButtonElement>(null)
   const completeRef = useRef<HTMLButtonElement>(null)
@@ -36,7 +34,6 @@ export function EpisodeSaveButtons() {
   const generating =
     status === 'processing' || scriptStatus === 'processing' || audioStatus === 'processing'
   const busy = generating || uploadStatus === 'uploading'
-  const unchanged = operation === 'update' && !modified
 
   useHotkey({ cmdCtrlKey: true, editDepth, keyCodes: ['s'] }, (e) => {
     e.preventDefault()
@@ -56,7 +53,7 @@ export function EpisodeSaveButtons() {
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
       <FormSubmit
         buttonId="action-save-draft"
-        disabled={busy || unchanged}
+        disabled={busy}
         onClick={() => {
           void saveAs('draft')
         }}
@@ -68,7 +65,7 @@ export function EpisodeSaveButtons() {
       </FormSubmit>
       <FormSubmit
         buttonId="action-save-complete"
-        disabled={busy || unchanged}
+        disabled={busy}
         onClick={() => {
           void saveAs('complete')
         }}
@@ -78,6 +75,9 @@ export function EpisodeSaveButtons() {
       >
         Save as Complete
       </FormSubmit>
+      {generating ? (
+        <span role="status">Generation is in progress. You can save when it finishes.</span>
+      ) : null}
     </div>
   )
 }

@@ -66,8 +66,13 @@ try {
   process.exit(strict ? 1 : 0)
 }
 
-const sql =
-  readFileSync(sqlPath, 'utf8') + '\n' + readFileSync(join(__dirname, 'ensure-rbac.sql'), 'utf8')
+const sql = [
+  sqlPath,
+  join(__dirname, 'ensure-rbac.sql'),
+  join(__dirname, 'ensure-video-transcription.sql'),
+]
+  .map((path) => readFileSync(path, 'utf8'))
+  .join('\n')
 const client = new pg.Client({ connectionString: databaseUrl })
 
 try {
