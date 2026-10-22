@@ -929,6 +929,39 @@ html .nav__link-indicator {
   }
 }
 
+.nav .nav__controls {
+  width: 100%;
+}
+
+.nav .uv-admin-sign-out {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 16px;
+  box-sizing: border-box;
+  border: 1px solid var(--uv-border);
+  border-radius: 8px;
+  background: var(--uv-surface);
+  color: var(--uv-brand);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.nav .uv-admin-sign-out:hover {
+  border-color: var(--uv-brand);
+  background: var(--uv-selected);
+  color: var(--uv-brand);
+}
+
+.nav .uv-admin-sign-out:focus-visible {
+  outline: 2px solid var(--uv-focus);
+  outline-offset: 3px;
+}
+
 /* Comfortable editor spacing without changing Payload's responsive shell. */
 .uv-admin-home__intro {
   margin-bottom: 2rem;

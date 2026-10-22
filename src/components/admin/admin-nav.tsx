@@ -1,6 +1,8 @@
 'use client'
 
-import { Link, Logout, useAuth, useConfig, useNav } from '@payloadcms/ui'
+import { Link, useAuth, useConfig, useNav } from '@payloadcms/ui'
+import { LogOut } from 'lucide-react'
+import { formatAdminURL } from 'payload/shared'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { Fragment, useEffect, useRef, useState } from 'react'
 
@@ -208,7 +210,17 @@ export function AdminNav() {
             ),
           )}
           <div className="nav__controls">
-            <Logout />
+            <Link
+              className="uv-admin-sign-out"
+              href={formatAdminURL({
+                adminRoute: config.routes.admin,
+                path: config.admin.routes.logout,
+              })}
+              prefetch={false}
+            >
+              <LogOut size={18} aria-hidden="true" />
+              <span>Sign out</span>
+            </Link>
           </div>
         </nav>
       </div>
