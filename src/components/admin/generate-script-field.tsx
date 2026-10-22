@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, useAllFormFields, useDocumentInfo } from '@payloadcms/ui'
+import { Button, useAuth, useAllFormFields, useDocumentInfo } from '@payloadcms/ui'
 import { useEffect, useRef, useState } from 'react'
 
 import { Skeleton } from '@/components/ui/skeleton'
@@ -34,7 +34,12 @@ function rowCount(fields: Record<string, { rows?: unknown[] } | undefined>, path
   return fields[path]?.rows?.length ?? 0
 }
 
-function syncPointArray(dispatchFields: DispatchFields, path: string, points: PointRow[], currentCount: number) {
+function syncPointArray(
+  dispatchFields: DispatchFields,
+  path: string,
+  points: PointRow[],
+  currentCount: number,
+) {
   for (let index = currentCount - 1; index >= 0; index -= 1) {
     dispatchFields({ type: 'REMOVE_ROW', path, rowIndex: index })
   }
@@ -86,6 +91,8 @@ function applyDoc(
 
 export function GenerateScriptField() {
   const { id } = useDocumentInfo()
+  const { permissions } = useAuth()
+  const canGenerate = permissions?.collections?.['podcast-episodes']?.update === true
   const [fields, dispatchFields] = useAllFormFields()
   const [watching, setWatching] = useState(false)
   const [pending, setPending] = useState(false)
@@ -132,7 +139,9 @@ export function GenerateScriptField() {
 
     async function pull() {
       try {
-        const response = await fetch(`/api/podcast-episodes/${id}?depth=0`, { credentials: 'include' })
+        const response = await fetch(`/api/podcast-episodes/${id}?depth=0`, {
+          credentials: 'include',
+        })
         if (!response.ok || cancelled) return
         const doc = (await response.json()) as PipelineResponse
         if (cancelled) return
@@ -217,7 +226,9 @@ export function GenerateScriptField() {
         }
         setLocalMessage(body?.error ?? 'Could not generate a podcast script.')
         try {
-          const refresh = await fetch(`/api/podcast-episodes/${id}?depth=0`, { credentials: 'include' })
+          const refresh = await fetch(`/api/podcast-episodes/${id}?depth=0`, {
+            credentials: 'include',
+          })
           if (!refresh.ok) {
             if (statusRef.current !== 'processing') {
               setWatching(false)
@@ -246,7 +257,9 @@ export function GenerateScriptField() {
 
       seenProcessingRef.current = true
       try {
-        const refresh = await fetch(`/api/podcast-episodes/${id}?depth=0`, { credentials: 'include' })
+        const refresh = await fetch(`/api/podcast-episodes/${id}?depth=0`, {
+          credentials: 'include',
+        })
         if (refresh.ok) {
           const doc = (await refresh.json()) as PipelineResponse
           applyDoc(dispatchFields, fieldsRef.current, doc)
@@ -262,6 +275,8 @@ export function GenerateScriptField() {
       setPending(true)
     }
   }
+
+  if (!canGenerate) return null
 
   const detail = localMessage || button.hint || scriptStatusMessage
 
@@ -284,7 +299,11 @@ export function GenerateScriptField() {
         </div>
       ) : (
         <>
-          <Button buttonStyle="primary" disabled={button.disabled} onClick={() => void onGenerate()}>
+          <Button
+            buttonStyle="primary"
+            disabled={button.disabled}
+            onClick={() => void onGenerate()}
+          >
             Generate Podcast Script
           </Button>
           {detail ? <p>{detail}</p> : null}

@@ -1,3 +1,4 @@
+import { PermissionsField as PermissionsField_94a12404037fa04f60e200786bf3178a } from '@/components/admin/permissions-field'
 import { FeaturedCell as FeaturedCell_713c6af4da8e270b4b09b2d002943233 } from '@/components/admin/featured-cell'
 import { BooleanToggleCell as BooleanToggleCell_f777bb6bacc0a140ee2d76cb19dce5cc } from '@/components/admin/boolean-toggle-cell'
 import { ChannelBulkActiveActions as ChannelBulkActiveActions_1edd759a7ae23c284e468de246f21f07 } from '@/components/admin/channel-bulk-active-actions'
@@ -45,6 +46,7 @@ import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } f
 
 /** @type import('payload').ImportMap */
 export const importMap = {
+  "@/components/admin/permissions-field#PermissionsField": PermissionsField_94a12404037fa04f60e200786bf3178a,
   "@/components/admin/featured-cell#FeaturedCell": FeaturedCell_713c6af4da8e270b4b09b2d002943233,
   "@/components/admin/boolean-toggle-cell#BooleanToggleCell": BooleanToggleCell_f777bb6bacc0a140ee2d76cb19dce5cc,
   "@/components/admin/channel-bulk-active-actions#ChannelBulkActiveActions": ChannelBulkActiveActions_1edd759a7ae23c284e468de246f21f07,

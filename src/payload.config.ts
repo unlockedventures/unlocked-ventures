@@ -23,6 +23,8 @@ import { PodcastEpisodes } from './collections/PodcastEpisodes'
 import { Solutions } from './collections/Solutions'
 import { TrustedLogos } from './collections/TrustedLogos'
 import { Users } from './collections/Users'
+import { Roles } from './collections/Roles'
+import { collectionRBAC, globalRBAC } from './access/rbac'
 import { Media } from './collections/Media'
 import { seedAwards } from './data/seed-awards'
 import { seedDigitalEngineering } from './data/seed-digital-engineering'
@@ -86,6 +88,7 @@ export default buildConfig({
   },
   collections: [
     Users,
+    Roles,
     Media,
     Awards,
     NewsPosts,
@@ -97,7 +100,7 @@ export default buildConfig({
     Solutions,
     TrustedLogos,
     ContactMessages,
-  ],
+  ].map(collectionRBAC),
   email: process.env.SMTP_HOST
     ? await nodemailerAdapter({
         defaultFromAddress: process.env.SMTP_FROM_ADDRESS || 'noreply@unlockedventures.com',
@@ -138,7 +141,7 @@ export default buildConfig({
     TrustedBy,
     Contact,
     Site,
-  ],
+  ].map(globalRBAC),
   onInit: async (payload) => {
     const seeds: { name: string; run: () => Promise<void> }[] = [
       // Schema-adjacent data backfill for existing DBs after pulling develop.

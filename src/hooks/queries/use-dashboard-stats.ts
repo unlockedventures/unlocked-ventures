@@ -1,8 +1,9 @@
 'use client'
 
+import { useAuth } from '@payloadcms/ui'
 import { useQuery } from '@tanstack/react-query'
 
-export type DashboardStats = {
+export type DashboardStats = Partial<{
   users: number
   media: number
   awards: number
@@ -11,7 +12,7 @@ export type DashboardStats = {
   'podcast-channels': number
   'podcast-episodes': number
   'contact-messages': number
-}
+}>
 
 async function fetchDashboardStats(): Promise<DashboardStats> {
   const response = await fetch('/api/dashboard/stats', {
@@ -26,8 +27,10 @@ async function fetchDashboardStats(): Promise<DashboardStats> {
 }
 
 export function useDashboardStats() {
+  const { user } = useAuth()
   return useQuery({
-    queryKey: ['dashboard', 'stats'],
+    queryKey: ['dashboard', 'stats', user?.id],
+    enabled: Boolean(user),
     queryFn: fetchDashboardStats,
     staleTime: 60 * 1000,
     refetchOnWindowFocus: true,

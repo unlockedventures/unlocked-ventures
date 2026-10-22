@@ -1,15 +1,18 @@
 'use client'
 
-import { CheckboxInput, toast, useListQuery } from '@payloadcms/ui'
+import { CheckboxInput, toast, useAuth, useListQuery } from '@payloadcms/ui'
 import type { DefaultCellComponentProps } from 'payload'
 import { useEffect, useState } from 'react'
 
 export function FeaturedCell({ cellData, collectionSlug, rowData }: DefaultCellComponentProps) {
+  const { permissions } = useAuth()
+  const canUpdate = Boolean(collectionSlug && permissions?.collections?.[collectionSlug]?.update)
   const saved = cellData === true
   const [pending, setPending] = useState<boolean | null>(null)
   const [saving, setSaving] = useState(false)
   const { query, refineListData } = useListQuery()
-  const id = typeof rowData?.id === 'string' || typeof rowData?.id === 'number' ? String(rowData.id) : ''
+  const id =
+    typeof rowData?.id === 'string' || typeof rowData?.id === 'number' ? String(rowData.id) : ''
   const checked = pending ?? saved
 
   useEffect(() => {
@@ -18,7 +21,7 @@ export function FeaturedCell({ cellData, collectionSlug, rowData }: DefaultCellC
 
   async function onToggle(event: React.ChangeEvent<HTMLInputElement>) {
     event.stopPropagation()
-    if (!id || saving) return
+    if (!id || saving || !canUpdate) return
 
     const next = !checked
     setPending(next)
@@ -53,7 +56,7 @@ export function FeaturedCell({ cellData, collectionSlug, rowData }: DefaultCellC
         id={`featured-${id}`}
         Label={null}
         onToggle={onToggle}
-        readOnly={saving || !id}
+        readOnly={saving || !id || !canUpdate}
       />
     </div>
   )

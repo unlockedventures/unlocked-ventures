@@ -2,6 +2,7 @@
 
 import {
   FormSubmit,
+  useAuth,
   useAllFormFields,
   useDocumentInfo,
   useEditDepth,
@@ -26,6 +27,9 @@ export function EpisodeSaveButtons() {
   const completeRef = useRef<HTMLButtonElement>(null)
   const editDepth = useEditDepth()
   const operation = useOperation()
+  const { permissions } = useAuth()
+  const grants = permissions?.collections?.['podcast-episodes']
+  const canSave = operation === 'create' ? grants?.create === true : grants?.update === true
   const status = fieldText(fields.status?.value)
   const scriptStatus = fieldText(fields.scriptStatus?.value)
   const audioStatus = fieldText(fields.audioStatus?.value)
@@ -37,14 +41,16 @@ export function EpisodeSaveButtons() {
   useHotkey({ cmdCtrlKey: true, editDepth, keyCodes: ['s'] }, (e) => {
     e.preventDefault()
     e.stopPropagation()
-    if (busy) return
+    if (busy || !canSave) return
     draftRef.current?.click()
   })
 
   async function saveAs(episodeStatus: 'draft' | 'complete') {
-    if (busy) return
+    if (busy || !canSave) return
     await submit({ overrides: { episodeStatus } })
   }
+
+  if (!canSave) return null
 
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>

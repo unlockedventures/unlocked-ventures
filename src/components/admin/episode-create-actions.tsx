@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, useConfig } from '@payloadcms/ui'
+import { Button, useAuth, useConfig } from '@payloadcms/ui'
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 
@@ -12,6 +12,8 @@ const HIDE_STYLE_ID = 'uv-episode-hide-default-create'
 /** Replaces Episodes list "Create New" with Create with AI + Create Manually. */
 export function EpisodeCreateActions() {
   const { config } = useConfig()
+  const { permissions } = useAuth()
+  const canCreate = permissions?.collections?.['podcast-episodes']?.create === true
   const [host, setHost] = useState<Element | null>(null)
   const adminRoute = config.routes.admin
   const aiHref = `${adminRoute}/collections/podcast-episodes/create?mode=ai`
@@ -61,7 +63,7 @@ export function EpisodeCreateActions() {
     }
   }, [])
 
-  if (!host) return null
+  if (!host || !canCreate) return null
 
   return createPortal(
     <>

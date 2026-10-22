@@ -79,7 +79,10 @@ export async function handleGenerateAudioRequest(args: {
 
   const scriptJson = typeof args.doc.scriptJson === 'string' ? args.doc.scriptJson.trim() : ''
   if (!scriptJson || !parseStoredScriptJson(scriptJson)) {
-    return { status: 400, body: { error: 'Generate a valid script.json before creating podcast audio.' } }
+    return {
+      status: 400,
+      body: { error: 'Generate a valid script.json before creating podcast audio.' },
+    }
   }
 
   const systemOpinion =
@@ -176,7 +179,7 @@ export async function attachGeneratedAudioToEpisode(args: {
       size: args.buffer.length,
     },
     depth: 0,
-    overrideAccess: true,
+    overrideAccess: !args.req?.user,
     req: args.req,
   })
 
@@ -193,7 +196,7 @@ export async function attachGeneratedAudioToEpisode(args: {
       ...(mediaUrl ? { mediaUrl } : {}),
     },
     depth: 0,
-    overrideAccess: true,
+    overrideAccess: !args.req?.user,
     req: args.req,
   })
 

@@ -151,3 +151,35 @@ End-to-end tests need Playwright browsers:
 pnpm exec playwright install
 pnpm test
 ```
+
+## Admin roles and permissions
+
+Super Admins manage accounts under **Accounts → Portal users** and permissions
+under **Accounts → Roles**. Create a role, select collection Create/Read/Update/Delete
+permissions (or Read/Update for page globals), then assign it to a user. Write
+permissions require Read. Contact messages remain read only. A user without a role
+has no content permissions. Only Super Admins can manage users and roles; regular
+users can update their own account credentials but cannot change their access.
+
+For existing databases, run `pnpm ensure-schema` (inside the app container for
+Docker) or `pnpm migrate` before serving the new code. The one-time bootstrap
+promotes the designated existing account, `abir@yopmail.com`, to active Super Admin.
+Other existing accounts receive no content permissions until assigned a role.
+The bootstrap receipt prevents later restarts from restoring revoked privileges.
+For a fresh database, only the designated email can register the first account;
+run the schema command after tables exist to install database-level safeguards.
+The last active Super Admin cannot be demoted, disabled, or deleted.
+
+Server requests resolve current account and role data, so changed grants and
+account disabling take effect on subsequent requests. Refresh the admin to update
+its visible actions. Public content remains readable; the contact inbox and account
+and role data are protected. Intentional system operations (content seeds, public
+contact ingestion, and internal metadata lookups) keep their narrowly scoped
+access bypasses. Podcast generation requires episode Read/Update and, when
+creating audio, Podcast audio Create permission.
+
+To run database-backed access checks with temporary fixtures (cleaned up afterward):
+
+```bash
+docker compose exec -T -e PAYLOAD_DB_PUSH=false app pnpm exec tsx scripts/verify-rbac.mts
+```

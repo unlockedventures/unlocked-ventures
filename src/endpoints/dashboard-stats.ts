@@ -1,6 +1,8 @@
 import type { PayloadHandler } from 'payload'
+import { hasPermission } from '@/access/rbac'
 
 export const dashboardStatsHandler: PayloadHandler = async (req) => {
+  if (!req.user) return Response.json({ message: 'Unauthorized' }, { status: 401 })
   try {
     const collectionSlugs = [
       'users',
@@ -13,8 +15,12 @@ export const dashboardStatsHandler: PayloadHandler = async (req) => {
       'contact-messages',
     ] as const
 
+    const readable: (typeof collectionSlugs)[number][] = []
+    for (const slug of collectionSlugs) {
+      if (await hasPermission(req, slug, 'read')) readable.push(slug)
+    }
     const results = await Promise.all(
-      collectionSlugs.map(async (slug) => {
+      readable.map(async (slug) => {
         const result = await req.payload.count({
           collection: slug,
           overrideAccess: false,

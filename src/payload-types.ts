@@ -68,6 +68,7 @@ export interface Config {
   blocks: {};
   collections: {
     users: User;
+    roles: Role;
     media: Media;
     awards: Award;
     'news-posts': NewsPost;
@@ -87,6 +88,7 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
+    roles: RolesSelect<false> | RolesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     awards: AwardsSelect<false> | AwardsSelect<true>;
     'news-posts': NewsPostsSelect<false> | NewsPostsSelect<true>;
@@ -180,13 +182,25 @@ export interface UserAuthOperations {
   };
 }
 /**
- * People who can sign in and change the website.
+ * Manage portal accounts and assign roles. Only Super Admins can change access.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
   id: number;
+  /**
+   * Full access, including user and role management.
+   */
+  isSuperAdmin?: boolean | null;
+  /**
+   * Disable to revoke portal access on subsequent requests.
+   */
+  active?: boolean | null;
+  /**
+   * Assign a role to grant content permissions. No role means no content access.
+   */
+  role?: (number | null) | Role;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -206,6 +220,28 @@ export interface User {
     | null;
   password?: string | null;
   collection: 'users';
+}
+/**
+ * Choose exactly which content each role can view and change.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "roles".
+ */
+export interface Role {
+  id: number;
+  name: string;
+  description?: string | null;
+  permissions:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * Every photo and logo already uploaded. Change a picture on its section. Open a file here to reuse it, update its description, or delete one that is no longer used.
@@ -870,6 +906,10 @@ export interface PayloadLockedDocument {
         value: number | User;
       } | null)
     | ({
+        relationTo: 'roles';
+        value: number | Role;
+      } | null)
+    | ({
         relationTo: 'media';
         value: number | Media;
       } | null)
@@ -960,6 +1000,9 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  isSuperAdmin?: T;
+  active?: T;
+  role?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -977,6 +1020,17 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "roles_select".
+ */
+export interface RolesSelect<T extends boolean = true> {
+  name?: T;
+  description?: T;
+  permissions?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

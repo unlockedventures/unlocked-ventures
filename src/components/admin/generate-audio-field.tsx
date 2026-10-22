@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, useAllFormFields, useDocumentInfo } from '@payloadcms/ui'
+import { Button, useAuth, useAllFormFields, useDocumentInfo } from '@payloadcms/ui'
 import { useEffect, useRef, useState } from 'react'
 
 import { audioButtonState } from '@/pipeline/audio-button-state'
@@ -50,6 +50,10 @@ function applyDoc(dispatchFields: DispatchFields, doc: PipelineResponse) {
 
 export function GenerateAudioField() {
   const { id } = useDocumentInfo()
+  const { permissions } = useAuth()
+  const canGenerate =
+    permissions?.collections?.['podcast-episodes']?.update === true &&
+    permissions?.collections?.['podcast-audio']?.create === true
   const [fields, dispatchFields] = useAllFormFields()
   const [watching, setWatching] = useState(false)
   const [pending, setPending] = useState(false)
@@ -90,7 +94,9 @@ export function GenerateAudioField() {
 
     async function pull() {
       try {
-        const response = await fetch(`/api/podcast-episodes/${id}?depth=0`, { credentials: 'include' })
+        const response = await fetch(`/api/podcast-episodes/${id}?depth=0`, {
+          credentials: 'include',
+        })
         if (!response.ok || cancelled) return
         const doc = (await response.json()) as PipelineResponse
         if (cancelled) return
@@ -175,7 +181,9 @@ export function GenerateAudioField() {
         }
         setLocalMessage(errorFromBody(body, 'Could not generate podcast audio.'))
         try {
-          const refresh = await fetch(`/api/podcast-episodes/${id}?depth=0`, { credentials: 'include' })
+          const refresh = await fetch(`/api/podcast-episodes/${id}?depth=0`, {
+            credentials: 'include',
+          })
           if (!refresh.ok) {
             if (statusRef.current !== 'processing') {
               setWatching(false)
@@ -204,7 +212,9 @@ export function GenerateAudioField() {
 
       seenProcessingRef.current = true
       try {
-        const refresh = await fetch(`/api/podcast-episodes/${id}?depth=0`, { credentials: 'include' })
+        const refresh = await fetch(`/api/podcast-episodes/${id}?depth=0`, {
+          credentials: 'include',
+        })
         if (refresh.ok) {
           const doc = (await refresh.json()) as PipelineResponse
           applyDoc(dispatchFields, doc)
@@ -220,6 +230,8 @@ export function GenerateAudioField() {
       setPending(true)
     }
   }
+
+  if (!canGenerate) return null
 
   const detail = localMessage || button.hint || audioStatusMessage
 

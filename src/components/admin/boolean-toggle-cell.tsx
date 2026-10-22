@@ -1,6 +1,6 @@
 'use client'
 
-import { CheckboxInput, toast, useListQuery } from '@payloadcms/ui'
+import { CheckboxInput, toast, useAuth, useListQuery } from '@payloadcms/ui'
 import type { DefaultCellComponentProps } from 'payload'
 import { useEffect, useState } from 'react'
 
@@ -19,12 +19,16 @@ export function BooleanToggleCell({
   field,
   rowData,
 }: DefaultCellComponentProps) {
-  const fieldName = typeof field?.name === 'string' ? field.name : 'featured'
+  const { permissions } = useAuth()
+  const canUpdate = Boolean(collectionSlug && permissions?.collections?.[collectionSlug]?.update)
+  const fieldName =
+    field && 'name' in field && typeof field.name === 'string' ? field.name : 'featured'
   const saved = cellData === true
   const [pending, setPending] = useState<boolean | null>(null)
   const [saving, setSaving] = useState(false)
   const { query, refineListData } = useListQuery()
-  const id = typeof rowData?.id === 'string' || typeof rowData?.id === 'number' ? String(rowData.id) : ''
+  const id =
+    typeof rowData?.id === 'string' || typeof rowData?.id === 'number' ? String(rowData.id) : ''
   const checked = pending ?? saved
 
   useEffect(() => {
@@ -47,7 +51,7 @@ export function BooleanToggleCell({
 
   async function onToggle(event: React.ChangeEvent<HTMLInputElement>) {
     event.stopPropagation()
-    if (!id || saving) return
+    if (!id || saving || !canUpdate) return
 
     const next = !checked
     setPending(next)
@@ -82,7 +86,7 @@ export function BooleanToggleCell({
         id={`${fieldName}-${id}`}
         Label={null}
         onToggle={onToggle}
-        readOnly={saving || !id}
+        readOnly={saving || !id || !canUpdate}
       />
     </div>
   )

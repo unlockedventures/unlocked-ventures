@@ -26,13 +26,13 @@ function canReadEntry(
   kind: 'collection' | 'global',
   slug: string,
 ) {
-  if (!permissions) return true
+  if (!permissions) return false
 
   const access = (kind === 'collection' ? permissions.collections : permissions.globals)?.[slug]
 
   if (!access) return false
 
-  if (access.read === undefined) return true
+  if (access.read === undefined) return false
 
   return Boolean(access.read)
 }
@@ -64,7 +64,7 @@ function AdminHomeLinks({ items, stats }: { items: AdminNavItem[]; stats?: Dashb
                   {item.link.description && <span>{item.link.description}</span>}
 
                   {count !== undefined && (
-                    <span className="uv-admin-home__count">{count.toLocaleString()} entries</span>
+                    <span className="uv-admin-home__count">{count?.toLocaleString()} entries</span>
                   )}
                 </Link>
               </li>
@@ -153,28 +153,30 @@ export function AdminHome() {
           </div>
         ) : (
           <ul className="uv-dashboard-stats__grid">
-            {statItems.map((item) => {
-              const count = stats[item.key]
-              const Icon = item.icon
+            {statItems
+              .filter((item) => stats[item.key] !== undefined)
+              .map((item) => {
+                const count = stats[item.key]
+                const Icon = item.icon
 
-              return (
-                <li key={item.key} className="uv-dashboard-stats__item">
-                  <Link href={item.href} prefetch={false} className="uv-dashboard-stats__card">
-                    <span className="uv-dashboard-stats__card-top" aria-hidden="true">
-                      <span className="uv-dashboard-stats__icon">
-                        <Icon size={20} strokeWidth={1.6} />
+                return (
+                  <li key={item.key} className="uv-dashboard-stats__item">
+                    <Link href={item.href} prefetch={false} className="uv-dashboard-stats__card">
+                      <span className="uv-dashboard-stats__card-top" aria-hidden="true">
+                        <span className="uv-dashboard-stats__icon">
+                          <Icon size={20} strokeWidth={1.6} />
+                        </span>
+                        <ArrowUpRight className="uv-dashboard-stats__arrow" size={18} />
                       </span>
-                      <ArrowUpRight className="uv-dashboard-stats__arrow" size={18} />
-                    </span>
-                    <strong className="uv-dashboard-stats__label">{item.label}</strong>
+                      <strong className="uv-dashboard-stats__label">{item.label}</strong>
 
-                    <span className="uv-dashboard-stats__value">{count.toLocaleString()}</span>
+                      <span className="uv-dashboard-stats__value">{count?.toLocaleString()}</span>
 
-                    <span className="uv-dashboard-stats__description">Total entries</span>
-                  </Link>
-                </li>
-              )
-            })}
+                      <span className="uv-dashboard-stats__description">Total entries</span>
+                    </Link>
+                  </li>
+                )
+              })}
           </ul>
         )}
       </section>
@@ -193,7 +195,7 @@ export function AdminHome() {
                   {section.link.description && <span>{section.link.description}</span>}
 
                   {count !== undefined && (
-                    <span className="uv-admin-home__count">{count.toLocaleString()} entries</span>
+                    <span className="uv-admin-home__count">{count?.toLocaleString()} entries</span>
                   )}
                 </Link>
               </li>

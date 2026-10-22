@@ -8,11 +8,15 @@ import { buildAdminNav, buildAdminSections, type AdminNavItem } from '@/admin/bu
 
 type AccessMap = Record<string, { read?: boolean } | undefined>
 
-function canReadEntry(permissions: { collections?: AccessMap; globals?: AccessMap } | undefined, kind: 'collection' | 'global', slug: string) {
-  if (!permissions) return true
+function canReadEntry(
+  permissions: { collections?: AccessMap; globals?: AccessMap } | undefined,
+  kind: 'collection' | 'global',
+  slug: string,
+) {
+  if (!permissions) return false
   const access = (kind === 'collection' ? permissions.collections : permissions.globals)?.[slug]
   if (!access) return false
-  if (access.read === undefined) return true
+  if (access.read === undefined) return false
   return Boolean(access.read)
 }
 
@@ -21,7 +25,11 @@ function linkIsCurrent(pathname: string, href: string, search = '') {
   const path = queryIndex === -1 ? href : href.slice(0, queryIndex)
   const query = queryIndex === -1 ? '' : href.slice(queryIndex + 1)
   if (pathname !== path && !pathname.startsWith(`${path}/`)) return false
-  if (query) return pathname === path && new URLSearchParams(search).toString() === new URLSearchParams(query).toString()
+  if (query)
+    return (
+      pathname === path &&
+      new URLSearchParams(search).toString() === new URLSearchParams(query).toString()
+    )
   if (pathname !== path) return true
   return !new URLSearchParams(search).has('where[kind][equals]')
 }

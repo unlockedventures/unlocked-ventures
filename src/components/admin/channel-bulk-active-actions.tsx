@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, toast, useSelection } from '@payloadcms/ui'
+import { Button, toast, useAuth, useSelection } from '@payloadcms/ui'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
@@ -14,13 +14,17 @@ import {
 export function ChannelBulkActiveActions() {
   const { count, selectedIDs, toggleAll } = useSelection()
   const router = useRouter()
+  const { permissions } = useAuth()
+  const canUpdate = permissions?.collections?.['podcast-channels']?.update === true
   const [host, setHost] = useState<Element | null>(null)
   const [busy, setBusy] = useState(false)
 
   useEffect(() => {
     if (count === 0) {
       setHost(null)
-      document.querySelectorAll('.uv-channel-bulk-sep, .uv-channel-bulk-host').forEach((el) => el.remove())
+      document
+        .querySelectorAll('.uv-channel-bulk-sep, .uv-channel-bulk-host')
+        .forEach((el) => el.remove())
       return
     }
 
@@ -51,12 +55,14 @@ export function ChannelBulkActiveActions() {
 
     return () => {
       observer.disconnect()
-      document.querySelectorAll('.uv-channel-bulk-sep, .uv-channel-bulk-host').forEach((el) => el.remove())
+      document
+        .querySelectorAll('.uv-channel-bulk-sep, .uv-channel-bulk-host')
+        .forEach((el) => el.remove())
     }
   }, [count])
 
   async function setActive(active: boolean) {
-    if (busy || count === 0 || selectedIDs.length === 0) return
+    if (!canUpdate || busy || count === 0 || selectedIDs.length === 0) return
     setBusy(true)
     const ids = selectedIDs.map(String)
     try {

@@ -1,4 +1,5 @@
 import type { Endpoint, PayloadRequest } from 'payload'
+import { hasPermission } from '@/access/rbac'
 
 import { generatePodcastAudioFromScript } from '@/pipeline/generate-audio'
 import { generateScriptFromTranscript } from '@/pipeline/generate-script'
@@ -30,7 +31,7 @@ type EpisodeAiDoc = {
 
 async function loadEpisode(req: PayloadRequest, id: number | string) {
   return req.payload
-    .findByID({ collection: 'podcast-episodes', id, depth: 0, req })
+    .findByID({ collection: 'podcast-episodes', id, depth: 0, req, overrideAccess: false })
     .catch(() => null) as Promise<EpisodeAiDoc | null>
 }
 
@@ -41,10 +42,16 @@ export const episodeAiEndpoints: Endpoint[] = [
     method: 'post',
     handler: async (req) => {
       if (!req.user) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+      if (
+        !(await hasPermission(req, 'podcast-episodes', 'update')) ||
+        !(await hasPermission(req, 'podcast-episodes', 'read'))
+      )
+        return Response.json({ error: 'Permission denied.' }, { status: 403 })
 
-      const body = (
-        req.json ? await req.json().catch(() => null) : null
-      ) as { id?: number | string; videoLinks?: { url?: string | null }[] | null } | null
+      const body = (req.json ? await req.json().catch(() => null) : null) as {
+        id?: number | string
+        videoLinks?: { url?: string | null }[] | null
+      } | null
       const id = body?.id
       if (id == null || id === '') {
         return Response.json({ error: 'Episode not found.' }, { status: 404 })
@@ -56,6 +63,7 @@ export const episodeAiEndpoints: Endpoint[] = [
         depth: 0,
         limit: 1,
         req,
+        overrideAccess: false,
         where: { and: [{ status: { equals: 'processing' } }, { id: { not_equals: id } }] },
       })
 
@@ -85,6 +93,7 @@ export const episodeAiEndpoints: Endpoint[] = [
             },
             depth: 0,
             req,
+            overrideAccess: false,
             context: { skipAiContentSync: true },
           })
         },
@@ -104,6 +113,11 @@ export const episodeAiEndpoints: Endpoint[] = [
     method: 'get',
     handler: async (req) => {
       if (!req.user) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+      if (
+        !(await hasPermission(req, 'podcast-episodes', 'update')) ||
+        !(await hasPermission(req, 'podcast-episodes', 'read'))
+      )
+        return Response.json({ error: 'Permission denied.' }, { status: 403 })
 
       const endpoint = process.env.TRANSCRIBER_URL ?? ''
       const secret = process.env.TRANSCRIBER_SECRET ?? ''
@@ -130,10 +144,17 @@ export const episodeAiEndpoints: Endpoint[] = [
     method: 'post',
     handler: async (req) => {
       if (!req.user) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+      if (
+        !(await hasPermission(req, 'podcast-episodes', 'update')) ||
+        !(await hasPermission(req, 'podcast-episodes', 'read'))
+      )
+        return Response.json({ error: 'Permission denied.' }, { status: 403 })
 
-      const body = (
-        req.json ? await req.json().catch(() => null) : null
-      ) as { id?: number | string; hostGender?: unknown; guestGender?: unknown } | null
+      const body = (req.json ? await req.json().catch(() => null) : null) as {
+        id?: number | string
+        hostGender?: unknown
+        guestGender?: unknown
+      } | null
       const id = body?.id
       if (id == null || id === '') {
         return Response.json({ error: 'Episode not found.' }, { status: 404 })
@@ -162,6 +183,7 @@ export const episodeAiEndpoints: Endpoint[] = [
             data,
             depth: 0,
             req,
+            overrideAccess: false,
             context: { skipAiContentSync: true },
           })
         },
@@ -183,11 +205,20 @@ export const episodeAiEndpoints: Endpoint[] = [
     method: 'post',
     handler: async (req) => {
       if (!req.user) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+      if (
+        !(await hasPermission(req, 'podcast-episodes', 'update')) ||
+        !(await hasPermission(req, 'podcast-episodes', 'read'))
+      )
+        return Response.json({ error: 'Permission denied.' }, { status: 403 })
 
+      if (!(await hasPermission(req, 'podcast-audio', 'create')))
+        return Response.json({ error: 'Audio upload permission required.' }, { status: 403 })
       try {
-        const body = (
-          req.json ? await req.json().catch(() => null) : null
-        ) as { id?: number | string; hostVoiceId?: unknown; guestVoiceId?: unknown } | null
+        const body = (req.json ? await req.json().catch(() => null) : null) as {
+          id?: number | string
+          hostVoiceId?: unknown
+          guestVoiceId?: unknown
+        } | null
         const id = body?.id
         if (id == null || id === '') {
           return Response.json({ error: 'Episode not found.' }, { status: 404 })
@@ -221,6 +252,7 @@ export const episodeAiEndpoints: Endpoint[] = [
               data,
               depth: 0,
               req,
+              overrideAccess: false,
               context: { skipAiContentSync: true },
             })
           },
@@ -248,7 +280,10 @@ export const episodeAiEndpoints: Endpoint[] = [
         return Response.json(result.body, { status: result.status })
       } catch (error) {
         const message =
-          error && typeof error === 'object' && 'message' in error && typeof error.message === 'string'
+          error &&
+          typeof error === 'object' &&
+          'message' in error &&
+          typeof error.message === 'string'
             ? error.message
             : 'Could not generate podcast audio.'
         req.payload.logger.error({ err: error }, 'generate-audio failed')
