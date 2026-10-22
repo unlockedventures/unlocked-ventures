@@ -2,6 +2,47 @@
 
 Marketing site and content admin for Unlocked Ventures. The public site is a Next.js app. Editors manage pages, media, and site content in [Payload CMS](https://payloadcms.com).
 
+The CMS covers company pages, solutions, case studies, awards, news, podcasts,
+media, navigation, contact information, and a contact inbox. It also includes
+podcast content generation tools. Repository development instructions and
+engineering principles live in [AGENTS.md](AGENTS.md).
+
+## Technology stack
+
+- Next.js 16 App Router, React 19, and strict TypeScript.
+- Payload CMS 3 with PostgreSQL and Lexical rich text editing.
+- Tailwind CSS 4, Radix UI, shadcn, and Lucide icons.
+- TanStack Query, Zustand, and React Hook Form.
+- Nodemailer for optional SMTP delivery and Sharp for image processing.
+- Vitest with Testing Library and Playwright for browser tests.
+- pnpm for development and Docker Compose for the app and database.
+
+See `package.json` for exact versions and supported runtime engines.
+
+## Project structure
+
+| Path | Responsibility |
+| --- | --- |
+| `src/payload.config.ts` | Collections, globals, admin views, adapters, seeds, endpoints |
+| `src/app/(frontend)/` | Public pages, layouts, styles, and public API routes |
+| `src/app/(payload)/` | Payload admin and API integration, generated import map |
+| `src/access/` | Shared RBAC policies and permission definitions |
+| `src/collections/` | Portal users, roles, media, awards, news, podcasts, case studies, badges, solutions, logos, contact messages |
+| `src/globals/` | Singleton page/section content, navigation, header, footer, site settings |
+| `src/components/admin/` | Custom dashboard, navigation, login, and editor controls |
+| `src/admin/` | Shared editor guidance and admin organization |
+| `src/components/`, `src/blocks/`, `src/fields/` | Shared UI, content blocks, field definitions |
+| `src/lib/`, `src/hooks/`, `src/stores/` | Helpers, hooks, client state |
+| `src/endpoints/` | Custom Payload endpoints, including dashboard statistics |
+| `src/pipeline/`, `src/studio/` | Podcast generation workflows and studio services |
+| `src/data/` | Content seeds and data backfills |
+| `src/migrations/`, `scripts/ensure-*.sql` | Migrations and additive schema compatibility updates |
+| `src/payload-types.ts` | Generated Payload types |
+| `tests/int/`, `tests/e2e/` | Vitest and Playwright suites |
+| `public/brand/` | Unlocked Ventures brand assets |
+
+Imports use `@/*` for `src/` and `@payload-config` for the Payload configuration.
+
 ## Run with Docker
 
 Install [Docker](https://docs.docker.com/get-docker/) with Compose. `docker compose up -d` starts PostgreSQL in its own container, then starts the app in the background.
@@ -111,6 +152,9 @@ openssl rand -hex 32
 
 `.env` stays on your machine. Do not commit it.
 
+Consult `.env.example` for optional integrations. SMTP delivery is enabled when
+`SMTP_HOST` is configured; keep credentials out of source files and logs.
+
 ### Start
 
 ```bash
@@ -134,18 +178,28 @@ The app listens on port 3000.
 
 | Command | What it does |
 | --- | --- |
-| `pnpm dev` | Start the development server |
+| `pnpm install` | Install dependencies |
+| `pnpm dev` | Run the schema precheck and start the development server |
 | `pnpm devsafe` | Clear the Next.js cache, then start the development server |
 | `pnpm build` | Build for production |
 | `pnpm start` | Serve the production build |
 | `pnpm lint` | Run ESLint |
+| `pnpm exec tsc --noEmit` | Check TypeScript |
+| `pnpm ensure-schema` | Apply additive schema compatibility updates |
+| `pnpm migrate` | Run Payload migrations |
+| `pnpm generate:types` | Regenerate Payload types after schema changes |
+| `pnpm generate:importmap` | Regenerate the admin component import map |
 | `pnpm seed` | Seed CMS demo content (globals, podcasts, insights, etc.) |
-| `pnpm test` | Run unit tests, then end-to-end tests |
+| `pnpm test:int` | Run Vitest integration/component tests |
+| `pnpm test:e2e` | Run Playwright; starts or reuses the development server |
+| `pnpm test` | Run integration/component tests, then end-to-end tests |
+| `pnpm test:web-vitals` | Generate web performance reports |
 | `pnpm payload` | Run the Payload CLI |
 | `docker compose up -d` | Start the app and its PostgreSQL container in the background |
 | `docker compose exec app pnpm seed` | Seed CMS data inside the running Docker app container |
 
-End-to-end tests need Playwright browsers:
+Database-backed checks require configured PostgreSQL. End-to-end tests need
+Playwright browsers:
 
 ```bash
 pnpm exec playwright install
