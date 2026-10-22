@@ -51,9 +51,6 @@ export const PodcastEpisodes: CollectionConfig = {
     components: {
       beforeList: ['@/components/admin/episode-create-actions#EpisodeCreateActions'],
       edit: {
-        beforeDocumentControls: [
-          '@/components/admin/episode-editor-mode#EpisodeEditorModeBootstrap',
-        ],
         SaveButton: '@/components/admin/episode-save-buttons#EpisodeSaveButtons',
       },
     },
@@ -196,6 +193,15 @@ export const PodcastEpisodes: CollectionConfig = {
   },
   defaultSort: 'sortOrder',
   fields: [
+    {
+      name: 'editorModeBootstrap',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '@/components/admin/episode-editor-mode#EpisodeEditorModeBootstrap',
+        },
+      },
+    },
     {
       name: 'editorMode',
       type: 'select',

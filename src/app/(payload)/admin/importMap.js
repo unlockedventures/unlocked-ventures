@@ -2,13 +2,13 @@ import { PermissionsField as PermissionsField_94a12404037fa04f60e200786bf3178a }
 import { FeaturedCell as FeaturedCell_713c6af4da8e270b4b09b2d002943233 } from '@/components/admin/featured-cell'
 import { BooleanToggleCell as BooleanToggleCell_f777bb6bacc0a140ee2d76cb19dce5cc } from '@/components/admin/boolean-toggle-cell'
 import { ChannelBulkActiveActions as ChannelBulkActiveActions_1edd759a7ae23c284e468de246f21f07 } from '@/components/admin/channel-bulk-active-actions'
+import { EpisodeEditorModeBootstrap as EpisodeEditorModeBootstrap_73bce5d0b5b71802817cbd75052a7ce4 } from '@/components/admin/episode-editor-mode'
 import { EpisodeStatusCell as EpisodeStatusCell_2252193e32191b865283ffad203b6461 } from '@/components/admin/episode-status-cell'
 import { GenerateTranscriptField as GenerateTranscriptField_d809db76de84e66ad7e54e5d951facd4 } from '@/components/admin/generate-transcript-field'
 import { GenerateScriptField as GenerateScriptField_bab222324d11fa721dc22069e6402c46 } from '@/components/admin/generate-script-field'
 import { GenerateAudioField as GenerateAudioField_00f96ba655ba0804c9b39d5d182597ac } from '@/components/admin/generate-audio-field'
 import { DirectUploadField as DirectUploadField_d3e9cae98f7356a2cf4ffa1e968e12a8 } from '@/components/admin/direct-upload-field'
 import { EpisodeCreateActions as EpisodeCreateActions_4b5649ad294156dd25a272118cc9feff } from '@/components/admin/episode-create-actions'
-import { EpisodeEditorModeBootstrap as EpisodeEditorModeBootstrap_73bce5d0b5b71802817cbd75052a7ce4 } from '@/components/admin/episode-editor-mode'
 import { EpisodeSaveButtons as EpisodeSaveButtons_30741118ebbece47612146faae78497e } from '@/components/admin/episode-save-buttons'
 import { HeaderNavChildField as HeaderNavChildField_5e4deb07483ca5bb99d59979e6db5246 } from '@/components/admin/header-nav-child-field'
 import { SuccessBadgeField as SuccessBadgeField_e64cd04f3e8026f4103b806ae4a2257f } from '@/components/admin/success-badge-field'
@@ -50,13 +50,13 @@ export const importMap = {
   "@/components/admin/featured-cell#FeaturedCell": FeaturedCell_713c6af4da8e270b4b09b2d002943233,
   "@/components/admin/boolean-toggle-cell#BooleanToggleCell": BooleanToggleCell_f777bb6bacc0a140ee2d76cb19dce5cc,
   "@/components/admin/channel-bulk-active-actions#ChannelBulkActiveActions": ChannelBulkActiveActions_1edd759a7ae23c284e468de246f21f07,
+  "@/components/admin/episode-editor-mode#EpisodeEditorModeBootstrap": EpisodeEditorModeBootstrap_73bce5d0b5b71802817cbd75052a7ce4,
   "@/components/admin/episode-status-cell#EpisodeStatusCell": EpisodeStatusCell_2252193e32191b865283ffad203b6461,
   "@/components/admin/generate-transcript-field#GenerateTranscriptField": GenerateTranscriptField_d809db76de84e66ad7e54e5d951facd4,
   "@/components/admin/generate-script-field#GenerateScriptField": GenerateScriptField_bab222324d11fa721dc22069e6402c46,
   "@/components/admin/generate-audio-field#GenerateAudioField": GenerateAudioField_00f96ba655ba0804c9b39d5d182597ac,
   "@/components/admin/direct-upload-field#DirectUploadField": DirectUploadField_d3e9cae98f7356a2cf4ffa1e968e12a8,
   "@/components/admin/episode-create-actions#EpisodeCreateActions": EpisodeCreateActions_4b5649ad294156dd25a272118cc9feff,
-  "@/components/admin/episode-editor-mode#EpisodeEditorModeBootstrap": EpisodeEditorModeBootstrap_73bce5d0b5b71802817cbd75052a7ce4,
   "@/components/admin/episode-save-buttons#EpisodeSaveButtons": EpisodeSaveButtons_30741118ebbece47612146faae78497e,
   "@/components/admin/header-nav-child-field#HeaderNavChildField": HeaderNavChildField_5e4deb07483ca5bb99d59979e6db5246,
   "@/components/admin/success-badge-field#SuccessBadgeField": SuccessBadgeField_e64cd04f3e8026f4103b806ae4a2257f,
