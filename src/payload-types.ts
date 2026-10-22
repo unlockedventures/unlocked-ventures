@@ -552,15 +552,15 @@ export interface PodcastEpisode {
    */
   meta?: string | null;
   /**
-   * Choose how to set the cover photo for the card and episode page.
+   * Required. Choose the thumbnail for the card and episode details page.
    */
   imageSource?: ('upload' | 'url') | null;
   /**
-   * Upload or drag and drop a cover photo.
+   * Required when using Upload image. Upload or drag and drop a thumbnail.
    */
   image?: (number | null) | Media;
   /**
-   * Paste a direct image address (https://…).
+   * Required when using Image URL. Paste a direct image address (https://…).
    */
   imageUrl?: string | null;
   imageAlt?: string | null;

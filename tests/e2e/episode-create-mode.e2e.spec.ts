@@ -23,6 +23,9 @@ test.describe('Episode creation modes', () => {
     await expect(page).toHaveURL(/\/create\?mode=ai/)
     await expect(page.locator('#field-editorMode')).toContainText('AI')
     await expect(page.getByText('Video links', { exact: true })).toBeVisible()
+    await expect(page.locator('input[type="file"][accept="image/*"]')).toBeVisible()
+    await page.getByRole('radio', { name: 'Image URL', exact: true }).check()
+    await expect(page.locator('#field-imageUrl')).toBeVisible()
     await expect(page.getByText('Audio URL', { exact: true })).not.toBeVisible()
   })
 
@@ -34,6 +37,7 @@ test.describe('Episode creation modes', () => {
     await expect(page).toHaveURL(/\/create\?mode=manual/)
     await expect(page.locator('#field-editorMode')).toContainText('Manual')
     await expect(page.getByText('Audio URL', { exact: true })).toBeVisible()
+    await expect(page.locator('input[type="file"][accept="image/*"]')).toBeVisible()
     await expect(page.getByText('Video links', { exact: true })).not.toBeVisible()
   })
 })

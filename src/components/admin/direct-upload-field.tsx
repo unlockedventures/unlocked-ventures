@@ -1,6 +1,13 @@
 'use client'
 
-import { FieldDescription, FieldLabel, toast, useConfig, useField } from '@payloadcms/ui'
+import {
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+  toast,
+  useConfig,
+  useField,
+} from '@payloadcms/ui'
 import { useEffect, useRef, useState } from 'react'
 
 type DirectUploadFieldProps = {
@@ -69,7 +76,9 @@ export function DirectUploadField(props: DirectUploadFieldProps) {
     try {
       const form = new FormData()
       form.append('file', file)
-      const payload: Record<string, unknown> = { alt: file.name.replace(/\.[^.]+$/, '') || file.name }
+      const payload: Record<string, unknown> = {
+        alt: file.name.replace(/\.[^.]+$/, '') || file.name,
+      }
       if (relationTo === 'media') {
         payload.kind = isImage ? 'image' : 'file'
       }
@@ -80,10 +89,14 @@ export function DirectUploadField(props: DirectUploadFieldProps) {
         credentials: 'include',
       })
       if (!res.ok) {
-        const body = (await res.json().catch(() => null)) as { errors?: { message?: string }[] } | null
+        const body = (await res.json().catch(() => null)) as {
+          errors?: { message?: string }[]
+        } | null
         throw new Error(body?.errors?.[0]?.message || 'Upload failed')
       }
-      const doc = (await res.json()) as { doc?: { id?: number | string; filename?: string; url?: string } }
+      const doc = (await res.json()) as {
+        doc?: { id?: number | string; filename?: string; url?: string }
+      }
       const id = doc.doc?.id
       if (id == null) throw new Error('Upload failed')
       setValue(id)
@@ -105,6 +118,7 @@ export function DirectUploadField(props: DirectUploadFieldProps) {
   return (
     <div className={`field-type upload uv-direct-upload-field${showError ? ' error' : ''}`}>
       <FieldLabel label={labelText(field.label)} path={path} />
+      <FieldError path={path} />
       {value != null && value !== '' ? (
         <div className="uv-direct-upload-field__preview">
           {isImage && previewUrl ? (

@@ -2,6 +2,7 @@ import type { CollectionConfig, PayloadRequest } from 'payload'
 
 import { adminGroups } from '@/admin/editor-guide'
 import { seoFields } from '@/admin/editor-fields'
+import { validateEpisodeThumbnail } from '@/lib/episode-thumbnail'
 import { podcastEpisodePath, podcastSlugFromHref, slugifyPodcastTitle } from '@/lib/podcast-slug'
 import { applyAiContentToEpisode } from '@/pipeline/apply-ai-content'
 import { episodeAiEndpoints } from '@/pipeline/episode-ai-endpoints'
@@ -61,6 +62,7 @@ export const PodcastEpisodes: CollectionConfig = {
   },
   endpoints: episodeAiEndpoints,
   hooks: {
+    beforeValidate: [validateEpisodeThumbnail],
     beforeChange: [
       async ({ data, operation, originalDoc, req, context }) => {
         if (Array.isArray(data.videoLinks) && !context?.transcriptionUpdate) {
@@ -554,9 +556,8 @@ export const PodcastEpisodes: CollectionConfig = {
         { label: 'Image URL', value: 'url' },
       ],
       admin: {
-        condition: isManualMode,
         layout: 'horizontal',
-        description: 'Choose how to set the cover photo for the card and episode page.',
+        description: 'Required. Choose the thumbnail for the card and episode details page.',
       },
     },
     {
@@ -565,9 +566,8 @@ export const PodcastEpisodes: CollectionConfig = {
       label: 'Upload image',
       relationTo: 'media',
       admin: {
-        condition: (_data, siblingData) =>
-          isManualMode(_data, siblingData) && siblingData?.imageSource !== 'url',
-        description: 'Upload or drag and drop a cover photo.',
+        condition: (_data, siblingData) => siblingData?.imageSource !== 'url',
+        description: 'Required when using Upload image. Upload or drag and drop a thumbnail.',
         components: {
           Field: '@/components/admin/direct-upload-field#DirectUploadField',
         },
@@ -583,16 +583,14 @@ export const PodcastEpisodes: CollectionConfig = {
       type: 'text',
       label: 'Image URL',
       admin: {
-        condition: (_data, siblingData) =>
-          isManualMode(_data, siblingData) && siblingData?.imageSource === 'url',
-        description: 'Paste a direct image address (https://…).',
+        condition: (_data, siblingData) => siblingData?.imageSource === 'url',
+        description: 'Required when using Image URL. Paste a direct image address (https://…).',
       },
     },
     {
       name: 'imageAlt',
       type: 'text',
       label: 'Image alt',
-      admin: { condition: isManualMode },
     },
     {
       name: 'audioSource',
