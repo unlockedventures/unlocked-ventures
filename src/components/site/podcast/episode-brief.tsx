@@ -299,37 +299,39 @@ export function EpisodeBrief({
       ) : null}
 
       {details && (details.guest || details.topic || details.duration) ? (
-        <div className="mt-10 flex flex-col gap-3 border-b border-[#171616]/10 pb-10">
-          {details.topic ? (
-            <div className="flex flex-col gap-2 rounded-xl bg-[#F5F6F8] px-5 py-4">
-              <p className="font-sans text-[11px] leading-4 font-medium tracking-[0.1em] text-[#8A8F98] uppercase">
-                Topic
-              </p>
-              <p className="max-w-prose font-sans text-base leading-6 font-medium tracking-[-0.01em] whitespace-pre-line text-[#171616] sm:text-[17px] sm:leading-7">
-                {details.topic}
-              </p>
-            </div>
-          ) : null}
-          <div className="grid gap-3 sm:grid-cols-2">
-            {details.guest ? (
-              <div className="flex min-h-[5.5rem] flex-col gap-2 rounded-xl bg-[#F5F6F8] px-5 py-4">
-                <p className="font-sans text-[11px] leading-4 font-medium tracking-[0.1em] text-[#8A8F98] uppercase">
-                  Guest name
-                </p>
-                <p className="font-sans text-base leading-6 font-medium tracking-[-0.01em] text-[#171616] sm:text-[17px] sm:leading-7">
-                  {details.guest}
-                </p>
-              </div>
-            ) : null}
+        <div className="mt-10 border-b border-[#171616]/10 pb-10">
+          <div className="flex items-center justify-between gap-4 rounded-2xl border border-[#0B1F3A]/10 bg-[#F5F6F8] p-5 sm:gap-8 sm:p-6">
+            <dl className="min-w-0 flex-1 space-y-4 border-l-2 border-[#0B1F3A]/25 pl-4">
+              {details.topic ? (
+                <div>
+                  <dt className="font-sans text-[11px] leading-4 font-medium tracking-[0.1em] text-[#626B78] uppercase">
+                    Topic
+                  </dt>
+                  <dd className="mt-1 font-sans text-base leading-6 font-semibold tracking-[-0.01em] whitespace-pre-line text-[#0B1F3A] [overflow-wrap:anywhere] sm:text-lg sm:leading-7">
+                    {details.topic}
+                  </dd>
+                </div>
+              ) : null}
+              {details.guest ? (
+                <div>
+                  <dt className="font-sans text-[11px] leading-4 font-medium tracking-[0.1em] text-[#626B78] uppercase">
+                    Guest name
+                  </dt>
+                  <dd className="mt-1.5 inline-block max-w-full rounded-md bg-[#0B1F3A]/[0.06] px-2.5 py-1 font-sans text-sm leading-6 font-semibold text-[#0B1F3A] [overflow-wrap:anywhere] sm:text-base">
+                    {details.guest}
+                  </dd>
+                </div>
+              ) : null}
+            </dl>
             {details.duration ? (
-              <div className="flex min-h-[5.5rem] flex-col gap-2 rounded-xl bg-[#F5F6F8] px-5 py-4">
-                <p className="font-sans text-[11px] leading-4 font-medium tracking-[0.1em] text-[#8A8F98] uppercase">
+              <dl className="shrink-0 border-l border-[#0B1F3A]/10 pl-4 text-right sm:pl-8">
+                <dt className="font-sans text-[11px] leading-4 font-medium tracking-[0.1em] text-[#626B78] uppercase">
                   Duration
-                </p>
-                <p className="font-sans text-base leading-6 font-medium tracking-[-0.01em] text-[#171616] tabular-nums sm:text-[17px] sm:leading-7">
+                </dt>
+                <dd className="mt-2 font-sans text-lg leading-7 font-medium whitespace-nowrap text-[#0B1F3A] tabular-nums sm:text-2xl sm:leading-8">
                   {details.duration}
-                </p>
-              </div>
+                </dd>
+              </dl>
             ) : null}
           </div>
         </div>
