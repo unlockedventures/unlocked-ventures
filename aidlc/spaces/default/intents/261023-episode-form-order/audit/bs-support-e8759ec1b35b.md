@@ -1489,3 +1489,71 @@
 **Session**: 01a1672a-a80f-75d0-b97f-283541103874
 
 ---
+
+## Human Turn
+**Timestamp**: 2026-10-23T06:06:15Z
+**Event**: HUMAN_TURN
+**Session**: 01a1672a-a80f-75d0-b97f-283541103874
+
+---
+
+## Guard Stood Aside
+**Timestamp**: 2026-10-23T06:07:18Z
+**Event**: GUARD_STOOD_ASIDE
+**Guard**: plan-approval
+**Authority**: instruction
+**Grant**: none
+**Actor**: main
+**Stage**: code-generation
+**Tool**: Bash
+**Details**: docker compose ps --format json
+
+---
+
+## Guard Stood Aside
+**Timestamp**: 2026-10-23T06:07:34Z
+**Event**: GUARD_STOOD_ASIDE
+**Guard**: plan-approval
+**Authority**: instruction
+**Grant**: none
+**Actor**: main
+**Stage**: code-generation
+**Tool**: Bash
+**Details**: docker compose exec -T app node --input-type=module -e 'import {createRequire} from "node:module"; const require=createRequire(import.meta.url); const {Client}=
+
+---
+
+## Guard Stood Aside
+**Timestamp**: 2026-10-23T06:07:49Z
+**Event**: GUARD_STOOD_ASIDE
+**Guard**: plan-approval
+**Authority**: instruction
+**Grant**: none
+**Actor**: main
+**Stage**: code-generation
+**Tool**: Bash
+**Details**: docker compose exec -T app node --input-type=module -e 'import {createRequire} from "node:module"; import {readFileSync} from "node:fs"; const require=createReq
+
+---
+
+## Guard Stood Aside
+**Timestamp**: 2026-10-23T06:08:07Z
+**Event**: GUARD_STOOD_ASIDE
+**Guard**: plan-approval
+**Authority**: instruction
+**Grant**: none
+**Actor**: main
+**Stage**: code-generation
+**Tool**: Bash
+**Details**: docker compose exec -T app node --input-type=module -e 'import {createRequire} from "node:module"; const require=createRequire(import.meta.url); const {Client}=
+
+---
+
+## Artifact Created
+**Timestamp**: 2026-10-23T06:08:09Z
+**Event**: ARTIFACT_CREATED
+**Tool**: Write
+**File**: <project-dir>/aidlc/spaces/default/intents/261023-episode-form-order/construction/code-generation/schema-rollout-evidence.md
+**Context**: construction > code-generation > schema-rollout-evidence.md
+
+---
