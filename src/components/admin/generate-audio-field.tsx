@@ -24,8 +24,7 @@ function fieldText(value: unknown) {
 function readVoiceId(path: 'hostVoiceId' | 'guestVoiceId', formValue: string) {
   if (typeof document !== 'undefined') {
     const input = document.querySelector<HTMLInputElement>(`#field-${path}`)
-    const typed = input?.value?.trim() ?? ''
-    if (typed) return typed
+    if (input) return input.value.trim()
   }
   return formValue.trim()
 }

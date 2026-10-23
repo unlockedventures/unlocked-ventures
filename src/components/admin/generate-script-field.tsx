@@ -290,8 +290,8 @@ export function GenerateScriptField() {
           <Skeleton className="uv-podcast-skeleton__select" />
           <Skeleton className="uv-podcast-skeleton__select" />
           <Skeleton className="uv-podcast-skeleton__button" />
-          <Skeleton className="uv-podcast-skeleton__script" />
           <Skeleton className="uv-podcast-skeleton__summary" />
+          <Skeleton className="uv-podcast-skeleton__script" />
           <Skeleton className="uv-podcast-skeleton__line" />
           <Skeleton className="uv-podcast-skeleton__line" />
           <Skeleton className="uv-podcast-skeleton__line" />

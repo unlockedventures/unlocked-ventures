@@ -37,7 +37,7 @@ export function audioButtonState(args: {
   if (!args.hasSystemOpinion) {
     return {
       disabled: true,
-      hint: "Add the system's overall opinion before generating podcast audio.",
+      hint: 'Add UV takes before generating podcast audio.',
     }
   }
   if (!args.hasHostVoiceId || !args.hasGuestVoiceId) {

@@ -1,0 +1,33 @@
+{
+  "stage": "code-generation",
+  "upstream_ids": [
+    "FR1", "FR2", "FR3", "FR4", "FR5", "NFR1", "NFR2", "NFR3",
+    "AC1.1", "AC1.2", "AC2.1", "AC2.2", "AC3.1", "AC3.2", "AC4.1",
+    "AC4.2", "AC4.3", "AC4.4", "AC5.1", "AC5.2", "AC6.1", "AC6.2", "AC6.3"
+  ],
+  "coverage": [
+    { "id": "FR1", "status": "OK", "target": "src/collections/PodcastEpisodes.ts" },
+    { "id": "FR2", "status": "OK", "target": "src/components/admin/generate-transcript-field.tsx" },
+    { "id": "FR3", "status": "OK", "target": "src/collections/PodcastEpisodes.ts" },
+    { "id": "FR4", "status": "OK", "target": "src/components/admin/generate-audio-field.tsx" },
+    { "id": "FR5", "status": "OK", "target": "src/components/admin/episode-podcast-label.tsx" },
+    { "id": "NFR1", "status": "OK", "target": "src/collections/PodcastEpisodes.ts" },
+    { "id": "NFR2", "status": "GAP", "target": "src/collections/PodcastEpisodes.ts", "justification": "Labels and required guidance implemented; browser accessibility and responsive behavior unverified at user's request." },
+    { "id": "NFR3", "status": "GAP", "target": "src/components/admin/generate-script-field.tsx", "justification": "Request and polling code preserved by source inspection; post-change execution waived by user." },
+    { "id": "AC1.1", "status": "GAP", "target": "src/collections/PodcastEpisodes.ts", "justification": "Section order implemented; post-change metadata/browser checks waived by user." },
+    { "id": "AC1.2", "status": "GAP", "target": "src/payload-types.ts", "justification": "Flat field contracts retained; saved AI round-trip unverified." },
+    { "id": "AC2.1", "status": "GAP", "target": "src/components/admin/generate-transcript-field.tsx", "justification": "Transcript-only action preserved; post-change network execution waived." },
+    { "id": "AC2.2", "status": "GAP", "target": "src/components/admin/generate-transcript-field.tsx", "justification": "Existing error handling preserved; post-change invalid-input check waived." },
+    { "id": "AC3.1", "status": "GAP", "target": "src/collections/PodcastEpisodes.ts", "justification": "Requested output order and editable fields implemented; generation-result interaction unverified." },
+    { "id": "AC3.2", "status": "GAP", "target": "src/collections/PodcastEpisodes.ts", "justification": "UV takes uses existing systemOpinion path; reopening saved content unverified." },
+    { "id": "AC4.1", "status": "GAP", "target": "src/components/admin/generate-script-field.tsx", "justification": "Both gender guards preserved and required guidance added; post-change checks waived." },
+    { "id": "AC4.2", "status": "GAP", "target": "src/components/admin/generate-audio-field.tsx", "justification": "Trimmed voice guards preserved and cleared live-input fallback fixed; post-change checks waived." },
+    { "id": "AC4.3", "status": "GAP", "target": "src/collections/PodcastEpisodes.ts", "justification": "Generation inputs remain optional on save; post-change draft-save execution waived." },
+    { "id": "AC4.4", "status": "GAP", "target": "src/components/admin/generate-audio-field.tsx", "justification": "Existing failure/retry paths preserved; post-change failure execution waived." },
+    { "id": "AC5.1", "status": "GAP", "target": "src/components/admin/episode-podcast-label.tsx", "justification": "Manual heading, shared order and conditional controls implemented; browser execution waived." },
+    { "id": "AC5.2", "status": "GAP", "target": "src/collections/PodcastEpisodes.ts", "justification": "Manual contracts retained; database save/reopen unverified." },
+    { "id": "AC6.1", "status": "GAP", "target": "src/pipeline/episode-ai-endpoints.ts", "justification": "Authorization code unchanged; pre-change rbac suite passed, post-change verification waived." },
+    { "id": "AC6.2", "status": "GAP", "target": "src/collections/PodcastEpisodes.ts", "justification": "Field labels and guidance implemented; keyboard/viewport/overflow checks waived." },
+    { "id": "AC6.3", "status": "GAP", "target": "src/components/admin/generate-script-field.tsx", "justification": "No request/polling additions in source; post-change network checks waived." }
+  ]
+}

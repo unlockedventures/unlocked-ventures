@@ -460,7 +460,7 @@ export interface PodcastChannel {
   createdAt: string;
 }
 /**
- * Create with AI (video links → transcript/script) or Create Manually. Save as Draft or Save as Complete. Only Complete episodes appear on the site.
+ * Create with AI: transcribe video links, generate a podcast script, then generate audio. Or Create Manually. Only Complete episodes appear on the site.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "podcast-episodes".
@@ -475,11 +475,24 @@ export interface PodcastEpisode {
    * Only Complete episodes appear on the public site.
    */
   episodeStatus: 'draft' | 'complete';
+  title: string;
   /**
    * Required. Create channels under Podcast → Channels.
    */
   channel: number | PodcastChannel;
-  title: string;
+  /**
+   * Required. Choose the thumbnail for the card and episode details page.
+   */
+  imageSource?: ('upload' | 'url') | null;
+  /**
+   * Required when using Upload image. Upload or drag and drop a thumbnail.
+   */
+  image?: (number | null) | Media;
+  /**
+   * Required when using Image URL. Paste a direct image address (https://…).
+   */
+  imageUrl?: string | null;
+  imageAlt?: string | null;
   videoLinks?:
     | {
         /**
@@ -500,12 +513,28 @@ export interface PodcastEpisode {
    * Generated text. You can edit it before saving.
    */
   sourceTranscript?: string | null;
+  /**
+   * Required to generate the podcast script. Optional when saving a draft.
+   */
   hostGender?: ('male' | 'female') | null;
+  /**
+   * Required to generate the podcast script. Optional when saving a draft.
+   */
   guestGender?: ('male' | 'female') | null;
+  /**
+   * Main About text. Filled by AI script generation when using Create with AI.
+   */
+  summary?: string | null;
   /**
    * Two-person (host/guest) podcast-video script JSON. You can edit it.
    */
   scriptJson?: string | null;
+  mainPoints?:
+    | {
+        point: string;
+        id?: string | null;
+      }[]
+    | null;
   contrastingPoints?:
     | {
         point: string;
@@ -519,7 +548,17 @@ export interface PodcastEpisode {
       }[]
     | null;
   systemOpinion?: string | null;
+  /**
+   * Used only when Summary is empty.
+   */
+  about?: string | null;
+  /**
+   * Required to generate podcast audio. Optional when saving a draft.
+   */
   hostVoiceId?: string | null;
+  /**
+   * Required to generate podcast audio. Optional when saving a draft.
+   */
   guestVoiceId?: string | null;
   status?: ('idle' | 'processing' | 'ready' | 'error') | null;
   statusMessage?: string | null;
@@ -527,43 +566,10 @@ export interface PodcastEpisode {
   scriptStatusMessage?: string | null;
   audioStatus?: ('idle' | 'processing' | 'ready' | 'error') | null;
   audioStatusMessage?: string | null;
-  /**
-   * Featured episodes appear in the homepage Newest podcast section.
-   */
-  featured?: boolean | null;
   slug: string;
   href: string;
   category?: string | null;
   sortOrder: number;
-  /**
-   * Turn on to show Guest name, Topic, and Duration above About this episode. Leave off to hide the section.
-   */
-  showDetailsSection?: boolean | null;
-  /**
-   * Shown in the optional details section and on cards when set.
-   */
-  guests?: string | null;
-  /**
-   * Short topic line for the optional details section.
-   */
-  topic?: string | null;
-  /**
-   * Episode length, for example 14:22. Also used on cards and listings.
-   */
-  meta?: string | null;
-  /**
-   * Required. Choose the thumbnail for the card and episode details page.
-   */
-  imageSource?: ('upload' | 'url') | null;
-  /**
-   * Required when using Upload image. Upload or drag and drop a thumbnail.
-   */
-  image?: (number | null) | Media;
-  /**
-   * Required when using Image URL. Paste a direct image address (https://…).
-   */
-  imageUrl?: string | null;
-  imageAlt?: string | null;
   /**
    * Episode audio. Uploads are stored on this server for now (S3 later).
    */
@@ -585,20 +591,6 @@ export interface PodcastEpisode {
    * Large featured episode at the top of /podcast.
    */
   heroFeatured?: boolean | null;
-  /**
-   * Main About text. Filled by AI script generation when using Create with AI.
-   */
-  summary?: string | null;
-  /**
-   * Used only when Summary is empty.
-   */
-  about?: string | null;
-  mainPoints?:
-    | {
-        point: string;
-        id?: string | null;
-      }[]
-    | null;
   /**
    * Short intro above the two columns.
    */
@@ -639,6 +631,26 @@ export interface PodcastEpisode {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Turn on to show Guest name, Topic, and Duration above About this episode. Leave off to hide the section.
+   */
+  showDetailsSection?: boolean | null;
+  /**
+   * Shown in the optional details section and on cards when set.
+   */
+  guests?: string | null;
+  /**
+   * Short topic line for the optional details section.
+   */
+  topic?: string | null;
+  /**
+   * Episode length, for example 14:22. Also used on cards and listings.
+   */
+  meta?: string | null;
+  /**
+   * Featured episodes appear in the homepage Newest podcast section.
+   */
+  featured?: boolean | null;
   /**
    * Shown in the browser tab and search-result title.
    */
@@ -1184,8 +1196,12 @@ export interface PodcastChannelsSelect<T extends boolean = true> {
 export interface PodcastEpisodesSelect<T extends boolean = true> {
   editorMode?: T;
   episodeStatus?: T;
-  channel?: T;
   title?: T;
+  channel?: T;
+  imageSource?: T;
+  image?: T;
+  imageUrl?: T;
+  imageAlt?: T;
   videoLinks?:
     | T
     | {
@@ -1199,7 +1215,14 @@ export interface PodcastEpisodesSelect<T extends boolean = true> {
   sourceTranscript?: T;
   hostGender?: T;
   guestGender?: T;
+  summary?: T;
   scriptJson?: T;
+  mainPoints?:
+    | T
+    | {
+        point?: T;
+        id?: T;
+      };
   contrastingPoints?:
     | T
     | {
@@ -1213,6 +1236,7 @@ export interface PodcastEpisodesSelect<T extends boolean = true> {
         id?: T;
       };
   systemOpinion?: T;
+  about?: T;
   hostVoiceId?: T;
   guestVoiceId?: T;
   status?: T;
@@ -1221,33 +1245,16 @@ export interface PodcastEpisodesSelect<T extends boolean = true> {
   scriptStatusMessage?: T;
   audioStatus?: T;
   audioStatusMessage?: T;
-  featured?: T;
   slug?: T;
   href?: T;
   category?: T;
   sortOrder?: T;
-  showDetailsSection?: T;
-  guests?: T;
-  topic?: T;
-  meta?: T;
-  imageSource?: T;
-  image?: T;
-  imageUrl?: T;
-  imageAlt?: T;
   audioSource?: T;
   audio?: T;
   mediaUrl?: T;
   excerpt?: T;
   stats?: T;
   heroFeatured?: T;
-  summary?: T;
-  about?: T;
-  mainPoints?:
-    | T
-    | {
-        point?: T;
-        id?: T;
-      };
   reading?: T;
   agree?:
     | T
@@ -1279,6 +1286,11 @@ export interface PodcastEpisodesSelect<T extends boolean = true> {
         text?: T;
         id?: T;
       };
+  showDetailsSection?: T;
+  guests?: T;
+  topic?: T;
+  meta?: T;
+  featured?: T;
   metaTitle?: T;
   metaDescription?: T;
   updatedAt?: T;

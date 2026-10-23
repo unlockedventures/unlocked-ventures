@@ -46,7 +46,7 @@ export const PodcastEpisodes: CollectionConfig = {
   admin: {
     group: adminGroups.podcast,
     description:
-      'Create with AI (video links → transcript/script) or Create Manually. Save as Draft or Save as Complete. Only Complete episodes appear on the site.',
+      'Create with AI: transcribe video links, generate a podcast script, then generate audio. Or Create Manually. Only Complete episodes appear on the site.',
     hideAPIURL: true,
     useAsTitle: 'title',
     defaultColumns: ['title', 'channel', 'editorMode', 'episodeStatus', 'featured', 'guests'],
@@ -243,6 +243,7 @@ export const PodcastEpisodes: CollectionConfig = {
         },
       },
     },
+    { name: 'title', type: 'text', required: true },
     {
       name: 'channel',
       type: 'relationship',
@@ -256,7 +257,52 @@ export const PodcastEpisodes: CollectionConfig = {
         active: { equals: true },
       },
     },
-    { name: 'title', type: 'text', required: true },
+    {
+      name: 'imageSource',
+      type: 'radio',
+      label: 'Picture',
+      defaultValue: 'upload',
+      options: [
+        { label: 'Upload image', value: 'upload' },
+        { label: 'Image URL', value: 'url' },
+      ],
+      admin: {
+        layout: 'horizontal',
+        description: 'Required. Choose the thumbnail for the card and episode details page.',
+      },
+    },
+    {
+      name: 'image',
+      type: 'upload',
+      label: 'Upload image',
+      relationTo: 'media',
+      admin: {
+        condition: (_data, siblingData) => siblingData?.imageSource !== 'url',
+        description: 'Required when using Upload image. Upload or drag and drop a thumbnail.',
+        components: {
+          Field: '@/components/admin/direct-upload-field#DirectUploadField',
+        },
+        custom: {
+          relationTo: 'media',
+          accept: 'image/*',
+          emptyLabel: 'Upload or drag and drop an image',
+        },
+      },
+    },
+    {
+      name: 'imageUrl',
+      type: 'text',
+      label: 'Image URL',
+      admin: {
+        condition: (_data, siblingData) => siblingData?.imageSource === 'url',
+        description: 'Required when using Image URL. Paste a direct image address (https://…).',
+      },
+    },
+    {
+      name: 'imageAlt',
+      type: 'text',
+      label: 'Image alt',
+    },
 
     // —— AI create (same table) ——
     {
@@ -328,10 +374,26 @@ export const PodcastEpisodes: CollectionConfig = {
           label: 'Source transcript',
           admin: { description: 'Generated text. You can edit it before saving.' },
         },
+      ],
+    },
+    {
+      type: 'collapsible',
+      label: 'Generate podcast',
+      admin: {
+        initCollapsed: false,
+        components: {
+          Label: '@/components/admin/episode-podcast-label#EpisodePodcastLabel',
+        },
+      },
+      fields: [
         {
           name: 'hostGender',
           type: 'select',
-          label: 'Host gender',
+          label: 'Host gender (required for script generation)',
+          admin: {
+            condition: isAiMode,
+            description: 'Required to generate the podcast script. Optional when saving a draft.',
+          },
           options: [
             { label: 'Male', value: 'male' },
             { label: 'Female', value: 'female' },
@@ -340,7 +402,11 @@ export const PodcastEpisodes: CollectionConfig = {
         {
           name: 'guestGender',
           type: 'select',
-          label: 'Guest gender',
+          label: 'Guest gender (required for script generation)',
+          admin: {
+            condition: isAiMode,
+            description: 'Required to generate the podcast script. Optional when saving a draft.',
+          },
           options: [
             { label: 'Male', value: 'male' },
             { label: 'Female', value: 'female' },
@@ -350,9 +416,18 @@ export const PodcastEpisodes: CollectionConfig = {
           name: 'generateScript',
           type: 'ui',
           admin: {
+            condition: isAiMode,
             components: {
               Field: '@/components/admin/generate-script-field#GenerateScriptField',
             },
+          },
+        },
+        {
+          name: 'summary',
+          type: 'textarea',
+          label: 'Summary',
+          admin: {
+            description: 'Main About text. Filled by AI script generation when using Create with AI.',
           },
         },
         {
@@ -360,13 +435,23 @@ export const PodcastEpisodes: CollectionConfig = {
           type: 'textarea',
           label: 'script.json',
           admin: {
+            condition: isAiMode,
             description: 'Two-person (host/guest) podcast-video script JSON. You can edit it.',
           },
+        },
+        {
+          name: 'mainPoints',
+          type: 'array',
+          label: 'Main points',
+          labels: { singular: 'Main point', plural: 'Main points' },
+          maxRows: 10,
+          fields: [{ name: 'point', type: 'text', required: true, label: 'Point' }],
         },
         {
           name: 'contrastingPoints',
           type: 'array',
           label: 'Contrasting points',
+          admin: { condition: isAiMode },
           labels: { singular: 'Contrasting point', plural: 'Contrasting points' },
           fields: [{ name: 'point', type: 'text', required: true, label: 'Point' }],
         },
@@ -374,23 +459,47 @@ export const PodcastEpisodes: CollectionConfig = {
           name: 'disagreementPoints',
           type: 'array',
           label: 'Disagreement points',
+          admin: { condition: isAiMode },
           labels: { singular: 'Disagreement point', plural: 'Disagreement points' },
           fields: [{ name: 'point', type: 'text', required: true, label: 'Point' }],
         },
         {
           name: 'systemOpinion',
           type: 'textarea',
-          label: "System's overall opinion",
+          label: 'UV takes',
+          admin: { condition: isAiMode },
         },
+        {
+          name: 'about',
+          type: 'textarea',
+          label: 'About (fallback)',
+          admin: {
+            condition: isManualMode,
+            description: 'Used only when Summary is empty.',
+          },
+        },
+      ],
+    },
+    {
+      type: 'collapsible',
+      label: 'Audio generation',
+      admin: { initCollapsed: false, condition: isAiMode },
+      fields: [
         {
           name: 'hostVoiceId',
           type: 'text',
-          label: 'Host ElevenLabs voice ID',
+          label: 'Host ElevenLabs voice ID (required for audio generation)',
+          admin: {
+            description: 'Required to generate podcast audio. Optional when saving a draft.',
+          },
         },
         {
           name: 'guestVoiceId',
           type: 'text',
-          label: 'Guest ElevenLabs voice ID',
+          label: 'Guest ElevenLabs voice ID (required for audio generation)',
+          admin: {
+            description: 'Required to generate podcast audio. Optional when saving a draft.',
+          },
         },
         {
           name: 'generateAudio',
@@ -462,18 +571,6 @@ export const PodcastEpisodes: CollectionConfig = {
     },
 
     {
-      name: 'featured',
-      type: 'checkbox',
-      label: 'Featured',
-      defaultValue: true,
-      admin: {
-        description: 'Featured episodes appear in the homepage Newest podcast section.',
-        components: {
-          Cell: '@/components/admin/featured-cell#FeaturedCell',
-        },
-      },
-    },
-    {
       name: 'slug',
       type: 'text',
       label: 'Page address',
@@ -500,97 +597,6 @@ export const PodcastEpisodes: CollectionConfig = {
       required: true,
       defaultValue: 0,
       admin: { hidden: true },
-    },
-    {
-      type: 'collapsible',
-      label: 'Guest, topic, and duration',
-      admin: {
-        initCollapsed: false,
-        description:
-          'Optional block on the episode page, shown above About this episode when enabled.',
-      },
-      fields: [
-        {
-          name: 'showDetailsSection',
-          type: 'checkbox',
-          label: 'Show Guest / Topic / Duration on episode page',
-          defaultValue: false,
-          admin: {
-            description:
-              'Turn on to show Guest name, Topic, and Duration above About this episode. Leave off to hide the section.',
-          },
-        },
-        {
-          name: 'guests',
-          type: 'text',
-          label: 'Guest name',
-          admin: {
-            description: 'Shown in the optional details section and on cards when set.',
-          },
-        },
-        {
-          name: 'topic',
-          type: 'text',
-          label: 'Topic',
-          admin: {
-            description: 'Short topic line for the optional details section.',
-          },
-        },
-        {
-          name: 'meta',
-          type: 'text',
-          label: 'Duration',
-          admin: {
-            description: 'Episode length, for example 14:22. Also used on cards and listings.',
-          },
-        },
-      ],
-    },
-    {
-      name: 'imageSource',
-      type: 'radio',
-      label: 'Picture',
-      defaultValue: 'upload',
-      options: [
-        { label: 'Upload image', value: 'upload' },
-        { label: 'Image URL', value: 'url' },
-      ],
-      admin: {
-        layout: 'horizontal',
-        description: 'Required. Choose the thumbnail for the card and episode details page.',
-      },
-    },
-    {
-      name: 'image',
-      type: 'upload',
-      label: 'Upload image',
-      relationTo: 'media',
-      admin: {
-        condition: (_data, siblingData) => siblingData?.imageSource !== 'url',
-        description: 'Required when using Upload image. Upload or drag and drop a thumbnail.',
-        components: {
-          Field: '@/components/admin/direct-upload-field#DirectUploadField',
-        },
-        custom: {
-          relationTo: 'media',
-          accept: 'image/*',
-          emptyLabel: 'Upload or drag and drop an image',
-        },
-      },
-    },
-    {
-      name: 'imageUrl',
-      type: 'text',
-      label: 'Image URL',
-      admin: {
-        condition: (_data, siblingData) => siblingData?.imageSource === 'url',
-        description: 'Required when using Image URL. Paste a direct image address (https://…).',
-      },
-    },
-    {
-      name: 'imageAlt',
-      type: 'text',
-      label: 'Image alt',
     },
     {
       name: 'audioSource',
@@ -665,40 +671,6 @@ export const PodcastEpisodes: CollectionConfig = {
 
     {
       type: 'collapsible',
-      label: 'About this episode',
-      admin: { initCollapsed: false },
-      fields: [
-        {
-          name: 'summary',
-          type: 'textarea',
-          label: 'Summary',
-          admin: {
-            description:
-              'Main About text. Filled by AI script generation when using Create with AI.',
-          },
-        },
-        {
-          name: 'about',
-          type: 'textarea',
-          label: 'About (fallback)',
-          admin: {
-            condition: isManualMode,
-            description: 'Used only when Summary is empty.',
-          },
-        },
-        {
-          name: 'mainPoints',
-          type: 'array',
-          label: 'Main points',
-          labels: { singular: 'Main point', plural: 'Main points' },
-          maxRows: 10,
-          fields: [{ name: 'point', type: 'text', required: true, label: 'Point' }],
-        },
-      ],
-    },
-
-    {
-      type: 'collapsible',
       label: 'Agree, disagree, and take',
       admin: { initCollapsed: true, condition: isManualMode },
       fields: [
@@ -766,6 +738,63 @@ export const PodcastEpisodes: CollectionConfig = {
           ],
         },
       ],
+    },
+    {
+      type: 'collapsible',
+      label: 'Guest, topic, and duration',
+      admin: {
+        initCollapsed: false,
+        description:
+          'Optional block on the episode page, shown above About this episode when enabled.',
+      },
+      fields: [
+        {
+          name: 'showDetailsSection',
+          type: 'checkbox',
+          label: 'Show Guest / Topic / Duration on episode page',
+          defaultValue: false,
+          admin: {
+            description:
+              'Turn on to show Guest name, Topic, and Duration above About this episode. Leave off to hide the section.',
+          },
+        },
+        {
+          name: 'guests',
+          type: 'text',
+          label: 'Guest name',
+          admin: {
+            description: 'Shown in the optional details section and on cards when set.',
+          },
+        },
+        {
+          name: 'topic',
+          type: 'text',
+          label: 'Topic',
+          admin: {
+            description: 'Short topic line for the optional details section.',
+          },
+        },
+        {
+          name: 'meta',
+          type: 'text',
+          label: 'Duration',
+          admin: {
+            description: 'Episode length, for example 14:22. Also used on cards and listings.',
+          },
+        },
+      ],
+    },
+    {
+      name: 'featured',
+      type: 'checkbox',
+      label: 'Featured',
+      defaultValue: true,
+      admin: {
+        description: 'Featured episodes appear in the homepage Newest podcast section.',
+        components: {
+          Cell: '@/components/admin/featured-cell#FeaturedCell',
+        },
+      },
     },
     ...seoFields({
       initCollapsed: true,

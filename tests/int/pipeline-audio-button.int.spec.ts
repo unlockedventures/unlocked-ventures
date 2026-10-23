@@ -35,7 +35,7 @@ describe('audioButtonState', () => {
     })
   })
 
-  it('asks for system opinion', () => {
+  it('asks for UV takes', () => {
     expect(
       audioButtonState({
         saved: true,
@@ -47,7 +47,7 @@ describe('audioButtonState', () => {
       }),
     ).toEqual({
       disabled: true,
-      hint: "Add the system's overall opinion before generating podcast audio.",
+      hint: 'Add UV takes before generating podcast audio.',
     })
   })
 

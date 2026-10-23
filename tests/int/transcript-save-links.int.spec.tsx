@@ -59,7 +59,7 @@ describe('Saving video links before transcription', () => {
     expect(screen.getByRole('button', { name: 'Generate Transcript' })).toBeDisabled()
     fireEvent.click(screen.getByRole('button', { name: 'Save video links' }))
     expect(state.submit).toHaveBeenCalledWith({ overrides: { episodeStatus: 'draft' } })
-    expect(screen.getByRole('status')).toHaveTextContent('Choose a channel')
+    expect(screen.getByRole('status')).toHaveTextContent('Enter a title, choose a channel and picture')
   })
 
   it('enables transcription after the episode has been saved', () => {

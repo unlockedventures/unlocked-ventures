@@ -47,15 +47,11 @@
 .uv-pipeline-transcribing .field-type.textarea:has(#field-scriptJson),
 .uv-pipeline-transcribing .field-type.textarea:has(#field-summary),
 .uv-pipeline-transcribing .field-type.textarea:has(#field-systemOpinion),
-.uv-pipeline-transcribing .field-type.text:has(#field-hostVoiceId),
-.uv-pipeline-transcribing .field-type.text:has(#field-guestVoiceId),
 .uv-pipeline-transcribing #field-hostGender,
 .uv-pipeline-transcribing #field-guestGender,
 .uv-pipeline-transcribing #field-mainPoints,
 .uv-pipeline-transcribing #field-contrastingPoints,
-.uv-pipeline-transcribing #field-disagreementPoints,
-.uv-pipeline-transcribing #field-hostVoiceId,
-.uv-pipeline-transcribing #field-guestVoiceId {
+.uv-pipeline-transcribing #field-disagreementPoints {
   display: none;
 }
 
