@@ -518,9 +518,11 @@ export function PodcastListing({ copy }: { copy: PodcastListingCopy }) {
         aria-label={selectedChannel?.title ?? copy.title}
         aria-busy={busy}
       >
-        <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-4 px-4 sm:px-6 md:gap-6 md:px-8 xl:px-14">
-          <div ref={channelSelectorRef} className="flex flex-col gap-4 md:gap-6">
-            <h2 className="font-sans text-xl font-bold text-[#33353F] md:text-2xl">Channels</h2>
+        <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-10 px-4 sm:px-6 md:gap-12 md:px-8 xl:px-14">
+          <div ref={channelSelectorRef} className="flex flex-col gap-10 md:gap-12">
+            <h2 className="whitespace-pre-line font-sans text-[2rem] leading-[2.4rem] font-normal tracking-[-1px] text-[#33353F] sm:text-4xl sm:leading-[2.75rem] lg:text-5xl lg:leading-[56px]">
+              Channels
+            </h2>
             <ChannelTabs
               channels={channels}
               selectedSlug={tabSlug}
