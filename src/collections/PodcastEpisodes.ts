@@ -1,4 +1,4 @@
-import type { CollectionConfig, PayloadRequest } from 'payload'
+import { APIError, type CollectionConfig, type PayloadRequest } from 'payload'
 
 import { adminGroups } from '@/admin/editor-guide'
 import { seoFields } from '@/admin/editor-fields'
@@ -7,6 +7,7 @@ import { podcastEpisodePath, podcastSlugFromHref, slugifyPodcastTitle } from '@/
 import { applyAiContentToEpisode } from '@/pipeline/apply-ai-content'
 import { episodeAiEndpoints } from '@/pipeline/episode-ai-endpoints'
 import { reconcileVideoResources } from '@/pipeline/video-resources'
+import { sourceRevision } from '@/pipeline/source-summary'
 
 async function channelTitle(
   req: PayloadRequest,
@@ -46,7 +47,7 @@ export const PodcastEpisodes: CollectionConfig = {
   admin: {
     group: adminGroups.podcast,
     description:
-      'Create with AI: transcribe video links, generate a podcast script, then generate audio. Or Create Manually. Only Complete episodes appear on the site.',
+      'Create with AI: transcribe video links, generate a source summary, then generate the podcast script and audio. Or Create Manually. Only Complete episodes appear on the site.',
     hideAPIURL: true,
     useAsTitle: 'title',
     defaultColumns: ['title', 'channel', 'editorMode', 'episodeStatus', 'featured', 'guests'],
@@ -65,8 +66,34 @@ export const PodcastEpisodes: CollectionConfig = {
     beforeValidate: [validateEpisodeThumbnail],
     beforeChange: [
       async ({ data, operation, originalDoc, req, context }) => {
+        const generationToken = req.context?.episodeGenerationToken
+        if (generationToken && originalDoc?.generationLock !== generationToken) {
+          throw new APIError('This generation lease expired. Retry the action.', 409)
+        }
+        // Job bookkeeping is server-owned even though editors can edit the summary text.
+        for (const key of ['sourceSummaryRevision', 'sourceSummaryStatus', 'sourceSummaryMessage',
+          'currentSourceRevision', 'generationLock', 'generationLockExpiresAt'] as const) {
+          if (!context?.sourceSummaryUpdate) data[key] = originalDoc?.[key] ?? null
+        }
+        if (!context?.sourceSummaryUpdate && originalDoc?.generationLock &&
+            data.sourceSummary !== undefined && data.sourceSummary !== originalDoc.sourceSummary) {
+          throw new APIError('Wait for episode generation to finish before editing the source summary.', 409)
+        }
         if (Array.isArray(data.videoLinks) && !context?.transcriptionUpdate) {
           data.videoLinks = reconcileVideoResources(data.videoLinks, originalDoc?.videoLinks ?? [])
+        }
+        data.currentSourceRevision = await sourceRevision({
+          videoLinks: data.videoLinks ?? originalDoc?.videoLinks,
+          sourceTranscript: data.sourceTranscript !== undefined ? data.sourceTranscript : originalDoc?.sourceTranscript,
+        })
+        if (context?.expectedSourceRevision && context.expectedSourceRevision !== data.currentSourceRevision) {
+          throw new APIError('Sources changed during generation. Generate a current source summary and retry.', 409)
+        }
+        if (originalDoc?.currentSourceRevision &&
+            originalDoc.currentSourceRevision !== data.currentSourceRevision &&
+            data.sourceSummaryStatus !== 'processing') {
+          data.sourceSummaryStatus = 'idle'
+          data.sourceSummaryMessage = 'Sources changed. Generate a current source summary before creating a podcast.'
         }
         if (!data.episodeStatus) {
           data.episodeStatus =
@@ -375,6 +402,36 @@ export const PodcastEpisodes: CollectionConfig = {
           admin: { description: 'Generated text. You can edit it before saving.' },
         },
       ],
+    },
+    {
+      type: 'collapsible',
+      label: 'Source summary',
+      admin: { initCollapsed: false, condition: isAiMode },
+      fields: [
+        {
+          name: 'generateSourceSummary',
+          type: 'ui',
+          admin: { components: { Field: '@/components/admin/generate-source-summary-field#GenerateSourceSummaryField' } },
+        },
+        {
+          name: 'sourceSummary',
+          type: 'textarea',
+          label: 'Combined source summary',
+          admin: { description: 'Editable summary of every current video transcript. Podcast generation uses this text, including your edits.' },
+        },
+      ],
+    },
+    { name: 'currentSourceRevision', type: 'text', admin: { hidden: true } },
+    { name: 'sourceSummaryRevision', type: 'text', admin: { hidden: true } },
+    { name: 'generationLock', type: 'text', admin: { hidden: true } },
+    { name: 'generationLockExpiresAt', type: 'date', admin: { hidden: true } },
+    {
+      name: 'sourceSummaryStatus', type: 'text', defaultValue: 'idle', label: 'Source summary job',
+      admin: { position: 'sidebar', readOnly: true, condition: isAiMode },
+    },
+    {
+      name: 'sourceSummaryMessage', type: 'text', label: 'Source summary detail',
+      admin: { position: 'sidebar', readOnly: true, condition: isAiMode },
     },
     {
       type: 'collapsible',

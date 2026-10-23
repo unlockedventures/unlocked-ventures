@@ -1,6 +1,7 @@
 export function scriptButtonState(args: {
   saved: boolean
   hasTranscript: boolean
+  hasCurrentSourceSummary?: boolean
   hasHostGender: boolean
   hasGuestGender: boolean
   scriptStatus: string | null | undefined
@@ -18,6 +19,12 @@ export function scriptButtonState(args: {
     return {
       disabled: true,
       hint: 'Wait for the transcript to finish before creating a podcast script.',
+    }
+  }
+  if (args.hasCurrentSourceSummary === false) {
+    return {
+      disabled: true,
+      hint: 'Generate a current source summary before creating a podcast script.',
     }
   }
   if (!args.hasTranscript) {

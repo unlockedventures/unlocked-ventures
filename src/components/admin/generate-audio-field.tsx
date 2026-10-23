@@ -80,7 +80,7 @@ export function GenerateAudioField() {
     audioStatus,
     transcriptStatus,
     scriptStatus,
-    pending,
+    pending: pending || fields.sourceSummaryStatus?.value === 'processing',
   })
 
   useEffect(() => {

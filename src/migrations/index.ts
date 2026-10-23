@@ -1,5 +1,6 @@
 import * as rbac from './20261022_120000_rbac'
 import * as videoTranscription from './20261022_190000_video_transcription'
+import * as sourceSummary from './20261023_120000_source_summary'
 import * as migration_20261009_120000_ensure_additive_schema from './20261009_120000_ensure_additive_schema'
 
 export const migrations = [
@@ -14,4 +15,5 @@ export const migrations = [
     down: videoTranscription.down,
     name: '20261022_190000_video_transcription',
   },
+  { up: sourceSummary.up, down: sourceSummary.down, name: '20261023_120000_source_summary' },
 ]

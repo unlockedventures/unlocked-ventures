@@ -30,3 +30,14 @@ B. Require all four inputs for every AI episode save, including draft saves befo
 X. Other (please specify)
 
 [Answer]: A. Require both genders to generate a script and both voice IDs to generate audio; allow saving a draft before these inputs are filled. Source: user selected option 1 in chat.
+
+## Q4: Combined transcript summary action
+The user requested an additional layer summarizing all source transcripts from all videos, with podcast generation based on that summary. The user confirmed it belongs to the active work. Current implementation sends source transcript directly to script generation; this new layer has not been implemented.
+
+How should the intermediate summary be generated?
+
+A. A separate Generate source summary button and editable summary section between transcription and Generate podcast. Podcast generation requires a current source summary.
+B. Automatically summarize all transcripts when Generate Podcast Script is selected, then generate podcast content from that summary in the same action.
+X. Other (please specify)
+
+[Answer]: A. Separate Generate source summary button and editable summary section between transcription and Generate podcast. Podcast generation requires a current source summary. Source: user selected option 1 in chat.

@@ -18,6 +18,7 @@ import { syncVideoProgress } from '@/pipeline/sync-video-progress'
 import type { VideoResource } from '@/pipeline/video-resources'
 
 type PipelineResponse = {
+  currentSourceRevision?: string | null
   videoLinks?: VideoResource[] | null
   sourceTranscript?: string | null
   status?: string | null
@@ -56,9 +57,15 @@ export function GenerateTranscriptField() {
     saved,
     status,
     scriptStatus,
-    pending,
+    pending: pending || fields.sourceSummaryStatus?.value === 'processing' || fields.audioStatus?.value === 'processing',
   })
   const waiting = /waiting for another transcript/i.test(statusMessage)
+  function syncSources(doc: PipelineResponse) {
+    syncVideoProgress(fieldsRef.current, doc.videoLinks, dispatchFields)
+    if (doc.currentSourceRevision) {
+      dispatchFields({ type: 'UPDATE', path: 'currentSourceRevision', value: doc.currentSourceRevision })
+    }
+  }
   const overall = overallTranscriptPercent({ statusMessage, stagePercent })
   const percent =
     !(status === 'processing' || watching) || waiting
@@ -89,7 +96,7 @@ export function GenerateTranscriptField() {
         if (!docResponse.ok || cancelled) return
         const doc = (await docResponse.json()) as PipelineResponse
         if (cancelled) return
-        syncVideoProgress(fieldsRef.current, doc.videoLinks, dispatchFields)
+        syncSources(doc)
 
         if (progressResponse.ok) {
           const progress = (await progressResponse.json()) as { percent?: number }
@@ -205,7 +212,7 @@ export function GenerateTranscriptField() {
             return
           }
           const doc = (await refresh.json()) as PipelineResponse
-          syncVideoProgress(fieldsRef.current, doc.videoLinks, dispatchFields)
+          syncSources(doc)
           if (doc.status === 'processing') seenProcessingRef.current = true
           dispatchFields({
             type: 'UPDATE',
@@ -240,7 +247,7 @@ export function GenerateTranscriptField() {
         })
         if (refresh.ok) {
           const doc = (await refresh.json()) as PipelineResponse
-          syncVideoProgress(fieldsRef.current, doc.videoLinks, dispatchFields)
+          syncSources(doc)
           dispatchFields({
             type: 'UPDATE',
             path: 'sourceTranscript',
@@ -277,6 +284,7 @@ export function GenerateTranscriptField() {
     status === 'processing' ||
     scriptStatus === 'processing' ||
     fields.audioStatus?.value === 'processing' ||
+    fields.sourceSummaryStatus?.value === 'processing' ||
     collectVideoLinksFromForm(fields).length === 0
 
   return (

@@ -227,6 +227,37 @@ Database smoke checks use synthetic results and remove their temporary episode:
 docker compose exec -T -e PAYLOAD_DB_PUSH=false app pnpm exec tsx scripts/verify-video-transcription.mts
 ```
 
+## AI episode source summaries
+
+AI episodes now follow **video transcripts → source summary → podcast script →
+podcast audio**. After every current video has a completed, nonblank transcript,
+save any source edits and select **Generate source summary**. This separate Gemini
+operation summarizes the complete combined source text without truncating it.
+Provider capacity or timeout failures retain earlier content and show an error.
+The combined source summary is editable and separate from the episode's published
+Summary. Script generation submits and saves the edited source summary, and uses
+that text rather than falling back to raw transcripts.
+
+Changing the video set or source transcript marks the summary outdated without
+deleting previous summaries, scripts or audio. Generate a current source summary
+before requesting another podcast script, including for existing AI episodes.
+Incomplete drafts and manual episodes do not require a source summary.
+
+**Schema rollout prerequisite:** apply `pnpm ensure-schema` or `pnpm migrate`
+against the target database before serving this code. The registered
+`20261023_120000_source_summary` migration and `scripts/ensure-source-summary.sql`
+add the summary, source identities, job state and generation lease columns without
+backfilling or replacing content. Docker's existing schema precheck includes the
+new SQL. Production startup does not automatically run this rollout. These
+database commands were prepared but not executed as part of this change.
+
+Episode generation actions share an atomic database lease, preventing duplicate
+or conflicting transcription, summary, script and audio requests across workers.
+Normal completion and failure release it; after a crashed worker, it expires
+after one hour. Reload the editor and retry Generate source summary after expiry
+to recover. Source changes are rechecked before accepting generated output.
+Rolling application code back leaves these additive columns and saved text intact.
+
 ## Admin roles and permissions
 
 Super Admins manage accounts under **Accounts → Portal users** and permissions
