@@ -61,6 +61,7 @@ if [ "$DB_EXISTS" -eq 1 ]; then
   echo "Existing database detected — applying additive schema ensure"
   # Fail the boot if schema ensure fails: teammates pulling develop must get
   # columns/tables before the app serves, or admin/API will error mid-session.
+  # Includes source-summary columns before generation endpoints can serve requests.
   ENSURE_SCHEMA_STRICT=1 PG_PKG="$PG_PKG" node /app/scripts/ensure-schema.mjs
 else
   echo "Empty database — Payload push will create tables on first boot"

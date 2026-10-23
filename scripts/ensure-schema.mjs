@@ -70,6 +70,7 @@ const sql = [
   sqlPath,
   join(__dirname, 'ensure-rbac.sql'),
   join(__dirname, 'ensure-video-transcription.sql'),
+  join(__dirname, 'ensure-source-summary.sql'),
 ]
   .map((path) => readFileSync(path, 'utf8'))
   .join('\n')

@@ -12,8 +12,11 @@ import {
 } from '@/pipeline/run-generate-audio'
 import { handleGenerateScriptRequest, type ScriptPipelineDoc } from '@/pipeline/run-generate-script'
 import { handleTranscribeRequest, type PipelineDoc } from '@/pipeline/run-transcription'
+import { generateSourceSummary } from '@/pipeline/generate-source-summary'
+import { withEpisodeGenerationLock } from '@/pipeline/episode-generation-lock'
+import { hasCurrentSourceSummary, sourceRevision, sourceSummaryInput, type SourceSummaryDoc } from '@/pipeline/source-summary'
 
-type EpisodeAiDoc = {
+type EpisodeAiDoc = SourceSummaryDoc & {
   id: number | string
   title?: string | null
   sourceTranscript?: string | null
@@ -37,7 +40,43 @@ async function loadEpisode(req: PayloadRequest, id: number | string) {
 }
 
 /** AI transcript / script / audio endpoints — stored on podcast-episodes. */
-export const episodeAiEndpoints: Endpoint[] = [
+const episodeGenerationEndpoints: Endpoint[] = [
+  {
+    path: '/generate-source-summary',
+    method: 'post',
+    handler: async (req) => {
+      const body = await req.json!()
+      const id = body.id as string | number
+      const doc = await loadEpisode(req, id)
+      if (!doc) return Response.json({ error: 'Episode not found.' }, { status: 404 })
+      const input = sourceSummaryInput(doc)
+      if (input.error || !input.transcript) {
+        return Response.json({ error: input.error }, { status: 400 })
+      }
+      const revision = await sourceRevision(doc)
+      const save = async (data: Record<string, unknown>) => req.payload.update({
+        collection: 'podcast-episodes', id, data, req, depth: 0, overrideAccess: false,
+        context: { skipAiContentSync: true, sourceSummaryUpdate: true,
+          expectedSourceRevision: 'sourceSummaryRevision' in data ? revision : undefined },
+      })
+      await save({ sourceSummaryStatus: 'processing', sourceSummaryMessage: 'Summarizing all current video transcripts…' })
+      try {
+        const sourceSummary = await generateSourceSummary(input.transcript)
+        const current = await loadEpisode(req, id)
+        if (!current || await sourceRevision(current) !== revision || sourceSummaryInput(current).error) {
+          await save({ sourceSummaryStatus: 'error', sourceSummaryMessage: 'Sources changed during generation. Generate the source summary again.' })
+          return Response.json({ error: 'Sources changed. Generate the source summary again.' }, { status: 409 })
+        }
+        await save({ sourceSummary, sourceSummaryRevision: revision, sourceSummaryStatus: 'ready', sourceSummaryMessage: '' })
+        return Response.json({ sourceSummary, sourceSummaryRevision: revision, currentSourceRevision: revision, sourceSummaryStatus: 'ready' })
+      } catch {
+        // Provider exceptions can contain source text or credentials; expose only a fixed message.
+        const error = 'Could not generate the source summary. Check Gemini configuration and try again.'
+        await save({ sourceSummaryStatus: 'error', sourceSummaryMessage: error })
+        return Response.json({ error }, { status: 502 })
+      }
+    },
+  },
   {
     path: '/transcribe',
     method: 'post',
@@ -155,6 +194,8 @@ export const episodeAiEndpoints: Endpoint[] = [
         id?: number | string
         hostGender?: unknown
         guestGender?: unknown
+        sourceSummary?: unknown
+        sourceSummaryRevision?: unknown
       } | null
       const id = body?.id
       if (id == null || id === '') {
@@ -163,12 +204,26 @@ export const episodeAiEndpoints: Endpoint[] = [
 
       const doc = await loadEpisode(req, id)
 
+      if (!doc || !hasCurrentSourceSummary({ ...doc, currentSourceRevision: await sourceRevision(doc) }) ||
+          body?.sourceSummaryRevision !== doc.sourceSummaryRevision) {
+        return Response.json({ error: 'Generate a current source summary before creating a podcast script.' }, { status: 400 })
+      }
+      const sourceSummary = typeof body.sourceSummary === 'string' ? body.sourceSummary.trim() : ''
+      if (!sourceSummary) {
+        return Response.json({ error: 'Add a nonblank source summary before creating a podcast script.' }, { status: 400 })
+      }
+      const revision = doc.sourceSummaryRevision
+      await req.payload.update({
+        collection: 'podcast-episodes', id, data: { sourceSummary }, depth: 0, req,
+        overrideAccess: false, context: { skipAiContentSync: true, sourceSummaryUpdate: true },
+      })
+
       const result = await handleGenerateScriptRequest({
         user: req.user,
         doc: doc
           ? ({
               id: doc.id,
-              transcript: doc.sourceTranscript,
+              transcript: sourceSummary,
               hostGender: doc.hostGender,
               guestGender: doc.guestGender,
               status: doc.status,
@@ -178,6 +233,18 @@ export const episodeAiEndpoints: Endpoint[] = [
         hostGender: body?.hostGender,
         guestGender: body?.guestGender,
         save: async (data) => {
+          if (data.scriptStatus === 'ready') {
+            const current = await loadEpisode(req, id)
+            if (!current || await sourceRevision(current) !== revision ||
+                current.sourceSummary?.trim() !== sourceSummary) {
+              await req.payload.update({
+                collection: 'podcast-episodes', id, data: {
+                  scriptStatus: 'error', scriptStatusMessage: 'Sources changed during generation. Generate a current source summary and retry.',
+                }, req, overrideAccess: false, context: { skipAiContentSync: true },
+              })
+              throw new Error('Sources changed during podcast generation.')
+            }
+          }
           await req.payload.update({
             collection: 'podcast-episodes',
             id,
@@ -185,12 +252,14 @@ export const episodeAiEndpoints: Endpoint[] = [
             depth: 0,
             req,
             overrideAccess: false,
-            context: { skipAiContentSync: true },
+            context: { skipAiContentSync: true,
+              expectedSourceRevision: data.scriptStatus === 'ready' ? revision : undefined },
           })
         },
         generate: ({ transcript, hostGender, guestGender }) =>
           generateScriptFromTranscript({
             transcript,
+            sourceKind: 'source summary',
             hostGender,
             guestGender,
             apiKey: process.env['GEMINI_API_KEY']?.trim() ?? '',
@@ -293,3 +362,7 @@ export const episodeAiEndpoints: Endpoint[] = [
     },
   },
 ]
+
+export const episodeAiEndpoints: Endpoint[] = episodeGenerationEndpoints.map((endpoint) => endpoint.method === 'post'
+  ? { ...endpoint, handler: withEpisodeGenerationLock(endpoint.handler) }
+  : endpoint) as Endpoint[]

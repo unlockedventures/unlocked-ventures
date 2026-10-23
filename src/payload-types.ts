@@ -460,7 +460,7 @@ export interface PodcastChannel {
   createdAt: string;
 }
 /**
- * Create with AI: transcribe video links, generate a podcast script, then generate audio. Or Create Manually. Only Complete episodes appear on the site.
+ * Create with AI: transcribe video links, generate a source summary, then generate the podcast script and audio. Or Create Manually. Only Complete episodes appear on the site.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "podcast-episodes".
@@ -513,6 +513,16 @@ export interface PodcastEpisode {
    * Generated text. You can edit it before saving.
    */
   sourceTranscript?: string | null;
+  /**
+   * Editable summary of every current video transcript. Podcast generation uses this text, including your edits.
+   */
+  sourceSummary?: string | null;
+  currentSourceRevision?: string | null;
+  sourceSummaryRevision?: string | null;
+  generationLock?: string | null;
+  generationLockExpiresAt?: string | null;
+  sourceSummaryStatus?: string | null;
+  sourceSummaryMessage?: string | null;
   /**
    * Required to generate the podcast script. Optional when saving a draft.
    */
@@ -1213,6 +1223,13 @@ export interface PodcastEpisodesSelect<T extends boolean = true> {
         id?: T;
       };
   sourceTranscript?: T;
+  sourceSummary?: T;
+  currentSourceRevision?: T;
+  sourceSummaryRevision?: T;
+  generationLock?: T;
+  generationLockExpiresAt?: T;
+  sourceSummaryStatus?: T;
+  sourceSummaryMessage?: T;
   hostGender?: T;
   guestGender?: T;
   summary?: T;

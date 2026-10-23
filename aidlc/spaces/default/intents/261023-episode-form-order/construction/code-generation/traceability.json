@@ -1,9 +1,10 @@
 {
   "stage": "code-generation",
   "upstream_ids": [
-    "FR1", "FR2", "FR3", "FR4", "FR5", "NFR1", "NFR2", "NFR3",
+    "FR1", "FR2", "FR3", "FR4", "FR5", "FR6", "NFR1", "NFR2", "NFR3",
     "AC1.1", "AC1.2", "AC2.1", "AC2.2", "AC3.1", "AC3.2", "AC4.1",
-    "AC4.2", "AC4.3", "AC4.4", "AC5.1", "AC5.2", "AC6.1", "AC6.2", "AC6.3"
+    "AC4.2", "AC4.3", "AC4.4", "AC5.1", "AC5.2", "AC6.1", "AC6.2", "AC6.3",
+    "AC7.1", "AC7.2", "AC7.3", "AC7.4", "AC7.5", "AC7.6", "AC7.7"
   ],
   "coverage": [
     { "id": "FR1", "status": "OK", "target": "src/collections/PodcastEpisodes.ts" },
@@ -11,9 +12,10 @@
     { "id": "FR3", "status": "OK", "target": "src/collections/PodcastEpisodes.ts" },
     { "id": "FR4", "status": "OK", "target": "src/components/admin/generate-audio-field.tsx" },
     { "id": "FR5", "status": "OK", "target": "src/components/admin/episode-podcast-label.tsx" },
+    { "id": "FR6", "status": "OK", "target": "src/pipeline/episode-ai-endpoints.ts" },
     { "id": "NFR1", "status": "OK", "target": "src/collections/PodcastEpisodes.ts" },
     { "id": "NFR2", "status": "GAP", "target": "src/collections/PodcastEpisodes.ts", "justification": "Labels and required guidance implemented; browser accessibility and responsive behavior unverified at user's request." },
-    { "id": "NFR3", "status": "GAP", "target": "src/components/admin/generate-script-field.tsx", "justification": "Request and polling code preserved by source inspection; post-change execution waived by user." },
+    { "id": "NFR3", "status": "GAP", "target": "src/components/admin/generate-source-summary-field.tsx", "justification": "FR6 adds an explicit summary request and processing-only polling. Unintended requests and runtime behavior remain unverified; user waived checks." },
     { "id": "AC1.1", "status": "GAP", "target": "src/collections/PodcastEpisodes.ts", "justification": "Section order implemented; post-change metadata/browser checks waived by user." },
     { "id": "AC1.2", "status": "GAP", "target": "src/payload-types.ts", "justification": "Flat field contracts retained; saved AI round-trip unverified." },
     { "id": "AC2.1", "status": "GAP", "target": "src/components/admin/generate-transcript-field.tsx", "justification": "Transcript-only action preserved; post-change network execution waived." },
@@ -26,8 +28,15 @@
     { "id": "AC4.4", "status": "GAP", "target": "src/components/admin/generate-audio-field.tsx", "justification": "Existing failure/retry paths preserved; post-change failure execution waived." },
     { "id": "AC5.1", "status": "GAP", "target": "src/components/admin/episode-podcast-label.tsx", "justification": "Manual heading, shared order and conditional controls implemented; browser execution waived." },
     { "id": "AC5.2", "status": "GAP", "target": "src/collections/PodcastEpisodes.ts", "justification": "Manual contracts retained; database save/reopen unverified." },
-    { "id": "AC6.1", "status": "GAP", "target": "src/pipeline/episode-ai-endpoints.ts", "justification": "Authorization code unchanged; pre-change rbac suite passed, post-change verification waived." },
+    { "id": "AC6.1", "status": "GAP", "target": "src/pipeline/episode-ai-endpoints.ts", "justification": "Existing permissions reused by new endpoint/lease wrapper; new behavior unverified; pre-change RBAC suite is baseline only." },
     { "id": "AC6.2", "status": "GAP", "target": "src/collections/PodcastEpisodes.ts", "justification": "Field labels and guidance implemented; keyboard/viewport/overflow checks waived." },
-    { "id": "AC6.3", "status": "GAP", "target": "src/components/admin/generate-script-field.tsx", "justification": "No request/polling additions in source; post-change network checks waived." }
+    { "id": "AC6.3", "status": "GAP", "target": "src/components/admin/generate-source-summary-field.tsx", "justification": "Explicit FR6 summary action adds processing-only polling; post-change network behavior checks waived." },
+    { "id": "AC7.1", "status": "GAP", "target": "src/pipeline/generate-source-summary.ts", "justification": "Dedicated combined-source summarizer and persisted separate section implemented; no provider/runtime verification." },
+    { "id": "AC7.2", "status": "GAP", "target": "src/pipeline/source-summary.ts", "justification": "Every-row completeness and nonblank checks implemented; checks not executed at user request." },
+    { "id": "AC7.3", "status": "GAP", "target": "src/pipeline/episode-ai-endpoints.ts", "justification": "Script action submits/persists live edited source summary and uses only that input; execution unverified." },
+    { "id": "AC7.4", "status": "GAP", "target": "src/collections/PodcastEpisodes.ts", "justification": "Protected identities/currentness guard preserve old content and block stale or missing summaries; execution unverified." },
+    { "id": "AC7.5", "status": "GAP", "target": "src/pipeline/episode-generation-lock.ts", "justification": "Atomic bounded lease, error-state recovery, status UI, revalidation and prior-text preservation implemented; DB/provider runtime unverified." },
+    { "id": "AC7.6", "status": "GAP", "target": "src/pipeline/episode-ai-endpoints.ts", "justification": "Read/Update checks, record access and sanitized source-summary errors implemented; denial/error execution waived." },
+    { "id": "AC7.7", "status": "GAP", "target": "src/collections/PodcastEpisodes.ts", "justification": "Summary optional on save and AI-only section implemented; draft/manual runtime behavior unverified." }
   ]
 }

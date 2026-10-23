@@ -4,6 +4,7 @@ import { Button, useAuth, useAllFormFields, useDocumentInfo } from '@payloadcms/
 import { useEffect, useRef, useState } from 'react'
 
 import { Skeleton } from '@/components/ui/skeleton'
+import { useSourceSummary } from '@/components/admin/use-source-summary'
 import { scriptButtonState } from '@/pipeline/script-button-state'
 import { isSpeakerGender } from '@/pipeline/script-schema'
 
@@ -94,6 +95,7 @@ export function GenerateScriptField() {
   const { permissions } = useAuth()
   const canGenerate = permissions?.collections?.['podcast-episodes']?.update === true
   const [fields, dispatchFields] = useAllFormFields()
+  const { source, current } = useSourceSummary(fields)
   const [watching, setWatching] = useState(false)
   const [pending, setPending] = useState(false)
   const [localMessage, setLocalMessage] = useState<string | null>(null)
@@ -101,7 +103,6 @@ export function GenerateScriptField() {
   const scriptStatus = fieldText(fields.scriptStatus?.value) || 'idle'
   const scriptStatusMessage = fieldText(fields.scriptStatusMessage?.value)
   const transcriptStatus = fieldText(fields.status?.value) || 'idle'
-  const transcript = fieldText(fields.sourceTranscript?.value)
   const hostGender = fieldText(fields.hostGender?.value)
   const guestGender = fieldText(fields.guestGender?.value)
   const statusRef = useRef(scriptStatus)
@@ -121,12 +122,13 @@ export function GenerateScriptField() {
 
   const button = scriptButtonState({
     saved: id != null && id !== '',
-    hasTranscript: transcript.trim() !== '',
+    hasTranscript: source.sourceSummary.trim() !== '',
+    hasCurrentSourceSummary: current,
     hasHostGender: isSpeakerGender(hostGender),
     hasGuestGender: isSpeakerGender(guestGender),
     scriptStatus,
     transcriptStatus,
-    pending,
+    pending: pending || fields.sourceSummaryStatus?.value === 'processing' || fields.audioStatus?.value === 'processing',
   })
 
   useEffect(() => {
@@ -181,6 +183,12 @@ export function GenerateScriptField() {
 
   async function onGenerate() {
     if (button.disabled || id == null) return
+    const input = document.querySelector<HTMLTextAreaElement>('#field-sourceSummary')
+    const sourceSummary = (input ? input.value : source.sourceSummary).trim()
+    if (!sourceSummary) {
+      setLocalMessage('Add a nonblank source summary before creating a podcast script.')
+      return
+    }
     if (!isSpeakerGender(hostGender) || !isSpeakerGender(guestGender)) {
       setLocalMessage('Choose a host gender and a guest gender before creating a podcast script.')
       return
@@ -200,7 +208,7 @@ export function GenerateScriptField() {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, hostGender, guestGender }),
+        body: JSON.stringify({ id, hostGender, guestGender, sourceSummary, sourceSummaryRevision: source.sourceSummaryRevision }),
       })
       const body = (await response.json().catch(() => null)) as PipelineResponse | null
       if (!response.ok) {

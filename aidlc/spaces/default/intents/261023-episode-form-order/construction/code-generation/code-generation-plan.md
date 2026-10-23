@@ -1,34 +1,32 @@
-# Episode form implementation plan
+# Episode source-summary implementation plan
 
 ## Summary
 
-- Builds: Ordered episode form with independent transcript, podcast script and audio sections.
-- Touches: PodcastEpisodes collection, generation guidance/guards, related tests and generated Payload output.
-- Tests: Approximately 10 targeted metadata/component regressions plus existing generation regressions and full-suite comparison.
+- Builds: Separate editable source summary between all-video transcription and podcast generation.
+- Touches: Episode collection/admin, summary/script pipeline, additive schema/migration and generated Payload outputs.
+- Tests: Further checks omitted at user request; runtime acceptance unverified.
 
-## Approved scope and design
+## Scope and approach
 
-Source: ../../inception/requirements-analysis/requirements.md, FR1–FR5, NFR1–NFR3, AC1.1–AC6.3.
-Use unnamed presentation groups and existing field definitions. Keep flat persistence, routes, hooks and access unchanged. Title and Channel precede Picture; transcript-only Create with AI precedes Generate podcast and separate Audio generation; details precede Featured. Shared manual editorial content follows Picture and precedes details/Featured; retain manual audio and transcript editors.
-No migrations, seeds, providers or deployment changes. Alternative rejected: named groups or duplicate conditional field definitions would change persisted paths or introduce duplicate contracts.
+Approved requirements revision: FR1–FR6, NFR1–NFR3, AC7.1–AC7.7. Preserve previous ordering work. Add distinct source-summary text, status/detail and source-revision metadata, retaining existing episode Summary output. New independent action summarizes all completed video transcripts; podcast input is only the current editable source summary. No raw-transcript fallback. Existing episodes must generate a summary before generating another podcast.
+Use existing Gemini configuration and RBAC. Source identity derives from video URLs/transcripts and combined source text, never a client-supplied trusted revision. Reject incomplete sources, stale output and conflicting work; preserve prior text on failures. Include saved editor changes in script input. Prefer small cohesive helpers and operation handlers over generic frameworks.
 
-## Impact and proposed diff
+## Impact and rollout
 
-Medium impact: collection presentation consumed by Payload admin and metadata tests; grouping changes affect loading selectors. Generation controls and audio prerequisite hints consumed by component/pipeline tests. Generated types/import map may refresh from existing commands. Preserve required-at-action semantics without collection-wide required flags. Main files: src/collections/PodcastEpisodes.ts, src/components/admin/generate-transcript-field.tsx, src/components/admin/generate-script-field.tsx, src/components/admin/generate-audio-field.tsx, src/components/admin/generate-podcast-skeleton.css, src/pipeline/audio-button-state.ts. Touch endpoint guards only if inspection proves a gap in approved generation-time validation. Preserve unrelated work.
+New additive persisted columns and endpoint plus changed script prerequisite. Inspect Payload hooks, boot SQL and migrations before editing; add idempotent schema scripts/migration consistent with current patterns. Never run schema scripts, migrations, seeds or paid AI requests. Preserve stored content and unrelated edits. Rollback restores code while leaving additive data columns intact. Existing manual mode is unaffected.
 
-## Sequential steps
+## Steps
 
-- [x] Step 1: Inspect relevant existing files/configuration and verify runner readiness; establish full existing test baseline and focused baseline before source edits. Record unavailable prerequisites and failures. Test configuration review is required; retain working configuration without speculative changes. (All requirements)
-- [x] Step 2: Reorganize collection presentation using one authoritative field definition per stored path. Move Picture forward, split transcript/script/audio, move Summary/Main points to podcast content, relabel UV takes, preserve manual controls and align shared order, move details before Featured. Include required-for-generation indicators/guidance for genders and voice IDs without blocking drafts. (FR1, FR3, FR4, FR5)
-- [ ] Step 3: Write/run collection layout and compatibility tests in tests/int/episode-form-order.int.spec.ts and update affected existing metadata tests. Cover AI/manual visibility, flat field identities, output order and optional-on-save inputs. (FR1, FR3, FR4, FR5)
-- [x] Step 4: Update generation guidance, required input handling and any affected loading selectors; retain transcript-only action and existing endpoint guards/provider behavior. Use trimmed voice IDs and both genders for action prerequisites. Rename editor-facing opinion hints to UV takes. (FR2, FR3, FR4, NFR1, NFR3)
-- [ ] Step 5: Write/run focused generation component and pipeline regressions after implementation. Extend existing tests for both valid inputs and missing/whitespace input cases, draft saving, failure and denied-access preservation. Update browser episode creation test for section order/responsive layout where practical. (FR2–FR5, NFR1–NFR3)
-- [ ] Step 6: Run documented Payload generators when configuration inputs change; inspect generated diffs. Run lint, TypeScript, focused tests, full existing suite comparison and build. Attempt relevant browser checks; report missing database/browser prerequisites explicitly. (All requirements)
-- [x] Step 7: Review changed code against SOLID/KISS/DRY/YAGNI and compatibility; write code-summary.md and traceability.json mapping every assigned requirement/acceptance criterion to actual paths and evidence. Record gaps honestly. (All requirements)
+- [x] Step 1: Inspect pipeline, controls, permissions, migrations and initialization. Record affected paths; no additional baseline/test commands.
+- [x] Step 2: Add source-summary fields, section/button, protected revision/status metadata and editable content; preserve prior form order and hide in manual mode. (FR1, FR6)
+- [x] Step 3: Implement completeness/source identity helper, Gemini summarizer and authorized endpoint using existing patterns. Reject duplicates/conflicting work and stale results; preserve summary on errors. (FR6, NFR1, NFR3)
+- [x] Step 4: Change script server/UI prerequisites to current source summary, explicitly persist/submit edits, update prompt/input wording, and invalidate summary identity on source edits without deleting content. Keep previous script/audio contracts. (FR2–FR4, FR6)
+- [x] Step 5: Add registered additive migration and boot SQL wiring, regenerate Payload types/import map and document rollout in README. Do not execute database mutations. (FR6, NFR1)
+- [x] Step 6: Review source, update code-summary.md and traceability.json mapping actual paths and unverified acceptance; document compatibility, rollback and user test waiver. No tests/lint/typecheck/build/browser runs. Existing fixtures may be maintained without execution. (All requirements)
 
-## Verification and rollback
+## Verification waiver
 
-See unit-test-instructions.md for scoped commands. Full baseline and post-change comparison additionally use pnpm test; pnpm lint, pnpm exec tsc --noEmit and pnpm build verify repository checks. Do not weaken failed checks. Restore this change's application diff to roll back; no stored-data migration is planned.
+The original Testing Contract remains below for audit. The user's subsequent explicit instruction 'no need of testing' overrides further execution. No new tests, verification runs or claims of passed behavior. Required safe code generators and source inspection remain allowed.
 
 ## Testing Contract
 
