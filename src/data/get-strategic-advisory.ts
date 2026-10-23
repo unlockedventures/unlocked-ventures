@@ -2,10 +2,12 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
 import type { StrategicAdvisorySectionProps } from '@/components/site/strategic-advisory/strategic-advisory-section'
+import { inheritedHomeGroups } from '@/lib/home-menu-source'
 
-export async function getStrategicAdvisory(): Promise<
-  Omit<StrategicAdvisorySectionProps, 'className'> | null
-> {
+export async function getStrategicAdvisory(): Promise<Omit<
+  StrategicAdvisorySectionProps,
+  'className'
+> | null> {
   const payload = await getPayload({ config: configPromise })
   const doc = await payload.findGlobal({
     slug: 'strategic-advisory',
@@ -14,33 +16,39 @@ export async function getStrategicAdvisory(): Promise<
 
   if (!doc.title || !doc.description || !doc.cta?.label || !doc.cta.href) return null
 
-  const groups = (doc.groups ?? []).flatMap((group) => {
-    const icon = group.icon
-    if (
-      !group.title ||
-      typeof icon === 'number' ||
-      !icon?.url ||
-      !group.iconWidth ||
-      !group.iconHeight
-    ) {
-      return []
-    }
+  const groups = doc.menuSource
+    ? inheritedHomeGroups(
+        await payload.findGlobal({ slug: 'navigation', depth: 0 }),
+        doc.menuSource,
+        doc.groups ?? [],
+      )
+    : (doc.groups ?? []).flatMap((group) => {
+        const icon = group.icon
+        if (
+          !group.title ||
+          typeof icon === 'number' ||
+          !icon?.url ||
+          !group.iconWidth ||
+          !group.iconHeight
+        ) {
+          return []
+        }
 
-    const items = (group.items ?? []).flatMap((item) =>
-      item.label && item.href ? [{ label: item.label, href: item.href }] : [],
-    )
-    if (!items.length) return []
+        const items = (group.items ?? []).flatMap((item) =>
+          item.label && item.href ? [{ label: item.label, href: item.href }] : [],
+        )
+        if (!items.length) return []
 
-    return [
-      {
-        title: group.title,
-        iconSrc: icon.url,
-        iconWidth: group.iconWidth,
-        iconHeight: group.iconHeight,
-        items,
-      },
-    ]
-  })
+        return [
+          {
+            title: group.title,
+            iconSrc: icon.url,
+            iconWidth: group.iconWidth,
+            iconHeight: group.iconHeight,
+            items,
+          },
+        ]
+      })
 
   if (!groups.length) return null
 

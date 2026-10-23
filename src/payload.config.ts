@@ -64,6 +64,7 @@ import { StrategicAdvisory } from './globals/StrategicAdvisory'
 import { Site } from './globals/Site'
 import { SuccessStories } from './globals/SuccessStories'
 import { dashboardStatsHandler } from './endpoints/dashboard-stats'
+import { homeMenuSourcesHandler } from './endpoints/home-menu-sources'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -199,6 +200,7 @@ export default buildConfig({
   sharp,
   plugins: [],
   endpoints: [
+    { path: '/home-menu-sources', method: 'get', handler: homeMenuSourcesHandler },
     {
       path: '/dashboard/stats',
       method: 'get',

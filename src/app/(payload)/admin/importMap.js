@@ -39,6 +39,9 @@ import { RelationshipFeatureClient as RelationshipFeatureClient_e70f5e05f09f93e0
 import { BlockquoteFeatureClient as BlockquoteFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { HorizontalRuleFeatureClient as HorizontalRuleFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { InlineToolbarFeatureClient as InlineToolbarFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
+import { HomeMenuSourceField as HomeMenuSourceField_7dcb0d78fe43d7f3d75304a0c517a579 } from '@/components/admin/home-menu-source-field'
+import { HomeMenuGroupField as HomeMenuGroupField_7dcb0d78fe43d7f3d75304a0c517a579 } from '@/components/admin/home-menu-source-field'
+import { HomeMenuPresentationField as HomeMenuPresentationField_7dcb0d78fe43d7f3d75304a0c517a579 } from '@/components/admin/home-menu-source-field'
 import { RelatedItemsField as RelatedItemsField_a7098b4589ca4a6f4f719f7d06b509fe } from '@/components/admin/related-items-field'
 import { ContactEmailPreviewField as ContactEmailPreviewField_62446f45008242da925e59025d902cc8 } from '@/components/admin/contact-email-preview-field'
 import { AdminNav as AdminNav_f919f0c6105891138159f6f666f5060d } from '@/components/admin/admin-nav'
@@ -90,6 +93,9 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#BlockquoteFeatureClient": BlockquoteFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#HorizontalRuleFeatureClient": HorizontalRuleFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#InlineToolbarFeatureClient": InlineToolbarFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
+  "@/components/admin/home-menu-source-field#HomeMenuSourceField": HomeMenuSourceField_7dcb0d78fe43d7f3d75304a0c517a579,
+  "@/components/admin/home-menu-source-field#HomeMenuGroupField": HomeMenuGroupField_7dcb0d78fe43d7f3d75304a0c517a579,
+  "@/components/admin/home-menu-source-field#HomeMenuPresentationField": HomeMenuPresentationField_7dcb0d78fe43d7f3d75304a0c517a579,
   "@/components/admin/related-items-field#RelatedItemsField": RelatedItemsField_a7098b4589ca4a6f4f719f7d06b509fe,
   "@/components/admin/contact-email-preview-field#ContactEmailPreviewField": ContactEmailPreviewField_62446f45008242da925e59025d902cc8,
   "@/components/admin/admin-nav#AdminNav": AdminNav_f919f0c6105891138159f6f666f5060d,

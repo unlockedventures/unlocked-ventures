@@ -1695,19 +1695,36 @@ export interface DigitalEngineering {
     href: string;
   };
   /**
-   * The picture beside the service list. Choose a different file to replace it.
+   * Choose the Header menu parent supplying this section. Edit its headings and links in Header menu.
    */
+  menuSource?: string | null;
+  menuPresentationArchive?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   image?: (number | null) | Media;
   imageAlt?: string | null;
+  /**
+   * Groups are created automatically from the selected Header menu. Edit only their presentation here.
+   */
   groups?:
     | {
+        /**
+         * Automatically created from the selected Header menu.
+         */
+        sourceGroupId?: string | null;
         index?: string | null;
-        title: string;
+        title?: string | null;
         description?: string | null;
         /**
          * The icon on this card. Choose a different file to replace it.
          */
-        icon: number | Media;
+        icon?: (number | null) | Media;
         /**
          * Leave this unless the picture looks too big or too small.
          */
@@ -1716,6 +1733,9 @@ export interface DigitalEngineering {
          * Leave this unless the picture looks too big or too small.
          */
         iconHeight: number;
+        /**
+         * Preserved previous links. Current offerings come from the selected Header menu.
+         */
         items?:
           | {
               label: string;
@@ -1972,15 +1992,32 @@ export interface StrategicAdvisory {
     href: string;
   };
   /**
-   * Enterprise and Early-stage.
+   * Choose the Header menu parent supplying this section. Edit its headings and links in Header menu.
+   */
+  menuSource?: string | null;
+  menuPresentationArchive?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Groups are created automatically from the selected Header menu. Edit only their presentation here.
    */
   groups?:
     | {
-        title: string;
         /**
-         * The icon on this card. Choose a different file to replace it. Add or remove a card with the controls on this list.
+         * Automatically created from the selected Header menu.
          */
-        icon: number | Media;
+        sourceGroupId?: string | null;
+        title?: string | null;
+        /**
+         * The icon on this card. Choose a different file to replace it.
+         */
+        icon?: (number | null) | Media;
         /**
          * Leave this unless the picture looks too big or too small.
          */
@@ -1989,14 +2026,19 @@ export interface StrategicAdvisory {
          * Leave this unless the picture looks too big or too small.
          */
         iconHeight: number;
-        items: {
-          label: string;
-          /**
-           * A page on this site, such as /contact, or a full address starting with https://
-           */
-          href: string;
-          id?: string | null;
-        }[];
+        /**
+         * Previous offerings are preserved. Select a Header menu source to inherit current links.
+         */
+        items?:
+          | {
+              label: string;
+              /**
+               * A page on this site, such as /contact, or a full address starting with https://
+               */
+              href: string;
+              id?: string | null;
+            }[]
+          | null;
         id?: string | null;
       }[]
     | null;
@@ -2576,11 +2618,14 @@ export interface DigitalEngineeringSelect<T extends boolean = true> {
         label?: T;
         href?: T;
       };
+  menuSource?: T;
+  menuPresentationArchive?: T;
   image?: T;
   imageAlt?: T;
   groups?:
     | T
     | {
+        sourceGroupId?: T;
         index?: T;
         title?: T;
         description?: T;
@@ -2771,9 +2816,12 @@ export interface StrategicAdvisorySelect<T extends boolean = true> {
         label?: T;
         href?: T;
       };
+  menuSource?: T;
+  menuPresentationArchive?: T;
   groups?:
     | T
     | {
+        sourceGroupId?: T;
         title?: T;
         icon?: T;
         iconWidth?: T;

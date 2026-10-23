@@ -3,11 +3,14 @@ import Link from 'next/link'
 import { cn } from '@/lib/utils'
 
 export type EngineeringOffering = {
+  id?: string | null
   label: string
   href: string
+  external?: boolean
 }
 
 export type EngineeringGroup = {
+  id?: string | null
   index: string
   title: string
   description?: string
@@ -64,24 +67,30 @@ function EngineeringGroupCard({ group }: { group: EngineeringGroup }) {
         />
       ) : null}
       <div className="flex flex-col gap-8">
-        <h3 className="font-sans text-base leading-7 font-normal tracking-normal text-[#25282D] uppercase">
-          {group.title}
-        </h3>
+        {group.title ? (
+          <h3 className="font-sans text-base leading-7 font-normal tracking-normal break-words text-[#25282D] uppercase">
+            {group.title}
+          </h3>
+        ) : null}
         {group.description ? (
-          <p className="font-sans text-base leading-6 font-normal text-[#222222]/70">{group.description}</p>
+          <p className="font-sans text-base leading-6 font-normal text-[#222222]/70">
+            {group.description}
+          </p>
         ) : null}
         {group.items?.length ? (
           <ul className="flex flex-col gap-3">
-            {group.items.map((item) => (
-              <li key={item.href}>
+            {group.items.map((item, index) => (
+              <li key={item.id || `${index}-${item.href}`}>
                 <Link
                   href={item.href}
+                  target={item.external ? '_blank' : undefined}
+                  rel={item.external ? 'noopener noreferrer' : undefined}
                   className={cn(
                     'group flex cursor-pointer items-center justify-between gap-4 pb-3 text-[#222222]',
                     optionBorderClassName,
                   )}
                 >
-                  <span className="font-sans text-lg leading-7 font-normal sm:text-xl sm:leading-8">
+                  <span className="min-w-0 break-words font-sans text-lg leading-7 font-normal sm:text-xl sm:leading-8">
                     {item.label}
                   </span>
                   <span className="inline-flex size-12 shrink-0 items-center justify-center rounded-full bg-white text-[#0b1f3a]">
@@ -105,7 +114,11 @@ export function DigitalEngineeringSection({
   flushTop = false,
 }: DigitalEngineeringSectionProps) {
   return (
-    <section id="digital-engineering" aria-label={title} className={cn('scroll-mt-24 bg-white', className)}>
+    <section
+      id="digital-engineering"
+      aria-label={title}
+      className={cn('scroll-mt-24 bg-white', className)}
+    >
       <div
         className={cn(
           'mx-auto flex w-full max-w-[1440px] flex-col gap-8 px-4 py-12 sm:px-6 md:gap-12 md:px-8 md:py-16 xl:gap-12 xl:px-14 xl:pb-[100px]',
@@ -117,12 +130,14 @@ export function DigitalEngineeringSection({
             <h2 className="font-sans text-[2rem] leading-10 font-normal tracking-[-1px] text-[#33353F] md:text-5xl md:leading-[56px]">
               {title}
             </h2>
-            <p className="font-sans text-base leading-6 font-normal text-[#222222]/70">{description}</p>
+            <p className="font-sans text-base leading-6 font-normal text-[#222222]/70">
+              {description}
+            </p>
           </div>
         </div>
         <div className="grid grid-cols-1 items-stretch gap-4 md:grid-cols-2">
-          {groups.map((group) => (
-            <EngineeringGroupCard key={group.title} group={group} />
+          {groups.map((group, index) => (
+            <EngineeringGroupCard key={group.id || `${index}-${group.title}`} group={group} />
           ))}
         </div>
       </div>

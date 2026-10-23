@@ -6,10 +6,16 @@ import { digitalEngineeringSeed } from '@/data/digital-engineering-seed'
 import { uploadPublicFile } from '@/data/upload-public-file'
 
 async function iconFor(payload: Payload, title: string) {
-  const group = digitalEngineeringSeed.groups.find((item) => item.title.toLowerCase() === title.toLowerCase())
+  const group = digitalEngineeringSeed.groups.find(
+    (item) => item.title.toLowerCase() === title.toLowerCase(),
+  )
   if (!group) return null
 
-  const media = await uploadPublicFile(payload, `digital-engineering/${group.iconFile}`, group.title)
+  const media = await uploadPublicFile(
+    payload,
+    `digital-engineering/${group.iconFile}`,
+    group.title,
+  )
   return {
     icon: media.id,
     iconWidth: group.iconWidth,
@@ -21,6 +27,8 @@ export async function seedDigitalEngineering(payload: Payload) {
   const current = await payload.findGlobal({ slug: 'digital-engineering' })
 
   if (current.title) {
+    // Source-driven presentation is optional; do not backfill editor choices.
+    if (current.menuSource) return
     const groups = current.groups ?? []
     if (!groups.some((group) => !group.icon)) return
 
@@ -30,7 +38,7 @@ export async function seedDigitalEngineering(payload: Payload) {
         nextGroups.push(group)
         continue
       }
-      const icon = await iconFor(payload, group.title)
+      const icon = group.title ? await iconFor(payload, group.title) : null
       nextGroups.push(icon ? { ...group, ...icon } : group)
     }
 
@@ -41,7 +49,12 @@ export async function seedDigitalEngineering(payload: Payload) {
     return
   }
 
-  const filePath = path.join(process.cwd(), 'public', 'digital-engineering', digitalEngineeringSeed.imageFile)
+  const filePath = path.join(
+    process.cwd(),
+    'public',
+    'digital-engineering',
+    digitalEngineeringSeed.imageFile,
+  )
   const data = fs.readFileSync(filePath)
   const media = await payload.create({
     collection: 'media',

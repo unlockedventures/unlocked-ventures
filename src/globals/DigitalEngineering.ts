@@ -2,6 +2,13 @@ import type { GlobalConfig } from 'payload'
 
 import { adminGroups } from '@/admin/editor-guide'
 import { buttonGroup, linkField, sizeField } from '@/admin/editor-fields'
+import {
+  homeMenuGroupField,
+  homeMenuSourceField,
+  homeMenuPresentationArchive,
+  homeMenuPresentationAdmin,
+} from '@/admin/home-menu-fields'
+import { protectHomeMenuSource } from '@/hooks/home-menu-source'
 
 export const DigitalEngineering: GlobalConfig = {
   slug: 'digital-engineering',
@@ -14,6 +21,7 @@ export const DigitalEngineering: GlobalConfig = {
   access: {
     read: () => true,
   },
+  hooks: { beforeValidate: [protectHomeMenuSource] },
   fields: [
     {
       name: 'title',
@@ -26,28 +34,33 @@ export const DigitalEngineering: GlobalConfig = {
       required: true,
     },
     buttonGroup(),
+    homeMenuSourceField,
+    homeMenuPresentationArchive,
     {
       name: 'image',
       type: 'upload',
       label: 'Photo',
       relationTo: 'media',
       admin: {
-        description: 'The picture beside the service list. Choose a different file to replace it.',
+        hidden: true,
       },
     },
     {
       name: 'imageAlt',
       type: 'text',
+      admin: { hidden: true },
     },
     {
       name: 'groups',
       type: 'array',
-      label: 'Service groups',
+      label: 'Service group presentation',
+      admin: homeMenuPresentationAdmin,
       labels: {
         singular: 'Group',
         plural: 'Groups',
       },
       fields: [
+        homeMenuGroupField,
         {
           name: 'index',
           type: 'text',
@@ -59,7 +72,8 @@ export const DigitalEngineering: GlobalConfig = {
         {
           name: 'title',
           type: 'text',
-          required: true,
+          label: 'Previous group title (preserved)',
+          admin: { hidden: true },
         },
         {
           name: 'description',
@@ -70,16 +84,20 @@ export const DigitalEngineering: GlobalConfig = {
           type: 'upload',
           label: 'Icon',
           relationTo: 'media',
-          required: true,
           admin: {
             description: 'The icon on this card. Choose a different file to replace it.',
           },
         },
-        sizeField('iconWidth', 'Icon width (pixels)'),
-        sizeField('iconHeight', 'Icon height (pixels)'),
+        { ...sizeField('iconWidth', 'Icon width (pixels)'), defaultValue: 90 },
+        { ...sizeField('iconHeight', 'Icon height (pixels)'), defaultValue: 90 },
         {
           name: 'items',
           type: 'array',
+          admin: {
+            hidden: true,
+            description:
+              'Preserved previous links. Current offerings come from the selected Header menu.',
+          },
           labels: {
             singular: 'Offering',
             plural: 'Offerings',

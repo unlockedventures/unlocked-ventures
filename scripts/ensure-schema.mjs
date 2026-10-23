@@ -71,6 +71,7 @@ const sql = [
   join(__dirname, 'ensure-rbac.sql'),
   join(__dirname, 'ensure-video-transcription.sql'),
   join(__dirname, 'ensure-source-summary.sql'),
+  join(__dirname, 'ensure-home-menu-sources.sql'),
 ]
   .map((path) => readFileSync(path, 'utf8'))
   .join('\n')

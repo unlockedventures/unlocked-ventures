@@ -2,6 +2,13 @@ import type { GlobalConfig } from 'payload'
 
 import { adminGroups } from '@/admin/editor-guide'
 import { buttonGroup, linkField, sizeField } from '@/admin/editor-fields'
+import {
+  homeMenuGroupField,
+  homeMenuSourceField,
+  homeMenuPresentationArchive,
+  homeMenuPresentationAdmin,
+} from '@/admin/home-menu-fields'
+import { protectHomeMenuSource } from '@/hooks/home-menu-source'
 
 export const StrategicAdvisory: GlobalConfig = {
   slug: 'strategic-advisory',
@@ -14,6 +21,7 @@ export const StrategicAdvisory: GlobalConfig = {
   access: {
     read: () => true,
   },
+  hooks: { beforeValidate: [protectHomeMenuSource] },
   fields: [
     {
       name: 'title',
@@ -26,40 +34,44 @@ export const StrategicAdvisory: GlobalConfig = {
       required: true,
     },
     buttonGroup(),
+    homeMenuSourceField,
+    homeMenuPresentationArchive,
     {
       name: 'groups',
       type: 'array',
-      label: 'Cards',
+      label: 'Card presentation',
       labels: {
         singular: 'Card',
         plural: 'Cards',
       },
-      admin: {
-        description: 'Enterprise and Early-stage.',
-      },
+      admin: homeMenuPresentationAdmin,
       fields: [
+        homeMenuGroupField,
         {
           name: 'title',
           type: 'text',
-          required: true,
+          label: 'Previous card title (preserved)',
+          admin: { hidden: true },
         },
         {
           name: 'icon',
           type: 'upload',
           label: 'Icon',
           relationTo: 'media',
-          required: true,
           admin: {
-            description: 'The icon on this card. Choose a different file to replace it. Add or remove a card with the controls on this list.',
+            description: 'The icon on this card. Choose a different file to replace it.',
           },
         },
-        sizeField('iconWidth', 'Icon width (pixels)'),
-        sizeField('iconHeight', 'Icon height (pixels)'),
+        { ...sizeField('iconWidth', 'Icon width (pixels)'), defaultValue: 90 },
+        { ...sizeField('iconHeight', 'Icon height (pixels)'), defaultValue: 90 },
         {
           name: 'items',
           type: 'array',
-          required: true,
-          minRows: 1,
+          admin: {
+            hidden: true,
+            description:
+              'Previous offerings are preserved. Select a Header menu source to inherit current links.',
+          },
           labels: {
             singular: 'Offering',
             plural: 'Offerings',

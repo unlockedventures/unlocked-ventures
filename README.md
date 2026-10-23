@@ -258,6 +258,30 @@ after one hour. Reload the editor and retry Generate source summary after expiry
 to recover. Source changes are rechecked before accepting generated output.
 Rolling application code back leaves these additive columns and saved text intact.
 
+## Homepage menu sources
+
+Under **Home → Strategic Advisory** or **Home → Digital Engineering**, choose a
+**Header menu source** and save. The read-only preview shows the selected parent's
+groups and links. Names, destinations, external-link behavior and ordering come
+from **Menus → Header menu**; edit them there. All parents are selectable, including
+ones hidden from the header. “Published in header” controls only the header.
+
+Section headings, descriptions and card presentation remain editable. Presentation
+rows are created automatically from the selected parent's groups, in source order;
+there is no manual group selection. Existing icons and descriptions stay associated
+with stable group IDs across renames and reordering. On first selection, uniquely
+matching existing group names are associated automatically. Unused presentation
+is archived for reuse when switching menus. Photo and Image Alt are no longer
+shown in the Digital Engineering editor. New groups render without icons until
+configured. Previous offerings remain stored and render until a source is chosen;
+a missing or empty selected source hides the public section and shows an admin
+warning. Header edits appear on a fresh homepage load or normal data refetch.
+
+Run `pnpm ensure-schema` or `pnpm migrate` before serving this schema on an existing
+database. Migration `20261023_140000_home_menu_sources` adds source IDs and relaxes
+optional presentation constraints without deleting content. Docker's schema
+precheck includes the same SQL. The additive columns remain on rollback.
+
 ## Admin roles and permissions
 
 Super Admins manage accounts under **Accounts → Portal users** and permissions
