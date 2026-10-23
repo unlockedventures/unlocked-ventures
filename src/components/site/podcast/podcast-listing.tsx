@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
@@ -10,6 +11,14 @@ const PAGE_SIZE = 9
 /** Opacity-only crossfade — no layout swap mid-transition. */
 const FADE_MS = 420
 const EASE = 'cubic-bezier(0.33, 1, 0.68, 1)'
+const CARD_CLASS_NAME =
+  'relative flex h-full w-full min-w-0 flex-col overflow-hidden rounded-xl border border-slate-200/70 bg-white shadow-sm lg:h-[320px] min-[1440px]:h-[360px]'
+const CARD_IMAGE_CLASS_NAME =
+  'relative aspect-video w-full shrink-0 overflow-hidden bg-slate-100 lg:aspect-auto lg:h-[180px] min-[1440px]:h-[210px]'
+const CARD_CONTENT_CLASS_NAME =
+  'flex h-[120px] min-w-0 shrink-0 flex-col gap-1.5 p-4 lg:h-auto lg:min-h-0 lg:flex-1 lg:gap-2 min-[1440px]:p-5'
+const EPISODE_GRID_CLASS_NAME =
+  'grid grid-cols-1 items-stretch gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6'
 
 export type PodcastListEpisode = {
   title: string
@@ -89,38 +98,68 @@ function ChevronRight({ className }: { className?: string }) {
 }
 
 function DurationBadge({ label }: { label: string }) {
-  if (!label) return null
+  if (!label?.trim()) return null
+
+  const parts = label.trim().split(':').map(Number)
+  const minutes = label.includes(':')
+    ? parts.length === 3
+      ? parts[0] * 60 + parts[1] + parts[2] / 60
+      : parts.length === 2
+        ? parts[0] + parts[1] / 60
+        : NaN
+    : Number.parseFloat(label)
+
+  if (!Number.isFinite(minutes) || minutes < 0) return null
+
   return (
-    <span className="absolute right-3 bottom-3 z-10 bg-[rgba(34,34,34,0.8)] px-3 py-2 font-sans text-sm leading-none font-normal text-white backdrop-blur-[2px]">
-      {label}
+    <span className="absolute right-2 bottom-2 z-10 rounded-md bg-black/65 px-2 py-1 font-sans text-xs leading-none font-medium text-white backdrop-blur-sm [text-box-edge:cap_alphabetic] [text-box-trim:trim-both]">
+      {Math.floor(minutes)} MIN
     </span>
   )
 }
 
 function ExploreCard({ episode }: { episode: PodcastListEpisode }) {
   return (
-    <article className="group/card relative flex h-full flex-col gap-5 bg-white">
-      <Link href={episode.href} className="absolute inset-0 z-20" aria-label={episode.title} />
-      <div className="relative aspect-[368/220] w-full overflow-hidden bg-[#E4E6EA]">
+    <article
+      className={cn(CARD_CLASS_NAME, 'group/card transition-shadow duration-200 hover:shadow-md')}
+    >
+      <Link
+        href={episode.href}
+        className="absolute inset-0 z-20 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-slate-700"
+        aria-label={episode.title}
+      />
+      <div className={CARD_IMAGE_CLASS_NAME}>
         {episode.imageSrc ? (
           <img
             src={episode.imageSrc}
             alt={episode.imageAlt}
+            loading="lazy"
             className="absolute inset-0 h-full w-full object-cover"
           />
-        ) : null}
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-slate-100 to-teal-50">
+            <img
+              src="/brand/brand-logo.svg"
+              alt=""
+              aria-hidden="true"
+              className="h-auto w-1/2 max-w-[160px] opacity-60"
+            />
+          </div>
+        )}
         <DurationBadge label={episode.duration} />
       </div>
-      <div className="relative z-10 flex flex-col gap-3 px-5 pb-6">
+      <div className={CARD_CONTENT_CLASS_NAME}>
         <p
-          className="font-sans text-xs leading-[26px] font-medium uppercase"
+          className="shrink-0 truncate font-sans text-xs leading-4 font-semibold tracking-wide uppercase"
           style={{ color: categoryColor(episode.category) }}
         >
           {episode.category}
         </p>
-        <h3 className="font-sans text-xl leading-7 font-normal text-[#25282D]">{episode.title}</h3>
+        <h3 className="line-clamp-2 min-h-11 shrink-0 font-sans text-base leading-[22px] font-semibold text-[#25282D] lg:min-h-[52px] lg:text-lg lg:leading-[26px] min-[1440px]:min-h-14 min-[1440px]:text-xl min-[1440px]:leading-7">
+          {episode.title}
+        </h3>
         {episode.stats ? (
-          <p className="font-sans text-base leading-6 font-normal text-[rgba(34,34,34,0.85)] opacity-80">
+          <p className="mt-auto shrink-0 truncate font-sans text-xs leading-4 text-slate-500 lg:text-sm lg:leading-5">
             {episode.stats}
           </p>
         ) : null}
@@ -131,18 +170,17 @@ function ExploreCard({ episode }: { episode: PodcastListEpisode }) {
 
 function ExploreCardSkeleton() {
   return (
-    <div className="relative flex h-full flex-col gap-5 bg-white" aria-hidden="true">
-      {/* Same image frame as ExploreCard */}
-      <div className="relative aspect-[368/220] w-full overflow-hidden bg-[#E4E6EA]">
+    <div className={CARD_CLASS_NAME} aria-hidden="true">
+      <div className={CARD_IMAGE_CLASS_NAME}>
         <Skeleton className="absolute inset-0 size-full rounded-none bg-[#E4E6EA]" />
       </div>
-      {/* Same text block: category (leading-[26px]) + title (text-xl / leading-7, ~2 lines) */}
-      <div className="relative flex flex-col gap-3 px-5 pb-6">
-        <Skeleton className="h-[26px] w-[7.5rem] max-w-[45%] rounded-none bg-[#E4E6EA]" />
-        <div className="flex flex-col gap-0">
-          <Skeleton className="h-7 w-full rounded-none bg-[#E4E6EA]" />
-          <Skeleton className="h-7 w-[82%] rounded-none bg-[#E4E6EA]" />
+      <div className={CARD_CONTENT_CLASS_NAME}>
+        <Skeleton className="h-4 w-[45%] shrink-0 rounded-sm bg-[#E4E6EA]" />
+        <div className="flex flex-col gap-1">
+          <Skeleton className="h-5 w-full rounded-sm bg-[#E4E6EA] lg:h-6 min-[1440px]:h-[26px]" />
+          <Skeleton className="h-5 w-[82%] rounded-sm bg-[#E4E6EA] lg:h-6 min-[1440px]:h-[26px]" />
         </div>
+        <Skeleton className="mt-auto h-4 w-1/2 shrink-0 rounded-sm bg-[#E4E6EA] lg:h-5" />
       </div>
     </div>
   )
@@ -150,9 +188,9 @@ function ExploreCardSkeleton() {
 
 function EpisodeGridSkeleton({ count = 6 }: { count?: number }) {
   return (
-    <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3" aria-hidden="true">
+    <ul className={EPISODE_GRID_CLASS_NAME} aria-hidden="true">
       {Array.from({ length: count }, (_, index) => (
-        <li key={index}>
+        <li key={index} className="min-w-0">
           <ExploreCardSkeleton />
         </li>
       ))}
@@ -172,9 +210,9 @@ function EpisodeGrid({
   }
 
   return (
-    <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    <ul className={EPISODE_GRID_CLASS_NAME}>
       {episodes.map((episode) => (
-        <li key={episode.href}>
+        <li key={episode.href} className="min-w-0">
           <ExploreCard episode={episode} />
         </li>
       ))}
@@ -183,7 +221,9 @@ function EpisodeGrid({
 }
 
 function prefersReducedMotion() {
-  return typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  return (
+    typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  )
 }
 
 export function PodcastListingSkeleton() {
@@ -214,7 +254,10 @@ export function PodcastListingSkeleton() {
         <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-10 px-4 sm:px-6 md:gap-12 md:px-8 xl:px-14">
           <div className="flex gap-2 overflow-hidden border-b border-[#D1D6EA]">
             {Array.from({ length: 4 }, (_, index) => (
-              <Skeleton key={index} className="mb-px h-12 w-28 shrink-0 rounded-none bg-[#E4E6EA]" />
+              <Skeleton
+                key={index}
+                className="mb-px h-12 w-28 shrink-0 rounded-none bg-[#E4E6EA]"
+              />
             ))}
           </div>
 
@@ -255,7 +298,7 @@ function ChannelTabs({
             disabled={disabled}
             onClick={() => onSelect(channel.slug)}
             className={cn(
-              'shrink-0 cursor-pointer border-b-2 px-4 py-3 font-sans text-base leading-[22px] font-normal transition-[color,border-color,opacity] duration-200 sm:px-5 disabled:cursor-wait',
+              'shrink-0 cursor-pointer border-b-2 px-4 py-1 font-sans text-base leading-[22px] font-normal transition-[color,border-color,opacity] duration-200 first:pl-0 sm:px-5 disabled:cursor-wait',
               selected
                 ? 'border-[#171616] text-[#171616]'
                 : 'border-transparent text-[#696969] hover:text-[#171616]',
@@ -277,6 +320,9 @@ export function PodcastListing({ copy }: { copy: PodcastListingCopy }) {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
   const [fading, setFading] = useState(false)
   const [lockedHeight, setLockedHeight] = useState<number | undefined>()
+  const [showChannelPill, setShowChannelPill] = useState(false)
+  const channelSelectorRef = useRef<HTMLDivElement>(null)
+  const channelSectionEndRef = useRef<HTMLDivElement>(null)
   const gridRef = useRef<HTMLDivElement>(null)
   const pendingSlugRef = useRef(initialSlug)
   const timerRef = useRef<number | null>(null)
@@ -287,8 +333,7 @@ export function PodcastListing({ copy }: { copy: PodcastListingCopy }) {
     }
   }, [])
 
-  const hero =
-    copy.episodes.find((episode) => episode.heroFeatured) ?? copy.episodes[0] ?? null
+  const hero = copy.episodes.find((episode) => episode.heroFeatured) ?? copy.episodes[0] ?? null
 
   const channelEpisodes = useMemo(() => {
     if (!displaySlug) return copy.episodes
@@ -299,6 +344,87 @@ export function PodcastListing({ copy }: { copy: PodcastListingCopy }) {
   const hasMore = visible.length < channelEpisodes.length
   const selectedChannel = channels.find((channel) => channel.slug === tabSlug)
   const busy = fading
+
+  useEffect(() => {
+    const selector = channelSelectorRef.current
+    const tabs = selector?.querySelector<HTMLElement>('[role="tablist"]')
+    const sectionEnd = channelSectionEndRef.current
+    if (!tabs || !sectionEnd) return
+
+    let tabsPassed = false
+    let endReached = true
+    let tabObserver: IntersectionObserver | undefined
+    let endObserver: IntersectionObserver | undefined
+    let headerOffset = -1
+
+    const updateVisibility = () => setShowChannelPill(tabsPassed && !endReached)
+    const observe = () => {
+      const header = document.querySelector('header')
+      const nextOffset = Math.ceil(Math.max(0, header?.getBoundingClientRect().bottom ?? 0))
+      if (nextOffset === headerOffset && tabObserver) return
+      headerOffset = nextOffset
+      tabObserver?.disconnect()
+      endObserver?.disconnect()
+
+      tabObserver = new IntersectionObserver(
+        ([entry]) => {
+          // Do not show the pill before the selector has been reached from above.
+          tabsPassed =
+            !entry.isIntersecting &&
+            entry.boundingClientRect.bottom <= (entry.rootBounds?.top ?? headerOffset)
+          updateVisibility()
+        },
+        { rootMargin: `-${headerOffset}px 0px 0px 0px`, threshold: 0 },
+      )
+      endObserver = new IntersectionObserver(
+        ([entry]) => {
+          endReached =
+            entry.boundingClientRect.top <=
+            (entry.rootBounds?.bottom ?? window.innerHeight)
+          updateVisibility()
+        },
+        { rootMargin: '0px 0px 16px 0px', threshold: 0 },
+      )
+      tabObserver.observe(tabs)
+      endObserver.observe(sectionEnd)
+    }
+
+    // Refresh observer margins when the responsive header changes height or loads.
+    const resizeObserver = new ResizeObserver(observe)
+    resizeObserver.observe(document.documentElement)
+    const header = document.querySelector('header')
+    if (header) resizeObserver.observe(header)
+    window.addEventListener('resize', observe)
+    observe()
+
+    return () => {
+      tabObserver?.disconnect()
+      endObserver?.disconnect()
+      resizeObserver.disconnect()
+      window.removeEventListener('resize', observe)
+    }
+  }, [displaySlug, visibleCount])
+
+  const returnToChannels = () => {
+    const selector = channelSelectorRef.current
+    if (!selector) return
+
+    const headerHeight = Math.max(
+      0,
+      document.querySelector('header')?.getBoundingClientRect().bottom ?? 0,
+    )
+    const activeTab = selector.querySelector<HTMLButtonElement>('[role="tab"][aria-selected="true"]')
+    const tabList = selector.querySelector<HTMLElement>('[role="tablist"]')
+    activeTab?.focus({ preventScroll: true })
+    if (activeTab && tabList) {
+      const offset = activeTab.getBoundingClientRect().left - tabList.getBoundingClientRect().left
+      tabList.scrollLeft += offset - (tabList.clientWidth - activeTab.offsetWidth) / 2
+    }
+    window.scrollTo({
+      top: Math.max(0, window.scrollY + selector.getBoundingClientRect().top - headerHeight - 16),
+      behavior: prefersReducedMotion() ? 'instant' : 'smooth',
+    })
+  }
 
   const selectChannel = (slug: string) => {
     if (slug === tabSlug || busy) return
@@ -388,17 +514,20 @@ export function PodcastListing({ copy }: { copy: PodcastListingCopy }) {
       </div>
 
       <section
-        className="w-full bg-[#F3F4F9] py-16 md:py-[100px]"
+        className="relative w-full bg-[#F3F4F9] py-10 md:py-[60px]"
         aria-label={selectedChannel?.title ?? copy.title}
         aria-busy={busy}
       >
-        <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-10 px-4 sm:px-6 md:gap-12 md:px-8 xl:px-14">
-          <ChannelTabs
-            channels={channels}
-            selectedSlug={tabSlug}
-            disabled={busy}
-            onSelect={selectChannel}
-          />
+        <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-4 px-4 sm:px-6 md:gap-6 md:px-8 xl:px-14">
+          <div ref={channelSelectorRef} className="flex flex-col gap-4 md:gap-6">
+            <h2 className="font-sans text-xl font-bold text-[#33353F] md:text-2xl">Channels</h2>
+            <ChannelTabs
+              channels={channels}
+              selectedSlug={tabSlug}
+              disabled={busy}
+              onSelect={selectChannel}
+            />
+          </div>
 
           <div
             ref={gridRef}
@@ -413,11 +542,7 @@ export function PodcastListing({ copy }: { copy: PodcastListingCopy }) {
               )}
               style={{ transitionDuration: `${FADE_MS}ms`, transitionTimingFunction: EASE }}
             >
-              <EpisodeGrid
-                key={displaySlug}
-                episodes={visible}
-                emptyLabel={copy.emptyLabel}
-              />
+              <EpisodeGrid key={displaySlug} episodes={visible} emptyLabel={copy.emptyLabel} />
             </div>
           </div>
 
@@ -434,7 +559,33 @@ export function PodcastListing({ copy }: { copy: PodcastListingCopy }) {
             </div>
           ) : null}
         </div>
+        <div
+          ref={channelSectionEndRef}
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-px"
+        />
       </section>
+      {showChannelPill && selectedChannel && visible.length > 0 ? createPortal(
+        <div className="pointer-events-none fixed inset-x-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-40 flex justify-center">
+          <button
+            type="button"
+            onClick={returnToChannels}
+            aria-label={`Viewing ${selectedChannel.title}. Return to channel selector.`}
+            className="pointer-events-auto inline-flex min-h-11 max-w-full cursor-pointer items-center gap-2 rounded-full border border-slate-200 bg-white/95 px-4 py-2.5 font-sans text-sm text-slate-700 shadow-lg backdrop-blur-sm transition-colors hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-700"
+          >
+            <span className="min-w-0 truncate font-semibold text-[#015B5B]">
+              {selectedChannel.title}
+            </span>
+            <span aria-hidden="true" className="shrink-0 text-slate-300">
+              ·
+            </span>
+            <span className="shrink-0">
+              Change channel <span aria-hidden="true">↑</span>
+            </span>
+          </button>
+        </div>,
+        document.body,
+      ) : null}
     </div>
   )
 }
