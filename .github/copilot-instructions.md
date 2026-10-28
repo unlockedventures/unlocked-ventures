@@ -1,0 +1,16 @@
+# Unlocked Ventures — Repository Instructions
+
+Before making changes, read and follow the repository-root AGENTS.md, then
+README.md and aidlc/AGENTS.md. The root AGENTS.md is the canonical project working
+agreement; keep shared policy there rather than copying it into tool-specific files.
+
+For each new feature, follow its Feature records section: create or reuse
+`aidlc/aidlc-docs/units/<feature-slug>/` and maintain `intent.md`,
+`requirements.md`, `plan.md`, `tasks.md` and `audit.md` using the templates.
+Read existing records before continuing a feature. Draft intent, requirements
+and plan before implementation; reconcile acceptance criteria, tasks and actual
+verification results before marking it done. These records add no approval gates.
+
+Preserve unrelated work and editorial content. Follow task-specific verification
+instructions. Never claim checks passed unless run, and do not push, merge or
+deploy without user authorization.

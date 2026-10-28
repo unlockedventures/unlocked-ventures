@@ -5,9 +5,10 @@ Payload CMS 3, PostgreSQL and Tailwind CSS. Read README.md for setup and command
 
 ## Working agreement
 
-- Implement the user's requested changes directly. Do not create AI lifecycle
-  records, stage documents or repeated approval questions. Ask only when a
-  material requirement cannot be reasonably resolved from context.
+- Implement the user's requested changes directly. Maintain the feature records
+  described below without introducing lifecycle stages or repeated approval
+  questions. Ask only when a material requirement cannot be reasonably resolved
+  from context.
 - Preserve unrelated work and persisted editor content. Keep changes focused.
 - Apply SOLID, KISS, DRY and YAGNI proportionately. Use established framework
   patterns, existing components and brand assets.
@@ -28,6 +29,44 @@ Payload CMS 3, PostgreSQL and Tailwind CSS. Read README.md for setup and command
 - Respect task-specific verification instructions. Report checks actually run,
   failures and unverified behavior; never claim unrun tests passed.
 - Do not push, merge or deploy unless the user authorizes it.
+
+## AI tool onboarding
+
+Read this file before making changes, then read `README.md` and `aidlc/AGENTS.md`.
+When continuing feature work, read the existing unit records before editing and
+update them with the implementation. This file is the canonical shared policy;
+tool-specific entry points must point here rather than maintain separate rules.
+
+Root `CLAUDE.md`, `GEMINI.md`, `.github/copilot-instructions.md` and
+`.cursor/rules/project.mdc` provide entry points for common tools. For any other
+tool, configure its project instructions to read this file or explicitly attach
+it to the initial prompt. Instruction discovery depends on the tool and its
+settings; these files are guidance, not a technical enforcement mechanism.
+
+## Feature records
+
+For every new feature, create `aidlc/aidlc-docs/units/<feature-slug>/` when work
+starts, using a descriptive kebab-case slug. Reuse that folder when continuing
+or fixing the same feature; preserve its existing records. Use a real ticket key
+as a prefix only when one is provided. Do not invent tickets or backfill past
+features unless requested. Standalone maintenance and documentation changes do
+not require a new feature folder.
+
+Create and maintain all five files from `aidlc/aidlc-docs/templates/`:
+
+- `intent.md`: purpose, scope, stakeholders and feature status.
+- `requirements.md`: behavior, acceptance criteria, constraints and open questions.
+- `plan.md`: implementation approach, affected files, rollout and verification strategy.
+- `tasks.md`: actionable work, progress, actual check results and handoff notes.
+- `audit.md`: factual, append-only decisions, changes, verification and handoffs.
+
+Draft the intent, requirements and plan before implementation, then update all
+records as the work evolves. Before marking the feature done, reconcile its
+acceptance criteria and tasks, record checks actually run and remaining
+limitations, and update the intent status. Keep records proportional to the
+feature. These records do not add approval gates or authorize push, merge or
+deployment. ADRs remain separate and are added when architectural documentation
+is requested or included in the task scope.
 
 ## Project map
 
