@@ -9,6 +9,7 @@ import { GenerateTranscriptField as GenerateTranscriptField_d809db76de84e66ad7e5
 import { GenerateSourceSummaryField as GenerateSourceSummaryField_e4cdf4246e4007813a44617bc5ec5f7d } from '@/components/admin/generate-source-summary-field'
 import { GenerateScriptField as GenerateScriptField_bab222324d11fa721dc22069e6402c46 } from '@/components/admin/generate-script-field'
 import { EpisodePodcastLabel as EpisodePodcastLabel_8415134688a1774850c1f17935492641 } from '@/components/admin/episode-podcast-label'
+import { KokoroVoiceField as KokoroVoiceField_5c7d0510b7bc26d1fc3d7bd8fb9ba844 } from '@/components/admin/kokoro-voice-field'
 import { GenerateAudioField as GenerateAudioField_00f96ba655ba0804c9b39d5d182597ac } from '@/components/admin/generate-audio-field'
 import { EpisodeCreateActions as EpisodeCreateActions_4b5649ad294156dd25a272118cc9feff } from '@/components/admin/episode-create-actions'
 import { EpisodeSaveButtons as EpisodeSaveButtons_30741118ebbece47612146faae78497e } from '@/components/admin/episode-save-buttons'
@@ -63,6 +64,7 @@ export const importMap = {
   "@/components/admin/generate-source-summary-field#GenerateSourceSummaryField": GenerateSourceSummaryField_e4cdf4246e4007813a44617bc5ec5f7d,
   "@/components/admin/generate-script-field#GenerateScriptField": GenerateScriptField_bab222324d11fa721dc22069e6402c46,
   "@/components/admin/episode-podcast-label#EpisodePodcastLabel": EpisodePodcastLabel_8415134688a1774850c1f17935492641,
+  "@/components/admin/kokoro-voice-field#KokoroVoiceField": KokoroVoiceField_5c7d0510b7bc26d1fc3d7bd8fb9ba844,
   "@/components/admin/generate-audio-field#GenerateAudioField": GenerateAudioField_00f96ba655ba0804c9b39d5d182597ac,
   "@/components/admin/episode-create-actions#EpisodeCreateActions": EpisodeCreateActions_4b5649ad294156dd25a272118cc9feff,
   "@/components/admin/episode-save-buttons#EpisodeSaveButtons": EpisodeSaveButtons_30741118ebbece47612146faae78497e,

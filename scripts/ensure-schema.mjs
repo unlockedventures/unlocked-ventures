@@ -72,6 +72,8 @@ const sql = [
   join(__dirname, 'ensure-video-transcription.sql'),
   join(__dirname, 'ensure-source-summary.sql'),
   join(__dirname, 'ensure-home-menu-sources.sql'),
+  join(__dirname, 'ensure-podcast-audio-duration.sql'),
+  join(__dirname, 'ensure-podcast-audio-preview.sql'),
 ]
   .map((path) => readFileSync(path, 'utf8'))
   .join('\n')

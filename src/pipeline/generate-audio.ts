@@ -1,4 +1,4 @@
-import { ELEVENLABS_PCM_SAMPLE_RATE, synthesizeSpeech } from '@/pipeline/elevenlabs'
+import { KOKORO_PCM_SAMPLE_RATE, synthesizeKokoroSpeech } from '@/pipeline/kokoro'
 import {
   parsePodcastVideoScript,
   type PodcastVideoScript,
@@ -44,13 +44,13 @@ export function voiceIdForSpeaker(
   return speaker === 'host' ? voices.hostVoiceId : voices.guestVoiceId
 }
 
-function pcmSilence(durationMs: number, sampleRate = ELEVENLABS_PCM_SAMPLE_RATE): Buffer {
+function pcmSilence(durationMs: number, sampleRate = KOKORO_PCM_SAMPLE_RATE): Buffer {
   const samples = Math.max(0, Math.round((sampleRate * durationMs) / 1000))
   return Buffer.alloc(samples * 2) // 16-bit mono
 }
 
 /** Wrap little-endian 16-bit mono PCM in a WAV container. */
-export function pcmToWav(pcm: Buffer, sampleRate = ELEVENLABS_PCM_SAMPLE_RATE): Buffer {
+export function pcmToWav(pcm: Buffer, sampleRate = KOKORO_PCM_SAMPLE_RATE): Buffer {
   const header = Buffer.alloc(44)
   const dataSize = pcm.length
   header.write('RIFF', 0)
@@ -70,17 +70,28 @@ export function pcmToWav(pcm: Buffer, sampleRate = ELEVENLABS_PCM_SAMPLE_RATE): 
 }
 
 export type GeneratePodcastAudioResult =
-  | { ok: true; buffer: Buffer; filename: string; mimeType: string; turnCount: number }
+  | {
+      ok: true
+      buffer: Buffer
+      filename: string
+      mimeType: string
+      turnCount: number
+      durationSeconds: number
+    }
   | { ok: false; error: string }
 
 export async function generatePodcastAudioFromScript(args: {
   scriptJson: string
   hostVoiceId: string
   guestVoiceId: string
-  apiKey: string
+  baseUrl: string
   modelId?: string
+  speed?: number
+  timeoutMs?: number
   title?: string
-  synthesize?: typeof synthesizeSpeech
+  synthesize?: typeof synthesizeKokoroSpeech
+  onProgress?: (completedTurns: number, totalTurns: number) => void | Promise<void>
+  signal?: AbortSignal
 }): Promise<GeneratePodcastAudioResult> {
   const script = parseStoredScriptJson(args.scriptJson)
   if (!script) {
@@ -95,34 +106,44 @@ export async function generatePodcastAudioFromScript(args: {
   const hostVoiceId = args.hostVoiceId.trim()
   const guestVoiceId = args.guestVoiceId.trim()
   if (!hostVoiceId || !guestVoiceId) {
-    return { ok: false, error: 'Host and guest ElevenLabs voice IDs are required.' }
+    return { ok: false, error: 'Host and guest Kokoro voices are required.' }
   }
 
-  const synthesize = args.synthesize ?? synthesizeSpeech
+  const synthesize = args.synthesize ?? synthesizeKokoroSpeech
   const parts: Buffer[] = []
 
   try {
     for (let index = 0; index < turns.length; index += 1) {
+      if (args.signal?.aborted) throw new Error('Audio generation stopped.')
       const turn = turns[index]
       const voiceId = voiceIdForSpeaker(turn.speaker, { hostVoiceId, guestVoiceId })
       const pcm = await synthesize({
-        apiKey: args.apiKey,
+        baseUrl: args.baseUrl,
         voiceId,
         text: turn.text,
         modelId: args.modelId,
+        speed: args.speed,
+        timeoutMs: args.timeoutMs,
+        signal: args.signal,
       })
       parts.push(pcm)
       if (index < turns.length - 1) parts.push(pcmSilence(PAUSE_MS))
+      await args.onProgress?.(index + 1, turns.length)
     }
   } catch (error) {
-    const message =
-      error && typeof error === 'object' && 'message' in error && typeof error.message === 'string'
+    const message = args.signal?.aborted
+      ? 'Audio generation stopped.'
+      : error &&
+          typeof error === 'object' &&
+          'message' in error &&
+          typeof error.message === 'string'
         ? error.message
-        : 'ElevenLabs TTS failed.'
+        : 'Kokoro speech generation failed.'
     return { ok: false, error: message }
   }
 
-  const wav = pcmToWav(Buffer.concat(parts))
+  const pcm = Buffer.concat(parts)
+  const wav = pcmToWav(pcm)
   const slugBase = (args.title || script.title || 'podcast')
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
@@ -136,5 +157,6 @@ export async function generatePodcastAudioFromScript(args: {
     filename,
     mimeType: 'audio/wav',
     turnCount: turns.length,
+    durationSeconds: pcm.length / (KOKORO_PCM_SAMPLE_RATE * 2),
   }
 }

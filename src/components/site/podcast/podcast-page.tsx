@@ -76,7 +76,9 @@ function ListenNext({
 
   return (
     <div className="flex flex-col gap-4">
-      <h2 className="font-sans text-xl leading-7 font-normal tracking-[-0.3px] text-[#171616]">{title}</h2>
+      <h2 className="font-sans text-xl leading-7 font-normal tracking-[-0.3px] text-[#171616]">
+        {title}
+      </h2>
       <ul className="flex flex-col gap-4">
         {visible.map((item, index) => (
           <li key={`${item.href}-${index}`}>
@@ -87,7 +89,9 @@ function ListenNext({
                 <span className="size-16 shrink-0 bg-[#E4E6EA]" aria-hidden="true" />
               )}
               <span className="flex min-w-0 flex-col gap-1">
-                <span className="font-sans text-[11px] leading-4 font-normal text-[#696969]">{item.meta}</span>
+                <span className="font-sans text-[11px] leading-4 font-normal text-[#696969]">
+                  {item.meta}
+                </span>
                 <span className="line-clamp-2 font-sans text-sm leading-5 font-medium tracking-[-0.16px] text-[#171616]">
                   {item.title}
                 </span>
@@ -104,7 +108,13 @@ function ListenNext({
         >
           {loadMoreLabel}
           <svg viewBox="0 0 20 20" className="size-4" fill="none" aria-hidden="true">
-            <path d="M5 8.5 10 13.5 15 8.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+            <path
+              d="M5 8.5 10 13.5 15 8.5"
+              stroke="currentColor"
+              strokeWidth="1.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
         </button>
       ) : null}
@@ -137,7 +147,9 @@ export function PodcastPage({ content }: { content: PodcastPageContent }) {
         <h1 className="mt-4 font-sans text-[2rem] leading-10 font-normal tracking-[-0.5px] text-[#171616] xl:text-[40px] xl:leading-[48px]">
           {content.title}
         </h1>
-        <p className="mt-3 font-sans text-sm leading-5 font-normal text-[#696969]">{content.meta}</p>
+        <p className="mt-3 font-sans text-sm leading-5 font-normal text-[#696969]">
+          {content.meta}
+        </p>
 
         <div className="mt-8 grid items-start gap-10 xl:mt-8 xl:grid-cols-[minmax(0,1fr)_340px] xl:gap-8">
           <div className="flex min-w-0 flex-col gap-10">
@@ -149,7 +161,6 @@ export function PodcastPage({ content }: { content: PodcastPageContent }) {
                 imageSrc={content.coverSrc}
                 imageAlt={content.coverAlt}
                 mediaUrl={content.mediaUrl}
-                transcript={content.transcript}
               />
               <EpisodeBrief
                 title={content.title}

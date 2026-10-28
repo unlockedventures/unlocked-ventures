@@ -5,6 +5,7 @@ import { seoFields } from '@/admin/editor-fields'
 import { validateEpisodeThumbnail } from '@/lib/episode-thumbnail'
 import { podcastEpisodePath, podcastSlugFromHref, slugifyPodcastTitle } from '@/lib/podcast-slug'
 import { applyAiContentToEpisode } from '@/pipeline/apply-ai-content'
+import { formatAudioDuration } from '@/pipeline/audio-duration'
 import { episodeAiEndpoints } from '@/pipeline/episode-ai-endpoints'
 import { reconcileVideoResources } from '@/pipeline/video-resources'
 import { sourceRevision } from '@/pipeline/source-summary'
@@ -71,29 +72,58 @@ export const PodcastEpisodes: CollectionConfig = {
           throw new APIError('This generation lease expired. Retry the action.', 409)
         }
         // Job bookkeeping is server-owned even though editors can edit the summary text.
-        for (const key of ['sourceSummaryRevision', 'sourceSummaryStatus', 'sourceSummaryMessage',
-          'currentSourceRevision', 'generationLock', 'generationLockExpiresAt'] as const) {
+        for (const key of [
+          'sourceSummaryRevision',
+          'sourceSummaryStatus',
+          'sourceSummaryMessage',
+          'currentSourceRevision',
+          'generationLock',
+          'generationLockExpiresAt',
+        ] as const) {
           if (!context?.sourceSummaryUpdate) data[key] = originalDoc?.[key] ?? null
         }
-        if (!context?.sourceSummaryUpdate && originalDoc?.generationLock &&
-            data.sourceSummary !== undefined && data.sourceSummary !== originalDoc.sourceSummary) {
-          throw new APIError('Wait for episode generation to finish before editing the source summary.', 409)
+        if (!context?.audioPreviewUpdate) {
+          data.pendingAudio = originalDoc?.pendingAudio ?? null
+          data.pendingAudioUrl = originalDoc?.pendingAudioUrl ?? null
+        }
+        if (
+          !context?.sourceSummaryUpdate &&
+          originalDoc?.generationLock &&
+          data.sourceSummary !== undefined &&
+          data.sourceSummary !== originalDoc.sourceSummary
+        ) {
+          throw new APIError(
+            'Wait for episode generation to finish before editing the source summary.',
+            409,
+          )
         }
         if (Array.isArray(data.videoLinks) && !context?.transcriptionUpdate) {
           data.videoLinks = reconcileVideoResources(data.videoLinks, originalDoc?.videoLinks ?? [])
         }
         data.currentSourceRevision = await sourceRevision({
           videoLinks: data.videoLinks ?? originalDoc?.videoLinks,
-          sourceTranscript: data.sourceTranscript !== undefined ? data.sourceTranscript : originalDoc?.sourceTranscript,
+          sourceTranscript:
+            data.sourceTranscript !== undefined
+              ? data.sourceTranscript
+              : originalDoc?.sourceTranscript,
         })
-        if (context?.expectedSourceRevision && context.expectedSourceRevision !== data.currentSourceRevision) {
-          throw new APIError('Sources changed during generation. Generate a current source summary and retry.', 409)
+        if (
+          context?.expectedSourceRevision &&
+          context.expectedSourceRevision !== data.currentSourceRevision
+        ) {
+          throw new APIError(
+            'Sources changed during generation. Generate a current source summary and retry.',
+            409,
+          )
         }
-        if (originalDoc?.currentSourceRevision &&
-            originalDoc.currentSourceRevision !== data.currentSourceRevision &&
-            data.sourceSummaryStatus !== 'processing') {
+        if (
+          originalDoc?.currentSourceRevision &&
+          originalDoc.currentSourceRevision !== data.currentSourceRevision &&
+          data.sourceSummaryStatus !== 'processing'
+        ) {
           data.sourceSummaryStatus = 'idle'
-          data.sourceSummaryMessage = 'Sources changed. Generate a current source summary before creating a podcast.'
+          data.sourceSummaryMessage =
+            'Sources changed. Generate a current source summary before creating a podcast.'
         }
         if (!data.episodeStatus) {
           data.episodeStatus =
@@ -165,9 +195,14 @@ export const PodcastEpisodes: CollectionConfig = {
                 overrideAccess: true,
               })
               if (typeof audioDoc?.url === 'string' && audioDoc.url) data.mediaUrl = audioDoc.url
+              data.meta = formatAudioDuration(audioDoc.durationSeconds)
             } catch {
               // leave mediaUrl unchanged if lookup fails
             }
+          }
+          if (audioId == null) {
+            data.mediaUrl = null
+            data.meta = '—'
           }
         }
 
@@ -411,13 +446,20 @@ export const PodcastEpisodes: CollectionConfig = {
         {
           name: 'generateSourceSummary',
           type: 'ui',
-          admin: { components: { Field: '@/components/admin/generate-source-summary-field#GenerateSourceSummaryField' } },
+          admin: {
+            components: {
+              Field: '@/components/admin/generate-source-summary-field#GenerateSourceSummaryField',
+            },
+          },
         },
         {
           name: 'sourceSummary',
           type: 'textarea',
           label: 'Combined source summary',
-          admin: { description: 'Editable summary of every current video transcript. Podcast generation uses this text, including your edits.' },
+          admin: {
+            description:
+              'Editable summary of every current video transcript. Podcast generation uses this text, including your edits.',
+          },
         },
       ],
     },
@@ -426,11 +468,16 @@ export const PodcastEpisodes: CollectionConfig = {
     { name: 'generationLock', type: 'text', admin: { hidden: true } },
     { name: 'generationLockExpiresAt', type: 'date', admin: { hidden: true } },
     {
-      name: 'sourceSummaryStatus', type: 'text', defaultValue: 'idle', label: 'Source summary job',
+      name: 'sourceSummaryStatus',
+      type: 'text',
+      defaultValue: 'idle',
+      label: 'Source summary job',
       admin: { position: 'sidebar', readOnly: true, condition: isAiMode },
     },
     {
-      name: 'sourceSummaryMessage', type: 'text', label: 'Source summary detail',
+      name: 'sourceSummaryMessage',
+      type: 'text',
+      label: 'Source summary detail',
       admin: { position: 'sidebar', readOnly: true, condition: isAiMode },
     },
     {
@@ -484,7 +531,8 @@ export const PodcastEpisodes: CollectionConfig = {
           type: 'textarea',
           label: 'Summary',
           admin: {
-            description: 'Main About text. Filled by AI script generation when using Create with AI.',
+            description:
+              'Main About text. Filled by AI script generation when using Create with AI.',
           },
         },
         {
@@ -545,17 +593,25 @@ export const PodcastEpisodes: CollectionConfig = {
         {
           name: 'hostVoiceId',
           type: 'text',
-          label: 'Host ElevenLabs voice ID (required for audio generation)',
+          label: 'Host Kokoro voice (required for audio generation)',
           admin: {
-            description: 'Required to generate podcast audio. Optional when saving a draft.',
+            description:
+              'Choose a voice reported by the self-hosted Kokoro service. Optional when saving a draft.',
+            components: {
+              Field: '@/components/admin/kokoro-voice-field#KokoroVoiceField',
+            },
           },
         },
         {
           name: 'guestVoiceId',
           type: 'text',
-          label: 'Guest ElevenLabs voice ID (required for audio generation)',
+          label: 'Guest Kokoro voice (required for audio generation)',
           admin: {
-            description: 'Required to generate podcast audio. Optional when saving a draft.',
+            description:
+              'Choose a different voice reported by the self-hosted Kokoro service. Optional when saving a draft.',
+            components: {
+              Field: '@/components/admin/kokoro-voice-field#KokoroVoiceField',
+            },
           },
         },
         {
@@ -700,6 +756,17 @@ export const PodcastEpisodes: CollectionConfig = {
       },
     },
     {
+      name: 'pendingAudio',
+      type: 'relationship',
+      relationTo: 'podcast-audio',
+      admin: { hidden: true, readOnly: true },
+    },
+    {
+      name: 'pendingAudioUrl',
+      type: 'text',
+      admin: { hidden: true, readOnly: true },
+    },
+    {
       name: 'excerpt',
       type: 'textarea',
       label: 'Short summary',
@@ -836,7 +903,9 @@ export const PodcastEpisodes: CollectionConfig = {
           type: 'text',
           label: 'Duration',
           admin: {
-            description: 'Episode length, for example 14:22. Also used on cards and listings.',
+            readOnly: true,
+            description:
+              'Calculated automatically from generated or uploaded audio and used on cards and listings.',
           },
         },
       ],

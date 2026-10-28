@@ -2,6 +2,8 @@ import path from 'path'
 import type { CollectionConfig } from 'payload'
 import { fileURLToPath } from 'url'
 
+import { readAudioDuration } from '@/pipeline/audio-duration'
+
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
 /**
@@ -23,12 +25,42 @@ export const PodcastAudio: CollectionConfig = {
   access: {
     read: () => true,
   },
+  hooks: {
+    beforeChange: [
+      async ({ context, data, req }) => {
+        if (
+          context?.generatedAudioDuration === true &&
+          typeof data.durationSeconds === 'number' &&
+          Number.isFinite(data.durationSeconds) &&
+          data.durationSeconds > 0
+        ) {
+          return data
+        }
+        const file = req.file
+        if (!file?.data?.length) return data
+        const duration = await readAudioDuration({
+          buffer: file.data,
+          mimeType: file.mimetype,
+          size: file.size,
+        })
+        if (duration) data.durationSeconds = duration
+        else req.payload.logger.warn('Could not read podcast audio duration')
+        return data
+      },
+    ],
+  },
   fields: [
     {
       name: 'alt',
       type: 'text',
       label: 'Description',
       admin: { description: 'Optional label for this audio file.' },
+    },
+    {
+      name: 'durationSeconds',
+      type: 'number',
+      label: 'Duration in seconds',
+      admin: { hidden: true, readOnly: true },
     },
   ],
   upload: {

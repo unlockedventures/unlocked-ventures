@@ -43,7 +43,7 @@ export function audioButtonState(args: {
   if (!args.hasHostVoiceId || !args.hasGuestVoiceId) {
     return {
       disabled: true,
-      hint: 'Paste ElevenLabs voice IDs for the host and guest before generating audio.',
+      hint: 'Select Kokoro voices for the host and guest before generating audio.',
     }
   }
   if (args.pending || args.audioStatus === 'processing') {

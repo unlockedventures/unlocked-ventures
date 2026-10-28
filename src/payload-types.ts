@@ -422,6 +422,7 @@ export interface PodcastAudio {
    * Optional label for this audio file.
    */
   alt?: string | null;
+  durationSeconds?: number | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -563,11 +564,11 @@ export interface PodcastEpisode {
    */
   about?: string | null;
   /**
-   * Required to generate podcast audio. Optional when saving a draft.
+   * Choose a voice reported by the self-hosted Kokoro service. Optional when saving a draft.
    */
   hostVoiceId?: string | null;
   /**
-   * Required to generate podcast audio. Optional when saving a draft.
+   * Choose a different voice reported by the self-hosted Kokoro service. Optional when saving a draft.
    */
   guestVoiceId?: string | null;
   status?: ('idle' | 'processing' | 'ready' | 'error') | null;
@@ -592,6 +593,8 @@ export interface PodcastEpisode {
    * Paste an audio file URL, or a YouTube / Vimeo link.
    */
   mediaUrl?: string | null;
+  pendingAudio?: (number | null) | PodcastAudio;
+  pendingAudioUrl?: string | null;
   /**
    * Shown on the podcast list and cards.
    */
@@ -654,7 +657,7 @@ export interface PodcastEpisode {
    */
   topic?: string | null;
   /**
-   * Episode length, for example 14:22. Also used on cards and listings.
+   * Calculated automatically from generated or uploaded audio and used on cards and listings.
    */
   meta?: string | null;
   /**
@@ -1174,6 +1177,7 @@ export interface NewsPostsSelect<T extends boolean = true> {
  */
 export interface PodcastAudioSelect<T extends boolean = true> {
   alt?: T;
+  durationSeconds?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1269,6 +1273,8 @@ export interface PodcastEpisodesSelect<T extends boolean = true> {
   audioSource?: T;
   audio?: T;
   mediaUrl?: T;
+  pendingAudio?: T;
+  pendingAudioUrl?: T;
   excerpt?: T;
   stats?: T;
   heroFeatured?: T;

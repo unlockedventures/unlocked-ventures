@@ -1,5 +1,6 @@
 import type { Payload, PayloadRequest } from 'payload'
 
+import { formatAudioDuration } from '@/pipeline/audio-duration'
 import {
   generatePodcastAudioFromScript,
   parseStoredScriptJson,
@@ -19,6 +20,7 @@ export type AudioPipelineDoc = {
   status?: string | null
   scriptStatus?: string | null
   audioStatus?: AudioStatus | null
+  pendingAudio?: number | { id?: number } | null
 }
 
 export type AudioPipelinePatch = {
@@ -26,6 +28,8 @@ export type AudioPipelinePatch = {
   guestVoiceId?: string
   audioStatus: AudioStatus
   audioStatusMessage: string
+  pendingAudio?: number | null
+  pendingAudioUrl?: string | null
 }
 
 export type AudioRunResult = {
@@ -35,8 +39,7 @@ export type AudioRunResult = {
 
 function relationId(value: number | { id?: number } | null | undefined): number | null {
   if (typeof value === 'number') return value
-  if (value && typeof value.id === 'number') return value.id
-  return null
+  return value && typeof value.id === 'number' ? value.id : null
 }
 
 export async function handleGenerateAudioRequest(args: {
@@ -50,14 +53,18 @@ export async function handleGenerateAudioRequest(args: {
     hostVoiceId: string
     guestVoiceId: string
     title: string
+    onProgress: (completedTurns: number, totalTurns: number) => Promise<void>
+    signal?: AbortSignal
   }) => Promise<GeneratePodcastAudioResult>
-  attachToEpisode: (args: {
-    episodeId: number | null
+  stageAudio: (args: {
     buffer: Buffer
     filename: string
     mimeType: string
     title: string
-  }) => Promise<number | null>
+    durationSeconds: number
+  }) => Promise<{ audioId: number; mediaUrl: string | null }>
+  discardAudio?: (audioId: number) => Promise<void>
+  signal?: AbortSignal
 }): Promise<AudioRunResult> {
   if (!args.user) return { status: 401, body: { error: 'Unauthorized' } }
   if (!args.doc) return { status: 404, body: { error: 'Pipeline document not found.' } }
@@ -110,7 +117,7 @@ export async function handleGenerateAudioRequest(args: {
   if (!hostVoiceId || !guestVoiceId) {
     return {
       status: 400,
-      body: { error: 'Paste ElevenLabs voice IDs for the host and guest before generating audio.' },
+      body: { error: 'Select Kokoro voices for the host and guest before generating audio.' },
     }
   }
 
@@ -123,7 +130,20 @@ export async function handleGenerateAudioRequest(args: {
     audioStatusMessage: 'Generating host and guest audio…',
   })
 
-  const result = await args.generate({ scriptJson, hostVoiceId, guestVoiceId, title })
+  const result = await args.generate({
+    scriptJson,
+    hostVoiceId,
+    guestVoiceId,
+    title,
+    signal: args.signal,
+    onProgress: async (completedTurns, totalTurns) => {
+      const percent = Math.round((completedTurns / totalTurns) * 100)
+      await args.save({
+        audioStatus: 'processing',
+        audioStatusMessage: `Generating audio: ${completedTurns} of ${totalTurns} turns (${percent}%).`,
+      })
+    },
+  })
   if (!result.ok) {
     await args.save({
       audioStatus: 'error',
@@ -133,13 +153,27 @@ export async function handleGenerateAudioRequest(args: {
   }
 
   try {
-    await args.attachToEpisode({
-      episodeId: relationId(args.doc.episode),
+    const staged = await args.stageAudio({
       buffer: result.buffer,
       filename: result.filename,
       mimeType: result.mimeType,
       title: title || 'Podcast',
+      durationSeconds: result.durationSeconds,
     })
+    await args.save({
+      audioStatus: 'ready',
+      audioStatusMessage: `Generated ${result.turnCount} dialogue turns. Preview it, then save to publish.`,
+      pendingAudio: staged.audioId,
+      pendingAudioUrl: staged.mediaUrl,
+    })
+    const previousPreviewId = relationId(args.doc.pendingAudio)
+    if (previousPreviewId != null && previousPreviewId !== staged.audioId) {
+      try {
+        await args.discardAudio?.(previousPreviewId)
+      } catch {
+        // The new preview remains valid; orphan cleanup can be retried operationally.
+      }
+    }
   } catch (error) {
     const message =
       error && typeof error === 'object' && 'message' in error && typeof error.message === 'string'
@@ -152,26 +186,25 @@ export async function handleGenerateAudioRequest(args: {
     return { status: 200, body: { status: 'error' } }
   }
 
-  await args.save({
-    audioStatus: 'ready',
-    audioStatusMessage: `Generated ${result.turnCount} dialogue turns.`,
-  })
   return { status: 200, body: { status: 'ready' } }
 }
 
-/** Upload WAV to podcast-audio and point the linked episode at it. */
-export async function attachGeneratedAudioToEpisode(args: {
+/** Upload a generated WAV as a preview without changing the public episode audio. */
+export async function createGeneratedAudioPreview(args: {
   payload: Payload
   req?: PayloadRequest
-  episodeId: number | null
   buffer: Buffer
   filename: string
   mimeType: string
   title: string
-}): Promise<number | null> {
+  durationSeconds: number
+}): Promise<{ audioId: number; mediaUrl: string | null }> {
   const audioDoc = await args.payload.create({
     collection: 'podcast-audio',
-    data: { alt: `${args.title} — host & guest` },
+    data: {
+      alt: `${args.title} — host & guest`,
+      durationSeconds: args.durationSeconds,
+    },
     file: {
       data: args.buffer,
       mimetype: args.mimeType,
@@ -181,24 +214,48 @@ export async function attachGeneratedAudioToEpisode(args: {
     depth: 0,
     overrideAccess: !args.req?.user,
     req: args.req,
+    context: { generatedAudioDuration: true },
   })
 
   const audioId = typeof audioDoc.id === 'number' ? audioDoc.id : Number(audioDoc.id)
-  const mediaUrl = typeof audioDoc.url === 'string' ? audioDoc.url : undefined
-  if (args.episodeId == null) return audioId
+  const mediaUrl = typeof audioDoc.url === 'string' ? audioDoc.url : null
+  return { audioId, mediaUrl }
+}
 
+/** Commit a generated preview to the episode. This is the public-audio boundary. */
+export async function saveGeneratedAudioToEpisode(args: {
+  payload: Payload
+  req: PayloadRequest
+  episodeId: number | string
+  audioId: number
+}): Promise<{ mediaUrl: string; duration: string }> {
+  const audioDoc = await args.payload.findByID({
+    collection: 'podcast-audio',
+    id: args.audioId,
+    depth: 0,
+    req: args.req,
+    overrideAccess: true,
+  })
+  const mediaUrl = typeof audioDoc.url === 'string' ? audioDoc.url : ''
+  if (!mediaUrl) throw new Error('Generated audio URL is unavailable.')
+  const duration = formatAudioDuration(audioDoc.durationSeconds)
   await args.payload.update({
     collection: 'podcast-episodes',
     id: args.episodeId,
     data: {
       audioSource: 'upload',
-      audio: audioId,
-      ...(mediaUrl ? { mediaUrl } : {}),
+      audio: args.audioId,
+      mediaUrl,
+      meta: duration,
+      pendingAudio: null,
+      pendingAudioUrl: null,
+      audioStatus: 'ready',
+      audioStatusMessage: 'Generated audio saved. The public podcast now uses this audio.',
     },
     depth: 0,
-    overrideAccess: !args.req?.user,
+    overrideAccess: false,
     req: args.req,
+    context: { skipAiContentSync: true, audioPreviewUpdate: true },
   })
-
-  return audioId
+  return { mediaUrl, duration }
 }

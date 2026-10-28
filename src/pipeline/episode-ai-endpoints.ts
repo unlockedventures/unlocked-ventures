@@ -3,18 +3,25 @@ import { hasPermission } from '@/access/rbac'
 import type { VideoResource } from '@/pipeline/video-resources'
 
 import { generatePodcastAudioFromScript } from '@/pipeline/generate-audio'
+import { listKokoroVoices } from '@/pipeline/kokoro'
 import { generateScriptFromTranscript } from '@/pipeline/generate-script'
 import { requestTranscript } from '@/pipeline/request-transcript'
 import {
-  attachGeneratedAudioToEpisode,
+  createGeneratedAudioPreview,
   handleGenerateAudioRequest,
+  saveGeneratedAudioToEpisode,
   type AudioPipelineDoc,
 } from '@/pipeline/run-generate-audio'
 import { handleGenerateScriptRequest, type ScriptPipelineDoc } from '@/pipeline/run-generate-script'
 import { handleTranscribeRequest, type PipelineDoc } from '@/pipeline/run-transcription'
 import { generateSourceSummary } from '@/pipeline/generate-source-summary'
 import { withEpisodeGenerationLock } from '@/pipeline/episode-generation-lock'
-import { hasCurrentSourceSummary, sourceRevision, sourceSummaryInput, type SourceSummaryDoc } from '@/pipeline/source-summary'
+import {
+  hasCurrentSourceSummary,
+  sourceRevision,
+  sourceSummaryInput,
+  type SourceSummaryDoc,
+} from '@/pipeline/source-summary'
 
 type EpisodeAiDoc = SourceSummaryDoc & {
   id: number | string
@@ -31,7 +38,13 @@ type EpisodeAiDoc = SourceSummaryDoc & {
   statusMessage?: string | null
   scriptStatus?: string | null
   audioStatus?: string | null
+  audio?: number | null
+  mediaUrl?: string | null
+  pendingAudio?: number | null
+  pendingAudioUrl?: string | null
 }
+
+const activeAudioGenerations = new Map<string, AbortController>()
 
 async function loadEpisode(req: PayloadRequest, id: number | string) {
   return req.payload
@@ -41,6 +54,31 @@ async function loadEpisode(req: PayloadRequest, id: number | string) {
 
 /** AI transcript / script / audio endpoints — stored on podcast-episodes. */
 const episodeGenerationEndpoints: Endpoint[] = [
+  {
+    path: '/kokoro-voices',
+    method: 'get',
+    handler: async (req) => {
+      if (!req.user) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+      if (!(await hasPermission(req, 'podcast-episodes', 'read'))) {
+        return Response.json({ error: 'Permission denied.' }, { status: 403 })
+      }
+      try {
+        const voices = await listKokoroVoices({
+          baseUrl: process.env.KOKORO_BASE_URL?.trim() ?? '',
+          timeoutMs: Number(process.env.KOKORO_TIMEOUT_MS || 10_000),
+        })
+        return Response.json({
+          voices: voices.map((voice) => ({ value: voice.voiceId, label: voice.name })),
+        })
+      } catch (error) {
+        req.payload.logger.error({ err: error }, 'kokoro voice discovery failed')
+        return Response.json(
+          { error: 'Could not load Kokoro voices. Check the Kokoro service and try again.' },
+          { status: 502 },
+        )
+      }
+    },
+  },
   {
     path: '/generate-source-summary',
     method: 'post',
@@ -54,24 +92,58 @@ const episodeGenerationEndpoints: Endpoint[] = [
         return Response.json({ error: input.error }, { status: 400 })
       }
       const revision = await sourceRevision(doc)
-      const save = async (data: Record<string, unknown>) => req.payload.update({
-        collection: 'podcast-episodes', id, data, req, depth: 0, overrideAccess: false,
-        context: { skipAiContentSync: true, sourceSummaryUpdate: true,
-          expectedSourceRevision: 'sourceSummaryRevision' in data ? revision : undefined },
+      const save = async (data: Record<string, unknown>) =>
+        req.payload.update({
+          collection: 'podcast-episodes',
+          id,
+          data,
+          req,
+          depth: 0,
+          overrideAccess: false,
+          context: {
+            skipAiContentSync: true,
+            sourceSummaryUpdate: true,
+            expectedSourceRevision: 'sourceSummaryRevision' in data ? revision : undefined,
+          },
+        })
+      await save({
+        sourceSummaryStatus: 'processing',
+        sourceSummaryMessage: 'Summarizing all current video transcripts…',
       })
-      await save({ sourceSummaryStatus: 'processing', sourceSummaryMessage: 'Summarizing all current video transcripts…' })
       try {
         const sourceSummary = await generateSourceSummary(input.transcript)
         const current = await loadEpisode(req, id)
-        if (!current || await sourceRevision(current) !== revision || sourceSummaryInput(current).error) {
-          await save({ sourceSummaryStatus: 'error', sourceSummaryMessage: 'Sources changed during generation. Generate the source summary again.' })
-          return Response.json({ error: 'Sources changed. Generate the source summary again.' }, { status: 409 })
+        if (
+          !current ||
+          (await sourceRevision(current)) !== revision ||
+          sourceSummaryInput(current).error
+        ) {
+          await save({
+            sourceSummaryStatus: 'error',
+            sourceSummaryMessage:
+              'Sources changed during generation. Generate the source summary again.',
+          })
+          return Response.json(
+            { error: 'Sources changed. Generate the source summary again.' },
+            { status: 409 },
+          )
         }
-        await save({ sourceSummary, sourceSummaryRevision: revision, sourceSummaryStatus: 'ready', sourceSummaryMessage: '' })
-        return Response.json({ sourceSummary, sourceSummaryRevision: revision, currentSourceRevision: revision, sourceSummaryStatus: 'ready' })
+        await save({
+          sourceSummary,
+          sourceSummaryRevision: revision,
+          sourceSummaryStatus: 'ready',
+          sourceSummaryMessage: '',
+        })
+        return Response.json({
+          sourceSummary,
+          sourceSummaryRevision: revision,
+          currentSourceRevision: revision,
+          sourceSummaryStatus: 'ready',
+        })
       } catch {
         // Provider exceptions can contain source text or credentials; expose only a fixed message.
-        const error = 'Could not generate the source summary. Check Gemini configuration and try again.'
+        const error =
+          'Could not generate the source summary. Check Gemini configuration and try again.'
         await save({ sourceSummaryStatus: 'error', sourceSummaryMessage: error })
         return Response.json({ error }, { status: 502 })
       }
@@ -204,18 +276,32 @@ const episodeGenerationEndpoints: Endpoint[] = [
 
       const doc = await loadEpisode(req, id)
 
-      if (!doc || !hasCurrentSourceSummary({ ...doc, currentSourceRevision: await sourceRevision(doc) }) ||
-          body?.sourceSummaryRevision !== doc.sourceSummaryRevision) {
-        return Response.json({ error: 'Generate a current source summary before creating a podcast script.' }, { status: 400 })
+      if (
+        !doc ||
+        !hasCurrentSourceSummary({ ...doc, currentSourceRevision: await sourceRevision(doc) }) ||
+        body?.sourceSummaryRevision !== doc.sourceSummaryRevision
+      ) {
+        return Response.json(
+          { error: 'Generate a current source summary before creating a podcast script.' },
+          { status: 400 },
+        )
       }
-      const sourceSummary = typeof body.sourceSummary === 'string' ? body.sourceSummary.trim() : ''
+      const sourceSummary = typeof body?.sourceSummary === 'string' ? body.sourceSummary.trim() : ''
       if (!sourceSummary) {
-        return Response.json({ error: 'Add a nonblank source summary before creating a podcast script.' }, { status: 400 })
+        return Response.json(
+          { error: 'Add a nonblank source summary before creating a podcast script.' },
+          { status: 400 },
+        )
       }
       const revision = doc.sourceSummaryRevision
       await req.payload.update({
-        collection: 'podcast-episodes', id, data: { sourceSummary }, depth: 0, req,
-        overrideAccess: false, context: { skipAiContentSync: true, sourceSummaryUpdate: true },
+        collection: 'podcast-episodes',
+        id,
+        data: { sourceSummary },
+        depth: 0,
+        req,
+        overrideAccess: false,
+        context: { skipAiContentSync: true, sourceSummaryUpdate: true },
       })
 
       const result = await handleGenerateScriptRequest({
@@ -235,12 +321,22 @@ const episodeGenerationEndpoints: Endpoint[] = [
         save: async (data) => {
           if (data.scriptStatus === 'ready') {
             const current = await loadEpisode(req, id)
-            if (!current || await sourceRevision(current) !== revision ||
-                current.sourceSummary?.trim() !== sourceSummary) {
+            if (
+              !current ||
+              (await sourceRevision(current)) !== revision ||
+              current.sourceSummary?.trim() !== sourceSummary
+            ) {
               await req.payload.update({
-                collection: 'podcast-episodes', id, data: {
-                  scriptStatus: 'error', scriptStatusMessage: 'Sources changed during generation. Generate a current source summary and retry.',
-                }, req, overrideAccess: false, context: { skipAiContentSync: true },
+                collection: 'podcast-episodes',
+                id,
+                data: {
+                  scriptStatus: 'error',
+                  scriptStatusMessage:
+                    'Sources changed during generation. Generate a current source summary and retry.',
+                },
+                req,
+                overrideAccess: false,
+                context: { skipAiContentSync: true },
               })
               throw new Error('Sources changed during podcast generation.')
             }
@@ -252,8 +348,10 @@ const episodeGenerationEndpoints: Endpoint[] = [
             depth: 0,
             req,
             overrideAccess: false,
-            context: { skipAiContentSync: true,
-              expectedSourceRevision: data.scriptStatus === 'ready' ? revision : undefined },
+            context: {
+              skipAiContentSync: true,
+              expectedSourceRevision: data.scriptStatus === 'ready' ? revision : undefined,
+            },
           })
         },
         generate: ({ transcript, hostGender, guestGender }) =>
@@ -271,6 +369,76 @@ const episodeGenerationEndpoints: Endpoint[] = [
     },
   },
   {
+    path: '/stop-audio-generation',
+    method: 'post',
+    handler: async (req) => {
+      if (!req.user) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+      if (
+        !(await hasPermission(req, 'podcast-episodes', 'update')) ||
+        !(await hasPermission(req, 'podcast-episodes', 'read'))
+      )
+        return Response.json({ error: 'Permission denied.' }, { status: 403 })
+      const body = (req.json ? await req.json().catch(() => null) : null) as {
+        id?: number | string
+      } | null
+      if (body?.id == null || body.id === '') {
+        return Response.json({ error: 'Episode not found.' }, { status: 404 })
+      }
+      const controller = activeAudioGenerations.get(String(body.id))
+      if (!controller) {
+        return Response.json({ error: 'No active audio generation was found.' }, { status: 409 })
+      }
+      controller.abort()
+      return Response.json({ status: 'stopping' })
+    },
+  },
+  {
+    path: '/save-generated-audio',
+    method: 'post',
+    handler: async (req) => {
+      if (!req.user) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+      if (
+        !(await hasPermission(req, 'podcast-episodes', 'update')) ||
+        !(await hasPermission(req, 'podcast-episodes', 'read'))
+      )
+        return Response.json({ error: 'Permission denied.' }, { status: 403 })
+
+      const body = (req.json ? await req.json().catch(() => null) : null) as {
+        id?: number | string
+      } | null
+      if (body?.id == null || body.id === '') {
+        return Response.json({ error: 'Episode not found.' }, { status: 404 })
+      }
+      const doc = await loadEpisode(req, body.id)
+      const pendingAudioId = typeof doc?.pendingAudio === 'number' ? doc.pendingAudio : null
+      if (!doc || pendingAudioId == null) {
+        return Response.json({ error: 'Generate audio before saving it.' }, { status: 409 })
+      }
+      try {
+        const saved = await saveGeneratedAudioToEpisode({
+          payload: req.payload,
+          req,
+          episodeId: body.id,
+          audioId: pendingAudioId,
+        })
+        return Response.json({
+          status: 'ready',
+          audioStatus: 'ready',
+          mediaUrl: saved.mediaUrl,
+          audio: pendingAudioId,
+          audioSource: 'upload',
+          meta: saved.duration,
+          pendingAudio: null,
+          audioStatusMessage: 'Generated audio saved. The public podcast now uses this audio.',
+          pendingAudioUrl: null,
+        })
+      } catch (error) {
+        req.payload.logger.error({ err: error }, 'save-generated-audio failed')
+        return Response.json({ error: 'Could not save generated audio.' }, { status: 500 })
+      }
+    },
+  },
+  {
     path: '/generate-audio',
     method: 'post',
     handler: async (req) => {
@@ -283,6 +451,8 @@ const episodeGenerationEndpoints: Endpoint[] = [
 
       if (!(await hasPermission(req, 'podcast-audio', 'create')))
         return Response.json({ error: 'Audio upload permission required.' }, { status: 403 })
+      let generationKey: string | null = null
+      let controller: AbortController | null = null
       try {
         const body = (req.json ? await req.json().catch(() => null) : null) as {
           id?: number | string
@@ -296,6 +466,10 @@ const episodeGenerationEndpoints: Endpoint[] = [
 
         const doc = await loadEpisode(req, id)
         const episodeId = typeof id === 'number' ? id : Number(id)
+        generationKey = String(id)
+        const requestController = new AbortController()
+        controller = requestController
+        activeAudioGenerations.set(generationKey, requestController)
 
         const result = await handleGenerateAudioRequest({
           user: req.user,
@@ -311,10 +485,12 @@ const episodeGenerationEndpoints: Endpoint[] = [
                 status: doc.status,
                 scriptStatus: doc.scriptStatus,
                 audioStatus: doc.audioStatus as AudioPipelineDoc['audioStatus'],
+                pendingAudio: doc.pendingAudio,
               } satisfies AudioPipelineDoc)
             : null,
           hostVoiceId: body?.hostVoiceId,
           guestVoiceId: body?.guestVoiceId,
+          signal: requestController.signal,
           save: async (data) => {
             await req.payload.update({
               collection: 'podcast-episodes',
@@ -323,28 +499,40 @@ const episodeGenerationEndpoints: Endpoint[] = [
               depth: 0,
               req,
               overrideAccess: false,
-              context: { skipAiContentSync: true },
+              context: { skipAiContentSync: true, audioPreviewUpdate: true },
             })
           },
-          generate: ({ scriptJson, hostVoiceId, guestVoiceId, title }) =>
+          generate: ({ scriptJson, hostVoiceId, guestVoiceId, title, onProgress }) =>
             generatePodcastAudioFromScript({
               scriptJson,
               hostVoiceId,
               guestVoiceId,
               title,
-              apiKey: process.env['ELEVENLABS_API_KEY']?.trim() ?? '',
-              modelId: process.env['ELEVENLABS_MODEL_ID']?.trim() || undefined,
+              baseUrl: process.env.KOKORO_BASE_URL?.trim() ?? '',
+              modelId: process.env.KOKORO_MODEL?.trim() || undefined,
+              speed: Number(process.env.KOKORO_SPEED || 1),
+              timeoutMs: Number(process.env.KOKORO_TIMEOUT_MS || 120_000),
+              onProgress,
+              signal: requestController.signal,
             }),
-          attachToEpisode: ({ episodeId: targetId, buffer, filename, mimeType, title }) =>
-            attachGeneratedAudioToEpisode({
+          stageAudio: ({ buffer, filename, mimeType, title, durationSeconds }) =>
+            createGeneratedAudioPreview({
               payload: req.payload,
               req,
-              episodeId: targetId ?? (Number.isFinite(episodeId) ? episodeId : null),
               buffer,
               filename,
               mimeType,
               title,
+              durationSeconds,
             }),
+          discardAudio: async (audioId) => {
+            await req.payload.delete({
+              collection: 'podcast-audio',
+              id: audioId,
+              req,
+              overrideAccess: true,
+            })
+          },
         })
 
         return Response.json(result.body, { status: result.status })
@@ -358,11 +546,21 @@ const episodeGenerationEndpoints: Endpoint[] = [
             : 'Could not generate podcast audio.'
         req.payload.logger.error({ err: error }, 'generate-audio failed')
         return Response.json({ error: message }, { status: 500 })
+      } finally {
+        if (
+          generationKey &&
+          controller &&
+          activeAudioGenerations.get(generationKey) === controller
+        ) {
+          activeAudioGenerations.delete(generationKey)
+        }
       }
     },
   },
 ]
 
-export const episodeAiEndpoints: Endpoint[] = episodeGenerationEndpoints.map((endpoint) => endpoint.method === 'post'
-  ? { ...endpoint, handler: withEpisodeGenerationLock(endpoint.handler) }
-  : endpoint) as Endpoint[]
+export const episodeAiEndpoints: Endpoint[] = episodeGenerationEndpoints.map((endpoint) =>
+  endpoint.method === 'post' && endpoint.path !== '/stop-audio-generation'
+    ? { ...endpoint, handler: withEpisodeGenerationLock(endpoint.handler) }
+    : endpoint,
+) as Endpoint[]

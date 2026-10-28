@@ -63,7 +63,7 @@ describe('audioButtonState', () => {
       }),
     ).toEqual({
       disabled: true,
-      hint: 'Paste ElevenLabs voice IDs for the host and guest before generating audio.',
+      hint: 'Select Kokoro voices for the host and guest before generating audio.',
     })
   })
 

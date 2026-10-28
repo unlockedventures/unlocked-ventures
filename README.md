@@ -21,31 +21,33 @@ See `package.json` for exact versions and supported runtime engines.
 
 ## Project structure
 
-| Path | Responsibility |
-| --- | --- |
-| `src/payload.config.ts` | Collections, globals, admin views, adapters, seeds, endpoints |
-| `src/app/(frontend)/` | Public pages, layouts, styles, and public API routes |
-| `src/app/(payload)/` | Payload admin and API integration, generated import map |
-| `src/access/` | Shared RBAC policies and permission definitions |
-| `src/collections/` | Portal users, roles, media, awards, news, podcasts, case studies, badges, solutions, logos, contact messages |
-| `src/globals/` | Singleton page/section content, navigation, header, footer, site settings |
-| `src/components/admin/` | Custom dashboard, navigation, login, and editor controls |
-| `src/admin/` | Shared editor guidance and admin organization |
-| `src/components/`, `src/blocks/`, `src/fields/` | Shared UI, content blocks, field definitions |
-| `src/lib/`, `src/hooks/`, `src/stores/` | Helpers, hooks, client state |
-| `src/endpoints/` | Custom Payload endpoints, including dashboard statistics |
-| `src/pipeline/`, `src/studio/` | Podcast generation workflows and studio services |
-| `src/data/` | Content seeds and data backfills |
-| `src/migrations/`, `scripts/ensure-*.sql` | Migrations and additive schema compatibility updates |
-| `src/payload-types.ts` | Generated Payload types |
-| `tests/int/`, `tests/e2e/` | Vitest and Playwright suites |
-| `public/brand/` | Unlocked Ventures brand assets |
+| Path                                            | Responsibility                                                                                               |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `src/payload.config.ts`                         | Collections, globals, admin views, adapters, seeds, endpoints                                                |
+| `src/app/(frontend)/`                           | Public pages, layouts, styles, and public API routes                                                         |
+| `src/app/(payload)/`                            | Payload admin and API integration, generated import map                                                      |
+| `src/access/`                                   | Shared RBAC policies and permission definitions                                                              |
+| `src/collections/`                              | Portal users, roles, media, awards, news, podcasts, case studies, badges, solutions, logos, contact messages |
+| `src/globals/`                                  | Singleton page/section content, navigation, header, footer, site settings                                    |
+| `src/components/admin/`                         | Custom dashboard, navigation, login, and editor controls                                                     |
+| `src/admin/`                                    | Shared editor guidance and admin organization                                                                |
+| `src/components/`, `src/blocks/`, `src/fields/` | Shared UI, content blocks, field definitions                                                                 |
+| `src/lib/`, `src/hooks/`, `src/stores/`         | Helpers, hooks, client state                                                                                 |
+| `src/endpoints/`                                | Custom Payload endpoints, including dashboard statistics                                                     |
+| `src/pipeline/`, `src/studio/`                  | Podcast generation workflows and studio services                                                             |
+| `src/data/`                                     | Content seeds and data backfills                                                                             |
+| `src/migrations/`, `scripts/ensure-*.sql`       | Migrations and additive schema compatibility updates                                                         |
+| `src/payload-types.ts`                          | Generated Payload types                                                                                      |
+| `tests/int/`, `tests/e2e/`                      | Vitest and Playwright suites                                                                                 |
+| `public/brand/`                                 | Unlocked Ventures brand assets                                                                               |
 
 Imports use `@/*` for `src/` and `@payload-config` for the Payload configuration.
 
 ## Run with Docker
 
-Install [Docker](https://docs.docker.com/get-docker/) with Compose. `docker compose up -d` starts PostgreSQL in its own container, then starts the app in the background.
+Install [Docker](https://docs.docker.com/get-docker/) with Compose. `docker compose up -d` starts
+PostgreSQL, the transcription service and the pinned self-hosted Kokoro speech service, then starts
+the app in the background.
 
 ```bash
 git clone https://github.com/BrainStation-23/unlocked-venture.git
@@ -176,27 +178,27 @@ The app listens on port 3000.
 
 ## Scripts
 
-| Command | What it does |
-| --- | --- |
-| `pnpm install` | Install dependencies |
-| `pnpm dev` | Run the schema precheck and start the development server |
-| `pnpm devsafe` | Clear the Next.js cache, then start the development server |
-| `pnpm build` | Build for production |
-| `pnpm start` | Serve the production build |
-| `pnpm lint` | Run ESLint |
-| `pnpm exec tsc --noEmit` | Check TypeScript |
-| `pnpm ensure-schema` | Apply additive schema compatibility updates |
-| `pnpm migrate` | Run Payload migrations |
-| `pnpm generate:types` | Regenerate Payload types after schema changes |
-| `pnpm generate:importmap` | Regenerate the admin component import map |
-| `pnpm seed` | Seed CMS demo content (globals, podcasts, insights, etc.) |
-| `pnpm test:int` | Run Vitest integration/component tests |
-| `pnpm test:e2e` | Run Playwright; starts or reuses the development server |
-| `pnpm test` | Run integration/component tests, then end-to-end tests |
-| `pnpm test:web-vitals` | Generate web performance reports |
-| `pnpm payload` | Run the Payload CLI |
-| `docker compose up -d` | Start the app and its PostgreSQL container in the background |
-| `docker compose exec app pnpm seed` | Seed CMS data inside the running Docker app container |
+| Command                             | What it does                                                 |
+| ----------------------------------- | ------------------------------------------------------------ |
+| `pnpm install`                      | Install dependencies                                         |
+| `pnpm dev`                          | Run the schema precheck and start the development server     |
+| `pnpm devsafe`                      | Clear the Next.js cache, then start the development server   |
+| `pnpm build`                        | Build for production                                         |
+| `pnpm start`                        | Serve the production build                                   |
+| `pnpm lint`                         | Run ESLint                                                   |
+| `pnpm exec tsc --noEmit`            | Check TypeScript                                             |
+| `pnpm ensure-schema`                | Apply additive schema compatibility updates                  |
+| `pnpm migrate`                      | Run Payload migrations                                       |
+| `pnpm generate:types`               | Regenerate Payload types after schema changes                |
+| `pnpm generate:importmap`           | Regenerate the admin component import map                    |
+| `pnpm seed`                         | Seed CMS demo content (globals, podcasts, insights, etc.)    |
+| `pnpm test:int`                     | Run Vitest integration/component tests                       |
+| `pnpm test:e2e`                     | Run Playwright; starts or reuses the development server      |
+| `pnpm test`                         | Run integration/component tests, then end-to-end tests       |
+| `pnpm test:web-vitals`              | Generate web performance reports                             |
+| `pnpm payload`                      | Run the Payload CLI                                          |
+| `docker compose up -d`              | Start the app and its PostgreSQL container in the background |
+| `docker compose exec app pnpm seed` | Seed CMS data inside the running Docker app container        |
 
 Database-backed checks require configured PostgreSQL. End-to-end tests need
 Playwright browsers:
@@ -257,6 +259,38 @@ Normal completion and failure release it; after a crashed worker, it expires
 after one hour. Reload the editor and retry Generate source summary after expiry
 to recover. Source changes are rechecked before accepting generated output.
 Rolling application code back leaves these additive columns and saved text intact.
+
+## Self-hosted podcast audio
+
+AI episode audio is generated by the self-hosted Kokoro service in Docker. The admin loads available
+Kokoro voices from the server, then generates host and guest turns in script order. The application
+joins raw 24 kHz mono PCM with dialogue pauses and writes a preview WAV through the `podcast-audio`
+Payload upload collection. Generation does not replace the public episode audio. Editors listen to
+the preview, regenerate it if needed, and select **Save Generated Audio** to publish that audio to
+the episode. Until then, the public player continues streaming the previously saved audio and never
+uses browser speech synthesis when a transcript is present.
+
+Docker sets `KOKORO_BASE_URL=http://kokoro:8880` and keeps port 8880 private to the Compose network.
+The service image is pinned in `docker-compose.yml`. Outside Compose, set `KOKORO_BASE_URL` to the
+server-reachable Kokoro-FastAPI base URL. Optional `KOKORO_MODEL`, `KOKORO_SPEED`, and
+`KOKORO_TIMEOUT_MS` values are documented in `.env.example`. No ElevenLabs key is required.
+
+Episode Duration is derived from the generated PCM length, including inserted pauses. For manually
+uploaded audio, the server reads duration metadata while the upload buffer is available. The existing
+Duration string remains the value used on cards, listings, and episode details and is read only in
+the editor. Apply `pnpm ensure-schema` or `pnpm migrate` before serving this change against an
+existing database. Migration `20261028_120000_podcast_audio_duration` adds hidden numeric duration
+metadata, and `20261028_150000_podcast_audio_preview` adds the pending-preview relationship without
+changing existing published audio relationships.
+
+Audio remains on local disk for this rollout. A later Payload S3 storage-adapter change can move
+`podcast-audio` objects to S3 while PostgreSQL retains metadata, resolved URLs, and episode
+relationships. The Kokoro pipeline writes through Payload rather than directly to disk or S3.
+
+After startup, open an AI episode, select distinct Host and Guest Kokoro voices, generate audio,
+listen to the preview, then save or regenerate it. If voice loading or generation fails, check
+`docker compose ps kokoro` and
+`docker compose logs kokoro`; saved scripts and previous episode audio are retained.
 
 ## Homepage menu sources
 

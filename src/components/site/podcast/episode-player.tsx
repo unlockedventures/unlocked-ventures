@@ -2,8 +2,6 @@
 
 import { useCallback, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react'
 
-import { useTranscriptTts, type TranscriptTtsLine } from '@/components/site/podcast/use-transcript-tts'
-
 function formatTime(seconds: number) {
   if (!Number.isFinite(seconds) || seconds < 0) return '0:00'
   const total = Math.floor(seconds)
@@ -37,7 +35,11 @@ function unsuitableReason(url: string): string | null {
     if (host.includes('googlevideo.com') || host.includes('youtube.com') || host === 'youtu.be') {
       return 'Use a YouTube watch/share link, not a direct stream URL.'
     }
-    if (host.includes('spotify.com') || host.includes('podcasts.apple.com') || host.includes('music.apple.com')) {
+    if (
+      host.includes('spotify.com') ||
+      host.includes('podcasts.apple.com') ||
+      host.includes('music.apple.com')
+    ) {
       return 'Platform page links cannot be played here. Upload audio or paste a direct file / YouTube / Vimeo URL.'
     }
   } catch {
@@ -60,7 +62,6 @@ export function EpisodePlayer({
   imageSrc,
   imageAlt,
   mediaUrl,
-  transcript,
 }: {
   title: string
   timeLabel: string
@@ -68,8 +69,6 @@ export function EpisodePlayer({
   imageSrc?: string
   imageAlt: string
   mediaUrl?: string
-  /** Demo: browser TTS for Host/Guest lines (additive; media path unchanged when omitted). */
-  transcript?: TranscriptTtsLine[]
 }) {
   const mediaRef = useRef<HTMLMediaElement | null>(null)
   const setMediaRef = useCallback((node: HTMLAudioElement | HTMLVideoElement | null) => {
@@ -83,37 +82,19 @@ export function EpisodePlayer({
   const [embed, setEmbed] = useState<string | null>(null)
   const [scrubbing, setScrubbing] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const transcriptLines = transcript ?? []
-  const tts = useTranscriptTts(transcriptLines)
-  const useTtsDemo = transcriptLines.some((line) => line.text.trim()) && tts.supported
   const source = mediaUrl?.trim() ?? ''
   const kind = source ? fileKind(source) : null
   const blocked = source ? unsuitableReason(source) : null
   const mediaCanPlay = Boolean(source && kind && kind !== 'unsupported')
-  const canPlay = useTtsDemo || mediaCanPlay
-  const uiPlaying = useTtsDemo ? tts.playing : playing
-  const canSeek = Boolean(!useTtsDemo && mediaCanPlay && kind !== 'embed' && duration > 0)
-  const ttsPlayed =
-    tts.lineCount > 0 && tts.playing
-      ? Math.min(100, Math.max(0, ((tts.lineIndex + 1) / tts.lineCount) * 100))
-      : 0
-  const played = useTtsDemo
-    ? ttsPlayed
-    : duration > 0
+  const canPlay = mediaCanPlay
+  const uiPlaying = playing
+  const canSeek = Boolean(mediaCanPlay && kind !== 'embed' && duration > 0)
+  const played =
+    duration > 0
       ? Math.min(100, Math.max(0, (current / duration) * 100))
       : Math.min(100, Math.max(0, progress * 100))
-  const clock = useTtsDemo
-    ? tts.lineCount > 0
-      ? `${Math.min(tts.lineIndex + 1, tts.lineCount)} / ${tts.lineCount}`
-      : timeLabel
-    : duration > 0
-      ? `${formatTime(current)} / ${formatTime(duration)}`
-      : timeLabel
-  const statusMessage = useTtsDemo
-    ? tts.playing
-      ? 'Demo voices: Host & Guest (browser TTS)'
-      : 'Demo: play reads the transcript in two voices'
-    : error || blocked || (!source ? 'No audio linked for this episode.' : null)
+  const clock = duration > 0 ? `${formatTime(current)} / ${formatTime(duration)}` : timeLabel
+  const statusMessage = error || blocked || (!source ? 'No audio linked for this episode.' : null)
 
   function onMediaError() {
     setPlaying(false)
@@ -121,13 +102,6 @@ export function EpisodePlayer({
   }
 
   async function toggle() {
-    // Additive demo path: speak transcript with two browser voices (Host / Guest).
-    if (useTtsDemo) {
-      setError(null)
-      tts.toggle()
-      return
-    }
-
     if (!mediaCanPlay) {
       setError(blocked || 'No playable media for this episode.')
       return
@@ -316,7 +290,12 @@ export function EpisodePlayer({
               {uiPlaying ? (
                 <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
                   <circle cx="16" cy="16" r="15" stroke="white" strokeOpacity="0.7" />
-                  <path d="M12 10.5v11M20 10.5v11" stroke="white" strokeWidth="1.8" strokeLinecap="round" />
+                  <path
+                    d="M12 10.5v11M20 10.5v11"
+                    stroke="white"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                  />
                 </svg>
               ) : (
                 <img src="/podcast/episode/icons/play.svg" alt="" width={32} height={32} />
@@ -325,7 +304,10 @@ export function EpisodePlayer({
             <div className="min-w-0 flex-1">
               <p className="truncate font-sans text-sm leading-5 font-normal">{title}</p>
               {statusMessage ? (
-                <p className="mt-0.5 truncate font-sans text-[11px] leading-4 font-normal text-white/80" role="status">
+                <p
+                  className="mt-0.5 truncate font-sans text-[11px] leading-4 font-normal text-white/80"
+                  role="status"
+                >
                   {statusMessage}
                 </p>
               ) : null}

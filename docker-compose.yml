@@ -36,6 +36,22 @@ services:
       timeout: 5s
       retries: 10
 
+  kokoro:
+    image: ghcr.io/remsky/kokoro-fastapi-cpu:v0.9.0
+    expose:
+      - '8880'
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'python',
+          '-c',
+          'import urllib.request; urllib.request.urlopen("http://127.0.0.1:8880/health")',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
   app:
     image: node:22-bookworm
     working_dir: /app
@@ -52,6 +68,7 @@ services:
       - .env
     environment:
       TRANSCRIBER_URL: http://transcriber:8080
+      KOKORO_BASE_URL: http://kokoro:8880
       # GEMINI_API_KEY comes from env_file (.env). Do not set it here with
       # ${GEMINI_API_KEY:-} — an empty interpolation overrides env_file.
     volumes:
@@ -61,6 +78,8 @@ services:
       postgres:
         condition: service_healthy
       transcriber:
+        condition: service_healthy
+      kokoro:
         condition: service_healthy
 
 volumes:
