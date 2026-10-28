@@ -26,10 +26,11 @@ Use `.env.example` for integration configuration; do not copy credentials into d
 
 ## Working agreement
 
-- Implement requested changes directly. For every new feature, create and maintain the five
-  records under `aidlc/aidlc-docs/units/<feature-slug>/` as defined in the root AGENTS.md.
-  Do not add lifecycle stages or approval gates. Ask only when a material requirement cannot
-  reasonably be resolved from the available context.
+- For every new feature, create and maintain the five records under
+  `aidlc/aidlc-docs/units/<feature-slug>/` and strictly enforce the approval gates defined in
+  `aidlc/aidlc-docs/README.md`. Do not advance, write downstream artifacts, implement, or mark a
+  feature complete before the corresponding explicit user approval. Ask only when a material
+  requirement cannot reasonably be resolved from the available context.
 - Preserve unrelated changes and persisted editor content. Keep diffs focused.
 - Apply SOLID, KISS, DRY and YAGNI proportionately; use existing framework patterns and components.
 - Do not invent tracker keys, team approvers, infrastructure, integration contracts or requirements.
@@ -137,6 +138,22 @@ associations. Production startup does not automatically apply all schema rollout
 - See the root README for rollout migrations, recovery behavior and database smoke-check commands.
 
 ## Verification and delivery
+
+### Mandatory feature approval gates
+
+- **G1 — Requirements analysis:** Present `intent.md` and `requirements.md`. Stop until the user
+  explicitly approves G1. Planning is not authorized by a request to proceed unless G1 is named.
+- **G2 — Planning:** After G1 approval, present `plan.md` and `tasks.md`. Stop until the user
+  explicitly approves G2. Coding is prohibited before that approval.
+- **G3 — Coding:** After G2 approval, implement and verify the feature, then present the code and
+  verification result. Stop until the user explicitly approves G3. Do not mark the feature done.
+- **G4 — Feature status:** After G3 approval, reconcile all five records and propose the final
+  feature status. Stop until the user explicitly approves G4; only then set the intent and tasks to
+  their final completed state.
+
+Record every requested and granted gate in `audit.md`. Approval applies only to the named gate and
+feature. Revisions return to the applicable earlier gate. Never infer approval from silence,
+“continue,” or approval of a different gate.
 
 Choose verification appropriate to the change and follow task-specific instructions. The current
 homepage menu-source preference is no automated tests for that change; generate required outputs

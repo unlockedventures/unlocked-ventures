@@ -2,6 +2,8 @@
 
 Project: Unlocked Ventures
 
+Record every G1–G4 request, approval, rejection, and revision. Never infer a gate approval.
+
 Create this record in `units/<feature-slug>/` when feature work starts. Append factual entries
 throughout implementation and completion; preserve earlier
 entries and add corrections explicitly. This log does not establish approval gates.

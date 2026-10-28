@@ -1,8 +1,24 @@
 # Unlocked Ventures — Supporting Documentation
 
 This directory contains feature records and supporting project documentation. Every new feature
-gets a folder under `units/` when work starts, maintained through completion. These records do not
-introduce lifecycle stages or approval gates. Follow the repository-root working agreement.
+gets a folder under `units/` when work starts, maintained through completion. Every feature must
+pass the four approval gates below. Follow the repository-root working agreement and the more
+specific current user instruction when it explicitly requires these gates.
+
+## Mandatory approval gates
+
+| Gate | Review artifact                                    | Work allowed only after explicit approval                    |
+| ---- | -------------------------------------------------- | ------------------------------------------------------------ |
+| G1   | `intent.md`, `requirements.md`                     | Write the implementation plan and tasks                      |
+| G2   | `plan.md`, `tasks.md`                              | Change application code, schema, tests, or generated outputs |
+| G3   | Implemented code and verification evidence         | Finalize feature status and completion records               |
+| G4   | Reconciled status proposal across all five records | Mark the feature and tasks complete                          |
+
+At each gate, show the relevant artifact summary, identify open issues, ask for approval by gate
+name, and stop. Accept approval only when the user explicitly names or unmistakably approves that
+gate for the current feature. Record the request and decision in `audit.md`. If the user requests a
+revision, update the applicable artifacts and present the same gate again. Never treat “proceed” by
+itself as approval for an unnamed gate.
 
 ## Start here
 

@@ -2,6 +2,9 @@
 
 Project: Unlocked Ventures
 
+Gate: G2 — Planning. Create only after G1 approval. Do not begin coding until the user explicitly
+approves G2.
+
 Create this record in `units/<feature-slug>/` before feature implementation and update it when
 the approach changes. Keep it proportional to the change. This template does not
 require separate approval before implementing authorized work.

@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
-import { generateScriptFromTranscript } from '@/pipeline/generate-script'
-import { handleGenerateScriptRequest, type ScriptPipelinePatch } from '@/pipeline/run-generate-script'
+import { generateScriptFromTranscript, resolveScriptDuration } from '@/pipeline/generate-script'
+import { applyAiContentToEpisode } from '@/pipeline/apply-ai-content'
+import {
+  handleGenerateScriptRequest,
+  type ScriptPipelinePatch,
+} from '@/pipeline/run-generate-script'
 
 const geminiPayload = {
   script: {
@@ -51,6 +55,10 @@ describe('generateScriptFromTranscript', () => {
     expect(result.scriptJson).toContain('podcast_video')
     expect(result.scriptJson).toContain('"gender": "female"')
     expect(result.scriptJson).toContain('"speaker": "host"')
+    expect(applyAiContentToEpisode({ scriptJson: result.scriptJson }).transcript).toEqual([
+      { time: '0:00', speaker: 'Host', text: 'Welcome to the show.' },
+      { time: '0:10', speaker: 'Guest', text: 'Thanks for having me.' },
+    ])
   })
 
   it('fails when the API key is missing', async () => {
@@ -61,6 +69,60 @@ describe('generateScriptFromTranscript', () => {
       guestGender: 'female',
     })
     expect(result).toEqual({ ok: false, error: 'Gemini is not configured.' })
+  })
+
+  it('combines an edited brief with fixed script requirements', async () => {
+    let sentPrompt = ''
+    const result = await generateScriptFromTranscript({
+      transcript: 'Raw transcript text',
+      editorPrompt:
+        'Create a 6-minute conversation for a skeptical executive audience and end with three takeaways.',
+      apiKey: 'key',
+      hostGender: 'male',
+      guestGender: 'female',
+      generate: async ({ prompt }) => {
+        sentPrompt = prompt
+        return JSON.stringify(geminiPayload)
+      },
+    })
+    expect(result.ok).toBe(true)
+    expect(sentPrompt).toContain('skeptical executive audience')
+    expect(sentPrompt).toContain('fixed structural, grounding and safety requirements')
+    expect(sentPrompt).toContain('6 minutes (360 seconds) and 900 spoken words')
+    expect(sentPrompt).toContain('highest-priority creative requirement')
+    expect(sentPrompt).toContain('<source_data>')
+  })
+
+  it('uses a three-minute fallback when the editable prompt has no duration', async () => {
+    let sentPrompt = ''
+    await generateScriptFromTranscript({
+      transcript: 'Raw transcript text',
+      editorPrompt: 'Use a warm, practical tone.',
+      apiKey: 'key',
+      hostGender: 'male',
+      guestGender: 'female',
+      generate: async ({ prompt }) => {
+        sentPrompt = prompt
+        return JSON.stringify(geminiPayload)
+      },
+    })
+    expect(sentPrompt).toContain('3 minutes (180 seconds) and 450 spoken words')
+    expect(sentPrompt).toContain('product fallback of 3 minutes')
+  })
+
+  it('recognizes common explicit duration wording', () => {
+    expect(resolveScriptDuration('Make it 6-minute long')).toEqual({
+      seconds: 360,
+      explicit: true,
+    })
+    expect(resolveScriptDuration('Target 1.5 hours')).toEqual({
+      seconds: 5400,
+      explicit: true,
+    })
+    expect(resolveScriptDuration('No duration requested')).toEqual({
+      seconds: 180,
+      explicit: false,
+    })
   })
 
   it('fails when Gemini returns invalid JSON', async () => {

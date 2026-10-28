@@ -7,6 +7,7 @@ completion. Omit sections that do not apply.
 Do not create approval gates or invent ticket numbers, owners or decisions.
 
 - Status: <draft | active | done>
+- Gate status: <awaiting G1 | G1 approved | awaiting G2 | G2 approved | awaiting G3 | G3 approved | awaiting G4 | G4 approved>
 - Ticket or issue: <link, if available>
 - Owner: <if known>
 

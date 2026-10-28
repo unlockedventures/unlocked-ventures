@@ -136,6 +136,18 @@ export function EpisodePlayer({
     [],
   )
 
+  useEffect(() => {
+    setCurrent(0)
+    setDuration(0)
+    if (kind !== 'audio' && kind !== 'video') return
+    const media = mediaRef.current
+    if (!media) return
+    // Some browsers defer metadata for visually hidden audio until the first interaction.
+    // Explicitly start metadata loading so the measured duration replaces any CMS fallback.
+    media.load()
+    if (media.readyState >= HTMLMediaElement.HAVE_METADATA) syncMediaDuration(media)
+  }, [kind, source])
+
   function showPlaybackFeedback(action: 'play' | 'pause') {
     if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current)
     setPlaybackFeedback(action)

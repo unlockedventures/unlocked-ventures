@@ -2,9 +2,17 @@ import type { Endpoint, PayloadRequest } from 'payload'
 import { hasPermission } from '@/access/rbac'
 import type { VideoResource } from '@/pipeline/video-resources'
 
-import { generatePodcastAudioFromScript } from '@/pipeline/generate-audio'
-import { listKokoroVoices } from '@/pipeline/kokoro'
+import { generatePodcastAudioFromScript, pcmToWav } from '@/pipeline/generate-audio'
+import { listKokoroVoices, synthesizeKokoroSpeech } from '@/pipeline/kokoro'
+import { isVoicePreviewRole, voicePreviewText } from '@/pipeline/kokoro-voice-preview'
 import { generateScriptFromTranscript } from '@/pipeline/generate-script'
+import {
+  generatePodcastScriptPrompt,
+  generateSourceSummaryPrompt,
+} from '@/pipeline/generate-editor-prompts'
+import { podcastScriptPromptRevision } from '@/pipeline/prompt-revision'
+import { validateEditorPrompt } from '@/pipeline/prompt-constraints'
+import { isSpeakerGender } from '@/pipeline/script-schema'
 import { requestTranscript } from '@/pipeline/request-transcript'
 import {
   createGeneratedAudioPreview,
@@ -42,6 +50,10 @@ type EpisodeAiDoc = SourceSummaryDoc & {
   mediaUrl?: string | null
   pendingAudio?: number | null
   pendingAudioUrl?: string | null
+  sourceSummaryPrompt?: string | null
+  sourceSummaryPromptRevision?: string | null
+  scriptPrompt?: string | null
+  scriptPromptRevision?: string | null
 }
 
 const activeAudioGenerations = new Map<string, AbortController>()
@@ -80,10 +92,124 @@ const episodeGenerationEndpoints: Endpoint[] = [
     },
   },
   {
+    path: '/preview-kokoro-voice',
+    method: 'post',
+    handler: async (req) => {
+      if (!req.user) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+      if (
+        !(await hasPermission(req, 'podcast-episodes', 'read')) ||
+        !(await hasPermission(req, 'podcast-episodes', 'update'))
+      ) {
+        return Response.json({ error: 'Permission denied.' }, { status: 403 })
+      }
+      const body = (req.json ? await req.json().catch(() => null) : null) as {
+        voiceId?: unknown
+        role?: unknown
+      } | null
+      const voiceId = typeof body?.voiceId === 'string' ? body.voiceId.trim() : ''
+      if (!voiceId || voiceId.length > 100 || !isVoicePreviewRole(body?.role)) {
+        return Response.json({ error: 'Select a valid Kokoro voice to test.' }, { status: 400 })
+      }
+      const baseUrl = process.env.KOKORO_BASE_URL?.trim() ?? ''
+      const configuredTimeout = Number(process.env.KOKORO_TIMEOUT_MS || 30_000)
+      const timeoutMs = Number.isFinite(configuredTimeout)
+        ? Math.min(Math.max(configuredTimeout, 1_000), 30_000)
+        : 30_000
+      try {
+        const voices = await listKokoroVoices({ baseUrl, timeoutMs: 10_000 })
+        if (!voices.some((voice) => voice.voiceId === voiceId)) {
+          return Response.json(
+            { error: 'The selected Kokoro voice is not available.' },
+            { status: 400 },
+          )
+        }
+        const pcm = await synthesizeKokoroSpeech({
+          baseUrl,
+          voiceId,
+          text: voicePreviewText(body.role),
+          modelId: process.env.KOKORO_MODEL?.trim() || undefined,
+          speed: Number(process.env.KOKORO_SPEED || 1),
+          timeoutMs,
+        })
+        const wav = pcmToWav(pcm)
+        return new Response(new Uint8Array(wav), {
+          headers: {
+            'Cache-Control': 'no-store',
+            'Content-Disposition': 'inline; filename="kokoro-voice-preview.wav"',
+            'Content-Type': 'audio/wav',
+          },
+        })
+      } catch (error) {
+        req.payload.logger.error({ err: error }, 'kokoro voice preview failed')
+        return Response.json(
+          { error: 'Could not generate the voice preview. Check Kokoro and try again.' },
+          { status: 502 },
+        )
+      }
+    },
+  },
+  {
+    path: '/generate-source-summary-prompt',
+    method: 'post',
+    handler: async (req) => {
+      const body = (req.json ? await req.json().catch(() => null) : null) as {
+        id?: number | string
+      } | null
+      if (body?.id == null || body.id === '') {
+        return Response.json({ error: 'Episode not found.' }, { status: 404 })
+      }
+      const doc = await loadEpisode(req, body.id)
+      if (!doc) return Response.json({ error: 'Episode not found.' }, { status: 404 })
+      const input = sourceSummaryInput(doc)
+      if (input.error || !input.transcript) {
+        return Response.json({ error: input.error }, { status: 400 })
+      }
+      const revision = await sourceRevision(doc)
+      try {
+        const prompt = await generateSourceSummaryPrompt({
+          transcript: input.transcript,
+          apiKey: process.env.GEMINI_API_KEY?.trim() ?? '',
+          model: process.env.GEMINI_MODEL?.trim() || undefined,
+        })
+        const current = await loadEpisode(req, body.id)
+        if (!current || (await sourceRevision(current)) !== revision) {
+          return Response.json(
+            { error: 'Sources changed. Regenerate the prompt.' },
+            { status: 409 },
+          )
+        }
+        await req.payload.update({
+          collection: 'podcast-episodes',
+          id: body.id,
+          data: { sourceSummaryPrompt: prompt, sourceSummaryPromptRevision: revision },
+          depth: 0,
+          req,
+          overrideAccess: false,
+          context: { skipAiContentSync: true, promptRevisionUpdate: true },
+        })
+        return Response.json({
+          sourceSummaryPrompt: prompt,
+          sourceSummaryPromptRevision: revision,
+          currentSourceRevision: revision,
+        })
+      } catch (error) {
+        req.payload.logger.error({ err: error }, 'source-summary prompt generation failed')
+        return Response.json(
+          { error: 'Could not generate the source-summary prompt.' },
+          { status: 502 },
+        )
+      }
+    },
+  },
+  {
     path: '/generate-source-summary',
     method: 'post',
     handler: async (req) => {
-      const body = await req.json!()
+      const body = (await req.json!()) as {
+        id: string | number
+        sourceSummaryPrompt?: unknown
+        sourceSummaryPromptRevision?: unknown
+      }
       const id = body.id as string | number
       const doc = await loadEpisode(req, id)
       if (!doc) return Response.json({ error: 'Episode not found.' }, { status: 404 })
@@ -92,6 +218,18 @@ const episodeGenerationEndpoints: Endpoint[] = [
         return Response.json({ error: input.error }, { status: 400 })
       }
       const revision = await sourceRevision(doc)
+      const editorPrompt =
+        typeof body.sourceSummaryPrompt === 'string' ? body.sourceSummaryPrompt.trim() : ''
+      const promptValidation = validateEditorPrompt(editorPrompt)
+      if ('error' in promptValidation) {
+        return Response.json({ error: promptValidation.error }, { status: 400 })
+      }
+      if (body.sourceSummaryPromptRevision !== revision) {
+        return Response.json(
+          { error: 'Generate or update a current source-summary prompt first.' },
+          { status: 400 },
+        )
+      }
       const save = async (data: Record<string, unknown>) =>
         req.payload.update({
           collection: 'podcast-episodes',
@@ -103,15 +241,18 @@ const episodeGenerationEndpoints: Endpoint[] = [
           context: {
             skipAiContentSync: true,
             sourceSummaryUpdate: true,
+            promptRevisionUpdate: true,
             expectedSourceRevision: 'sourceSummaryRevision' in data ? revision : undefined,
           },
         })
       await save({
+        sourceSummaryPrompt: promptValidation.prompt,
+        sourceSummaryPromptRevision: revision,
         sourceSummaryStatus: 'processing',
         sourceSummaryMessage: 'Summarizing all current video transcripts…',
       })
       try {
-        const sourceSummary = await generateSourceSummary(input.transcript)
+        const sourceSummary = await generateSourceSummary(input.transcript, promptValidation.prompt)
         const current = await loadEpisode(req, id)
         if (
           !current ||
@@ -131,6 +272,8 @@ const episodeGenerationEndpoints: Endpoint[] = [
         await save({
           sourceSummary,
           sourceSummaryRevision: revision,
+          sourceSummaryPrompt: promptValidation.prompt,
+          sourceSummaryPromptRevision: revision,
           sourceSummaryStatus: 'ready',
           sourceSummaryMessage: '',
         })
@@ -252,6 +395,95 @@ const episodeGenerationEndpoints: Endpoint[] = [
     },
   },
   {
+    path: '/generate-script-prompt',
+    method: 'post',
+    handler: async (req) => {
+      const body = (req.json ? await req.json().catch(() => null) : null) as {
+        id?: number | string
+        hostGender?: unknown
+        guestGender?: unknown
+        sourceSummary?: unknown
+        sourceSummaryRevision?: unknown
+      } | null
+      if (body?.id == null || body.id === '') {
+        return Response.json({ error: 'Episode not found.' }, { status: 404 })
+      }
+      const doc = await loadEpisode(req, body.id)
+      if (
+        !doc ||
+        !hasCurrentSourceSummary({ ...doc, currentSourceRevision: await sourceRevision(doc) }) ||
+        body.sourceSummaryRevision !== doc.sourceSummaryRevision
+      ) {
+        return Response.json({ error: 'Generate a current source summary first.' }, { status: 400 })
+      }
+      const sourceSummary = typeof body.sourceSummary === 'string' ? body.sourceSummary.trim() : ''
+      if (
+        !sourceSummary ||
+        !isSpeakerGender(body.hostGender) ||
+        !isSpeakerGender(body.guestGender)
+      ) {
+        return Response.json(
+          { error: 'Add a source summary and choose host and guest genders first.' },
+          { status: 400 },
+        )
+      }
+      const promptRevision = podcastScriptPromptRevision({
+        sourceSummary,
+        hostGender: body.hostGender,
+        guestGender: body.guestGender,
+      })
+      try {
+        const prompt = await generatePodcastScriptPrompt({
+          sourceSummary,
+          hostGender: body.hostGender,
+          guestGender: body.guestGender,
+          apiKey: process.env.GEMINI_API_KEY?.trim() ?? '',
+          model: process.env.GEMINI_MODEL?.trim() || undefined,
+        })
+        const current = await loadEpisode(req, body.id)
+        if (
+          !current ||
+          current.sourceSummaryRevision !== body.sourceSummaryRevision ||
+          !hasCurrentSourceSummary({
+            ...current,
+            currentSourceRevision: await sourceRevision(current),
+          })
+        ) {
+          return Response.json(
+            { error: 'The source summary changed. Regenerate the prompt.' },
+            { status: 409 },
+          )
+        }
+        await req.payload.update({
+          collection: 'podcast-episodes',
+          id: body.id,
+          data: {
+            sourceSummary,
+            hostGender: body.hostGender,
+            guestGender: body.guestGender,
+            scriptPrompt: prompt,
+            scriptPromptRevision: promptRevision,
+          },
+          depth: 0,
+          req,
+          overrideAccess: false,
+          context: {
+            skipAiContentSync: true,
+            sourceSummaryUpdate: true,
+            promptRevisionUpdate: true,
+          },
+        })
+        return Response.json({ scriptPrompt: prompt, scriptPromptRevision: promptRevision })
+      } catch (error) {
+        req.payload.logger.error({ err: error }, 'podcast-script prompt generation failed')
+        return Response.json(
+          { error: 'Could not generate the podcast-script prompt.' },
+          { status: 502 },
+        )
+      }
+    },
+  },
+  {
     path: '/generate-script',
     method: 'post',
     handler: async (req) => {
@@ -268,6 +500,8 @@ const episodeGenerationEndpoints: Endpoint[] = [
         guestGender?: unknown
         sourceSummary?: unknown
         sourceSummaryRevision?: unknown
+        scriptPrompt?: unknown
+        scriptPromptRevision?: unknown
       } | null
       const id = body?.id
       if (id == null || id === '') {
@@ -294,14 +528,40 @@ const episodeGenerationEndpoints: Endpoint[] = [
         )
       }
       const revision = doc.sourceSummaryRevision
+      const editorPrompt = typeof body?.scriptPrompt === 'string' ? body.scriptPrompt.trim() : ''
+      const promptValidation = validateEditorPrompt(editorPrompt)
+      if ('error' in promptValidation) {
+        return Response.json({ error: promptValidation.error }, { status: 400 })
+      }
+      const expectedPromptRevision = podcastScriptPromptRevision({
+        sourceSummary,
+        hostGender: isSpeakerGender(body?.hostGender) ? body.hostGender : (doc.hostGender ?? ''),
+        guestGender: isSpeakerGender(body?.guestGender)
+          ? body.guestGender
+          : (doc.guestGender ?? ''),
+      })
+      if (body?.scriptPromptRevision !== expectedPromptRevision) {
+        return Response.json(
+          { error: 'Generate or update a current podcast-script prompt first.' },
+          { status: 400 },
+        )
+      }
       await req.payload.update({
         collection: 'podcast-episodes',
         id,
-        data: { sourceSummary },
+        data: {
+          sourceSummary,
+          scriptPrompt: promptValidation.prompt,
+          scriptPromptRevision: expectedPromptRevision,
+        },
         depth: 0,
         req,
         overrideAccess: false,
-        context: { skipAiContentSync: true, sourceSummaryUpdate: true },
+        context: {
+          skipAiContentSync: true,
+          sourceSummaryUpdate: true,
+          promptRevisionUpdate: true,
+        },
       })
 
       const result = await handleGenerateScriptRequest({
@@ -349,7 +609,9 @@ const episodeGenerationEndpoints: Endpoint[] = [
             req,
             overrideAccess: false,
             context: {
-              skipAiContentSync: true,
+              // A completed script must refresh the public transcript and other derived fields.
+              // Processing/error-only patches must not rewrite published episode content.
+              skipAiContentSync: data.scriptStatus !== 'ready',
               expectedSourceRevision: data.scriptStatus === 'ready' ? revision : undefined,
             },
           })
@@ -362,6 +624,7 @@ const episodeGenerationEndpoints: Endpoint[] = [
             guestGender,
             apiKey: process.env['GEMINI_API_KEY']?.trim() ?? '',
             model: process.env['GEMINI_MODEL']?.trim() || undefined,
+            editorPrompt: promptValidation.prompt,
           }),
       })
 
@@ -560,7 +823,9 @@ const episodeGenerationEndpoints: Endpoint[] = [
 ]
 
 export const episodeAiEndpoints: Endpoint[] = episodeGenerationEndpoints.map((endpoint) =>
-  endpoint.method === 'post' && endpoint.path !== '/stop-audio-generation'
+  endpoint.method === 'post' &&
+  endpoint.path !== '/stop-audio-generation' &&
+  endpoint.path !== '/preview-kokoro-voice'
     ? { ...endpoint, handler: withEpisodeGenerationLock(endpoint.handler) }
     : endpoint,
 ) as Endpoint[]

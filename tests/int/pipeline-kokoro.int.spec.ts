@@ -1,10 +1,20 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { listKokoroVoices, synthesizeKokoroSpeech } from '@/pipeline/kokoro'
+import { isVoicePreviewRole, voicePreviewText } from '@/pipeline/kokoro-voice-preview'
 
 describe('Kokoro provider', () => {
   afterEach(() => {
     vi.unstubAllGlobals()
+  })
+
+  it('uses short server-owned samples for host and guest previews', () => {
+    expect(isVoicePreviewRole('host')).toBe(true)
+    expect(isVoicePreviewRole('guest')).toBe(true)
+    expect(isVoicePreviewRole('other')).toBe(false)
+    expect(voicePreviewText('host')).not.toBe(voicePreviewText('guest'))
+    expect(voicePreviewText('host').length).toBeLessThan(160)
+    expect(voicePreviewText('guest').length).toBeLessThan(160)
   })
 
   it('normalizes available voices', async () => {

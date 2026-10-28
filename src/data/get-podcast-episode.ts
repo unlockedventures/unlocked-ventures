@@ -6,8 +6,14 @@ import { getPodcastSharedChrome } from '@/data/get-podcast-shared'
 import { isPodcastChannelActive } from '@/lib/podcast-channel'
 import { podcastAudioSrc, podcastCoverSrc } from '@/lib/podcast-cover'
 import { podcastEpisodePath, podcastSlugFromHref, slugifyPodcastTitle } from '@/lib/podcast-slug'
+import type { PodcastEpisode } from '@/payload-types'
+import { formatAudioDuration } from '@/pipeline/audio-duration'
 
-function episodeSlug(episode: { slug?: string | null; href?: string | null; title?: string | null }) {
+function episodeSlug(episode: {
+  slug?: string | null
+  href?: string | null
+  title?: string | null
+}) {
   if (episode.slug?.trim()) return episode.slug.trim()
   if (episode.href) {
     const fromHref = podcastSlugFromHref(episode.href)
@@ -18,6 +24,19 @@ function episodeSlug(episode: { slug?: string | null; href?: string | null; titl
 }
 
 export { podcastSlugFromHref }
+
+function episodeDuration(episode: PodcastEpisode) {
+  if (
+    episode.audioSource === 'upload' &&
+    episode.audio &&
+    typeof episode.audio === 'object' &&
+    typeof episode.audio.durationSeconds === 'number' &&
+    episode.audio.durationSeconds > 0
+  ) {
+    return formatAudioDuration(episode.audio.durationSeconds)
+  }
+  return typeof episode.meta === 'string' ? episode.meta.trim() : ''
+}
 
 export async function getPodcastEpisode(slug: string): Promise<PodcastPageContent | null> {
   const payload = await getPayload({ config: configPromise })
@@ -48,29 +67,34 @@ export async function getPodcastEpisode(slug: string): Promise<PodcastPageConten
 
   const { episode } = match
   const coverSrc = podcastCoverSrc(episode) || ''
+  const duration = episodeDuration(episode)
 
   const points = (items: { title?: string | null; body?: string | null }[] | null | undefined) =>
-    (items ?? []).flatMap((item) => (item.title && item.body ? [{ title: item.title, body: item.body }] : []))
+    (items ?? []).flatMap((item) =>
+      item.title && item.body ? [{ title: item.title, body: item.body }] : [],
+    )
   const mainPoints = (episode.mainPoints ?? []).flatMap((item) => {
     const point = typeof item?.point === 'string' ? item.point.trim() : ''
     return point ? [point] : []
   })
   const transcript = (episode.transcript ?? []).flatMap((line) =>
-    line.time && line.speaker && line.text ? [{ time: line.time, speaker: line.speaker, text: line.text }] : [],
+    line.time && line.speaker && line.text
+      ? [{ time: line.time, speaker: line.speaker, text: line.text }]
+      : [],
   )
   const summary = typeof episode.summary === 'string' ? episode.summary.trim() : ''
   const about = typeof episode.about === 'string' ? episode.about.trim() : ''
   const guestName = typeof episode.guests === 'string' ? episode.guests.trim() : ''
   const topic = typeof episode.topic === 'string' ? episode.topic.trim() : ''
-  const duration = typeof episode.meta === 'string' ? episode.meta.trim() : ''
   const showDetails = Boolean(episode.showDetailsSection) && Boolean(guestName || topic || duration)
 
   const listenNext = episodes.flatMap(({ episode: item, episodeSlug: itemSlug }) => {
     if (itemSlug === slug) return []
-    if (!item.meta || !item.title) return []
+    const itemDuration = episodeDuration(item)
+    if (!itemDuration || !item.title) return []
     return [
       {
-        meta: item.guests ? `${item.meta} · ${item.guests}` : item.meta,
+        meta: item.guests ? `${itemDuration} · ${item.guests}` : itemDuration,
         title: item.title,
         href: podcastEpisodePath(itemSlug),
         imageSrc: podcastCoverSrc(item) || '',
@@ -88,14 +112,14 @@ export async function getPodcastEpisode(slug: string): Promise<PodcastPageConten
         ? episode.channel.title
         : episode.category || '',
     title: episode.title,
-    meta: [episode.meta, episode.guests].filter(Boolean).join(' · '),
+    meta: [duration, episode.guests].filter(Boolean).join(' · '),
     description: summary || about || '',
     metaTitle: episode.metaTitle || undefined,
     metaDescription: episode.metaDescription || undefined,
     coverSrc,
     coverAlt: episode.imageAlt || episode.title,
     mediaUrl: podcastAudioSrc(episode),
-    timeLabel: episode.meta || '',
+    timeLabel: duration,
     details: showDetails
       ? {
           ...(guestName ? { guest: guestName } : {}),

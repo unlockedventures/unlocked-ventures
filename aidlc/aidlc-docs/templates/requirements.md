@@ -2,6 +2,8 @@
 
 Project: Unlocked Ventures
 
+Gate: G1 — Requirements analysis. Do not begin planning until the user explicitly approves G1.
+
 Create this record in `units/<feature-slug>/` before feature implementation and maintain it as
 requirements evolve. Keep requirements specific to the task;
 remove irrelevant prompts and do not introduce new scope.

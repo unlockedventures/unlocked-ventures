@@ -2,6 +2,9 @@
 
 Project: Unlocked Ventures
 
+Gate progression: tasks may be planned after G1, implemented after G2, submitted for code approval
+at G3, and marked complete only after G4 approval.
+
 Create this record in `units/<feature-slug>/` when feature work starts. Update progress throughout
 implementation and reconcile tasks, acceptance criteria and actual verification before completion.
 Keep tasks focused on authorized work.

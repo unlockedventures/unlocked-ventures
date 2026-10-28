@@ -4,6 +4,7 @@ import * as sourceSummary from './20261023_120000_source_summary'
 import * as homeMenuSources from './20261023_140000_home_menu_sources'
 import * as podcastAudioDuration from './20261028_120000_podcast_audio_duration'
 import * as podcastAudioPreview from './20261028_150000_podcast_audio_preview'
+import * as editableGeminiPrompts from './20261028_160000_editable_gemini_prompts'
 import * as migration_20261009_120000_ensure_additive_schema from './20261009_120000_ensure_additive_schema'
 
 export const migrations = [
@@ -29,5 +30,10 @@ export const migrations = [
     up: podcastAudioPreview.up,
     down: podcastAudioPreview.down,
     name: '20261028_150000_podcast_audio_preview',
+  },
+  {
+    up: editableGeminiPrompts.up,
+    down: editableGeminiPrompts.down,
+    name: '20261028_160000_editable_gemini_prompts',
   },
 ]

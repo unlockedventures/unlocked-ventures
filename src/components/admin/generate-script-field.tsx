@@ -7,6 +7,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useSourceSummary } from '@/components/admin/use-source-summary'
 import { scriptButtonState } from '@/pipeline/script-button-state'
 import { isSpeakerGender } from '@/pipeline/script-schema'
+import { podcastScriptPromptRevision } from '@/pipeline/prompt-revision'
+import { validateEditorPrompt } from '@/pipeline/prompt-constraints'
 
 import './generate-podcast-skeleton.css'
 
@@ -23,9 +25,11 @@ type PipelineResponse = {
   scriptStatusMessage?: string | null
   transcript?: string | null
   error?: string
+  scriptPrompt?: string | null
+  scriptPromptRevision?: string | null
 }
 
-type DispatchFields = (action: Record<string, unknown>) => void
+type DispatchFields = ReturnType<typeof useAllFormFields>[1]
 
 function fieldText(value: unknown) {
   return typeof value === 'string' ? value : ''
@@ -74,6 +78,16 @@ function applyDoc(
     path: 'scriptStatusMessage',
     value: doc.scriptStatusMessage ?? '',
   })
+  if (doc.scriptPrompt !== undefined) {
+    dispatchFields({ type: 'UPDATE', path: 'scriptPrompt', value: doc.scriptPrompt ?? '' })
+  }
+  if (doc.scriptPromptRevision !== undefined) {
+    dispatchFields({
+      type: 'UPDATE',
+      path: 'scriptPromptRevision',
+      value: doc.scriptPromptRevision ?? '',
+    })
+  }
 
   syncPointArray(dispatchFields, 'mainPoints', doc.mainPoints ?? [], rowCount(fields, 'mainPoints'))
   syncPointArray(
@@ -105,6 +119,18 @@ export function GenerateScriptField() {
   const transcriptStatus = fieldText(fields.status?.value) || 'idle'
   const hostGender = fieldText(fields.hostGender?.value)
   const guestGender = fieldText(fields.guestGender?.value)
+  const scriptPrompt = fieldText(fields.scriptPrompt?.value)
+  const scriptPromptRevision = fieldText(fields.scriptPromptRevision?.value)
+  const expectedPromptRevision = podcastScriptPromptRevision({
+    sourceSummary: source.sourceSummary,
+    hostGender,
+    guestGender,
+  })
+  const promptValidation = validateEditorPrompt(scriptPrompt)
+  const promptError = 'error' in promptValidation ? promptValidation.error : ''
+  const promptCurrent = Boolean(
+    scriptPrompt.trim() && scriptPromptRevision === expectedPromptRevision,
+  )
   const statusRef = useRef(scriptStatus)
   const fieldsRef = useRef(fields)
   /** Ignore stale ready/error from a previous run until this run has been processing on the server. */
@@ -128,8 +154,12 @@ export function GenerateScriptField() {
     hasGuestGender: isSpeakerGender(guestGender),
     scriptStatus,
     transcriptStatus,
-    pending: pending || fields.sourceSummaryStatus?.value === 'processing' || fields.audioStatus?.value === 'processing',
+    pending:
+      pending ||
+      fields.sourceSummaryStatus?.value === 'processing' ||
+      fields.audioStatus?.value === 'processing',
   })
+  const generationDisabled = button.disabled || Boolean(promptError) || !promptCurrent
 
   useEffect(() => {
     if (scriptStatus === 'processing') setWatching(true)
@@ -182,7 +212,7 @@ export function GenerateScriptField() {
   }, [dispatchFields, id, watching])
 
   async function onGenerate() {
-    if (button.disabled || id == null) return
+    if (generationDisabled || id == null) return
     const input = document.querySelector<HTMLTextAreaElement>('#field-sourceSummary')
     const sourceSummary = (input ? input.value : source.sourceSummary).trim()
     if (!sourceSummary) {
@@ -193,6 +223,8 @@ export function GenerateScriptField() {
       setLocalMessage('Choose a host gender and a guest gender before creating a podcast script.')
       return
     }
+    const promptInput = document.querySelector<HTMLTextAreaElement>('#field-scriptPrompt')
+    const livePrompt = (promptInput ? promptInput.value : scriptPrompt).trim()
     setLocalMessage(null)
     setPending(true)
     seenProcessingRef.current = false
@@ -208,7 +240,15 @@ export function GenerateScriptField() {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, hostGender, guestGender, sourceSummary, sourceSummaryRevision: source.sourceSummaryRevision }),
+        body: JSON.stringify({
+          id,
+          hostGender,
+          guestGender,
+          sourceSummary,
+          sourceSummaryRevision: source.sourceSummaryRevision,
+          scriptPrompt: livePrompt,
+          scriptPromptRevision,
+        }),
       })
       const body = (await response.json().catch(() => null)) as PipelineResponse | null
       if (!response.ok) {
@@ -286,7 +326,11 @@ export function GenerateScriptField() {
 
   if (!canGenerate) return null
 
-  const detail = localMessage || button.hint || scriptStatusMessage
+  const detail =
+    localMessage ||
+    button.hint ||
+    (!promptCurrent ? 'Generate a current podcast-script prompt first.' : promptError) ||
+    scriptStatusMessage
 
   return (
     <div ref={rootRef} className="field-type ui">
@@ -309,7 +353,7 @@ export function GenerateScriptField() {
         <>
           <Button
             buttonStyle="primary"
-            disabled={button.disabled}
+            disabled={generationDisabled}
             onClick={() => void onGenerate()}
           >
             Generate Podcast Script

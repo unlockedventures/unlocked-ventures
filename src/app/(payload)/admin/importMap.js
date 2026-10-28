@@ -6,7 +6,9 @@ import { EpisodeEditorModeBootstrap as EpisodeEditorModeBootstrap_73bce5d0b5b718
 import { EpisodeStatusCell as EpisodeStatusCell_2252193e32191b865283ffad203b6461 } from '@/components/admin/episode-status-cell'
 import { DirectUploadField as DirectUploadField_d3e9cae98f7356a2cf4ffa1e968e12a8 } from '@/components/admin/direct-upload-field'
 import { GenerateTranscriptField as GenerateTranscriptField_d809db76de84e66ad7e54e5d951facd4 } from '@/components/admin/generate-transcript-field'
+import { GenerateSourceSummaryPromptField as GenerateSourceSummaryPromptField_32f42f5c0120ae82f37f160b048110e9 } from '@/components/admin/generate-source-summary-prompt-field'
 import { GenerateSourceSummaryField as GenerateSourceSummaryField_e4cdf4246e4007813a44617bc5ec5f7d } from '@/components/admin/generate-source-summary-field'
+import { GenerateScriptPromptField as GenerateScriptPromptField_a55ba670baf316d4ac6f297119b72e65 } from '@/components/admin/generate-script-prompt-field'
 import { GenerateScriptField as GenerateScriptField_bab222324d11fa721dc22069e6402c46 } from '@/components/admin/generate-script-field'
 import { EpisodePodcastLabel as EpisodePodcastLabel_8415134688a1774850c1f17935492641 } from '@/components/admin/episode-podcast-label'
 import { KokoroVoiceField as KokoroVoiceField_5c7d0510b7bc26d1fc3d7bd8fb9ba844 } from '@/components/admin/kokoro-voice-field'
@@ -61,7 +63,9 @@ export const importMap = {
   "@/components/admin/episode-status-cell#EpisodeStatusCell": EpisodeStatusCell_2252193e32191b865283ffad203b6461,
   "@/components/admin/direct-upload-field#DirectUploadField": DirectUploadField_d3e9cae98f7356a2cf4ffa1e968e12a8,
   "@/components/admin/generate-transcript-field#GenerateTranscriptField": GenerateTranscriptField_d809db76de84e66ad7e54e5d951facd4,
+  "@/components/admin/generate-source-summary-prompt-field#GenerateSourceSummaryPromptField": GenerateSourceSummaryPromptField_32f42f5c0120ae82f37f160b048110e9,
   "@/components/admin/generate-source-summary-field#GenerateSourceSummaryField": GenerateSourceSummaryField_e4cdf4246e4007813a44617bc5ec5f7d,
+  "@/components/admin/generate-script-prompt-field#GenerateScriptPromptField": GenerateScriptPromptField_a55ba670baf316d4ac6f297119b72e65,
   "@/components/admin/generate-script-field#GenerateScriptField": GenerateScriptField_bab222324d11fa721dc22069e6402c46,
   "@/components/admin/episode-podcast-label#EpisodePodcastLabel": EpisodePodcastLabel_8415134688a1774850c1f17935492641,
   "@/components/admin/kokoro-voice-field#KokoroVoiceField": KokoroVoiceField_5c7d0510b7bc26d1fc3d7bd8fb9ba844,
