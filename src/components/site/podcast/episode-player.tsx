@@ -1,6 +1,14 @@
 'use client'
 
-import { useCallback, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type MouseEvent,
+  type PointerEvent,
+} from 'react'
 
 function formatTime(seconds: number) {
   if (!Number.isFinite(seconds) || seconds < 0) return '0:00'
@@ -10,6 +18,17 @@ function formatTime(seconds: number) {
   const secs = String(total % 60).padStart(2, '0')
   if (hours > 0) return `${hours}:${String(minutes).padStart(2, '0')}:${secs}`
   return `${minutes}:${secs}`
+}
+
+function parseTimeLabel(value: string) {
+  const parts = value
+    .trim()
+    .split(':')
+    .map((part) => Number(part))
+  if (parts.some((part) => !Number.isFinite(part) || part < 0)) return 0
+  if (parts.length === 2) return parts[0] * 60 + parts[1]
+  if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2]
+  return 0
 }
 
 function youtubeId(url: string) {
@@ -70,35 +89,69 @@ export function EpisodePlayer({
   imageAlt: string
   mediaUrl?: string
 }) {
+  const playerRef = useRef<HTMLDivElement>(null)
   const mediaRef = useRef<HTMLMediaElement | null>(null)
   const setMediaRef = useCallback((node: HTMLAudioElement | HTMLVideoElement | null) => {
     mediaRef.current = node
   }, [])
   const trackRef = useRef<HTMLDivElement>(null)
   const draggingRef = useRef(false)
+  const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [playing, setPlaying] = useState(false)
   const [current, setCurrent] = useState(0)
   const [duration, setDuration] = useState(0)
   const [embed, setEmbed] = useState<string | null>(null)
   const [scrubbing, setScrubbing] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [playbackRate, setPlaybackRate] = useState(1)
+  const [fullscreen, setFullscreen] = useState(false)
+  const [playbackFeedback, setPlaybackFeedback] = useState<'play' | 'pause' | null>(null)
   const source = mediaUrl?.trim() ?? ''
   const kind = source ? fileKind(source) : null
   const blocked = source ? unsuitableReason(source) : null
   const mediaCanPlay = Boolean(source && kind && kind !== 'unsupported')
   const canPlay = mediaCanPlay
   const uiPlaying = playing
-  const canSeek = Boolean(mediaCanPlay && kind !== 'embed' && duration > 0)
+  const effectiveDuration =
+    Number.isFinite(duration) && duration > 0 ? duration : parseTimeLabel(timeLabel)
+  const canSeek = Boolean(mediaCanPlay && kind !== 'embed' && effectiveDuration > 0)
   const played =
-    duration > 0
-      ? Math.min(100, Math.max(0, (current / duration) * 100))
+    effectiveDuration > 0
+      ? Math.min(100, Math.max(0, (current / effectiveDuration) * 100))
       : Math.min(100, Math.max(0, progress * 100))
-  const clock = duration > 0 ? `${formatTime(current)} / ${formatTime(duration)}` : timeLabel
+  const clock =
+    effectiveDuration > 0 ? `${formatTime(current)} / ${formatTime(effectiveDuration)}` : timeLabel
   const statusMessage = error || blocked || (!source ? 'No audio linked for this episode.' : null)
+
+  useEffect(() => {
+    const syncFullscreen = () => setFullscreen(document.fullscreenElement === playerRef.current)
+    document.addEventListener('fullscreenchange', syncFullscreen)
+    return () => document.removeEventListener('fullscreenchange', syncFullscreen)
+  }, [])
+
+  useEffect(
+    () => () => {
+      if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current)
+    },
+    [],
+  )
+
+  function showPlaybackFeedback(action: 'play' | 'pause') {
+    if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current)
+    setPlaybackFeedback(action)
+    feedbackTimerRef.current = setTimeout(() => {
+      setPlaybackFeedback(null)
+      feedbackTimerRef.current = null
+    }, 500)
+  }
 
   function onMediaError() {
     setPlaying(false)
     setError('This media file could not be played. Check the URL or upload a new audio file.')
+  }
+
+  function syncMediaDuration(media: HTMLMediaElement) {
+    if (Number.isFinite(media.duration) && media.duration > 0) setDuration(media.duration)
   }
 
   async function toggle() {
@@ -110,6 +163,7 @@ export function EpisodePlayer({
     if (kind === 'embed') {
       setEmbed(embedSrc(source))
       setPlaying(true)
+      showPlaybackFeedback('play')
       return
     }
     const media = mediaRef.current
@@ -117,11 +171,29 @@ export function EpisodePlayer({
     if (media.paused) {
       try {
         await media.play()
+        showPlaybackFeedback('play')
       } catch {
         onMediaError()
       }
     } else {
       media.pause()
+      showPlaybackFeedback('pause')
+    }
+  }
+
+  function changePlaybackRate(rate: number) {
+    if (!Number.isFinite(rate)) return
+    const media = mediaRef.current
+    if (media) media.playbackRate = rate
+    setPlaybackRate(rate)
+  }
+
+  async function toggleFullscreen() {
+    try {
+      if (document.fullscreenElement) await document.exitFullscreen()
+      else await playerRef.current?.requestFullscreen()
+    } catch {
+      setError('Fullscreen is not available in this browser.')
     }
   }
 
@@ -129,21 +201,26 @@ export function EpisodePlayer({
     (clientX: number) => {
       const media = mediaRef.current
       const track = trackRef.current
-      if (!media || !track || !duration) return
+      if (!media || !track || !effectiveDuration) return
       const bounds = track.getBoundingClientRect()
       const ratio = Math.min(1, Math.max(0, (clientX - bounds.left) / bounds.width))
-      media.currentTime = ratio * duration
-      setCurrent(ratio * duration)
+      media.currentTime = ratio * effectiveDuration
+      setCurrent(ratio * effectiveDuration)
     },
-    [duration],
+    [effectiveDuration],
   )
 
   function onTrackPointerDown(event: PointerEvent<HTMLDivElement>) {
     if (!canSeek) return
     event.preventDefault()
+    event.stopPropagation()
     draggingRef.current = true
     setScrubbing(true)
-    event.currentTarget.setPointerCapture(event.pointerId)
+    try {
+      event.currentTarget.setPointerCapture(event.pointerId)
+    } catch {
+      // Click-to-seek still works in browsers without pointer capture.
+    }
     seekToClientX(event.clientX)
   }
 
@@ -156,9 +233,19 @@ export function EpisodePlayer({
     if (!draggingRef.current) return
     draggingRef.current = false
     setScrubbing(false)
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-      event.currentTarget.releasePointerCapture(event.pointerId)
+    try {
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.releasePointerCapture(event.pointerId)
+      }
+    } catch {
+      // Pointer capture is optional; seeking already completed.
     }
+  }
+
+  function onTrackClick(event: MouseEvent<HTMLDivElement>) {
+    event.stopPropagation()
+    if (!canSeek) return
+    seekToClientX(event.clientX)
   }
 
   function onTrackKeyDown(event: KeyboardEvent<HTMLDivElement>) {
@@ -168,7 +255,7 @@ export function EpisodePlayer({
     const step = event.shiftKey ? 10 : 5
     if (event.key === 'ArrowRight' || event.key === 'ArrowUp') {
       event.preventDefault()
-      media.currentTime = Math.min(duration, media.currentTime + step)
+      media.currentTime = Math.min(effectiveDuration, media.currentTime + step)
       setCurrent(media.currentTime)
     } else if (event.key === 'ArrowLeft' || event.key === 'ArrowDown') {
       event.preventDefault()
@@ -180,13 +267,41 @@ export function EpisodePlayer({
       setCurrent(0)
     } else if (event.key === 'End') {
       event.preventDefault()
-      media.currentTime = duration
-      setCurrent(duration)
+      media.currentTime = effectiveDuration
+      setCurrent(effectiveDuration)
     }
   }
 
+  function onSurfaceClick(event: MouseEvent<HTMLDivElement>) {
+    const target = event.target
+    if (
+      target instanceof Element &&
+      target.closest('button, a, input, select, textarea, iframe, [role="slider"]')
+    ) {
+      return
+    }
+    void toggle()
+  }
+
+  function onSurfaceKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    if (event.target !== event.currentTarget) return
+    if (event.key !== 'Enter' && event.key !== ' ') return
+    event.preventDefault()
+    void toggle()
+  }
+
   return (
-    <div className="relative w-full overflow-hidden bg-[#E4E6EA]">
+    <div
+      ref={playerRef}
+      className={`relative w-full overflow-hidden bg-[#E4E6EA] outline-none focus-visible:ring-2 focus-visible:ring-[#0A2540] focus-visible:ring-offset-2 fullscreen:flex fullscreen:items-center fullscreen:bg-black ${
+        canPlay ? 'cursor-pointer' : ''
+      }`}
+      role="group"
+      tabIndex={canPlay ? 0 : -1}
+      aria-label={canPlay ? `${uiPlaying ? 'Pause' : 'Play'} ${title}` : title}
+      onClick={onSurfaceClick}
+      onKeyDown={onSurfaceKeyDown}
+    >
       {embed ? (
         <iframe
           src={embed}
@@ -213,7 +328,10 @@ export function EpisodePlayer({
           onTimeUpdate={() => {
             if (!draggingRef.current) setCurrent(mediaRef.current?.currentTime ?? 0)
           }}
-          onLoadedMetadata={() => setDuration(mediaRef.current?.duration ?? 0)}
+          onLoadedMetadata={(event) => syncMediaDuration(event.currentTarget)}
+          onDurationChange={(event) => syncMediaDuration(event.currentTarget)}
+          onCanPlay={(event) => syncMediaDuration(event.currentTarget)}
+          onRateChange={() => setPlaybackRate(mediaRef.current?.playbackRate ?? 1)}
         />
       ) : imageSrc ? (
         <img src={imageSrc} alt={imageAlt} className="aspect-[16/9] w-full object-cover" />
@@ -235,8 +353,37 @@ export function EpisodePlayer({
           onTimeUpdate={() => {
             if (!draggingRef.current) setCurrent(mediaRef.current?.currentTime ?? 0)
           }}
-          onLoadedMetadata={() => setDuration(mediaRef.current?.duration ?? 0)}
+          onLoadedMetadata={(event) => syncMediaDuration(event.currentTarget)}
+          onDurationChange={(event) => syncMediaDuration(event.currentTarget)}
+          onCanPlay={(event) => syncMediaDuration(event.currentTarget)}
+          onRateChange={() => setPlaybackRate(mediaRef.current?.playbackRate ?? 1)}
         />
+      ) : null}
+      {playbackFeedback ? (
+        <div
+          className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center"
+          data-testid="playback-feedback"
+          data-feedback={playbackFeedback}
+          aria-hidden="true"
+        >
+          <span className="absolute size-20 animate-ping rounded-full bg-black/30" />
+          <span className="relative flex size-16 items-center justify-center rounded-full bg-black/65 text-white shadow-lg">
+            {playbackFeedback === 'play' ? (
+              <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
+                <path d="M12 8.5 27 17 12 25.5v-17Z" fill="currentColor" />
+              </svg>
+            ) : (
+              <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
+                <path
+                  d="M11 9v16M23 9v16"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                  strokeLinecap="round"
+                />
+              </svg>
+            )}
+          </span>
+        </div>
       ) : null}
       {embed ? null : (
         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/45 to-transparent px-4 pt-12 pb-3">
@@ -245,7 +392,7 @@ export function EpisodePlayer({
             role="slider"
             tabIndex={canSeek ? 0 : -1}
             aria-valuemin={0}
-            aria-valuemax={Math.round(duration) || 100}
+            aria-valuemax={Math.round(effectiveDuration) || 100}
             aria-valuenow={Math.round(current)}
             aria-valuetext={clock}
             aria-label="Seek"
@@ -257,6 +404,7 @@ export function EpisodePlayer({
             onPointerMove={onTrackPointerMove}
             onPointerUp={onTrackPointerUp}
             onPointerCancel={onTrackPointerUp}
+            onClick={onTrackClick}
             onKeyDown={onTrackKeyDown}
           >
             <div className="relative h-1 w-full rounded-full bg-white/35 transition-[height] group-hover:h-1.5 group-focus-visible:h-1.5">
@@ -312,7 +460,48 @@ export function EpisodePlayer({
                 </p>
               ) : null}
             </div>
+            {kind === 'audio' || kind === 'video' ? (
+              <label className="shrink-0 text-xs">
+                <span className="sr-only">Playback speed</span>
+                <select
+                  aria-label="Playback speed"
+                  value={playbackRate}
+                  onChange={(event) => changePlaybackRate(Number(event.target.value))}
+                  className="cursor-pointer rounded border border-white/35 bg-black/30 px-1.5 py-1 text-xs text-white outline-none focus-visible:ring-2 focus-visible:ring-white"
+                >
+                  {[0.75, 1, 1.25, 1.5, 2].map((rate) => (
+                    <option key={rate} value={rate} className="bg-[#0A2540] text-white">
+                      {rate}×
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ) : null}
             <p className="shrink-0 font-sans text-xs leading-4 font-normal tabular-nums">{clock}</p>
+            <button
+              type="button"
+              aria-label={fullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+              onClick={() => void toggleFullscreen()}
+              className="shrink-0 cursor-pointer rounded p-1 outline-none focus-visible:ring-2 focus-visible:ring-white"
+            >
+              {fullscreen ? (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path
+                    d="M9 3v6H3M15 3v6h6M9 21v-6H3M15 21v-6h6"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                  />
+                </svg>
+              ) : (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path
+                    d="M3 9V3h6M21 9V3h-6M3 15v6h6M21 15v6h-6"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                  />
+                </svg>
+              )}
+            </button>
           </div>
         </div>
       )}

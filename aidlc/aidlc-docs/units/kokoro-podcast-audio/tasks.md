@@ -29,6 +29,10 @@ Statuses: `todo`, `in-progress`, `blocked`, `review`, `done`.
 | T21 | Show an inline listen control after generated audio is attached                   | done   | Codex           | Player uses the resolved episode media URL     |
 | T22 | Stage generated audio until an explicit editor save and support regeneration      | done   | Codex           | Public relationship remains unchanged pre-save |
 | T23 | Add authorized cancellation for an active Kokoro audio generation                 | done   | Codex           | Abort stops the current and future turns       |
+| T24 | Toggle public episode playback from the full artwork/player surface               | done   | Codex           | Pointer and keyboard activation covered        |
+| T25 | Add native playback-speed and fullscreen controls to the public player            | done   | Codex           | Five speeds and fullscreen regression covered  |
+| T26 | Add centered YouTube-style play/pause feedback over the episode thumbnail         | done   | Codex           | Transient overlay covered by player tests      |
+| T27 | Harden click/drag seeking across browser pointer implementations                  | done   | Codex           | Direct progress-bar click regression covered   |
 
 ## Completion checks
 

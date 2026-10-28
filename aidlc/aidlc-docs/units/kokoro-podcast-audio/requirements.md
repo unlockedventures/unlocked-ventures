@@ -48,6 +48,16 @@ Project: Unlocked Ventures
 - FR-20: While generation is processing, an authorized editor shall be able to stop it. Stopping
   shall abort the active Kokoro request, prevent remaining turns from running, preserve the public
   audio and preserve any previously completed preview.
+- FR-21: On the public episode page, clicking or keyboard-activating the episode artwork/player
+  surface shall toggle stored audio play and pause. Dedicated buttons and the seek control shall
+  retain their own behavior without causing a second toggle.
+- FR-22: The public native audio/video player shall offer 0.75×, 1×, 1.25×, 1.5× and 2× playback
+  speeds and a fullscreen toggle for the whole player. Embedded providers retain native controls.
+- FR-23: A play or pause action from the artwork surface, explicit control or keyboard shall show a
+  large, centered, transient visual indicator over the thumbnail without intercepting input.
+- FR-24: Clicking, dragging or keyboard-operating the public progress bar shall seek native media
+  without toggling playback, including browsers where pointer capture is unavailable or media
+  metadata duration arrives late. The saved episode duration shall provide the initial fallback.
 
 ## Content and compatibility
 
@@ -118,6 +128,14 @@ Consumers shall use Payload's resolved audio URL rather than constructing bucket
   duration become the episode's stored public values and the pending state is cleared.
 - AC-15: Given audio generation is active, when Stop Generating Audio is selected, then synthesis
   terminates with a stopped status and no generated audio is promoted to the public episode.
+- AC-16: Given a playable stored audio URL, when a visitor clicks the episode artwork twice, then
+  the first click plays and the second pauses; seeking and the explicit play button still work once.
+- AC-17: Given native stored media, when a visitor selects a speed, then media playbackRate changes;
+  when fullscreen is selected, the complete episode player enters browser fullscreen mode.
+- AC-18: Given playable stored media, when playback is toggled, then the matching centered play or
+  pause indicator appears briefly and disappears without blocking subsequent interaction.
+- AC-19: Given media with known duration, when the visitor clicks halfway across the progress bar,
+  then playback currentTime moves to approximately half the duration.
 
 ## Open questions
 
