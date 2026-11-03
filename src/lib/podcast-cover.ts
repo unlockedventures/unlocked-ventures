@@ -14,10 +14,14 @@ export function podcastCoverSrc(doc: {
 
 /** Resolve playable audio from upload or URL (mediaUrl). */
 export function podcastAudioSrc(doc: {
+  editorMode?: string | null
   audioSource?: string | null
   mediaUrl?: string | null
   audio?: number | { url?: string | null } | null
 }): string {
+  // Legacy AI rows may still contain a transcription source URL in mediaUrl.
+  if (doc.editorMode === 'ai' && (doc.audioSource !== 'upload' || !doc.audio)) return ''
+
   const url = typeof doc.mediaUrl === 'string' ? doc.mediaUrl.trim() : ''
   const uploaded =
     doc.audio && typeof doc.audio === 'object' && doc.audio.url ? doc.audio.url.trim() : ''

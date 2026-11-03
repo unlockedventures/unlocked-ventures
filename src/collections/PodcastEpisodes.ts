@@ -130,6 +130,18 @@ export const PodcastEpisodes: CollectionConfig = {
           data.sourceSummaryMessage =
             'Sources changed. Generate a current source summary before creating a podcast.'
         }
+        // Internal generation updates may retain a completed episode's existing public audio.
+        if (data.episodeStatus === 'complete' && !context?.audioPreviewUpdate) {
+          const editorMode = data.editorMode ?? originalDoc?.editorMode
+          const audioSource = data.audioSource ?? originalDoc?.audioSource
+          const audio = data.audio !== undefined ? data.audio : originalDoc?.audio
+          if (data.pendingAudio || (editorMode === 'ai' && (audioSource !== 'upload' || !audio))) {
+            throw new APIError(
+              'Save generated episode audio before saving as complete. You can still save a draft.',
+              400,
+            )
+          }
+        }
         if (!data.episodeStatus) {
           data.episodeStatus =
             typeof originalDoc?.episodeStatus === 'string' ? originalDoc.episodeStatus : 'draft'
@@ -191,6 +203,9 @@ export const PodcastEpisodes: CollectionConfig = {
         } else {
           const audioValue = data.audio !== undefined ? data.audio : originalDoc?.audio
           const audioId = typeof audioValue === 'number' ? audioValue : audioValue?.id
+          const priorAudioId =
+            typeof originalDoc?.audio === 'number' ? originalDoc.audio : originalDoc?.audio?.id
+          const audioChanged = audioId !== priorAudioId || originalDoc?.audioSource !== 'upload'
           if (typeof audioId === 'number') {
             try {
               const audioDoc = await req.payload.findByID({
@@ -200,7 +215,9 @@ export const PodcastEpisodes: CollectionConfig = {
                 overrideAccess: true,
               })
               if (typeof audioDoc?.url === 'string' && audioDoc.url) data.mediaUrl = audioDoc.url
-              data.meta = formatAudioDuration(audioDoc.durationSeconds)
+              if (audioChanged || data.meta === '—') {
+                data.meta = formatAudioDuration(audioDoc.durationSeconds)
+              }
             } catch {
               // leave mediaUrl unchanged if lookup fails
             }
@@ -232,7 +249,9 @@ export const PodcastEpisodes: CollectionConfig = {
                 : originalDoc?.disagreementPoints,
             videoLinks: data.videoLinks !== undefined ? data.videoLinks : originalDoc?.videoLinks,
           }
+          const duration = data.meta
           Object.assign(data, applyAiContentToEpisode(merged))
+          data.meta = duration
           // Prefer uploaded/generated audio over first video link when already set.
           if (
             originalDoc?.audioSource === 'upload' ||
@@ -244,9 +263,6 @@ export const PodcastEpisodes: CollectionConfig = {
               data.audio = originalDoc.audio
             if (typeof originalDoc?.mediaUrl === 'string' && originalDoc.mediaUrl) {
               data.mediaUrl = originalDoc.mediaUrl
-            }
-            if (typeof originalDoc?.meta === 'string' && originalDoc.meta.trim()) {
-              data.meta = originalDoc.meta
             }
           }
         }
@@ -966,9 +982,8 @@ export const PodcastEpisodes: CollectionConfig = {
           type: 'text',
           label: 'Duration',
           admin: {
-            readOnly: true,
             description:
-              'Calculated automatically from generated or uploaded audio and used on cards and listings.',
+              'Filled automatically when generated or uploaded audio is saved. You can edit this value; replacing the audio recalculates it. Used on cards and listings.',
           },
         },
       ],

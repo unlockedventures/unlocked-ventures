@@ -667,7 +667,7 @@ export interface PodcastEpisode {
    */
   topic?: string | null;
   /**
-   * Calculated automatically from generated or uploaded audio and used on cards and listings.
+   * Filled automatically when generated or uploaded audio is saved. You can edit this value; replacing the audio recalculates it. Used on cards and listings.
    */
   meta?: string | null;
   /**

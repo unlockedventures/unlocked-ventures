@@ -58,3 +58,15 @@ A representative full-episode benchmark on production-class hardware and editori
 voices remain rollout work. The future S3 account, bucket, access policy, retention and local-file
 migration are intentionally not selected or implemented; the Payload upload boundary is preserved
 for that separate feature.
+
+| 2026-11-03 | User / Codex | Revision | Requested editable automatically populated Duration; inspected attachment and AI synchronization hooks. Plan: preserve overrides until audio replacement, retain preview/publication boundary. | Conversation; PodcastEpisodes.ts |
+
+### 2026-11-03 — Duration editing verification
+
+Implemented editable Duration and conditional audio attachment recalculation; preserve the resolved value across AI content synchronization. Regenerated types with `pnpm generate:types` (successful after sandbox package-store failure and escalated retry). Focused Vitest audio-duration and generate-audio suites passed all 9 tests. TypeScript failed on existing Media/admin/data/seed/generation-lock/sync-episode errors, with none reported in PodcastEpisodes.ts. Targeted ESLint failed to load configuration (circular JSON). `git diff --check` passed. Browser and database save/reload behavior were not tested. No migration or seed ran. Follow-up complete with these verification limits.
+
+## Unsaved audio completion fix — 2026-11-03
+
+Decision: explicit audio save remains the publication boundary; block Complete for unsaved preview or AI episode without saved audio. Remove implicit source-video publication.
+
+Implementation and verification: blocked Complete for unsaved previews and AI episodes without saved audio, retaining Draft. Server uses persisted pending state so requests cannot clear it. Removed source-video mapping from both AI synchronization paths; public resolver suppresses legacy AI source playback without modifying database content. Existing saved uploaded audio and manual URL playback remain supported. Added 10 regression cases (2 UI, 8 server/mapping/media). Four focused suites passed all 35 tests. Prettier and diff checks passed. TypeScript reports previously observed baseline errors, including sync-episode create typing. Browser/database and live audio generation unverified; no database mutations or deployment. No schema/import-map inputs changed. Follow-up complete.

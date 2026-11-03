@@ -159,3 +159,13 @@ Consumers shall use Payload's resolved audio URL rather than constructing bucket
 This feature is not covered by the homepage menu-source no-automated-tests preference. Unit and
 integration tests are appropriate. A live Kokoro smoke test requires its Docker image/model and
 sufficient local compute.
+
+## Duration editing revision — 2026-11-03
+
+Supersedes FR-14: Duration is editable. Generated audio publication or replacement uploads populate measured duration; ordinary saves retain editor overrides. Audio removal retains the established empty placeholder. Existing meta consumers and permissions remain unchanged.
+
+Acceptance: an editor can change Duration and save/reload it, including AI episodes; replacing audio recalculates it; generating a pending preview leaves published duration unchanged.
+
+## Unsaved audio completion fix — 2026-11-03
+
+AI episodes require saved uploaded/generated audio before completion. Unsaved previews block completion even when previous audio exists. Draft saving remains available. Transcript source URLs must never be copied to public playback by AI synchronization. Enforce completion on server and explain blocked actions in admin.

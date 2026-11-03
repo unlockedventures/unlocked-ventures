@@ -71,8 +71,6 @@ export function applyAiContentToEpisode(doc: AiSource): Record<string, unknown> 
     script && script.estimatedDurationSeconds > 0
       ? formatClock(script.estimatedDurationSeconds)
       : undefined
-  const firstVideo =
-    (doc.videoLinks ?? []).map((item) => item.url?.trim()).find((url) => Boolean(url)) || ''
 
   const patch: Record<string, unknown> = {}
   if (summary) {
@@ -85,9 +83,5 @@ export function applyAiContentToEpisode(doc: AiSource): Record<string, unknown> 
   if (systemOpinion) patch.takeIntro = systemOpinion
   if (transcript.length) patch.transcript = transcript
   if (meta) patch.meta = meta
-  if (firstVideo) {
-    patch.mediaUrl = firstVideo
-    patch.audioSource = 'url'
-  }
   return patch
 }

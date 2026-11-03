@@ -267,7 +267,10 @@ Kokoro voices from the server, then generates host and guest turns in script ord
 joins raw 24 kHz mono PCM with dialogue pauses and writes a preview WAV through the `podcast-audio`
 Payload upload collection. Generation does not replace the public episode audio. Editors listen to
 the preview, regenerate it if needed, and select **Save Generated Audio** to publish that audio to
-the episode. Until then, the public player continues streaming the previously saved audio and never
+the episode. **Save as Complete** requires saved audio for AI episodes and is disabled while an
+unsaved generated preview exists; **Save as Draft** remains available. Transcription source video
+links are never automatically assigned as public playback media. Existing AI episodes without saved
+audio also hide legacy source-video playback until audio is saved. Until audio is saved, the public player continues streaming the previously saved audio and never
 uses browser speech synthesis when a transcript is present.
 
 Docker sets `KOKORO_BASE_URL=http://kokoro:8880` and keeps port 8880 private to the Compose network.
@@ -277,8 +280,8 @@ server-reachable Kokoro-FastAPI base URL. Optional `KOKORO_MODEL`, `KOKORO_SPEED
 
 Episode Duration is derived from the generated PCM length, including inserted pauses. For manually
 uploaded audio, the server reads duration metadata while the upload buffer is available. The existing
-Duration string remains the value used on cards, listings, and episode details and is read only in
-the editor. Apply `pnpm ensure-schema` or `pnpm migrate` before serving this change against an
+Duration string remains the value used on cards, listings, and episode details. Editors can override it; ordinary saves preserve the edited value, while
+saving newly generated audio or attaching replacement audio recalculates it. Apply `pnpm ensure-schema` or `pnpm migrate` before serving this change against an
 existing database. Migration `20261028_120000_podcast_audio_duration` adds hidden numeric duration
 metadata, and `20261028_150000_podcast_audio_preview` adds the pending-preview relationship without
 changing existing published audio relationships.

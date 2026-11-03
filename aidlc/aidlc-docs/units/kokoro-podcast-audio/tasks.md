@@ -65,3 +65,15 @@ Statuses: `todo`, `in-progress`, `blocked`, `review`, `done`.
   generated Payload files, tests, README and this feature unit.
 - Checks run: 19 focused tests passed; Compose config and live Kokoro health/voices/PCM smoke passed;
   schema ensure applied. Repo-wide test/type/lint limitations are recorded in `audit.md`.
+
+## Duration editing follow-up — 2026-11-03
+
+- Done: enabled Duration editing and preserved overrides through ordinary and AI saves. Replacement audio still recalculates duration; pending preview behavior is unchanged.
+- Done: regenerated Payload types and updated README. Nine existing audio tests passed across two files. `git diff --check` passed.
+- Limitations: TypeScript reports existing errors outside the changed collection; ESLint cannot load its configuration due to a circular JSON error. Browser save/reload and live generation were not exercised. No database migration, seeds, push or deployment performed.
+
+## Unsaved audio completion fix — 2026-11-03
+
+Done: completion guard in UI and server; draft saving remains available. Removed source playback mapping from both AI sync paths. Public media resolver hides legacy AI source URLs without saved audio. Added regression coverage and README guidance.
+
+Verification: 35 tests passed across episode save buttons, server completion/public media boundary, script mapping and audio generation suites. Prettier checks and `git diff --check` passed. TypeScript retains the previously observed errors (including the existing sync-episode create typing error); no errors in the new tests, completion guard or UI. ESLint configuration failure was observed earlier this session; not rerun. No browser/database flow or live generation exercised. No generated-output inputs changed, migrations or seeds needed. No push/deployment performed.

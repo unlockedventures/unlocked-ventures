@@ -184,3 +184,11 @@ storage lifecycle/retention policy and a decision on public URLs versus signed d
   separate storage feature before enabling S3.
 - If future throughput requires concurrent jobs, design a queue and worker model separately rather
   than adding uncontrolled parallel requests to the web process.
+
+## Duration editing revision — 2026-11-03
+
+Remove Duration readOnly metadata. Limit attachment duration synchronization to changed audio/source or missing duration. Preserve the resolved duration across AI content synchronization. Keep generated-audio publication behavior. Update README, regenerate Payload types, run focused audio tests and static checks. No database migration or import-map input change is needed.
+
+## Unsaved audio completion fix — 2026-11-03
+
+Add matching completion checks to the episode save UI and collection hook using persisted pending audio. Remove source-video playback mapping from both AI synchronization paths; preserve explicit existing media. Add regression tests and run focused suites/static checks. No schema migration.

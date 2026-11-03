@@ -122,7 +122,10 @@ export function mapTranscriptToLines(raw: string | null | undefined): Transcript
     // Skip ## video URL section headers from the pipeline append format.
     if (/^##\s+\S/.test(trimmedBlock) && !trimmedBlock.includes('\n')) continue
 
-    const rows = trimmedBlock.split('\n').map((line) => line.trim()).filter(Boolean)
+    const rows = trimmedBlock
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean)
     let buffer = ''
 
     const flushParagraph = () => {
@@ -177,8 +180,6 @@ export async function syncPipelineToEpisode(
   if (!title || channelId == null) return null
 
   const slug = slugifyPodcastTitle(title) || `episode-${doc.id}`
-  const firstVideo =
-    (doc.videoLinks ?? []).map((item) => item.url?.trim()).find((url) => Boolean(url)) || ''
   const summary = typeof doc.summary === 'string' ? doc.summary.trim() : ''
   const systemOpinion = typeof doc.systemOpinion === 'string' ? doc.systemOpinion.trim() : ''
   const mainPoints = mapMainPoints(doc.mainPoints)
@@ -212,28 +213,11 @@ export async function syncPipelineToEpisode(
     sortOrder: 0,
   }
 
-  const videoAudio = {
-    mediaUrl: firstVideo || undefined,
-    audioSource: 'url' as const,
-  }
-
   async function updateEpisodePreservingGeneratedAudio(episodeId: number) {
-    const existing = await req.payload.findByID({
-      collection: 'podcast-episodes',
-      id: episodeId,
-      depth: 0,
-      overrideAccess: true,
-      req,
-    })
-    const keepGeneratedAudio =
-      existing?.audioSource === 'upload' ||
-      (typeof existing?.audio === 'number' && existing.audio > 0) ||
-      (existing?.audio && typeof existing.audio === 'object')
-
     await req.payload.update({
       collection: 'podcast-episodes',
       id: episodeId,
-      data: keepGeneratedAudio ? baseData : { ...baseData, ...videoAudio },
+      data: baseData,
       depth: 0,
       overrideAccess: true,
       req,
@@ -260,7 +244,7 @@ export async function syncPipelineToEpisode(
 
   const created = await req.payload.create({
     collection: 'podcast-episodes',
-    data: { ...baseData, ...videoAudio },
+    data: baseData,
     depth: 0,
     overrideAccess: true,
     req,

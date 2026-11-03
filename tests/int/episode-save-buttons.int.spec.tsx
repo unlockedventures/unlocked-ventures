@@ -62,6 +62,32 @@ describe('Episode save actions after AI generation', () => {
     },
   )
 
+  it('requires explicitly saving a generated preview before completion', () => {
+    state.fields.pendingAudio = { value: 99 }
+    const view = render(<EpisodeSaveButtons />)
+    expect(screen.getByRole('button', { name: 'Save as Complete' })).toBeDisabled()
+    expect(screen.getByRole('status')).toHaveTextContent('Save Generated Audio')
+    fireEvent.click(screen.getByRole('button', { name: 'Save as Complete' }))
+    expect(state.submit).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByRole('button', { name: 'Save as Draft' }))
+    expect(state.submit).toHaveBeenCalledWith({ overrides: { episodeStatus: 'draft' } })
+    state.fields.pendingAudio = { value: null }
+    view.rerender(<EpisodeSaveButtons />)
+    expect(screen.getByRole('button', { name: 'Save as Complete' })).toBeEnabled()
+  })
+
+  it('requires saved audio for AI episodes even without a pending preview', () => {
+    state.fields.editorMode = { value: 'ai' }
+    state.fields.audioSource = { value: 'url' }
+    const view = render(<EpisodeSaveButtons />)
+    expect(screen.getByRole('button', { name: 'Save as Complete' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Save as Draft' })).toBeEnabled()
+    state.fields.audioSource = { value: 'upload' }
+    state.fields.audio = { value: 42 }
+    view.rerender(<EpisodeSaveButtons />)
+    expect(screen.getByRole('button', { name: 'Save as Complete' })).toBeEnabled()
+  })
+
   it('waits while a file is uploading', () => {
     state.uploadStatus = 'uploading'
     render(<EpisodeSaveButtons />)

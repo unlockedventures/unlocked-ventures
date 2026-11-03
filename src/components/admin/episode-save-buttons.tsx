@@ -34,6 +34,11 @@ export function EpisodeSaveButtons() {
   const generating =
     status === 'processing' || scriptStatus === 'processing' || audioStatus === 'processing'
   const busy = generating || uploadStatus === 'uploading'
+  const unsavedAudio = Boolean(fields.pendingAudio?.value)
+  const missingAiAudio =
+    fields.editorMode?.value === 'ai' &&
+    (fields.audioSource?.value !== 'upload' || !fields.audio?.value)
+  const audioNeedsSaving = unsavedAudio || missingAiAudio
 
   useHotkey({ cmdCtrlKey: true, editDepth, keyCodes: ['s'] }, (e) => {
     e.preventDefault()
@@ -43,7 +48,7 @@ export function EpisodeSaveButtons() {
   })
 
   async function saveAs(episodeStatus: 'draft' | 'complete') {
-    if (busy || !canSave) return
+    if (busy || !canSave || (episodeStatus === 'complete' && audioNeedsSaving)) return
     await submit({ overrides: { episodeStatus } })
   }
 
@@ -65,7 +70,7 @@ export function EpisodeSaveButtons() {
       </FormSubmit>
       <FormSubmit
         buttonId="action-save-complete"
-        disabled={busy}
+        disabled={busy || audioNeedsSaving}
         onClick={() => {
           void saveAs('complete')
         }}
@@ -75,6 +80,13 @@ export function EpisodeSaveButtons() {
       >
         Save as Complete
       </FormSubmit>
+      {audioNeedsSaving && !generating ? (
+        <span role="status">
+          {unsavedAudio
+            ? 'Select “Save Generated Audio” before saving as complete. You can still save a draft.'
+            : 'Generate and save episode audio before saving as complete. You can still save a draft.'}
+        </span>
+      ) : null}
       {generating ? (
         <span role="status">Generation is in progress. You can save when it finishes.</span>
       ) : null}

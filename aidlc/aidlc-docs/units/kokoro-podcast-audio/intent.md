@@ -72,3 +72,11 @@ an ElevenLabs API key.
 - Final production compute and resource limits remain deployment decisions. The development image is
   pinned to Kokoro-FastAPI `v0.9.0`.
 - English voice choices and pronunciation quality must be accepted using representative UV scripts.
+
+## Duration editing follow-up — 2026-11-03
+
+Editors may override the automatically populated Duration. Preserve overrides on ordinary saves; attaching replacement audio populates its measured duration. Status: done.
+
+## Unsaved audio completion fix — 2026-11-03
+
+Prevent AI episodes being completed with unsaved audio or source-video playback. Status: done.
