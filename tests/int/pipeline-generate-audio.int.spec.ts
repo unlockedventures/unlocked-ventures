@@ -16,8 +16,8 @@ const sampleScript: PodcastVideoScript = {
   format: 'podcast_video',
   title: 'Sample Show',
   speakers: {
-    host: { role: 'host', gender: 'male' },
-    guest: { role: 'guest', gender: 'female' },
+    host: { role: 'host' },
+    guest: { role: 'guest' },
   },
   estimatedWordCount: 20,
   estimatedDurationSeconds: 30,

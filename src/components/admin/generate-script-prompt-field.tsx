@@ -5,7 +5,6 @@ import { useState } from 'react'
 
 import { useSourceSummary } from '@/components/admin/use-source-summary'
 import { podcastScriptPromptRevision } from '@/pipeline/prompt-revision'
-import { isSpeakerGender } from '@/pipeline/script-schema'
 
 export function GenerateScriptPromptField() {
   const { id } = useDocumentInfo()
@@ -14,27 +13,20 @@ export function GenerateScriptPromptField() {
   const { source, current } = useSourceSummary(fields)
   const [pending, setPending] = useState(false)
   const [message, setMessage] = useState('')
-  const hostGender = String(fields.hostGender?.value ?? '')
-  const guestGender = String(fields.guestGender?.value ?? '')
   const prompt = String(fields.scriptPrompt?.value ?? '').trim()
   const promptRevision = String(fields.scriptPromptRevision?.value ?? '')
-  const gendersValid = isSpeakerGender(hostGender) && isSpeakerGender(guestGender)
-  const expectedRevision = podcastScriptPromptRevision({
-    sourceSummary: source.sourceSummary,
-    hostGender,
-    guestGender,
-  })
-  const promptCurrent = Boolean(prompt && gendersValid && promptRevision === expectedRevision)
+  const expectedRevision = podcastScriptPromptRevision({ sourceSummary: source.sourceSummary })
+  const promptCurrent = Boolean(prompt && promptRevision === expectedRevision)
   const busy =
     pending ||
     ['status', 'scriptStatus', 'audioStatus', 'sourceSummaryStatus'].some(
       (path) => fields[path]?.value === 'processing',
     )
   const canUpdate = permissions?.collections?.['podcast-episodes']?.update === true
-  const disabled = !id || busy || !current || !source.sourceSummary.trim() || !gendersValid
+  const disabled = !id || busy || !current || !source.sourceSummary.trim()
 
   async function generatePrompt() {
-    if (disabled || id == null || !gendersValid) return
+    if (disabled || id == null) return
     setPending(true)
     setMessage('Generating an editable podcast-script prompt…')
     try {
@@ -44,8 +36,6 @@ export function GenerateScriptPromptField() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           id,
-          hostGender,
-          guestGender,
           sourceSummary: source.sourceSummary,
           sourceSummaryRevision: source.sourceSummaryRevision,
         }),
@@ -76,13 +66,11 @@ export function GenerateScriptPromptField() {
   if (!canUpdate) return null
   const hint = !current
     ? 'Generate a current source summary first.'
-    : !gendersValid
-      ? 'Choose host and guest genders first.'
-      : prompt && !promptCurrent
-        ? 'Summary or speaker settings changed. Regenerate this prompt.'
-        : promptCurrent
-          ? 'Prompt is current and editable.'
-          : ''
+    : prompt && !promptCurrent
+      ? 'Prompt is out of date. Regenerate this prompt.'
+      : promptCurrent
+        ? 'Prompt is current and editable.'
+        : ''
 
   return (
     <div className="field-type ui">

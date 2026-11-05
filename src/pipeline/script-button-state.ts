@@ -2,8 +2,6 @@ export function scriptButtonState(args: {
   saved: boolean
   hasTranscript: boolean
   hasCurrentSourceSummary?: boolean
-  hasHostGender: boolean
-  hasGuestGender: boolean
   scriptStatus: string | null | undefined
   /** Transcript pipeline status — disable script generation while a transcript is running. */
   transcriptStatus?: string | null
@@ -31,12 +29,6 @@ export function scriptButtonState(args: {
     return {
       disabled: true,
       hint: 'Generate a transcript before creating a podcast script.',
-    }
-  }
-  if (!args.hasHostGender || !args.hasGuestGender) {
-    return {
-      disabled: true,
-      hint: 'Choose a host gender and a guest gender before creating a podcast script.',
     }
   }
   if (args.pending || args.scriptStatus === 'processing') {

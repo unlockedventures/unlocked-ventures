@@ -8,12 +8,6 @@ function stableHash(value: string) {
   return (hash >>> 0).toString(16).padStart(8, '0')
 }
 
-export function podcastScriptPromptRevision(args: {
-  sourceSummary: string
-  hostGender: string
-  guestGender: string
-}) {
-  return `v1-${stableHash(
-    JSON.stringify([args.sourceSummary.trim(), args.hostGender.trim(), args.guestGender.trim()]),
-  )}`
+export function podcastScriptPromptRevision(args: { sourceSummary: string }) {
+  return `v2-${stableHash(JSON.stringify([args.sourceSummary.trim()]))}`
 }

@@ -3,7 +3,6 @@ import {
   defaultGeminiGenerate,
   type GeminiGenerateFn,
 } from '@/pipeline/generate-script'
-import type { SpeakerGender } from '@/pipeline/script-schema'
 import { validateEditorPrompt } from '@/pipeline/prompt-constraints'
 
 async function generatePrompt(args: {
@@ -47,8 +46,6 @@ ${args.transcript}
 
 export function generatePodcastScriptPrompt(args: {
   sourceSummary: string
-  hostGender: SpeakerGender
-  guestGender: SpeakerGender
   apiKey: string
   model?: string
   generate?: GeminiGenerateFn
@@ -57,7 +54,6 @@ export function generatePodcastScriptPrompt(args: {
     ...args,
     request: `Create an editable editorial brief for another AI model that will turn the source summary below into a two-person podcast script.
 The brief should suggest audience, tone, narrative flow, opening, discussion emphasis, host/guest dynamic and closing.
-Host gender: ${args.hostGender}. Guest gender: ${args.guestGender}.
 Do not write the script. Do not include JSON schema or security instructions; the application supplies those separately.
 Return JSON only: { "prompt": "the proposed editorial brief" }.
 

@@ -6,7 +6,6 @@ import {
   parseScriptEnvelope,
   ScriptValidationError,
   toPointRows,
-  withAdminSpeakers,
 } from '@/pipeline/script-schema'
 
 const validEnvelope = {
@@ -45,8 +44,8 @@ describe('parseScriptEnvelope', () => {
   it('accepts a valid host/guest envelope', () => {
     const parsed = parseScriptEnvelope(validEnvelope)
     expect(parsed.script.title).toBe('Cost reduction story')
-    expect(parsed.script.speakers.host.gender).toBe('male')
-    expect(parsed.script.speakers.guest.gender).toBe('female')
+    // Legacy speakers.*.gender values are accepted and dropped.
+    expect(parsed.script.speakers).toEqual({ host: { role: 'host' }, guest: { role: 'guest' } })
     expect(parsed.script.sections[0]?.turns).toHaveLength(2)
     expect(parsed.disagreementPoints).toEqual([])
     expect(formatScriptJson(parsed.script)).toContain('"speaker": "host"')
@@ -117,15 +116,5 @@ describe('parseScriptEnvelope', () => {
   it('maps point rows both ways', () => {
     expect(toPointRows(['A', 'B'])).toEqual([{ point: 'A' }, { point: 'B' }])
     expect(fromPointRows([{ point: 'A' }, { point: '  ' }, { point: 'B' }])).toEqual(['A', 'B'])
-  })
-
-  it('overrides speakers with admin genders', () => {
-    const parsed = parseScriptEnvelope(validEnvelope)
-    const overridden = withAdminSpeakers(parsed.script, {
-      hostGender: 'female',
-      guestGender: 'male',
-    })
-    expect(overridden.speakers.host.gender).toBe('female')
-    expect(overridden.speakers.guest.gender).toBe('male')
   })
 })

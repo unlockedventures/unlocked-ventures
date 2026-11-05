@@ -42,13 +42,9 @@
 }
 
 /* Match leaf inputs only: collapsible ancestors also contain these IDs. */
-.uv-pipeline-transcribing .field-type.select:has(#field-hostGender),
-.uv-pipeline-transcribing .field-type.select:has(#field-guestGender),
 .uv-pipeline-transcribing .field-type.textarea:has(#field-scriptJson),
 .uv-pipeline-transcribing .field-type.textarea:has(#field-summary),
 .uv-pipeline-transcribing .field-type.textarea:has(#field-systemOpinion),
-.uv-pipeline-transcribing #field-hostGender,
-.uv-pipeline-transcribing #field-guestGender,
 .uv-pipeline-transcribing #field-mainPoints,
 .uv-pipeline-transcribing #field-contrastingPoints,
 .uv-pipeline-transcribing #field-disagreementPoints {

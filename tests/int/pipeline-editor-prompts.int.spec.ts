@@ -22,7 +22,7 @@ describe('editable Gemini prompt drafting', () => {
     expect(request).toContain('<source_transcript>')
   })
 
-  it('drafts a script brief with speaker context', async () => {
+  it('drafts a script brief from the source summary', async () => {
     let request = ''
     const generate: GeminiGenerateFn = async ({ prompt }) => {
       request = prompt
@@ -31,13 +31,12 @@ describe('editable Gemini prompt drafting', () => {
     await expect(
       generatePodcastScriptPrompt({
         sourceSummary: 'Current summary',
-        hostGender: 'female',
-        guestGender: 'male',
         apiKey: 'key',
         generate,
       }),
     ).resolves.toBe('Use a curious, practical tone.')
-    expect(request).toContain('Host gender: female')
+    expect(request).toContain('<source_summary>')
+    expect(request).not.toMatch(/gender/i)
   })
 
   it('rejects malformed or empty prompt output', async () => {
@@ -50,26 +49,10 @@ describe('editable Gemini prompt drafting', () => {
     ).rejects.toThrow('Generate or enter a prompt first')
   })
 
-  it('changes the script prompt revision with summary or speaker inputs', () => {
-    const base = podcastScriptPromptRevision({
-      sourceSummary: 'Summary A',
-      hostGender: 'female',
-      guestGender: 'male',
-    })
-    expect(
-      podcastScriptPromptRevision({
-        sourceSummary: 'Summary B',
-        hostGender: 'female',
-        guestGender: 'male',
-      }),
-    ).not.toBe(base)
-    expect(
-      podcastScriptPromptRevision({
-        sourceSummary: 'Summary A',
-        hostGender: 'male',
-        guestGender: 'female',
-      }),
-    ).not.toBe(base)
+  it('changes the script prompt revision with the summary', () => {
+    const base = podcastScriptPromptRevision({ sourceSummary: 'Summary A' })
+    expect(podcastScriptPromptRevision({ sourceSummary: ' Summary A ' })).toBe(base)
+    expect(podcastScriptPromptRevision({ sourceSummary: 'Summary B' })).not.toBe(base)
   })
 
   it('rejects an oversized editor prompt without truncating it', () => {

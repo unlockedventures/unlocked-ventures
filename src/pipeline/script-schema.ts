@@ -1,9 +1,7 @@
-export type SpeakerGender = 'male' | 'female'
 export type SpeakerRole = 'host' | 'guest'
 
 export type PodcastSpeaker = {
   role: SpeakerRole
-  gender: SpeakerGender
 }
 
 export type PodcastDialogueTurn = {
@@ -127,13 +125,6 @@ function asStringArray(value: unknown, label: string, max?: number): string[] {
   return items
 }
 
-export function parseSpeakerGender(value: unknown, label: string): SpeakerGender {
-  if (value !== 'male' && value !== 'female') {
-    throw new ScriptValidationError(`${label} must be "male" or "female".`)
-  }
-  return value
-}
-
 function parseSpeaker(value: unknown, expectedRole: SpeakerRole): PodcastSpeaker {
   const row = asRecord(value)
   if (!row) throw new ScriptValidationError(`speakers.${expectedRole} must be an object.`)
@@ -141,10 +132,7 @@ function parseSpeaker(value: unknown, expectedRole: SpeakerRole): PodcastSpeaker
   if (role !== expectedRole) {
     throw new ScriptValidationError(`speakers.${expectedRole}.role must be "${expectedRole}".`)
   }
-  return {
-    role: expectedRole,
-    gender: parseSpeakerGender(row.gender, `speakers.${expectedRole}.gender`),
-  }
+  return { role: expectedRole }
 }
 
 function parseTurn(value: unknown, sectionIndex: number, turnIndex: number): PodcastDialogueTurn {
@@ -268,20 +256,6 @@ export function parseScriptEnvelope(value: unknown): ScriptEnvelope {
   }
 }
 
-/** Force script speakers to match admin-selected genders. */
-export function withAdminSpeakers(
-  script: PodcastVideoScript,
-  genders: { hostGender: SpeakerGender; guestGender: SpeakerGender },
-): PodcastVideoScript {
-  return {
-    ...script,
-    speakers: {
-      host: { role: 'host', gender: genders.hostGender },
-      guest: { role: 'guest', gender: genders.guestGender },
-    },
-  }
-}
-
 export function formatScriptJson(script: PodcastVideoScript): string {
   return JSON.stringify(script, null, 2)
 }
@@ -295,8 +269,4 @@ export function fromPointRows(rows: { point?: string | null }[] | null | undefin
   return rows
     .map((row) => (typeof row?.point === 'string' ? row.point.trim() : ''))
     .filter((point) => point !== '')
-}
-
-export function isSpeakerGender(value: unknown): value is SpeakerGender {
-  return value === 'male' || value === 'female'
 }

@@ -12,7 +12,6 @@ import {
 } from '@/pipeline/generate-editor-prompts'
 import { podcastScriptPromptRevision } from '@/pipeline/prompt-revision'
 import { validateEditorPrompt } from '@/pipeline/prompt-constraints'
-import { isSpeakerGender } from '@/pipeline/script-schema'
 import { requestTranscript } from '@/pipeline/request-transcript'
 import {
   createGeneratedAudioPreview,
@@ -37,8 +36,6 @@ type EpisodeAiDoc = SourceSummaryDoc & {
   sourceTranscript?: string | null
   scriptJson?: string | null
   systemOpinion?: string | null
-  hostGender?: string | null
-  guestGender?: string | null
   hostVoiceId?: string | null
   guestVoiceId?: string | null
   videoLinks?: VideoResource[] | null
@@ -400,8 +397,6 @@ const episodeGenerationEndpoints: Endpoint[] = [
     handler: async (req) => {
       const body = (req.json ? await req.json().catch(() => null) : null) as {
         id?: number | string
-        hostGender?: unknown
-        guestGender?: unknown
         sourceSummary?: unknown
         sourceSummaryRevision?: unknown
       } | null
@@ -417,26 +412,13 @@ const episodeGenerationEndpoints: Endpoint[] = [
         return Response.json({ error: 'Generate a current source summary first.' }, { status: 400 })
       }
       const sourceSummary = typeof body.sourceSummary === 'string' ? body.sourceSummary.trim() : ''
-      if (
-        !sourceSummary ||
-        !isSpeakerGender(body.hostGender) ||
-        !isSpeakerGender(body.guestGender)
-      ) {
-        return Response.json(
-          { error: 'Add a source summary and choose host and guest genders first.' },
-          { status: 400 },
-        )
+      if (!sourceSummary) {
+        return Response.json({ error: 'Add a source summary first.' }, { status: 400 })
       }
-      const promptRevision = podcastScriptPromptRevision({
-        sourceSummary,
-        hostGender: body.hostGender,
-        guestGender: body.guestGender,
-      })
+      const promptRevision = podcastScriptPromptRevision({ sourceSummary })
       try {
         const prompt = await generatePodcastScriptPrompt({
           sourceSummary,
-          hostGender: body.hostGender,
-          guestGender: body.guestGender,
           apiKey: process.env.GEMINI_API_KEY?.trim() ?? '',
           model: process.env.GEMINI_MODEL?.trim() || undefined,
         })
@@ -459,8 +441,6 @@ const episodeGenerationEndpoints: Endpoint[] = [
           id: body.id,
           data: {
             sourceSummary,
-            hostGender: body.hostGender,
-            guestGender: body.guestGender,
             scriptPrompt: prompt,
             scriptPromptRevision: promptRevision,
           },
@@ -496,8 +476,6 @@ const episodeGenerationEndpoints: Endpoint[] = [
 
       const body = (req.json ? await req.json().catch(() => null) : null) as {
         id?: number | string
-        hostGender?: unknown
-        guestGender?: unknown
         sourceSummary?: unknown
         sourceSummaryRevision?: unknown
         scriptPrompt?: unknown
@@ -533,13 +511,7 @@ const episodeGenerationEndpoints: Endpoint[] = [
       if ('error' in promptValidation) {
         return Response.json({ error: promptValidation.error }, { status: 400 })
       }
-      const expectedPromptRevision = podcastScriptPromptRevision({
-        sourceSummary,
-        hostGender: isSpeakerGender(body?.hostGender) ? body.hostGender : (doc.hostGender ?? ''),
-        guestGender: isSpeakerGender(body?.guestGender)
-          ? body.guestGender
-          : (doc.guestGender ?? ''),
-      })
+      const expectedPromptRevision = podcastScriptPromptRevision({ sourceSummary })
       if (body?.scriptPromptRevision !== expectedPromptRevision) {
         return Response.json(
           { error: 'Generate or update a current podcast-script prompt first.' },
@@ -570,14 +542,10 @@ const episodeGenerationEndpoints: Endpoint[] = [
           ? ({
               id: doc.id,
               transcript: sourceSummary,
-              hostGender: doc.hostGender,
-              guestGender: doc.guestGender,
               status: doc.status,
               scriptStatus: doc.scriptStatus as ScriptPipelineDoc['scriptStatus'],
             } satisfies ScriptPipelineDoc)
           : null,
-        hostGender: body?.hostGender,
-        guestGender: body?.guestGender,
         save: async (data) => {
           if (data.scriptStatus === 'ready') {
             const current = await loadEpisode(req, id)
@@ -616,12 +584,10 @@ const episodeGenerationEndpoints: Endpoint[] = [
             },
           })
         },
-        generate: ({ transcript, hostGender, guestGender }) =>
+        generate: ({ transcript }) =>
           generateScriptFromTranscript({
             transcript,
             sourceKind: 'source summary',
-            hostGender,
-            guestGender,
             apiKey: process.env['GEMINI_API_KEY']?.trim() ?? '',
             model: process.env['GEMINI_MODEL']?.trim() || undefined,
             editorPrompt: promptValidation.prompt,
