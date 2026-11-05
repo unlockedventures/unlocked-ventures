@@ -104,6 +104,48 @@ Stop the app with `docker compose down`. Follow the logs with `docker compose lo
 
 `PAYLOAD_SECRET` should be a long random string (`openssl rand -hex 32`). `.env` stays on your machine. Do not commit it.
 
+### Export and import a project database
+
+To share a copy of the current Docker-backed project data, run this from the repository root
+while the PostgreSQL service is running:
+
+```bash
+pnpm db:export
+```
+
+The command creates a timestamped archive under `backups/`. It contains the full PostgreSQL
+database and local Payload uploads from `media/`. You can provide a destination path instead:
+
+```bash
+pnpm db:export backups/shareable-copy.tar.gz
+```
+
+This is a full data snapshot, not a sanitized content export. It includes account records and
+contact submissions and may contain personal or confidential information. Share it only with a
+trusted recipient over a secure channel. The archive is ignored by Git; do not commit it. It does
+not include `.env`, `PAYLOAD_SECRET`, integration credentials, or PostgreSQL cluster roles. The
+recipient must provide their own environment variables and use a compatible project version.
+
+To import the archive into another Docker-backed project checkout, copy the archive there, then
+start only its PostgreSQL service before starting the application:
+
+```bash
+docker compose up -d postgres
+pnpm db:import backups/shareable-copy.tar.gz
+docker compose up -d app
+```
+
+Import must happen before the app has initialized the database. The importer refuses to run while
+the app is running, when the target database already contains tables, or when the destination
+`media/` directory is non-empty. It does not drop existing database objects or overwrite existing
+uploads. If the recipient already has data, they must back up that data and arrange a separate
+empty target database before importing. Database and upload files are restored separately, so a
+filesystem failure after database restoration may require completing the upload copy manually.
+
+The export/import commands require Bash, Docker Compose, and a running PostgreSQL container; no
+host PostgreSQL client is needed. They do not export PostgreSQL users/roles or environment
+configuration.
+
 ## Run without Docker
 
 ### Prerequisites
@@ -188,6 +230,8 @@ The app listens on port 3000.
 | `pnpm lint`                         | Run ESLint                                                   |
 | `pnpm exec tsc --noEmit`            | Check TypeScript                                             |
 | `pnpm ensure-schema`                | Apply additive schema compatibility updates                  |
+| `pnpm db:export`                    | Export the Docker database and local uploads to `backups/`   |
+| `pnpm db:import <archive>`          | Import an archive into an empty Docker database              |
 | `pnpm migrate`                      | Run Payload migrations                                       |
 | `pnpm generate:types`               | Regenerate Payload types after schema changes                |
 | `pnpm generate:importmap`           | Regenerate the admin component import map                    |
