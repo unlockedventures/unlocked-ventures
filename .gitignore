@@ -8,6 +8,7 @@
 # local environment
 .env
 .env*.local
+/backups/
 
 # next.js
 /.next/
