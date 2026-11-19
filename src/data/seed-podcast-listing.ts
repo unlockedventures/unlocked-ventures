@@ -2,6 +2,7 @@ import path from 'path'
 import type { Payload } from 'payload'
 
 import { ensurePodcastChannel } from '@/data/ensure-podcast-channel'
+import type { PodcastEpisode } from '@/payload-types'
 import { uploadPublicFile as createPublicFile } from '@/data/upload-public-file'
 
 const listingSeed = {
@@ -219,32 +220,31 @@ export async function seedPodcastListing(payload: Payload) {
 
   const episodes = await payload.find({
     collection: 'podcast-episodes',
-    limit: 100,
+    pagination: false,
     depth: 0,
   })
 
+  // Starter defaults only: never overwrite saved episodes, including editor channel choices.
   for (const episode of episodes.docs) {
-    const slug = episode.slug
-    if (!slug) continue
-    const meta = episodeMeta[slug] ?? {
-      category: 'Digital engineering',
-      excerpt: episode.about || episode.title || '',
-      stats: '48K plays · 2 weeks ago',
+    const meta = episode.slug ? episodeMeta[episode.slug] : undefined
+    if (!meta) continue
+
+    const isEmpty = (value: string | null | undefined) => !value?.trim()
+    // A starter episode without an excerpt has not received its listing defaults yet.
+    const initializing = isEmpty(episode.excerpt)
+    const data: Partial<PodcastEpisode> = {}
+    if (initializing) {
+      data.channel = await ensurePodcastChannel(payload, meta.category)
+      data.heroFeatured = Boolean(meta.heroFeatured)
+      if (meta.title) data.title = meta.title
     }
-    const channelId = await ensurePodcastChannel(payload, meta.category)
-    await payload.update({
-      collection: 'podcast-episodes',
-      id: episode.id,
-      data: {
-        ...(meta.title ? { title: meta.title } : {}),
-        channel: channelId,
-        category: meta.category,
-        excerpt: meta.excerpt,
-        stats: meta.stats,
-        heroFeatured: Boolean(meta.heroFeatured),
-        ...(meta.summary ? { summary: meta.summary } : {}),
-        ...(meta.mainPoints?.length ? { mainPoints: meta.mainPoints } : {}),
-      },
-    })
+    if (isEmpty(episode.category)) data.category = meta.category
+    if (initializing) data.excerpt = meta.excerpt
+    if (isEmpty(episode.stats)) data.stats = meta.stats
+    if (meta.summary && isEmpty(episode.summary)) data.summary = meta.summary
+    if (meta.mainPoints?.length && !episode.mainPoints?.length) data.mainPoints = meta.mainPoints
+    if (!Object.keys(data).length) continue
+
+    await payload.update({ collection: 'podcast-episodes', id: episode.id, data })
   }
 }

@@ -27,7 +27,7 @@ if (!thumbnails.length) throw new Error('An existing episode thumbnail is needed
 let created = 0
 let skipped = 0
 for (const channel of channels.docs) {
-  for (let index = 1; index <= 12; index += 1) {
+  for (let index = 1; index <= 13; index += 1) {
     const slug = `ui-scroll-demo-${channel.id}-${String(index).padStart(2, '0')}`
     const existing = await payload.find({
       collection: 'podcast-episodes',
