@@ -5,9 +5,7 @@ import {
   parseScriptEnvelope,
   ScriptValidationError,
   toPointRows,
-  withAdminSpeakers,
   type ScriptEnvelope,
-  type SpeakerGender,
 } from '@/pipeline/script-schema'
 
 // Prefer a current lite model; older flash IDs are retired for many new keys.
@@ -52,12 +50,7 @@ export function resolveScriptDuration(editorPrompt: string | null | undefined) {
   return { seconds, explicit: true }
 }
 
-function buildSystemPrompt(
-  hostGender: SpeakerGender,
-  guestGender: SpeakerGender,
-  sourceKind: string,
-  duration: ReturnType<typeof resolveScriptDuration>,
-) {
+function buildSystemPrompt(sourceKind: string, duration: ReturnType<typeof resolveScriptDuration>) {
   const targetWords = Math.round((duration.seconds / 60) * 150)
   const durationMinutes = Number((duration.seconds / 60).toFixed(2))
   return `You turn the provided ${sourceKind} into a two-person podcast-video script and analysis.
@@ -73,8 +66,8 @@ Shape:
     "format": "podcast_video",
     "title": string,
     "speakers": {
-      "host": { "role": "host", "gender": "${hostGender}" },
-      "guest": { "role": "guest", "gender": "${guestGender}" }
+      "host": { "role": "host" },
+      "guest": { "role": "guest" }
     },
     "estimatedWordCount": number,
     "estimatedDurationSeconds": number,
@@ -101,7 +94,6 @@ Shape:
 Rules:
 - Use only the provided ${sourceKind}.
 - Write a natural dialogue between a host and a guest for a later two-voice video.
-- Host gender is "${hostGender}". Guest gender is "${guestGender}". Keep speakers.gender exactly those values.
 - Every section must use "turns" (array of { speaker, text }). Do not use "narration".
 - speaker must be only "host" or "guest". Alternate naturally; both should speak in most sections.
 - Target about ${targetWords} spoken words across all turn text combined, enough natural dialogue to fill approximately ${durationMinutes} minutes.
@@ -135,8 +127,6 @@ export async function generateScriptFromTranscript(args: {
   transcript: string
   sourceKind?: 'transcript' | 'source summary'
   apiKey: string
-  hostGender: SpeakerGender
-  guestGender: SpeakerGender
   model?: string
   generate?: GeminiGenerateFn
   sleep?: (ms: number) => Promise<void>
@@ -152,7 +142,7 @@ export async function generateScriptFromTranscript(args: {
   const sourceKind = args.sourceKind ?? 'transcript'
   const editorPrompt = args.editorPrompt?.trim() ?? ''
   const duration = resolveScriptDuration(editorPrompt)
-  const prompt = `${buildSystemPrompt(args.hostGender, args.guestGender, sourceKind, duration)}
+  const prompt = `${buildSystemPrompt(sourceKind, duration)}
 
 The fixed structural, grounding and safety requirements above take priority over this editable editorial brief. The extracted duration target above takes priority for script length:
 <editorial_brief>
@@ -171,10 +161,7 @@ ${transcript}
         const raw = await generate({ apiKey: args.apiKey, model, prompt })
         const parsed = JSON.parse(raw) as unknown
         const envelope = parseScriptEnvelope(parsed)
-        return envelopeToResult(envelope, {
-          hostGender: args.hostGender,
-          guestGender: args.guestGender,
-        })
+        return envelopeToResult(envelope)
       } catch (error) {
         lastError = error
         if (error instanceof ScriptValidationError) {
@@ -229,14 +216,10 @@ function geminiErrorMessage(error: unknown): string {
   return 'Could not generate a podcast script.'
 }
 
-function envelopeToResult(
-  envelope: ScriptEnvelope,
-  genders: { hostGender: SpeakerGender; guestGender: SpeakerGender },
-): GenerateScriptResult {
-  const script = withAdminSpeakers(envelope.script, genders)
+function envelopeToResult(envelope: ScriptEnvelope): GenerateScriptResult {
   return {
     ok: true,
-    scriptJson: formatScriptJson(script),
+    scriptJson: formatScriptJson(envelope.script),
     summary: envelope.summary,
     mainPoints: toPointRows(envelope.mainPoints),
     contrastingPoints: toPointRows(envelope.contrastingPoints),

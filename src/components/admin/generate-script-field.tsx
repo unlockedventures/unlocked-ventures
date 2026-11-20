@@ -6,7 +6,6 @@ import { useEffect, useRef, useState } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useSourceSummary } from '@/components/admin/use-source-summary'
 import { scriptButtonState } from '@/pipeline/script-button-state'
-import { isSpeakerGender } from '@/pipeline/script-schema'
 import { podcastScriptPromptRevision } from '@/pipeline/prompt-revision'
 import { validateEditorPrompt } from '@/pipeline/prompt-constraints'
 
@@ -117,14 +116,10 @@ export function GenerateScriptField() {
   const scriptStatus = fieldText(fields.scriptStatus?.value) || 'idle'
   const scriptStatusMessage = fieldText(fields.scriptStatusMessage?.value)
   const transcriptStatus = fieldText(fields.status?.value) || 'idle'
-  const hostGender = fieldText(fields.hostGender?.value)
-  const guestGender = fieldText(fields.guestGender?.value)
   const scriptPrompt = fieldText(fields.scriptPrompt?.value)
   const scriptPromptRevision = fieldText(fields.scriptPromptRevision?.value)
   const expectedPromptRevision = podcastScriptPromptRevision({
     sourceSummary: source.sourceSummary,
-    hostGender,
-    guestGender,
   })
   const promptValidation = validateEditorPrompt(scriptPrompt)
   const promptError = 'error' in promptValidation ? promptValidation.error : ''
@@ -150,8 +145,6 @@ export function GenerateScriptField() {
     saved: id != null && id !== '',
     hasTranscript: source.sourceSummary.trim() !== '',
     hasCurrentSourceSummary: current,
-    hasHostGender: isSpeakerGender(hostGender),
-    hasGuestGender: isSpeakerGender(guestGender),
     scriptStatus,
     transcriptStatus,
     pending:
@@ -219,10 +212,6 @@ export function GenerateScriptField() {
       setLocalMessage('Add a nonblank source summary before creating a podcast script.')
       return
     }
-    if (!isSpeakerGender(hostGender) || !isSpeakerGender(guestGender)) {
-      setLocalMessage('Choose a host gender and a guest gender before creating a podcast script.')
-      return
-    }
     const promptInput = document.querySelector<HTMLTextAreaElement>('#field-scriptPrompt')
     const livePrompt = (promptInput ? promptInput.value : scriptPrompt).trim()
     setLocalMessage(null)
@@ -242,8 +231,6 @@ export function GenerateScriptField() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           id,
-          hostGender,
-          guestGender,
           sourceSummary,
           sourceSummaryRevision: source.sourceSummaryRevision,
           scriptPrompt: livePrompt,

@@ -40,12 +40,10 @@ const geminiPayload = {
 }
 
 describe('generateScriptFromTranscript', () => {
-  it('returns mapped fields on success and keeps admin genders', async () => {
+  it('returns mapped fields on success without speaker gender', async () => {
     const result = await generateScriptFromTranscript({
       transcript: 'Raw transcript text',
       apiKey: 'key',
-      hostGender: 'female',
-      guestGender: 'male',
       generate: async () => JSON.stringify(geminiPayload),
     })
     expect(result.ok).toBe(true)
@@ -53,7 +51,7 @@ describe('generateScriptFromTranscript', () => {
     expect(result.summary).toContain('This episode opens')
     expect(result.mainPoints).toEqual([{ point: 'One' }])
     expect(result.scriptJson).toContain('podcast_video')
-    expect(result.scriptJson).toContain('"gender": "female"')
+    expect(result.scriptJson).not.toContain('gender')
     expect(result.scriptJson).toContain('"speaker": "host"')
     expect(applyAiContentToEpisode({ scriptJson: result.scriptJson }).transcript).toEqual([
       { time: '0:00', speaker: 'Host', text: 'Welcome to the show.' },
@@ -65,8 +63,6 @@ describe('generateScriptFromTranscript', () => {
     const result = await generateScriptFromTranscript({
       transcript: 'Raw transcript text',
       apiKey: '',
-      hostGender: 'male',
-      guestGender: 'female',
     })
     expect(result).toEqual({ ok: false, error: 'Gemini is not configured.' })
   })
@@ -78,8 +74,6 @@ describe('generateScriptFromTranscript', () => {
       editorPrompt:
         'Create a 6-minute conversation for a skeptical executive audience and end with three takeaways.',
       apiKey: 'key',
-      hostGender: 'male',
-      guestGender: 'female',
       generate: async ({ prompt }) => {
         sentPrompt = prompt
         return JSON.stringify(geminiPayload)
@@ -91,6 +85,7 @@ describe('generateScriptFromTranscript', () => {
     expect(sentPrompt).toContain('6 minutes (360 seconds) and 900 spoken words')
     expect(sentPrompt).toContain('highest-priority creative requirement')
     expect(sentPrompt).toContain('<source_data>')
+    expect(sentPrompt).not.toMatch(/gender/i)
   })
 
   it('uses a three-minute fallback when the editable prompt has no duration', async () => {
@@ -99,8 +94,6 @@ describe('generateScriptFromTranscript', () => {
       transcript: 'Raw transcript text',
       editorPrompt: 'Use a warm, practical tone.',
       apiKey: 'key',
-      hostGender: 'male',
-      guestGender: 'female',
       generate: async ({ prompt }) => {
         sentPrompt = prompt
         return JSON.stringify(geminiPayload)
@@ -129,8 +122,6 @@ describe('generateScriptFromTranscript', () => {
     const result = await generateScriptFromTranscript({
       transcript: 'Raw transcript text',
       apiKey: 'key',
-      hostGender: 'male',
-      guestGender: 'female',
       generate: async () => 'not-json',
     })
     expect(result).toEqual({ ok: false, error: 'Gemini returned invalid JSON.' })
@@ -141,8 +132,6 @@ describe('generateScriptFromTranscript', () => {
     const result = await generateScriptFromTranscript({
       transcript: 'Raw transcript text',
       apiKey: 'key',
-      hostGender: 'male',
-      guestGender: 'female',
       model: 'gemini-flash-latest',
       sleep: async () => undefined,
       generate: async ({ model }) => {
@@ -167,8 +156,6 @@ describe('handleGenerateScriptRequest', () => {
       doc: {
         id: 1,
         transcript: 'Raw text',
-        hostGender: 'male',
-        guestGender: 'female',
         scriptStatus: 'idle',
       },
       save: async (data) => {
@@ -199,8 +186,6 @@ describe('handleGenerateScriptRequest', () => {
       doc: {
         id: 1,
         transcript: '  ',
-        hostGender: 'male',
-        guestGender: 'female',
         scriptStatus: 'idle',
       },
       save: async () => undefined,
@@ -218,8 +203,6 @@ describe('handleGenerateScriptRequest', () => {
       doc: {
         id: 1,
         transcript: 'Raw text',
-        hostGender: 'male',
-        guestGender: 'female',
         status: 'processing',
         scriptStatus: 'idle',
       },
@@ -232,32 +215,16 @@ describe('handleGenerateScriptRequest', () => {
     })
   })
 
-  it('returns 400 when genders are missing', async () => {
-    const result = await handleGenerateScriptRequest({
-      user: { id: 1 },
-      doc: { id: 1, transcript: 'Raw text', scriptStatus: 'idle' },
-      save: async () => undefined,
-      generate: async () => ({ ok: false, error: 'nope' }),
-    })
-    expect(result).toEqual({
-      status: 400,
-      body: { error: 'Choose a host gender and a guest gender before creating a podcast script.' },
-    })
-  })
-
-  it('accepts genders from the request body when the document has none', async () => {
+  it('generates without speaker gender', async () => {
     const saves: ScriptPipelinePatch[] = []
     const result = await handleGenerateScriptRequest({
       user: { id: 1 },
       doc: { id: 1, transcript: 'Raw text', scriptStatus: 'idle' },
-      hostGender: 'female',
-      guestGender: 'male',
       save: async (data) => {
         saves.push(data)
       },
-      generate: async ({ hostGender, guestGender }) => {
-        expect(hostGender).toBe('female')
-        expect(guestGender).toBe('male')
+      generate: async (args) => {
+        expect(args).toEqual({ transcript: 'Raw text' })
         return {
           ok: true,
           scriptJson: '{"format":"podcast_video"}',
@@ -270,10 +237,9 @@ describe('handleGenerateScriptRequest', () => {
       },
     })
     expect(result).toEqual({ status: 200, body: { status: 'ready' } })
-    expect(saves[0]).toMatchObject({
-      hostGender: 'female',
-      guestGender: 'male',
+    expect(saves[0]).toEqual({
       scriptStatus: 'processing',
+      scriptStatusMessage: 'Generating podcast script…',
     })
   })
 })

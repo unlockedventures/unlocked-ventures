@@ -8,8 +8,6 @@ describe('scriptButtonState', () => {
       scriptButtonState({
         saved: false,
         hasTranscript: true,
-        hasHostGender: true,
-        hasGuestGender: true,
         scriptStatus: 'idle',
       }),
     ).toEqual({
@@ -23,8 +21,6 @@ describe('scriptButtonState', () => {
       scriptButtonState({
         saved: true,
         hasTranscript: false,
-        hasHostGender: true,
-        hasGuestGender: true,
         scriptStatus: 'idle',
       }),
     ).toEqual({
@@ -38,8 +34,6 @@ describe('scriptButtonState', () => {
       scriptButtonState({
         saved: true,
         hasTranscript: true,
-        hasHostGender: true,
-        hasGuestGender: true,
         scriptStatus: 'idle',
         transcriptStatus: 'processing',
       }),
@@ -49,40 +43,21 @@ describe('scriptButtonState', () => {
     })
   })
 
-  it('asks for host and guest genders before generating', () => {
-    expect(
-      scriptButtonState({
-        saved: true,
-        hasTranscript: true,
-        hasHostGender: false,
-        hasGuestGender: true,
-        scriptStatus: 'idle',
-      }),
-    ).toEqual({
-      disabled: true,
-      hint: 'Choose a host gender and a guest gender before creating a podcast script.',
-    })
-  })
-
   it('disables the button while a script run is in progress', () => {
     expect(
       scriptButtonState({
         saved: true,
         hasTranscript: true,
-        hasHostGender: true,
-        hasGuestGender: true,
         scriptStatus: 'processing',
       }),
     ).toEqual({ disabled: true, hint: null })
   })
 
-  it('enables the button when transcript and genders are set', () => {
+  it('enables the button when a transcript is set', () => {
     expect(
       scriptButtonState({
         saved: true,
         hasTranscript: true,
-        hasHostGender: true,
-        hasGuestGender: true,
         scriptStatus: 'idle',
       }),
     ).toEqual({ disabled: false, hint: null })

@@ -542,13 +542,11 @@ export const PodcastEpisodes: CollectionConfig = {
       },
       fields: [
         {
+          // Legacy: speaker gender is no longer used; kept hidden to preserve stored values.
           name: 'hostGender',
           type: 'select',
-          label: 'Host gender (required for script generation)',
-          admin: {
-            condition: isAiMode,
-            description: 'Required to generate the podcast script. Optional when saving a draft.',
-          },
+          label: 'Host gender',
+          admin: { hidden: true },
           options: [
             { label: 'Male', value: 'male' },
             { label: 'Female', value: 'female' },
@@ -557,11 +555,8 @@ export const PodcastEpisodes: CollectionConfig = {
         {
           name: 'guestGender',
           type: 'select',
-          label: 'Guest gender (required for script generation)',
-          admin: {
-            condition: isAiMode,
-            description: 'Required to generate the podcast script. Optional when saving a draft.',
-          },
+          label: 'Guest gender',
+          admin: { hidden: true },
           options: [
             { label: 'Male', value: 'male' },
             { label: 'Female', value: 'female' },
@@ -618,6 +613,46 @@ export const PodcastEpisodes: CollectionConfig = {
           },
         },
         {
+          type: 'collapsible',
+          label: 'Audio generation',
+          admin: { initCollapsed: false, condition: isAiMode },
+          fields: [
+            {
+              name: 'hostVoiceId',
+              type: 'text',
+              label: 'Host Kokoro voice (required for audio generation)',
+              admin: {
+                description:
+                  'Choose a voice reported by the self-hosted Kokoro service. Optional when saving a draft.',
+                components: {
+                  Field: '@/components/admin/kokoro-voice-field#KokoroVoiceField',
+                },
+              },
+            },
+            {
+              name: 'guestVoiceId',
+              type: 'text',
+              label: 'Guest Kokoro voice (required for audio generation)',
+              admin: {
+                description:
+                  'Choose a different voice reported by the self-hosted Kokoro service. Optional when saving a draft.',
+                components: {
+                  Field: '@/components/admin/kokoro-voice-field#KokoroVoiceField',
+                },
+              },
+            },
+            {
+              name: 'generateAudio',
+              type: 'ui',
+              admin: {
+                components: {
+                  Field: '@/components/admin/generate-audio-field#GenerateAudioField',
+                },
+              },
+            },
+          ],
+        },
+        {
           name: 'mainPoints',
           type: 'array',
           label: 'Main points',
@@ -663,46 +698,6 @@ export const PodcastEpisodes: CollectionConfig = {
       type: 'text',
       access: { read: ({ req }) => Boolean(req.user) },
       admin: { hidden: true },
-    },
-    {
-      type: 'collapsible',
-      label: 'Audio generation',
-      admin: { initCollapsed: false, condition: isAiMode },
-      fields: [
-        {
-          name: 'hostVoiceId',
-          type: 'text',
-          label: 'Host Kokoro voice (required for audio generation)',
-          admin: {
-            description:
-              'Choose a voice reported by the self-hosted Kokoro service. Optional when saving a draft.',
-            components: {
-              Field: '@/components/admin/kokoro-voice-field#KokoroVoiceField',
-            },
-          },
-        },
-        {
-          name: 'guestVoiceId',
-          type: 'text',
-          label: 'Guest Kokoro voice (required for audio generation)',
-          admin: {
-            description:
-              'Choose a different voice reported by the self-hosted Kokoro service. Optional when saving a draft.',
-            components: {
-              Field: '@/components/admin/kokoro-voice-field#KokoroVoiceField',
-            },
-          },
-        },
-        {
-          name: 'generateAudio',
-          type: 'ui',
-          admin: {
-            components: {
-              Field: '@/components/admin/generate-audio-field#GenerateAudioField',
-            },
-          },
-        },
-      ],
     },
     {
       name: 'status',
