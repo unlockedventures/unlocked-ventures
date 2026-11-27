@@ -35,6 +35,12 @@ Tag deploys rebuild/replace **containers/images** only. They must **reuse** thos
 directories. Do not re-import a backup archive or use `--wipe` unless replacing content
 on purpose. Success cleanup prunes unused Docker objects — never the data dirs.
 
+## Private repository + Deploy IONOS
+
+Safe to make `unlockedventures/unlocked-ventures` **Private** when the VPS has the
+read-only Deploy key and SSH `origin` (Actions `remote-git-checkout.sh` enforces this).
+Anonymous HTTPS fetch on the VPS will fail after going private.
+
 ## Optional local operator notes
 
 When present on a machine, gitignored `automation/` holds deeper runbooks and AI context

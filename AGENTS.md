@@ -116,6 +116,15 @@ Do **not** re-scp or re-import `automation/backups/*.tar.gz` on a routine deploy
 the user explicitly asks to replace CMS content. Do **not** run import with `--wipe`,
 `docker compose down -v`, or delete those directories as part of ship/tag deploy.
 
+### Private GitHub repository
+
+The production repo may be **Private**. Actions on the runner still use `GITHUB_TOKEN`.
+The VPS fetches via a **read-only Deploy key** and SSH origin
+`git@github.com-unlocked-ventures:unlockedventures/unlocked-ventures.git`
+(private key on VPS: `/root/.ssh/unlocked_ventures_deploy`).
+`remote-git-checkout.sh` re-asserts that remote every deploy — do not switch the VPS
+back to anonymous HTTPS if the repo is private.
+
 ### Do not
 
 - Deploy by pushing the `main` branch alone (that does not trigger deploy).

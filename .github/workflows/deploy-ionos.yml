@@ -35,6 +35,14 @@
 #                               (Postgres + whisper caches on disk)
 # UV_MEDIA_DIR                  default: /var/lib/unlocked-venture/media
 #                               (Payload uploads; kept outside the git tree on VPS)
+# IONOS_GIT_ORIGIN_URL          VPS git remote URL (default SSH deploy-key alias):
+#                               git@github.com-unlocked-ventures:unlockedventures/unlocked-ventures.git
+# IONOS_GIT_SSH_KEY             Path to read-only deploy private key on VPS
+#                               default: /root/.ssh/unlocked_ventures_deploy
+#
+# Private repo: Actions checkout on the runner uses GITHUB_TOKEN (fine). The VPS
+# must fetch via the read-only Deploy key + SSH origin above — remote-git-checkout.sh
+# re-asserts that remote every deploy so private visibility does not break ship.
 #
 # Trigger: push annotated tag prod-yyyy.MM.n from branch main (see AGENTS.md).
 # AI agents: user "deploy" → next prod tag + short -m from recent commits + push
@@ -116,6 +124,9 @@ jobs:
       KOKORO_TIMEOUT_MS: ${{ secrets.KOKORO_TIMEOUT_MS }}
       UV_DATA_DIR: ${{ secrets.UV_DATA_DIR }}
       UV_MEDIA_DIR: ${{ secrets.UV_MEDIA_DIR }}
+      # Optional overrides; defaults keep private-repo SSH deploy-key fetch working.
+      IONOS_GIT_ORIGIN_URL: ${{ secrets.IONOS_GIT_ORIGIN_URL }}
+      IONOS_GIT_SSH_KEY: ${{ secrets.IONOS_GIT_SSH_KEY }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
