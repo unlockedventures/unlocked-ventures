@@ -66,8 +66,8 @@ corepack prepare pnpm@10 --activate
 1. Clone the repository and move into it:
 
 ```bash
-git clone https://github.com/BrainStation-23/unlocked-venture.git
-cd unlocked-venture
+git clone https://github.com/unlockedventures/unlocked-ventures.git
+cd unlocked-ventures
 git checkout develop
 ```
 
@@ -126,7 +126,7 @@ the VPS is ready open **`automation/WHEN-VPS-READY.md`**. Tracked stub:
 [`README.DOCKER.md`](README.DOCKER.md).
 
 Quick local Compose (optional): `cp .env.example .env`, then follow `automation/`.
-Production release is an annotated tag `prod-yyyy.MM.n` from `deploy` (see
+Production release is an annotated tag `prod-yyyy.MM.n` from `main` (see
 `AGENTS.md` § Production deploy when an AI agent is asked to deploy).
 
 ## Scripts

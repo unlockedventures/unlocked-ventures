@@ -7,16 +7,16 @@ alwaysApply: true
 
 If the user says **deploy**, **prod deploy**, **deploy it**, **trigger deploy**,
 **trigger deploy workflow**, or clear equivalents, treat that as authorization to
-cut and push a production release tag from `deploy`.
+cut and push a production release tag from `main`.
 
 Follow the **Production deploy (AI agents)** section in repository-root `AGENTS.md`
 (canonical). Summary:
 
-1. Work must be on branch `deploy`.
+1. Work must be on branch `main` in `unlockedventures/unlocked-ventures`.
 2. Next annotated tag: `prod-YYYY.MM.N` (N increments within the month).
 3. `git tag -a prod-… -m "short informative reason"` then
    `git push origin refs/tags/prod-…`.
-4. That tag push starts **Deploy IONOS**. Do not rely on pushing `deploy` alone.
+4. That tag push starts **Deploy IONOS**. Do not rely on pushing `main` alone.
 
 Deploy docs + AI context: gitignored `automation/` — start with
 `WHEN-VPS-READY.md` (scp backup, secrets, tag deploy). Also `README.DOCKER.md`,

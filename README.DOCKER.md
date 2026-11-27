@@ -2,8 +2,8 @@
 
 **All deploy docs and AI context live in gitignored `automation/`** (not committed).
 
-Production (2026-11-27): live at **https://unlockedventures.com/** — see
-`automation/2026-11-27-ai-context.md`.
+Canonical production repo: **`unlockedventures/unlocked-ventures`** (`main`).  
+Live site: **https://unlockedventures.com/** — see `automation/2026-11-27-ai-context.md`.
 
 | Path | Purpose |
 | ---- | ------- |
@@ -17,4 +17,5 @@ Production (2026-11-27): live at **https://unlockedventures.com/** — see
 | `automation/backups/*.tar.gz` | DB+media archive (local only — never GitHub) |
 
 **Tracked packaging:** Dockerfiles, `docker-compose*.yml`, `.github/workflows/`, `.github/scripts/`.  
-**Coding:** root `README.md` (`pnpm`). Media is never pushed to GitHub — scp + import only.
+**Coding:** root `README.md` (`pnpm`). Media is never pushed to GitHub — scp + import only.  
+Production tags: annotated `prod-yyyy.MM.n` from **`main`** (not branch push alone).

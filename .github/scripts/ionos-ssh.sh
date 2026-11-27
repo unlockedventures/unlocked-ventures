@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Shared SSH/SCP helpers for IONOS deploy scripts.
 # Prefer IONOS_SSH_PRIVATE_KEY (ssh-agent / BatchMode). Temporary fallback:
-# IONOS_SSH_PASSWORD via sshpass until a deploy key is configured.
+# Requires IONOS_SSH_PRIVATE_KEY (ssh-agent).
 #
 # Source from other scripts (does not set -e itself). Never echo secret values.
 

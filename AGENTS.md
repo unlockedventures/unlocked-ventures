@@ -51,15 +51,18 @@ Image boot helpers that Dockerfiles copy (`scripts/docker-app-entrypoint.mjs`,
 
 ## Production deploy (AI agents)
 
+Canonical production remote: **`unlockedventures/unlocked-ventures`** on branch **`main`**.
+The older BrainStation-23 `unlocked-venture` repository is retired for production.
+
 When the user asks to **deploy**, **prod deploy**, **deploy it**, **trigger deploy**,
 **trigger deploy workflow**, or equivalent, do **not** run `workflow_dispatch` by
-default and do **not** wait for a push to `deploy` alone. Production deploys are
+default and do **not** wait for a push to `main` alone. Production deploys are
 started only by pushing an annotated tag in the form `prod-yyyy.MM.n`.
 
 ### What to do
 
-1. Ensure work to ship is committed on the `deploy` branch (checkout/create commits
-   there if the user already asked for that work on deploy).
+1. Ensure work to ship is committed on the `main` branch (checkout/create commits
+   there if the user already asked for that work on main).
 2. `git fetch origin --tags` and choose the next tag:
    - Pattern: `prod-YYYY.MM.N` (month zero-padded `01`–`12`; `N` starts at `1` each
      month and increments: `prod-2026.11.1`, `prod-2026.11.2`, …).
@@ -69,22 +72,22 @@ started only by pushing an annotated tag in the form `prod-yyyy.MM.n`.
    novel), then push **only that tag**:
 
 ```bash
-git checkout deploy
-git pull --ff-only origin deploy
+git checkout main
+git pull --ff-only origin main
 # compute NEXT tag, e.g. prod-2026.11.3
 git tag -a "prod-YYYY.MM.N" -m "Short informative reason for this prod release."
 git push origin "refs/tags/prod-YYYY.MM.N"
 ```
 
 4. Tell the user the tag name and that GitHub Actions workflow **Deploy IONOS**
-   should run. Do not push the `deploy` branch unless they also asked to push
+   should run. Do not push the `main` branch unless they also asked to push
    commits. Details: `automation/README.DOCKER.md` (gitignored) / stub `README.DOCKER.md`.
 
 ### Do not
 
-- Deploy by pushing the `deploy` branch alone (that does not trigger deploy).
+- Deploy by pushing the `main` branch alone (that does not trigger deploy).
 - Invent tags outside `prod-yyyy.MM.n`.
-- Tag commits that are not on `deploy`.
+- Tag commits that are not on `main`.
 - Skip the annotated `-m` message.
 
 ## AI tool onboarding

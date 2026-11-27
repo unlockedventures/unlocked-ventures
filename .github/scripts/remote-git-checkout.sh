@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SSH to the VPS and check out the release tag (or deploy branch for manual runs).
+# SSH to the VPS and check out the release tag (or main branch for manual runs).
 # IONOS_APP_PATH must already be a git clone with fetch access to origin.
 set -euo pipefail
 
@@ -35,12 +35,12 @@ command -v git >/dev/null
 
 git remote get-url origin >/dev/null
 
-echo "git fetch origin (tags + deploy)..."
-git fetch --prune --force origin '+refs/tags/prod-*:refs/tags/prod-*' '+refs/heads/deploy:refs/remotes/origin/deploy'
+echo "git fetch origin (tags + main)..."
+git fetch --prune --force origin '+refs/tags/prod-*:refs/tags/prod-*' '+refs/heads/main:refs/remotes/origin/main'
 
 if [[ "$EVENT_NAME" == "workflow_dispatch" && ! "$RELEASE_TAG" =~ ^prod-[0-9]{4}\.(0[1-9]|1[0-2])\.[1-9][0-9]*$ ]]; then
-  echo "manual dispatch without prod tag — checking out origin/deploy"
-  git checkout -f -B deploy origin/deploy
+  echo "manual dispatch without prod tag — checking out origin/main"
+  git checkout -f -B main origin/main
 else
   if [[ -z "$RELEASE_TAG" ]]; then
     echo "::error::No RELEASE_TAG / DEPLOY_TAG for git checkout." >&2
