@@ -24,6 +24,17 @@ git push origin "refs/tags/prod-YYYY.MM.N"
 
 That tag push starts GitHub Actions **Deploy IONOS**. A bare push of `main` does not.
 
+## Reuse database + media (every deploy)
+
+VPS bind mounts (written into remote `.env` from Actions secrets; defaults below):
+
+- `UV_DATA_DIR=/var/lib/unlocked-venture` → Postgres at `…/postgres`
+- `UV_MEDIA_DIR=/var/lib/unlocked-venture/media`
+
+Tag deploys rebuild/replace **containers/images** only. They must **reuse** those
+directories. Do not re-import a backup archive or use `--wipe` unless replacing content
+on purpose. Success cleanup prunes unused Docker objects — never the data dirs.
+
 ## Optional local operator notes
 
 When present on a machine, gitignored `automation/` holds deeper runbooks and AI context

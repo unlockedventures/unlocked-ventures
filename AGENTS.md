@@ -100,6 +100,22 @@ git push origin "refs/tags/$NEXT"
    commits. Optional deeper ops notes: stub `README.DOCKER.md` / gitignored
    `automation/` when present — never block a deploy on their absence.
 
+### Data that must be reused (never wiped by a normal deploy)
+
+Production Postgres and Payload media live on the VPS as **bind mounts**, outside the
+git tree and outside image layers. Tag deploys **reuse** these paths; success prune
+removes unused containers/images only — not disk data.
+
+| Role | VPS path (defaults / Actions secrets) |
+| ---- | ------------------------------------- |
+| Data root | `/var/lib/unlocked-venture` (`UV_DATA_DIR`) |
+| Postgres | `/var/lib/unlocked-venture/postgres` |
+| Media uploads | `/var/lib/unlocked-venture/media` (`UV_MEDIA_DIR`) |
+
+Do **not** re-scp or re-import `automation/backups/*.tar.gz` on a routine deploy unless
+the user explicitly asks to replace CMS content. Do **not** run import with `--wipe`,
+`docker compose down -v`, or delete those directories as part of ship/tag deploy.
+
 ### Do not
 
 - Deploy by pushing the `main` branch alone (that does not trigger deploy).
@@ -107,6 +123,7 @@ git push origin "refs/tags/$NEXT"
 - Tag commits that are not on `main`.
 - Skip the annotated `-m` message.
 - Refuse or stall a deploy only because `automation/` is missing.
+- Wipe or replace VPS Postgres/media during a normal tag deploy.
 
 ## AI tool onboarding
 

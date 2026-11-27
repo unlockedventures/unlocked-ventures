@@ -23,4 +23,6 @@ Summary:
 
 Keep packaging in Dockerfiles, compose, `.github/` only — not `src/`.
 Do not put deploy secrets or media archives in tracked files.
+Reuse VPS bind mounts `/var/lib/unlocked-venture` (Postgres) and
+`/var/lib/unlocked-venture/media` — never wipe/re-import on a normal tag deploy.
 Optional local ops notes may live under gitignored `automation/` when present.
