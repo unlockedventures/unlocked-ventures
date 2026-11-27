@@ -1,14 +1,12 @@
 import path from 'path'
 import type { CollectionConfig } from 'payload'
-import { fileURLToPath } from 'url'
 
 import { readAudioDuration } from '@/pipeline/audio-duration'
-
-const dirname = path.dirname(fileURLToPath(import.meta.url))
 
 /**
  * Local podcast audio files (disk for now; swap staticDir / storage adapter for S3 later).
  * Hidden from the main nav — editors upload through the Episode form.
+ * staticDir is cwd-relative so Docker standalone (/app) and local `pnpm dev` both use ./media.
  */
 export const PodcastAudio: CollectionConfig = {
   slug: 'podcast-audio',
@@ -64,7 +62,7 @@ export const PodcastAudio: CollectionConfig = {
     },
   ],
   upload: {
-    staticDir: path.resolve(dirname, '../../media/podcast-audio'),
+    staticDir: path.resolve(process.cwd(), 'media/podcast-audio'),
     mimeTypes: ['audio/*'],
   },
 }

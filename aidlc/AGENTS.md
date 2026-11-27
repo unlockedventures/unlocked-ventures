@@ -34,7 +34,10 @@ Use `.env.example` for integration configuration; do not copy credentials into d
 - Preserve unrelated changes and persisted editor content. Keep diffs focused.
 - Apply SOLID, KISS, DRY and YAGNI proportionately; use existing framework patterns and components.
 - Do not invent tracker keys, team approvers, infrastructure, integration contracts or requirements.
-- Do not push, merge or deploy without user authorization.
+- Do not push, merge or deploy without user authorization. Phrases **deploy**,
+  **prod deploy**, **deploy it**, **trigger deploy**, or **trigger deploy workflow**
+  authorize the annotated `prod-yyyy.MM.n` tag + push flow documented in root
+  AGENTS.md (§ Production deploy) and `automation/` deploy docs — not arbitrary merges.
 - Maintain feature records throughout implementation; keep other requested documentation in
   its requested location. Existing work records
   remain historical context, not permission to override current code or root instructions.
@@ -66,7 +69,8 @@ Configure `.env` locally using `.env.example`; PostgreSQL and a Payload secret a
 | Command                   | Purpose                                                      |
 | ------------------------- | ------------------------------------------------------------ |
 | `pnpm install`            | Install dependencies                                         |
-| `docker compose up -d`    | Start the development application and PostgreSQL             |
+| `docker compose up -d --build` | Production/IONOS stack (`db`, `whisper`, `kokoro`, `app`) |
+| `docker compose -f docker-compose.dev.yml up -d` | Local bind-mount development stack |
 | `pnpm dev`                | Apply the schema precheck and start Next.js development      |
 | `pnpm build`              | Build the production application                             |
 | `pnpm start`              | Serve the production build                                   |
@@ -136,6 +140,17 @@ associations. Production startup does not automatically apply all schema rollout
 - Preserve shared generation leases and source rechecks that prevent conflicting work and stale
   output. Enforce episode and audio permissions on server actions and endpoints.
 - See the root README for rollout migrations, recovery behavior and database smoke-check commands.
+
+## Production deploy (AI agents)
+
+Canonical procedure lives in the repository-root `AGENTS.md` (§ Production deploy
+and § Deploy packaging boundary). Full deploy docs + AI context:
+gitignored `automation/README.DOCKER.md` and `automation/AGENTS.md`. Packaging
+belongs in Dockerfiles, `docker-compose*.yml`, and `.github/workflows` /
+`.github/scripts` only — not in `src/`. If the user says deploy / prod deploy /
+deploy it / trigger deploy / trigger deploy workflow: create the next annotated
+`prod-yyyy.MM.n` tag on `deploy` with a short informative `-m` message and push
+that tag so **Deploy IONOS** runs. Do not treat a bare push of `deploy` as a deploy.
 
 ## Verification and delivery
 

@@ -132,7 +132,7 @@ class TranscribeTests(unittest.TestCase):
         def time_out(command, timeout):
             raise subprocess.TimeoutExpired(command, timeout)
 
-        with self.assertRaisesRegex(TranscriptionError, "30 minutes"):
+        with self.assertRaisesRegex(TranscriptionError, "took longer than"):
             transcribe_url(URL, run=time_out, work_root=self.root, timeout_seconds=1)
         self.assertEqual(list(self.root.iterdir()), [])
 

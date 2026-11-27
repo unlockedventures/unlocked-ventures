@@ -2,7 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { adminGroups } from '@/admin/editor-guide'
 
-export const Media: CollectionConfig = {
+export const Media = {
   slug: 'media',
   labels: {
     singular: 'File',
@@ -19,7 +19,7 @@ export const Media: CollectionConfig = {
   access: {
     read: () => true,
   },
-  // Allow inserting uploads from the device into Lexical article fields.
+  // Lexical device-insert flag (not on CollectionConfig typings in Payload 3.90).
   enableRichTextRelationship: true,
   fields: [
     {
@@ -49,4 +49,4 @@ export const Media: CollectionConfig = {
     },
   ],
   upload: true,
-}
+} satisfies CollectionConfig & { enableRichTextRelationship?: boolean }

@@ -15,7 +15,7 @@ engineering principles live in [AGENTS.md](AGENTS.md).
 - TanStack Query, Zustand, and React Hook Form.
 - Nodemailer for optional SMTP delivery and Sharp for image processing.
 - Vitest with Testing Library and Playwright for browser tests.
-- pnpm for development and Docker Compose for the app and database.
+- pnpm for day-to-day development. Docker/Compose is optional packaging (see below).
 
 See `package.json` for exact versions and supported runtime engines.
 
@@ -43,110 +43,10 @@ See `package.json` for exact versions and supported runtime engines.
 
 Imports use `@/*` for `src/` and `@payload-config` for the Payload configuration.
 
-## Run with Docker
+## Develop locally (default)
 
-Install [Docker](https://docs.docker.com/get-docker/) with Compose. `docker compose up -d` starts
-PostgreSQL, the transcription service and the pinned self-hosted Kokoro speech service, then starts
-the app in the background.
-
-```bash
-git clone https://github.com/BrainStation-23/unlocked-venture.git
-cd unlocked-venture
-git checkout develop
-cp .env.example .env
-docker compose up -d
-```
-
-The app reads `DATABASE_URL` and `PAYLOAD_SECRET` from `.env`. For this Compose file, `DATABASE_URL` must be:
-
-```bash
-postgresql://payload:payload@postgres:5432/unlocked_ventures
-```
-
-`postgres` is the database container’s name. The user, password, and database name match the container.
-
-The first start installs dependencies, creates the database tables, and fills empty content with the built-in site seed. Later starts leave content that already exists.
-
-If the Postgres volume already has tables from an older checkout, Docker applies additive schema updates (`scripts/ensure-schema.sql`) before the app boots. That keeps new code working on old volumes without interactive Payload prompts. Extra columns are additive only, so checking out older code against a newer database remains safe.
-
-Without Docker, after pulling schema changes against an existing database, run:
-
-```bash
-pnpm ensure-schema
-```
-
-Or Payload’s migration runner (`pnpm migrate`), which applies the same additive SQL from `src/migrations`.
-
-### Seed CMS data
-
-After the stack is up, fill or refresh demo content from the app container:
-
-```bash
-docker compose exec app sh -c 'PAYLOAD_DB_PUSH=false npx tsx scripts/seed-all.mts'
-```
-
-Or:
-
-```bash
-docker compose exec app pnpm seed
-```
-
-Seeds are mostly idempotent: they fill empty fields and leave existing editor content alone where possible. Use this after a fresh database, or when podcast / insights demo data is missing.
-
-Open:
-
-- Site: [http://localhost:3000](http://localhost:3000)
-- Admin: [http://localhost:3000/admin](http://localhost:3000/admin)
-
-On the first visit to the admin, create the first editor account. Use that email and password to sign in afterward.
-
-Stop the app with `docker compose down`. Follow the logs with `docker compose logs -f`.
-
-`PAYLOAD_SECRET` should be a long random string (`openssl rand -hex 32`). `.env` stays on your machine. Do not commit it.
-
-### Export and import a project database
-
-To share a copy of the current Docker-backed project data, run this from the repository root
-while the PostgreSQL service is running:
-
-```bash
-pnpm db:export
-```
-
-The command creates a timestamped archive under `backups/`. It contains the full PostgreSQL
-database and local Payload uploads from `media/`. You can provide a destination path instead:
-
-```bash
-pnpm db:export backups/shareable-copy.tar.gz
-```
-
-This is a full data snapshot, not a sanitized content export. It includes account records and
-contact submissions and may contain personal or confidential information. Share it only with a
-trusted recipient over a secure channel. The archive is ignored by Git; do not commit it. It does
-not include `.env`, `PAYLOAD_SECRET`, integration credentials, or PostgreSQL cluster roles. The
-recipient must provide their own environment variables and use a compatible project version.
-
-To import the archive into another Docker-backed project checkout, copy the archive there, then
-start only its PostgreSQL service before starting the application:
-
-```bash
-docker compose up -d postgres
-pnpm db:import backups/shareable-copy.tar.gz
-docker compose up -d app
-```
-
-Import must happen before the app has initialized the database. The importer refuses to run while
-the app is running, when the target database already contains tables, or when the destination
-`media/` directory is non-empty. It does not drop existing database objects or overwrite existing
-uploads. If the recipient already has data, they must back up that data and arrange a separate
-empty target database before importing. Database and upload files are restored separately, so a
-filesystem failure after database restoration may require completing the upload copy manually.
-
-The export/import commands require Bash, Docker Compose, and a running PostgreSQL container; no
-host PostgreSQL client is needed. They do not export PostgreSQL users/roles or environment
-configuration.
-
-## Run without Docker
+Use pnpm on your machine. You do not need Docker, Compose networks, or VPS deploy
+steps for normal feature work.
 
 ### Prerequisites
 
@@ -187,7 +87,7 @@ cp .env.example .env
 
 5. Open `.env` and set both values:
 
-- `DATABASE_URL` must match your PostgreSQL user, password, host, port, and database. On your machine the host is `127.0.0.1`, not `postgres`.
+- `DATABASE_URL` must match your PostgreSQL user, password, host, port, and database. On your machine the host is `127.0.0.1`, not `db`.
 - `PAYLOAD_SECRET` must be a long random string. Generate one with:
 
 ```bash
@@ -205,18 +105,29 @@ Consult `.env.example` for optional integrations. SMTP delivery is enabled when
 pnpm dev
 ```
 
-The first start creates the database tables and fills empty content with the built-in site seed. Later starts leave content that already exists. The site and admin URLs are the same as in the Docker section.
+The first start creates the database tables and fills empty content with the built-in site seed. Later starts leave content that already exists.
 
-## Production
+Open:
 
-Set `DATABASE_URL` and `PAYLOAD_SECRET` in the environment, then:
+- Site: [http://localhost:3000](http://localhost:3000)
+- Admin: [http://localhost:3000/admin](http://localhost:3000/admin)
 
-```bash
-pnpm build
-pnpm start
-```
+On the first visit to the admin, create the first editor account.
 
-The app listens on port 3000.
+After pulling schema changes against an existing database, run `pnpm ensure-schema`
+or `pnpm migrate` (same additive SQL as `src/migrations`).
+
+## Docker / deploy packaging
+
+Deploy packaging stays in **Dockerfiles**, **`docker-compose*.yml`**, and
+**`.github/workflows/`** / **`.github/scripts/`**. Full operator runbook, scp
+backup upload, and AI context: gitignored [`automation/`](automation/) — when
+the VPS is ready open **`automation/WHEN-VPS-READY.md`**. Tracked stub:
+[`README.DOCKER.md`](README.DOCKER.md).
+
+Quick local Compose (optional): `cp .env.example .env`, then follow `automation/`.
+Production release is an annotated tag `prod-yyyy.MM.n` from `deploy` (see
+`AGENTS.md` § Production deploy when an AI agent is asked to deploy).
 
 ## Scripts
 
@@ -230,8 +141,7 @@ The app listens on port 3000.
 | `pnpm lint`                         | Run ESLint                                                   |
 | `pnpm exec tsc --noEmit`            | Check TypeScript                                             |
 | `pnpm ensure-schema`                | Apply additive schema compatibility updates                  |
-| `pnpm db:export`                    | Export the Docker database and local uploads to `backups/`   |
-| `pnpm db:import <archive>`          | Import an archive into an empty Docker database              |
+| `pnpm db:export` / `pnpm db:import` | Docker DB+media snapshot helpers (see `automation/`)         |
 | `pnpm migrate`                      | Run Payload migrations                                       |
 | `pnpm generate:types`               | Regenerate Payload types after schema changes                |
 | `pnpm generate:importmap`           | Regenerate the admin component import map                    |
@@ -241,8 +151,7 @@ The app listens on port 3000.
 | `pnpm test`                         | Run integration/component tests, then end-to-end tests       |
 | `pnpm test:web-vitals`              | Generate web performance reports                             |
 | `pnpm payload`                      | Run the Payload CLI                                          |
-| `docker compose up -d`              | Start the app and its PostgreSQL container in the background |
-| `docker compose exec app pnpm seed` | Seed CMS data inside the running Docker app container        |
+| Docker / Compose / deploy           | See `automation/` + stub `README.DOCKER.md`                  |
 
 Database-backed checks require configured PostgreSQL. End-to-end tests need
 Playwright browsers:
@@ -300,7 +209,8 @@ database commands were prepared but not executed as part of this change.
 Episode generation actions share an atomic database lease, preventing duplicate
 or conflicting transcription, summary, script and audio requests across workers.
 Normal completion and failure release it; after a crashed worker, it expires
-after one hour. Reload the editor and retry Generate source summary after expiry
+after one hour by default (`GENERATION_LOCK_HOURS`, set to 12 on production Compose for
+long Whisper jobs). Reload the editor and retry Generate source summary after expiry
 to recover. Source changes are rechecked before accepting generated output.
 Rolling application code back leaves these additive columns and saved text intact.
 

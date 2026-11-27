@@ -5,7 +5,21 @@ import { URL } from 'node:url'
 import type { TranscribeResult } from '@/pipeline/run-transcription'
 
 const busyMessage = 'Another transcript is already being generated. Try again when it finishes.'
-const requestTimeoutMs = 30 * 60 * 1000
+
+/** Original default 30m; production Compose sets TRANSCRIBER_TIMEOUT_SECONDS=43200 (12h). */
+const DEFAULT_REQUEST_TIMEOUT_MS = 30 * 60 * 1000
+
+function transcriberRequestTimeoutMs(): number {
+  const fromSeconds = Number(process.env.TRANSCRIBER_TIMEOUT_SECONDS)
+  if (Number.isFinite(fromSeconds) && fromSeconds > 0) {
+    return Math.min(48 * 3600, Math.max(60, Math.floor(fromSeconds))) * 1000
+  }
+  const fromMs = Number(process.env.TRANSCRIBER_REQUEST_TIMEOUT_MS)
+  if (Number.isFinite(fromMs) && fromMs > 0) {
+    return Math.min(48 * 3600 * 1000, Math.max(60_000, Math.floor(fromMs)))
+  }
+  return DEFAULT_REQUEST_TIMEOUT_MS
+}
 
 export async function requestTranscript(args: {
   url: string
@@ -52,6 +66,8 @@ async function fetchTranscribe(args: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ url: args.url }),
+    // Node 18+ fetch supports AbortSignal.timeout for the full body wait.
+    signal: AbortSignal.timeout(transcriberRequestTimeoutMs()),
   })
   const body = (await response.json().catch(() => null)) as {
     transcript?: unknown
@@ -66,6 +82,7 @@ function postTranscribe(args: { url: string; endpoint: string; secret: string })
   const target = new URL('transcribe', base)
   const payload = JSON.stringify({ url: args.url })
   const lib = target.protocol === 'https:' ? https : http
+  const requestTimeoutMs = transcriberRequestTimeoutMs()
 
   return new Promise<{
     status: number
@@ -102,6 +119,7 @@ function postTranscribe(args: { url: string; endpoint: string; secret: string })
       },
     )
 
+    // Must cover multi-hour whisper jobs; default was 30 minutes and aborted valid work.
     request.setTimeout(requestTimeoutMs, () => {
       request.destroy(new Error('timeout'))
     })

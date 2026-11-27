@@ -1,6 +1,25 @@
+# Whisper / transcriber image build context (service container name: whisper)
+
+.git
+.env
+.env.*
+*.pem
+*.key
+credentials.json
+secrets/
+
 __pycache__/
 *.py[cod]
 *$py.class
 .pytest_cache/
+.venv/
+venv/
+
 *.md
 test_*.py
+*_test.py
+tests/
+
+.DS_Store
+Thumbs.db
+*.log

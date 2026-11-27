@@ -1,27 +1,91 @@
+# Deploy / runtime packaging (IONOS + optional local). Not required for pnpm coding.
+# Day-to-day develop: README.md (pnpm). Operator runbook: README.DOCKER.md.
+# Exact names: db, whisper, kokoro, app. Shared Docker network: unlocked-venture.
+# restart: unless-stopped on every service.
+#
+# DevSecOps defaults on every service: no-new-privileges, cap_drop ALL where safe,
+# read_only rootfs; write only via media binds and tmpfs (see each service).
+#
+# Persistent data on disk:
+#   Postgres + whisper caches: ${UV_DATA_DIR:-./data}/…
+#   Payload uploads: ${UV_MEDIA_DIR:-./media} → /app/media (UID 10001 write)
+# Never run: docker compose down -v  if you meant to keep bind-mounted data.
+#
+# Local stack: cp .env.example .env && bash .github/scripts/prepare-data-dirs.sh && docker compose up -d --build
+# Bind-mount app (still packaging): docker compose -f docker-compose.dev.yml up -d
+# CI deploy: .github/workflows/deploy-ionos.yml + .github/scripts/*
+
+x-app-uid: &app_uid '10001:10001'
+x-security-baseline: &security_baseline
+  security_opt:
+    - no-new-privileges:true
+  cap_drop:
+    - ALL
+
 services:
-  postgres:
-    image: postgres:16
+  db:
+    container_name: db
+    # Official Alpine Postgres (minimal). Entry point starts as root then drops to
+    # the postgres user inside the image — do not override user: here.
+    image: postgres:16-alpine
     environment:
       POSTGRES_USER: payload
       POSTGRES_PASSWORD: payload
       POSTGRES_DB: unlocked_ventures
+    command:
+      - postgres
+      - -c
+      - shared_buffers=160MB
+      - -c
+      - work_mem=4MB
+      - -c
+      - max_connections=40
+      - -c
+      - maintenance_work_mem=64MB
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - ${UV_DATA_DIR:-./data}/postgres:/var/lib/postgresql/data
+    shm_size: 128mb
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U payload -d unlocked_ventures']
       interval: 5s
       timeout: 5s
       retries: 20
+    mem_limit: 650m
+    mem_reservation: 400m
+    cpus: 0.50
+    pids_limit: 256
+    read_only: true
+    tmpfs:
+      # Writable scratch only (not the data volume).
+      - /tmp:size=32m,uid=70,gid=70,mode=0700
+      - /run/postgresql:size=8m,uid=70,gid=70,mode=0700
+    <<: *security_baseline
+    # Postgres needs a few caps to drop privileges / manage data dir on first boot.
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - SETGID
+      - SETUID
+    restart: unless-stopped
 
-  transcriber:
-    build: ./transcriber
+  whisper:
+    container_name: whisper
+    image: uv-whisper:local
+    build:
+      context: ./transcriber
+      args:
+        APP_UID: 10001
+        APP_GID: 10001
+    user: *app_uid
     environment:
       TRANSCRIBER_SECRET: ${TRANSCRIBER_SECRET:-}
-      # turbo (~large-v3) needs several GB RAM; local Docker often OOMs around 40%.
-      # Override with WHISPER_MODEL=turbo when the host has enough memory.
       WHISPER_MODEL: ${WHISPER_MODEL:-small}
+      TRANSCRIBER_TIMEOUT_SECONDS: ${TRANSCRIBER_TIMEOUT_SECONDS:-43200}
     volumes:
-      - whisper-models:/root/.cache/whisper
+      # Write: model cache + job scratch only (rootfs is read_only).
+      - ${UV_DATA_DIR:-./data}/whisper-models:/home/app/.cache/whisper
+      - ${UV_DATA_DIR:-./data}/whisper-workdir:/tmp/pipeline
     expose:
       - '8080'
     healthcheck:
@@ -35,9 +99,25 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+      start_period: 30s
+    mem_limit: 2600m
+    mem_reservation: 256m
+    cpus: 1.00
+    cpu_shares: 128
+    pids_limit: 512
+    oom_score_adj: 200
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,uid=10001,gid=10001,mode=0700
+    <<: *security_baseline
+    restart: unless-stopped
 
   kokoro:
-    image: ghcr.io/remsky/kokoro-fastapi-cpu:v0.9.0
+    container_name: kokoro
+    image: uv-kokoro:local
+    build:
+      context: ./kokoro
+    user: '1000:1000'
     expose:
       - '8880'
     healthcheck:
@@ -51,38 +131,67 @@ services:
       interval: 10s
       timeout: 5s
       retries: 30
+      start_period: 60s
+    mem_limit: 1600m
+    mem_reservation: 256m
+    cpus: 0.50
+    cpu_shares: 128
+    pids_limit: 512
+    oom_score_adj: 200
+    read_only: true
+    tmpfs:
+      - /tmp:size=128m,uid=1000,gid=1000,mode=0700
+      # Upstream TTS writes scratch under api/temp_files
+      - /app/api/temp_files:size=256m,uid=1000,gid=1000,mode=0700
+    <<: *security_baseline
+    restart: unless-stopped
 
   app:
-    image: node:22-bookworm
-    working_dir: /app
-    init: true
-    extra_hosts:
-      - host.docker.internal:host-gateway
-    # Strip CR so Windows checkouts (CRLF) do not die with: Illegal option -e
-    command: >
-      sh -c "tr -d '\\r' < /app/scripts/docker-dev.sh > /tmp/docker-dev.sh
-      && exec sh /tmp/docker-dev.sh"
+    container_name: app
+    image: uv-app:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_UID: 10001
+        APP_GID: 10001
+    user: *app_uid
     ports:
-      - '3000:3000'
+      - '127.0.0.1:3000:3000'
     env_file:
-      - .env
+      - path: .env
+        required: true
     environment:
-      TRANSCRIBER_URL: http://transcriber:8080
+      TRANSCRIBER_URL: http://whisper:8080
       KOKORO_BASE_URL: http://kokoro:8880
-      # GEMINI_API_KEY comes from env_file (.env). Do not set it here with
-      # ${GEMINI_API_KEY:-} — an empty interpolation overrides env_file.
+      # VPS write-remote-env sets 1; local default 0 so empty-dev boots are non-fatal.
+      ENSURE_SCHEMA_STRICT: ${ENSURE_SCHEMA_STRICT:-0}
+      TMPDIR: /app/tmp
+      TRANSCRIBER_TIMEOUT_SECONDS: ${TRANSCRIBER_TIMEOUT_SECONDS:-43200}
+      GENERATION_LOCK_HOURS: ${GENERATION_LOCK_HOURS:-12}
+      KOKORO_TIMEOUT_MS: ${KOKORO_TIMEOUT_MS:-1800000}
     volumes:
-      - .:/app
-      - node_modules:/app/node_modules
+      # Sole durable write mount for the app (Payload uploads). Everything else is read_only/tmpfs.
+      - ${UV_MEDIA_DIR:-./media}:/app/media
+    tmpfs:
+      - /app/tmp:size=256m,uid=10001,gid=10001,mode=0700
+    mem_limit: 1900m
+    mem_reservation: 1280m
+    cpus: 2.00
+    cpu_shares: 1024
+    pids_limit: 512
+    oom_score_adj: -250
+    read_only: true
+    <<: *security_baseline
     depends_on:
-      postgres:
+      db:
         condition: service_healthy
-      transcriber:
+      whisper:
         condition: service_healthy
       kokoro:
         condition: service_healthy
+    restart: unless-stopped
 
-volumes:
-  pgdata:
-  node_modules:
-  whisper-models:
+networks:
+  default:
+    name: unlocked-venture

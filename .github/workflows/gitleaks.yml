@@ -1,0 +1,33 @@
+# Secret scan. Fails the workflow when Gitleaks finds a leak in history or the tree.
+# Reusable via workflow_call so deploy can require a clean scan before touching the VPS.
+name: Gitleaks
+
+on:
+  pull_request:
+  push:
+    branches: [deploy, main, master, develop]
+  workflow_dispatch:
+  workflow_call:
+
+concurrency:
+  group: gitleaks-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  gitleaks:
+    name: Scan for secrets
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Gitleaks
+        env:
+          GITLEAKS_VERSION: '8.30.1'
+        run: bash .github/scripts/gitleaks.sh

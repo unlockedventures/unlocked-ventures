@@ -1,0 +1,76 @@
+# Keep build context small and secret-free.
+# Used when building images from the repo root (and as a safety net for Compose).
+
+.git
+.github
+.cursor
+.codex
+.idea
+.vscode
+.vercel
+.superpowers
+
+# dependencies and caches
+node_modules
+.pnpm-store
+.pnp
+.pnp.js
+.yarn/install-state.gz
+.next
+out
+build
+coverage
+test-results
+playwright-report
+blob-report
+playwright/.cache
+*.tsbuildinfo
+.turbo
+
+# secrets — never send into an image build
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.json
+secrets/
+*.secret
+docker-compose.override.yml
+compose.override.yml
+
+# runtime / local data (must exclude — postgres dir is mode 700 and breaks build context)
+data
+media
+podcast-audio
+backups
+.deploy-rollback
+*.dump
+*.sql.gz
+*.tar.gz
+tmp
+*.log
+
+# tests and docs not needed in app image builds
+tests
+**/*.spec.ts
+**/*.spec.tsx
+**/*.test.ts
+**/*.test.tsx
+aidlc
+automation
+.github
+*.md
+!README.DOCKER.md
+docker-compose.dev.yml
+
+# python local junk (whisper build uses transcriber/.dockerignore)
+**/__pycache__
+**/*.py[cod]
+.pytest_cache
+.venv
+venv
+
+# OS
+.DS_Store
+Thumbs.db

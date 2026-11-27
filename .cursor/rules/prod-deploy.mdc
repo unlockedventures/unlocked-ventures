@@ -1,0 +1,24 @@
+---
+description: Prod deploy via annotated prod-yyyy.MM.n tag (trigger phrases)
+alwaysApply: true
+---
+
+# Production deploy trigger
+
+If the user says **deploy**, **prod deploy**, **deploy it**, **trigger deploy**,
+**trigger deploy workflow**, or clear equivalents, treat that as authorization to
+cut and push a production release tag from `deploy`.
+
+Follow the **Production deploy (AI agents)** section in repository-root `AGENTS.md`
+(canonical). Summary:
+
+1. Work must be on branch `deploy`.
+2. Next annotated tag: `prod-YYYY.MM.N` (N increments within the month).
+3. `git tag -a prod-… -m "short informative reason"` then
+   `git push origin refs/tags/prod-…`.
+4. That tag push starts **Deploy IONOS**. Do not rely on pushing `deploy` alone.
+
+Deploy docs + AI context: gitignored `automation/` — start with
+`WHEN-VPS-READY.md` (scp backup, secrets, tag deploy). Also `README.DOCKER.md`,
+`AGENTS.md`. Keep packaging in Dockerfiles, compose, `.github/` only — not `src/`.
+Do not put deploy secrets or media archives in tracked files.

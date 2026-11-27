@@ -5,18 +5,50 @@
 .pnpm-store
 .yarn/install-state.gz
 
-# local environment
+# secrets and local environment
+# Real values come from GitHub Actions / Jenkins / VPS secrets at deploy time.
+# Commit only .env.example (placeholders). Never commit .env or secret files.
 .env
-.env*.local
+.env.*
+!.env.example
+*.pem
+*.key
+!*.key.pub
+credentials.json
+secrets/
+*.secret
+
+# local Compose overrides (may contain host-specific or secret wiring)
+docker-compose.override.yml
+compose.override.yml
+
+# Local-only deploy AI context for Cursor/Claude (never commit)
+/automation/
+
+# database / upload archives — never push media dumps to GitHub
 /backups/
+*.dump
+*.sql.gz
+*.tar.gz
+unlocked-ventures-*.tar.gz
 
 # next.js
 /.next/
 /out/
 next-env.d.ts
 
-# payload uploads
+# payload uploads and generated audio on disk — never commit / never push to GitHub
 /media
+/media/**
+/media.before-import.*
+/podcast-audio
+/podcast-audio/**
+
+# Compose bind-mount data root (postgres + media + whisper caches)
+/data/
+
+# VPS deploy rollback metadata (images refs, git sha, env bak)
+.deploy-rollback/
 
 # typescript
 *.tsbuildinfo
@@ -33,6 +65,9 @@ next-env.d.ts
 !/.idea/runConfigurations
 .superpowers/
 tmp/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json.example
 
 # production
 /build
@@ -52,10 +87,12 @@ __pycache__/
 *.py[cod]
 *$py.class
 .pytest_cache/
+.venv/
+venv/
 
 # misc
 .DS_Store
-*.pem
+Thumbs.db
 
 # BEGIN AI-DLC:gitignore
 # AI-DLC: local working files

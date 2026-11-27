@@ -1,0 +1,173 @@
+# =============================================================================
+# Deploy IONOS — GitHub Actions repository secrets checklist
+# =============================================================================
+# Deploy packaging home (with Dockerfiles + docker-compose*.yml). App/src coding
+# does not require this file — see README.md for pnpm; README.DOCKER.md for ops.
+# Target: Ubuntu VPS on IONOS (Docker + Compose + git + SSH).
+# Set every name below under:
+#   Repo → Settings → Secrets and variables → Actions → New repository secret
+# Do NOT commit real values. This file lists names + what to paste (placeholders).
+#
+# --- REQUIRED (workflow fails if empty) ---------------------------------------
+# IONOS_HOST              VPS public hostname or IP
+#                         e.g. 203.0.113.10  or  vps.example.com
+# IONOS_SSH_USER          SSH login on Ubuntu
+#                         e.g. root  or  deploy
+# IONOS_SSH_PRIVATE_KEY   Preferred: full private key PEM for IONOS_SSH_USER
+#                         (including -----BEGIN … KEY----- / -----END … KEY-----)
+# IONOS_SSH_PASSWORD      Temporary alternative if PRIVATE_KEY is unset
+#                         (sshpass). Remove once a deploy key is configured.
+# IONOS_APP_PATH          Absolute path to the git clone on the VPS
+#                         e.g. /var/www/unlocked-venture
+#                         (must already be a clone that can `git fetch` origin)
+# DATABASE_URL            App DB URL on the Compose network
+#                         e.g. postgresql://payload:payload@db:5432/unlocked_ventures
+# PAYLOAD_SECRET          Long random string for Payload CMS
+# TRANSCRIBER_SECRET      Shared secret for the whisper/transcriber service
+# GEMINI_API_KEY          Google Gemini API key
+# NEXT_PUBLIC_SERVER_URL  Public site origin, no trailing slash
+#                         e.g. https://www.example.com
+#
+# --- OPTIONAL (defaults applied on the VPS if unset) --------------------------
+# WHISPER_MODEL                 default: small
+# TRANSCRIBER_TIMEOUT_SECONDS   default: 43200   (12h)
+# GENERATION_LOCK_HOURS         default: 12
+# KOKORO_TIMEOUT_MS             default: 1800000 (30m/turn)
+# UV_DATA_DIR                   default: /var/lib/unlocked-venture
+#                               (Postgres + whisper caches on disk)
+# UV_MEDIA_DIR                  default: /var/lib/unlocked-venture/media
+#                               (Payload uploads; kept outside the git tree on VPS)
+#
+# Trigger: push annotated tag prod-yyyy.MM.n from branch deploy (see AGENTS.md).
+# Optional: workflow_dispatch (manual).
+# Flow: validate → Gitleaks → snapshot backup → git checkout → write .env →
+#   network → disk mounts → backup refresh → build (live up) →
+#   app-candidate :3001 → cut over :3000 → prune previous images (keep disk data).
+# Docs/AI context: gitignored automation/ (README.DOCKER.md, AGENTS.md).
+# =============================================================================
+name: Deploy IONOS
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'prod-*'
+
+concurrency:
+  group: deploy-ionos
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate release tag
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate prod-yyyy.MM.n tag
+        if: startsWith(github.ref, 'refs/tags/')
+        run: bash .github/scripts/validate-prod-tag.sh "${GITHUB_REF_NAME}"
+
+      - name: Ensure tag commit is on deploy branch
+        if: startsWith(github.ref, 'refs/tags/')
+        run: bash .github/scripts/ensure-tag-on-deploy.sh "${GITHUB_REF_NAME}"
+
+      - name: Note manual dispatch
+        if: github.event_name == 'workflow_dispatch'
+        run: echo 'Manual workflow_dispatch — tag format check skipped.'
+
+      - name: Validate Compose files
+        run: bash .github/scripts/validate-compose.sh
+
+  gitleaks:
+    name: Scan for secrets
+    needs: [validate]
+    uses: ./.github/workflows/gitleaks.yml
+
+  deploy:
+    name: Deploy to IONOS (Ubuntu VPS)
+    needs: [validate, gitleaks]
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      # Wired 1:1 from repository Actions secrets (see checklist at top of file).
+      DEPLOY_TAG: ${{ github.ref_name }}
+      GITHUB_EVENT_NAME: ${{ github.event_name }}
+      IONOS_HOST: ${{ secrets.IONOS_HOST }}
+      IONOS_SSH_USER: ${{ secrets.IONOS_SSH_USER }}
+      IONOS_SSH_PRIVATE_KEY: ${{ secrets.IONOS_SSH_PRIVATE_KEY }}
+      IONOS_SSH_PASSWORD: ${{ secrets.IONOS_SSH_PASSWORD }}
+      IONOS_APP_PATH: ${{ secrets.IONOS_APP_PATH }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+      TRANSCRIBER_SECRET: ${{ secrets.TRANSCRIBER_SECRET }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      NEXT_PUBLIC_SERVER_URL: ${{ secrets.NEXT_PUBLIC_SERVER_URL }}
+      WHISPER_MODEL: ${{ secrets.WHISPER_MODEL }}
+      TRANSCRIBER_TIMEOUT_SECONDS: ${{ secrets.TRANSCRIBER_TIMEOUT_SECONDS }}
+      GENERATION_LOCK_HOURS: ${{ secrets.GENERATION_LOCK_HOURS }}
+      KOKORO_TIMEOUT_MS: ${{ secrets.KOKORO_TIMEOUT_MS }}
+      UV_DATA_DIR: ${{ secrets.UV_DATA_DIR }}
+      UV_MEDIA_DIR: ${{ secrets.UV_MEDIA_DIR }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Confirm required secrets are set
+        run: |
+          bash .github/scripts/require-secrets.sh \
+            IONOS_HOST \
+            IONOS_SSH_USER \
+            IONOS_APP_PATH \
+            DATABASE_URL \
+            PAYLOAD_SECRET \
+            TRANSCRIBER_SECRET \
+            GEMINI_API_KEY \
+            NEXT_PUBLIC_SERVER_URL
+          # Prefer deploy key; allow temporary password until key is added.
+          if [[ -z "${IONOS_SSH_PRIVATE_KEY:-}" && -z "${IONOS_SSH_PASSWORD:-}" ]]; then
+            echo '::error::Set IONOS_SSH_PRIVATE_KEY (preferred) or temporary IONOS_SSH_PASSWORD.' >&2
+            exit 1
+          fi
+          if [[ -n "${IONOS_SSH_PRIVATE_KEY:-}" ]]; then
+            echo 'SSH auth: private key'
+          else
+            echo 'SSH auth: password (temporary — replace with IONOS_SSH_PRIVATE_KEY)'
+          fi
+
+      - name: Load SSH key
+        if: env.IONOS_SSH_PRIVATE_KEY != ''
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ env.IONOS_SSH_PRIVATE_KEY }}
+
+      - name: Install sshpass for password SSH
+        if: env.IONOS_SSH_PRIVATE_KEY == '' && env.IONOS_SSH_PASSWORD != ''
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq sshpass
+
+      - name: Add VPS host key
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          ssh-keyscan -H "$IONOS_HOST" >> ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Backup existing running app (images + git + .env)
+        run: bash .github/scripts/remote-snapshot.sh
+
+      - name: Pull / check out release on the VPS
+        run: bash .github/scripts/remote-git-checkout.sh
+
+      - name: Write remote .env from Actions secrets
+        run: bash .github/scripts/write-remote-env.sh
+
+      - name: Network, disk mounts, zero-downtime cutover, prune on success
+        run: bash .github/scripts/remote-compose-up.sh

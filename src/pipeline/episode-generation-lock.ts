@@ -3,6 +3,13 @@ import { sql, type PostgresAdapter } from '@payloadcms/db-postgres'
 import type { Endpoint } from 'payload'
 import { hasPermission } from '@/access/rbac'
 
+/** Hours a crashed worker keeps the lease. Default 1 (original); production Compose sets 12. */
+export function generationLockHours(): number {
+  const raw = Number(process.env.GENERATION_LOCK_HOURS || 1)
+  if (!Number.isFinite(raw)) return 1
+  return Math.min(48, Math.max(1, Math.floor(raw)))
+}
+
 /** Claim in PostgreSQL so concurrent workers cannot start conflicting paid operations. */
 export function withEpisodeGenerationLock(handler: Endpoint['handler']): Endpoint['handler'] {
   return async (req) => {
@@ -22,12 +29,13 @@ export function withEpisodeGenerationLock(handler: Endpoint['handler']): Endpoin
     if (!doc) return Response.json({ error: 'Episode not found.' }, { status: 404 })
     req.json = async () => body
     const token = randomUUID()
-    const db = req.payload.db as PostgresAdapter
+    const lockHours = generationLockHours()
+    const db = req.payload.db as unknown as PostgresAdapter
     let claimed
     try {
       claimed = await db.drizzle.execute(sql`
       UPDATE podcast_episodes SET generation_lock = ${token},
-        generation_lock_expires_at = NOW() + INTERVAL '1 hour',
+        generation_lock_expires_at = NOW() + make_interval(hours => ${lockHours}),
         status = CASE WHEN generation_lock_expires_at < NOW() AND status = 'processing' THEN 'error' ELSE status END,
         script_status = CASE WHEN generation_lock_expires_at < NOW() AND script_status = 'processing' THEN 'error' ELSE script_status END,
         audio_status = CASE WHEN generation_lock_expires_at < NOW() AND audio_status = 'processing' THEN 'error' ELSE audio_status END,

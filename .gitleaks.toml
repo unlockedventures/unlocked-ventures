@@ -1,0 +1,20 @@
+# Gitleaks v8 — must extend defaults or the scan is a silent no-op.
+title = "unlocked-venture"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Placeholders and public examples only — never real production secrets"
+paths = [
+  '''(.*?)(README\.DOCKER\.md)$''',
+  '''(.*?)(\.env\.example)$''',
+  '''(.*?)(aidlc/aidlc-docs/templates/.*)$''',
+]
+regexes = [
+  '''replace-with-a-long-random-string''',
+  '''replace-with-your-gemini-api-key''',
+  '''build-time-placeholder-not-used-at-runtime''',
+  '''postgresql://payload:payload@db:5432/unlocked_ventures''',
+  '''postgresql://payload:payload@127\.0\.0\.1:5432/unlocked_ventures''',
+]

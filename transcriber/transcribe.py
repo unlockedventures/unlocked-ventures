@@ -15,10 +15,33 @@ class TranscriptionError(Exception):
         self.stop = stop
 
 
+# Original default 30m; production Compose/image sets TRANSCRIBER_TIMEOUT_SECONDS=43200.
+_DEFAULT_TIMEOUT_SECONDS = 1800
+
+
 def whisper_model_name():
     """Whisper model id. Override with WHISPER_MODEL (e.g. small) when RAM is tight."""
     name = (os.environ.get("WHISPER_MODEL") or "turbo").strip()
     return name or "turbo"
+
+
+def default_timeout_seconds():
+    """Wall-clock budget for one transcription (download + ffmpeg + whisper)."""
+    raw = (os.environ.get("TRANSCRIBER_TIMEOUT_SECONDS") or "").strip()
+    try:
+        value = int(raw) if raw else _DEFAULT_TIMEOUT_SECONDS
+    except ValueError:
+        value = _DEFAULT_TIMEOUT_SECONDS
+    # Allow original 30m default; production may set up to 48h via env.
+    return max(60, min(value, 48 * 3600))
+
+
+def timeout_exceeded_message(timeout_seconds):
+    hours = max(1, int(round(timeout_seconds / 3600)))
+    if timeout_seconds >= 3600:
+        return f"This video took longer than {hours} hours."
+    minutes = max(1, int(round(timeout_seconds / 60)))
+    return f"This video took longer than {minutes} minutes."
 
 
 _SEGMENT_END = re.compile(
@@ -26,10 +49,14 @@ _SEGMENT_END = re.compile(
 )
 
 
-def transcribe_url(url, *, run, work_root, timeout_seconds=1800, on_progress=None):
+def transcribe_url(url, *, run, work_root, timeout_seconds=None, on_progress=None):
     parsed = urllib.parse.urlparse(url)
     if parsed.scheme not in ("http", "https") or not parsed.netloc:
         raise TranscriptionError("The video link must start with http:// or https://.")
+
+    if timeout_seconds is None:
+        timeout_seconds = default_timeout_seconds()
+    timeout_seconds = max(1, int(timeout_seconds))
 
     directory = Path(tempfile.mkdtemp(prefix="pipeline-", dir=work_root))
     deadline = time.monotonic() + timeout_seconds
@@ -43,6 +70,7 @@ def transcribe_url(url, *, run, work_root, timeout_seconds=1800, on_progress=Non
             deadline,
             "Could not download audio from this video.",
             report,
+            timeout_seconds=timeout_seconds,
             start_percent=1,
             end_percent=29,
             step_seconds=2,
@@ -58,6 +86,7 @@ def transcribe_url(url, *, run, work_root, timeout_seconds=1800, on_progress=Non
             run,
             deadline,
             "Could not convert this video's audio.",
+            timeout_seconds=timeout_seconds,
         )
         report(40)
         _run_whisper(
@@ -85,6 +114,7 @@ def transcribe_url(url, *, run, work_root, timeout_seconds=1800, on_progress=Non
             run,
             deadline,
             report,
+            timeout_seconds=timeout_seconds,
         )
 
         transcript_path = directory / "audio.txt"
@@ -141,19 +171,30 @@ def strip_trailing_hallucinations(text: str) -> str:
     return "\n".join(lines).strip()
 
 
-def _run(command, run, deadline, failure):
+def _run(command, run, deadline, failure, *, timeout_seconds):
     remaining = deadline - time.monotonic()
     if remaining <= 0:
-        raise TranscriptionError("This video took longer than 30 minutes.")
+        raise TranscriptionError(timeout_exceeded_message(timeout_seconds))
     try:
         completed = run(command, remaining)
     except subprocess.TimeoutExpired as error:
-        raise TranscriptionError("This video took longer than 30 minutes.") from error
+        raise TranscriptionError(timeout_exceeded_message(timeout_seconds)) from error
     if completed.returncode != 0:
         raise TranscriptionError(failure)
 
 
-def _run_with_crawl(command, run, deadline, failure, report, *, start_percent, end_percent, step_seconds):
+def _run_with_crawl(
+    command,
+    run,
+    deadline,
+    failure,
+    report,
+    *,
+    timeout_seconds,
+    start_percent,
+    end_percent,
+    step_seconds,
+):
     """Run a blocking command while slowly advancing progress so the UI does not sit at 0%."""
     holder = {"percent": start_percent}
     stop = threading.Event()
@@ -171,7 +212,7 @@ def _run_with_crawl(command, run, deadline, failure, report, *, start_percent, e
     crawler = threading.Thread(target=crawl, daemon=True)
     crawler.start()
     try:
-        _run(command, run, deadline, failure)
+        _run(command, run, deadline, failure, timeout_seconds=timeout_seconds)
         report(end_percent)
     finally:
         stop.set()
@@ -190,10 +231,10 @@ def _whisper_failure(returncode):
     return TranscriptionError("Could not transcribe this video.")
 
 
-def _run_whisper(command, run, deadline, report):
+def _run_whisper(command, run, deadline, report, *, timeout_seconds):
     remaining = deadline - time.monotonic()
     if remaining <= 0:
-        raise TranscriptionError("This video took longer than 30 minutes.")
+        raise TranscriptionError(timeout_exceeded_message(timeout_seconds))
 
     holder = {"percent": 40}
     stop_crawl = threading.Event()
@@ -219,12 +260,12 @@ def _run_whisper(command, run, deadline, report):
             try:
                 completed = stream(command, remaining, report_at_least)
             except subprocess.TimeoutExpired as error:
-                raise TranscriptionError("This video took longer than 30 minutes.") from error
+                raise TranscriptionError(timeout_exceeded_message(timeout_seconds)) from error
         else:
             try:
                 completed = run(command, remaining)
             except subprocess.TimeoutExpired as error:
-                raise TranscriptionError("This video took longer than 30 minutes.") from error
+                raise TranscriptionError(timeout_exceeded_message(timeout_seconds)) from error
         if completed.returncode != 0:
             raise _whisper_failure(completed.returncode)
         report_at_least(99)

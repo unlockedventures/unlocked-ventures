@@ -8,7 +8,13 @@ import { buildPageMetadata } from '@/lib/seo'
 import { getSiteURL } from '@/lib/site-url'
 
 export async function generateMetadata(): Promise<Metadata> {
-  const site = await getSite()
+  // During Docker/image build there is no Postgres; fall back so prerender cannot crash.
+  let site: Awaited<ReturnType<typeof getSite>> = null
+  try {
+    site = await getSite()
+  } catch {
+    site = null
+  }
   const base = buildPageMetadata({
     title: site?.title,
     description: site?.description,

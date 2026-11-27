@@ -66,7 +66,7 @@ try {
   process.exit(strict ? 1 : 0)
 }
 
-const sql = [
+const sqlFiles = [
   sqlPath,
   join(__dirname, 'ensure-rbac.sql'),
   join(__dirname, 'ensure-video-transcription.sql'),
@@ -76,17 +76,39 @@ const sql = [
   join(__dirname, 'ensure-podcast-audio-preview.sql'),
   join(__dirname, 'ensure-editable-gemini-prompts.sql'),
 ]
-  .map((path) => readFileSync(path, 'utf8'))
-  .join('\n')
 const client = new pg.Client({ connectionString: databaseUrl })
 
 try {
   await client.connect()
   const probe = await client.query("select to_regclass('public.users') as users")
   if (!probe.rows[0]?.users) {
-    console.log('ensure-schema: skipped (empty database — Payload push will create tables)')
+    // Production (NODE_ENV=production) never runs Payload push — empty DBs need
+    // `scripts/import-db.sh` (or migrate against a DB that already has base tables).
+    console.log(
+      'ensure-schema: skipped (empty database — restore a dump with scripts/import-db.sh; Payload push does not run in production)',
+    )
     process.exit(0)
   }
+
+  const missing = sqlFiles.filter((path) => !existsSync(path))
+  if (missing.length) {
+    const msg = `ensure-schema: missing SQL file(s): ${missing.join(', ')}`
+    if (strict) {
+      console.error(msg)
+      process.exit(1)
+    }
+    console.error(msg)
+  }
+
+  const sql = sqlFiles
+    .filter((path) => existsSync(path))
+    .map((path) => readFileSync(path, 'utf8'))
+    .join('\n')
+  if (!sql.trim()) {
+    console.log('ensure-schema: skipped (no SQL files present)')
+    process.exit(0)
+  }
+
   await client.query(sql)
   console.log('ensure-schema: applied additive schema updates')
 } catch (error) {
