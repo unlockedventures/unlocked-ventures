@@ -68,3 +68,7 @@ Project: Unlocked Ventures
 - Checks: `bash -n` on script + extracted remote body
 - Next: next annotated `prod-*` tag from `main` picks this up
 
+### 2026-11-27 — assistant (zero-downtime nginx flip)
+- Completed: `ensure-nginx-zero-downtime.sh`; harden `nginx-uv-upstream-switch.sh`; cutover flips edge to candidate before recreating app; VPS site includes snippet; edge still 200
+- Checks: bash -n; live nginx wire + https 200
+

@@ -25,7 +25,9 @@ Project: Unlocked Ventures
 - FR-14: After a successful deploy, prune unused containers, unused images, unused networks,
   unused volumes, builder cache, and deploy temp files; never delete UV_DATA_DIR / UV_MEDIA_DIR.
 - FR-11: Deploy SSHs to the VPS, `git fetch`/`checkout` the release tag, builds while the old
-  stack stays up, health-checks `app-candidate` on :3001, then cuts over :3000 (near-zero downtime).
+  stack stays up, health-checks `app-candidate` on :3001, flips nginx to :3001, recreates app on
+  :3000, then flips nginx back to :3000 (zero downtime for the public edge).
+- FR-15: Host nginx must `include` `/etc/nginx/snippets/uv-backend.conf` so upstream flips work.
 - FR-12: Tracked AI entry points (outside gitignored `automation/`) must instruct agents that
   user “deploy” / “prod deploy” / “trigger deploy” means annotated `prod-yyyy.MM.n` tag + push.
 - FR-13: Production images/containers use Alpine or distroless where feasible, fixed non-root

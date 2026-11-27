@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
-# Near-zero-downtime VPS deploy (GitHub Actions → SSH).
+# Zero-downtime VPS deploy (GitHub Actions → SSH).
 #
 # Ordered phases (must stay in this order):
 #   1) Ensure Docker network unlocked-venture
 #   2) Ensure on-disk mounts (Postgres + media + whisper caches)
 #   3) Confirm predeploy backup of running app (from remote-snapshot.sh)
-#   4) Build while live stack serves; candidate :3001 → cut over :3000
+#   4) Build while live serves → health-check candidate :3001 → nginx flip to
+#      :3001 → recreate app :3000 → nginx flip back to :3000 → drop candidate
 #   5) Success → prune unused containers/images/build cache + deploy temps;
 #                keep UV_DATA_DIR / UV_MEDIA_DIR and a fresh .deploy-rollback
-#      Failure → restore previous containers from .deploy-rollback, verify they
-#                are up, then exit non-zero (Actions fails)
+#      Failure → restore previous containers from .deploy-rollback, point nginx
+#                at :3000, verify they are up, then exit non-zero (Actions fails)
 #
 # Operator/AI docs: gitignored automation/README.DOCKER.md + automation/AGENTS.md
 set -euo pipefail
@@ -43,10 +44,46 @@ cleanup_candidate() {
   docker compose -p uv-candidate -f docker-compose.candidate.yml down --remove-orphans >/dev/null 2>&1 || true
 }
 
+ensure_nginx_zdt() {
+  bash ./.github/scripts/ensure-nginx-zero-downtime.sh
+}
+
+switch_nginx_upstream() {
+  local port="$1"
+  bash ./.github/scripts/nginx-uv-upstream-switch.sh "$port"
+}
+
 point_nginx_at_production() {
-  if [[ -x ./.github/scripts/nginx-uv-upstream-switch.sh ]]; then
-    ./.github/scripts/nginx-uv-upstream-switch.sh 3000 >/dev/null 2>&1 || true
-  fi
+  # Best-effort during rollback — still restore containers even if nginx flip fails.
+  bash ./.github/scripts/nginx-uv-upstream-switch.sh 3000 >/dev/null 2>&1 || true
+}
+
+# Hit the public edge (nginx → current upstream), not the Docker port directly.
+wait_edge_http_ok() {
+  local tries="${1:-30}"
+  local i body code
+  for ((i = 1; i <= tries; i++)); do
+    code="$(curl -ksS --max-time 8 -o /tmp/uv-edge-body -w '%{http_code}' \
+      -H 'Host: unlockedventures.com' https://127.0.0.1/ 2>/dev/null || echo 000)"
+    if [[ "$code" == "200" ]]; then
+      body="$(cat /tmp/uv-edge-body 2>/dev/null || true)"
+      if printf '%s' "$body" | grep -Fq 'Unlocked Ventures'; then
+        echo "healthy: nginx edge → Unlocked Ventures (try ${i})"
+        rm -f /tmp/uv-edge-body
+        return 0
+      fi
+    fi
+    # HTTP fallback if TLS local handshake is awkward
+    body="$(curl -fsS --max-time 8 -H 'Host: unlockedventures.com' http://127.0.0.1/ 2>/dev/null || true)"
+    if printf '%s' "$body" | grep -Fq 'Unlocked Ventures'; then
+      echo "healthy: nginx edge (http) → Unlocked Ventures (try ${i})"
+      rm -f /tmp/uv-edge-body
+      return 0
+    fi
+    sleep 1
+  done
+  rm -f /tmp/uv-edge-body
+  return 1
 }
 
 # --- Phase 1: network -------------------------------------------------------
@@ -195,8 +232,9 @@ rollback_stack() {
   echo "deploy failed — restoring previous app..." >&2
   echo "failure reason: ${reason}" >&2
 
-  cleanup_candidate
+  # Point edge at :3000 before removing candidate so traffic never hits a dead upstream.
   point_nginx_at_production
+  cleanup_candidate
 
   # First deploy with nothing to restore: stop broken leftovers and exit.
   if [[ "$had_previous" -eq 0 ]] || [[ ! -f "${rollback}/images/app.ref" ]]; then
@@ -336,7 +374,7 @@ ensure_stack_network
 prepare_disk_mounts
 ensure_predeploy_backup
 
-echo "phase 4: build + near-zero-downtime cutover (release ${RELEASE_TAG})"
+echo "phase 4: build + zero-downtime cutover (release ${RELEASE_TAG})"
 set +e
 docker compose build --pull
 build_rc=$?
@@ -371,8 +409,26 @@ if [[ "$had_previous" -eq 0 ]]; then
     docker logs --tail 100 app >&2 || true
     fail_deploy "first deploy: production app health check failed on :3000"
   fi
+
+  set +e
+  ensure_nginx_zdt
+  zdt_rc=$?
+  set -e
+  if [[ "$zdt_rc" -ne 0 ]]; then
+    fail_deploy "first deploy: failed to wire nginx for zero-downtime future cutovers"
+  fi
 else
-  # Live app dual-homed in phase 1 so DB DNS stays up while workers recreate.
+  # Wire nginx snippet include before cutover (idempotent).
+  set +e
+  ensure_nginx_zdt
+  zdt_rc=$?
+  set -e
+  if [[ "$zdt_rc" -ne 0 ]]; then
+    fail_deploy "failed to wire nginx for zero-downtime cutover"
+  fi
+
+  # Recreate workers only when Compose detects changes (no --force-recreate).
+  # Live app on :3000 keeps serving the site during this step.
   set +e
   docker compose up -d --no-deps --remove-orphans db whisper kokoro
   workers_rc=$?
@@ -390,7 +446,7 @@ else
   fi
 
   cleanup_candidate
-  echo "starting app-candidate on 127.0.0.1:3001 (production :3000 still live)..."
+  echo "starting app-candidate on 127.0.0.1:3001 (edge still on :3000)..."
   set +e
   docker compose -p uv-candidate -f docker-compose.candidate.yml up -d --no-build
   cand_rc=$?
@@ -405,20 +461,34 @@ else
   set -e
   if [[ "$health_rc" -ne 0 ]]; then
     docker logs --tail 100 app-candidate >&2 || true
-    fail_deploy "app-candidate health check failed on :3001 (production left on :3000)"
+    fail_deploy "app-candidate health check failed on :3001 (edge left on :3000)"
   fi
 
-  if [[ -x ./.github/scripts/nginx-uv-upstream-switch.sh ]]; then
-    ./.github/scripts/nginx-uv-upstream-switch.sh 3001 || true
+  echo "zero-downtime: nginx → :3001 (candidate) while old app still on :3000..."
+  set +e
+  switch_nginx_upstream 3001
+  flip_rc=$?
+  set -e
+  if [[ "$flip_rc" -ne 0 ]]; then
+    fail_deploy "nginx flip to candidate :3001 failed (edge left on :3000)"
   fi
 
-  echo "cutover: replacing production app on :3000 with new image..."
+  set +e
+  wait_edge_http_ok 30
+  edge_rc=$?
+  set -e
+  if [[ "$edge_rc" -ne 0 ]]; then
+    point_nginx_at_production
+    fail_deploy "nginx edge unhealthy after flip to :3001 — reverted edge to :3000"
+  fi
+
+  echo "cutover: recreating production app on :3000 (traffic on candidate)..."
   set +e
   docker compose up -d --no-deps --no-build --force-recreate app
   app_rc=$?
   set -e
   if [[ "$app_rc" -ne 0 ]]; then
-    fail_deploy "production app cutover failed (exit ${app_rc})"
+    fail_deploy "production app cutover failed (exit ${app_rc}) — traffic was on :3001"
   fi
 
   set +e
@@ -430,8 +500,30 @@ else
     fail_deploy "production app health check failed on :3000 after cutover"
   fi
 
-  if [[ -x ./.github/scripts/nginx-uv-upstream-switch.sh ]]; then
-    ./.github/scripts/nginx-uv-upstream-switch.sh 3000 || true
+  echo "zero-downtime: nginx → :3000 (new app)..."
+  set +e
+  switch_nginx_upstream 3000
+  flip_back_rc=$?
+  set -e
+  if [[ "$flip_back_rc" -ne 0 ]]; then
+    # New app is already healthy — do not roll back images; keep candidate until edge flips.
+    echo "::error::Deploy (${RELEASE_TAG}): nginx flip back to :3000 failed. New app healthy on :3000; candidate left on :3001." >&2
+    rolling_back=1
+    trap - EXIT
+    exit 1
+  fi
+
+  set +e
+  wait_edge_http_ok 30
+  edge_back_rc=$?
+  set -e
+  if [[ "$edge_back_rc" -ne 0 ]]; then
+    # Revert edge to candidate (still up) rather than rolling back the new app image.
+    switch_nginx_upstream 3001 >/dev/null 2>&1 || true
+    echo "::error::Deploy (${RELEASE_TAG}): nginx edge unhealthy on :3000 — traffic left on candidate :3001." >&2
+    rolling_back=1
+    trap - EXIT
+    exit 1
   fi
 
   cleanup_candidate

@@ -98,4 +98,4 @@ Git-pull / candidate verification:
 - `UV_CANDIDATE_NETWORK=… docker compose -f docker-compose.candidate.yml config --quiet` OK
 - Not run: live SSH git checkout, candidate boot, or nginx upstream flip on VPS
 | 2026-11-27 | assistant | change | Harden remote-compose-up: always restore+verify previous stack on failure; aggressive unused Docker/temp prune on success (keep data dirs) | user request |
-
+| 2026-11-27 | assistant | change | Wire nginx uv-backend snippet + require :3001/:3000 flips for zero-downtime cutover; VPS site wired live | user request |

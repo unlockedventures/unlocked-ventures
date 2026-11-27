@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
-# Optional: flip host nginx between app :3000 and candidate :3001 for true zero-downtime cutover.
-# Enable by making this executable on the VPS and pointing nginx at the generated snippet.
+# Flip host nginx between app :3000 and candidate :3001 for zero-downtime cutover.
 #
-# Example nginx (inside your site server block):
-#   include /etc/nginx/snippets/uv-backend.conf;
+# Requires the site to `include /etc/nginx/snippets/uv-backend.conf;`
+# (see ensure-nginx-zero-downtime.sh — run that once/before cutover).
 #
-# Usage (called by remote-compose-up.sh when executable):
+# Usage:
 #   ./.github/scripts/nginx-uv-upstream-switch.sh 3001
 #   ./.github/scripts/nginx-uv-upstream-switch.sh 3000
 set -euo pipefail
@@ -17,9 +16,21 @@ if [[ "$port" != "3000" && "$port" != "3001" ]]; then
 fi
 
 snippet="${UV_NGINX_SNIPPET:-/etc/nginx/snippets/uv-backend.conf}"
+site="${UV_NGINX_SITE:-/etc/nginx/sites-available/unlocked-venture}"
+
+if ! command -v nginx >/dev/null 2>&1; then
+  echo "::error::nginx missing — cannot switch upstream for zero-downtime cutover." >&2
+  exit 1
+fi
+
 if [[ ! -d "$(dirname "$snippet")" ]]; then
-  echo "nginx snippet dir missing (${snippet}); skip upstream switch" >&2
-  exit 0
+  echo "::error::nginx snippet dir missing (${snippet})" >&2
+  exit 1
+fi
+
+if [[ -f "$site" ]] && ! grep -Eq 'include[[:space:]]+/etc/nginx/snippets/uv-backend\.conf;' "$site"; then
+  echo "::error::${site} does not include uv-backend.conf — run ensure-nginx-zero-downtime.sh first." >&2
+  exit 1
 fi
 
 umask 022
@@ -28,9 +39,6 @@ cat >"$snippet" <<EOF
 proxy_pass http://127.0.0.1:${port};
 EOF
 
-if command -v nginx >/dev/null && nginx -t; then
-  nginx -s reload
-  echo "nginx upstream -> 127.0.0.1:${port}"
-else
-  echo "nginx reload skipped (nginx missing or config test failed)" >&2
-fi
+nginx -t
+nginx -s reload
+echo "nginx upstream -> 127.0.0.1:${port}"
