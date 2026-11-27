@@ -21,3 +21,9 @@ Supported via VPS read-only Deploy key over SSH. No credentials belong in tracke
 ## Optional local library
 
 `automation/` may exist on an operator machine. It is **gitignored** and must never be committed.
+
+## Local Compose
+
+Copy `.env.example` → `.env`, fill the placeholders, then `docker compose up -d --build`.
+You do not need GitHub Actions secrets to run locally.
+

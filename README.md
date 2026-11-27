@@ -68,7 +68,6 @@ corepack prepare pnpm@10 --activate
 ```bash
 git clone https://github.com/unlockedventures/unlocked-ventures.git
 cd unlocked-ventures
-git checkout develop
 ```
 
 2. Install dependencies:
@@ -85,19 +84,23 @@ pnpm install
 cp .env.example .env
 ```
 
-5. Open `.env` and set both values:
+5. Open `.env` and set:
 
-- `DATABASE_URL` must match your PostgreSQL user, password, host, port, and database. On your machine the host is `127.0.0.1`, not `db`.
-- `PAYLOAD_SECRET` must be a long random string. Generate one with:
+- `DATABASE_URL` — for **pnpm on the host**, use `127.0.0.1` (not `db`). For
+  **Docker Compose**, keep host `db` as in `.env.example`.
+- `PAYLOAD_SECRET` and `TRANSCRIBER_SECRET` — long random strings:
 
 ```bash
 openssl rand -hex 32
 ```
 
-`.env` stays on your machine. Do not commit it.
+- `GEMINI_API_KEY` — required for AI/podcast generation features.
+- `NEXT_PUBLIC_SERVER_URL` — default `http://localhost:3000` for local work.
 
-Consult `.env.example` for optional integrations. SMTP delivery is enabled when
-`SMTP_HOST` is configured; keep credentials out of source files and logs.
+`.env` stays on your machine. Do not commit it. You do **not** need GitHub Actions
+secrets (`IONOS_*`, etc.) to develop locally — those are for production deploys only.
+
+Consult `.env.example` for optional SMTP and Compose path overrides.
 
 ### Start
 
@@ -116,6 +119,24 @@ On the first visit to the admin, create the first editor account.
 
 After pulling schema changes against an existing database, run `pnpm ensure-schema`
 or `pnpm migrate` (same additive SQL as `src/migrations`).
+
+## Docker Compose locally (optional)
+
+Full stack without installing Postgres/Whisper/Kokoro on the host:
+
+```bash
+cp .env.example .env
+# set PAYLOAD_SECRET, TRANSCRIBER_SECRET, GEMINI_API_KEY (see comments in .env.example)
+bash .github/scripts/prepare-data-dirs.sh
+docker compose up -d --build
+docker compose ps    # app db whisper kokoro
+```
+
+App: [http://localhost:3000](http://localhost:3000) (bound on `127.0.0.1`).  
+Keep `DATABASE_URL` host as **`db`**. Data lands under `./data` and `./media` by default.
+
+An empty database means an empty-looking site until you import a dump or let seeds/
+migrations create content — see `.env.example` and `pnpm db:import`.
 
 ## Docker / deploy packaging
 
