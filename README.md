@@ -126,7 +126,6 @@ Full stack without installing Postgres/Whisper/Kokoro on the host:
 
 ```bash
 cp .env.example .env
-# set PAYLOAD_SECRET, TRANSCRIBER_SECRET, GEMINI_API_KEY (see comments in .env.example)
 bash .github/scripts/prepare-data-dirs.sh
 docker compose up -d --build
 docker compose ps    # app db whisper kokoro
@@ -135,8 +134,21 @@ docker compose ps    # app db whisper kokoro
 App: [http://localhost:3000](http://localhost:3000) (bound on `127.0.0.1`).  
 Keep `DATABASE_URL` host as **`db`**. Data lands under `./data` and `./media` by default.
 
-An empty database means an empty-looking site until you import a dump or let seeds/
-migrations create content — see `.env.example` and `pnpm db:import`.
+**Important:** production images do **not** create CMS tables on an empty database.
+Containers can be “healthy” while `http://localhost:3000` looks blank / broken until
+you load content. With a local archive (operators often keep one under
+`automation/backups/` — gitignored):
+
+```bash
+docker compose stop app
+# media must be empty for import (or use a fresh UV_MEDIA_DIR)
+rm -rf media && mkdir -p media
+bash scripts/import-db.sh automation/backups/unlocked-ventures-YYYYMMDD-HHMMSS.tar.gz
+docker compose up -d
+```
+
+Or create content via Payload after schema exists (`pnpm migrate` / admin). Without a
+dump, expect no real homepage until CMS data is present.
 
 ## Docker / deploy packaging
 
