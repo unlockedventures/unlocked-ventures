@@ -1,27 +1,23 @@
 # Docker / VPS deployment
 
-Canonical product repo: **`unlockedventures/unlocked-ventures`** (`main`).  
-Live brand: **https://unlockedventures.com/**
+| | |
+| :--- | ---: |
+| **Repo** | `unlockedventures/unlocked-ventures` · `main` |
+| **Live** | https://unlockedventures.com |
 
-**Tracked packaging:** Dockerfiles, `docker-compose*.yml`, `.github/`.  
-**Coding:** root `README.md` (`pnpm`).
+**Tracked packaging:** Dockerfiles · compose · `.github/`  
+**Coding:** root `README.md` (`pnpm`)
 
-## How production deploys work (zero downtime)
+## Zero downtime
 
-When present locally, read gitignored  
-`automation/DEPLOYMENT-GUIDE.md` — plain-language story of **nginx upstream flips**
-(live `:3000` ↔ candidate `:3001`) written for business and architecture readers.
+When present locally, open `automation/DEPLOYMENT-GUIDE.md` — clean diagrams and business language for **nginx upstream flips** (`:3000` ↔ `:3001`).
 
-Short form for agents (always available): root **`AGENTS.md`** § Production deploy —
-annotated `prod-yyyy.MM.n` tag from `main` + short message from recent commits →
-**Deploy IONOS**. Database and media on the VPS are reused, not wiped.
+Agents without that folder: root **`AGENTS.md`** § Production deploy → annotated `prod-yyyy.MM.n` + short message → **Deploy IONOS**. VPS database and media are reused, not wiped.
 
 ## Private repository
 
-Supported: VPS uses a read-only Deploy key over SSH. Making the GitHub repository
-private does not require putting credentials into tracked docs.
+Supported via VPS read-only Deploy key over SSH. No credentials belong in tracked docs.
 
-## Optional local folder
+## Optional local library
 
-`automation/` may exist on an operator machine for deeper narrative and checklists.
-It is **gitignored** and must never be committed.
+`automation/` may exist on an operator machine. It is **gitignored** and must never be committed.
