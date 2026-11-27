@@ -18,10 +18,12 @@ Project: Unlocked Ventures
 - FR-7: GitHub Actions deploy must write the VPS `.env` from repository secrets at runtime.
 - FR-8: After a successful deploy, unused containers and images must be pruned; Postgres and
   media data on disk under `UV_DATA_DIR` must never be pruned or rsynced away.
-- FR-9: Deploy runs only on push of tag `prod-yyyy.MM.n` (from `deploy`) or workflow_dispatch —
-  not on every push to `deploy`.
-- FR-10: If deploy build/up/health fails, restore the previously running containers and fail the
-  Actions job with a visible error reason.
+- FR-9: Deploy runs only on push of tag `prod-yyyy.MM.n` (from `main`) or workflow_dispatch —
+  not on every push to `main`.
+- FR-10: If deploy build/up/health fails, restore the previously running containers, verify they
+  are up (and :3000 healthy when possible), then fail the Actions job with a visible error reason.
+- FR-14: After a successful deploy, prune unused containers, unused images, unused networks,
+  unused volumes, builder cache, and deploy temp files; never delete UV_DATA_DIR / UV_MEDIA_DIR.
 - FR-11: Deploy SSHs to the VPS, `git fetch`/`checkout` the release tag, builds while the old
   stack stays up, health-checks `app-candidate` on :3001, then cuts over :3000 (near-zero downtime).
 - FR-12: Tracked AI entry points (outside gitignored `automation/`) must instruct agents that
@@ -54,7 +56,7 @@ Compose file must remain valid (`docker compose config`). Operator docs must mat
   `env_file: .env` required.
 - AC-6: Given a successful IONOS deploy script, when cleanup runs, then container/image
   prune runs and `UV_DATA_DIR` / volumes are not deleted.
-- AC-7: Given tag `prod-2026.11.1` on `deploy`, when the tag is pushed, then Deploy IONOS runs.
+- AC-7: Given tag `prod-2026.11.1` on `main`, when the tag is pushed, then Deploy IONOS runs.
 - AC-8: Given a failed compose up after a prior healthy stack, when the job ends, then previous
   containers are running again and the log contains `::error::Deploy failed`.
 

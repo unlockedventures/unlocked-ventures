@@ -6,9 +6,10 @@
 #   2) Ensure on-disk mounts (Postgres + media + whisper caches)
 #   3) Confirm predeploy backup of running app (from remote-snapshot.sh)
 #   4) Build while live stack serves; candidate :3001 → cut over :3000
-#   5) Success → remove candidate/previous unused images; keep disk data
-#      Failure → restore previous app from .deploy-rollback (zero downtime if
-#      cutover never started)
+#   5) Success → prune unused containers/images/build cache + deploy temps;
+#                keep UV_DATA_DIR / UV_MEDIA_DIR and a fresh .deploy-rollback
+#      Failure → restore previous containers from .deploy-rollback, verify they
+#                are up, then exit non-zero (Actions fails)
 #
 # Operator/AI docs: gitignored automation/README.DOCKER.md + automation/AGENTS.md
 set -euo pipefail
@@ -33,13 +34,19 @@ docker compose version >/dev/null
 command -v curl >/dev/null
 
 rollback=".deploy-rollback"
-cutover_started=0
-candidate_started=0
+had_previous=0
+rolling_back=0
 STACK_NETWORK=unlocked-venture
 
 cleanup_candidate() {
   docker rm -f app-candidate >/dev/null 2>&1 || true
   docker compose -p uv-candidate -f docker-compose.candidate.yml down --remove-orphans >/dev/null 2>&1 || true
+}
+
+point_nginx_at_production() {
+  if [[ -x ./.github/scripts/nginx-uv-upstream-switch.sh ]]; then
+    ./.github/scripts/nginx-uv-upstream-switch.sh 3000 >/dev/null 2>&1 || true
+  fi
 }
 
 # --- Phase 1: network -------------------------------------------------------
@@ -142,40 +149,27 @@ wait_http_ok() {
   return 1
 }
 
-rollback_stack() {
-  local reason="$1"
-  echo "deploy failed — restoring previous app..." >&2
-  echo "failure reason: ${reason}" >&2
-
-  cleanup_candidate
-
-  # Live app never replaced — leave it; reset git/env for consistency.
-  if [[ "$cutover_started" -eq 0 ]]; then
-    if [[ -f "${rollback}/git-sha" ]] && [[ -d .git ]]; then
-      git checkout -f "$(cat "${rollback}/git-sha")" >/dev/null 2>&1 || true
+containers_running() {
+  local name
+  for name in app db kokoro whisper; do
+    if [[ "$(docker inspect -f '{{.State.Running}}' "$name" 2>/dev/null || echo false)" != true ]]; then
+      return 1
     fi
-    if [[ -f "${rollback}/env.bak" ]]; then
-      cp -a "${rollback}/env.bak" .env
-      chmod 600 .env || true
-    fi
-    echo "::error::Deploy failed (${RELEASE_TAG}): ${reason}. Previous containers left running (no cutover — zero downtime)." >&2
-    docker compose ps >&2 || true
-    return 1
-  fi
+  done
+  return 0
+}
 
-  if [[ ! -f "${rollback}/images/app.ref" ]]; then
-    echo "::error::Deploy failed (${RELEASE_TAG}): ${reason}. No image backup to restore." >&2
-    return 1
-  fi
-
+restore_previous_tree() {
   if [[ -f "${rollback}/git-sha" ]] && [[ -d .git ]]; then
-    git checkout -f "$(cat "${rollback}/git-sha")"
+    git checkout -f "$(cat "${rollback}/git-sha")" >/dev/null 2>&1 || true
   fi
   if [[ -f "${rollback}/env.bak" ]]; then
     cp -a "${rollback}/env.bak" .env
     chmod 600 .env || true
   fi
+}
 
+restore_previous_images() {
   local name img_ref
   for name in app db kokoro whisper; do
     if [[ ! -f "${rollback}/images/${name}.ref" ]]; then
@@ -184,35 +178,86 @@ rollback_stack() {
     img_ref="$(cat "${rollback}/images/${name}.ref")"
     if docker image inspect "uv-rollback-${name}:predeploy" >/dev/null 2>&1; then
       docker tag "uv-rollback-${name}:predeploy" "$img_ref"
-      echo "rollback: restored ${img_ref}"
+      echo "rollback: restored image tag ${img_ref}"
     fi
   done
+}
 
-  ensure_stack_network || true
+# Always bring the previous stack back up when we had one, then fail the job.
+rollback_stack() {
+  local reason="$1"
+  if [[ "$rolling_back" -eq 1 ]]; then
+    echo "::error::Deploy failed (${RELEASE_TAG}): ${reason}. Rollback already in progress." >&2
+    return 1
+  fi
+  rolling_back=1
 
-  if ! docker compose up -d --no-build --remove-orphans; then
-    echo "::error::Deploy failed (${RELEASE_TAG}): ${reason}. Rollback compose up also failed." >&2
+  echo "deploy failed — restoring previous app..." >&2
+  echo "failure reason: ${reason}" >&2
+
+  cleanup_candidate
+  point_nginx_at_production
+
+  # First deploy with nothing to restore: stop broken leftovers and exit.
+  if [[ "$had_previous" -eq 0 ]] || [[ ! -f "${rollback}/images/app.ref" ]]; then
+    restore_previous_tree
+    echo "::error::Deploy failed (${RELEASE_TAG}): ${reason}. No prior stack to restore." >&2
     docker compose ps >&2 || true
     return 1
   fi
 
-  for name in app db kokoro whisper; do
-    if [[ "$(docker inspect -f '{{.State.Running}}' "$name" 2>/dev/null || echo false)" != true ]]; then
-      echo "::error::Deploy failed (${RELEASE_TAG}): ${reason}. Rollback left ${name} down." >&2
-      docker logs --tail 80 "$name" >&2 || true
-      return 1
-    fi
-  done
+  restore_previous_tree
+  restore_previous_images
+  ensure_stack_network || true
 
-  echo "::error::Deploy failed (${RELEASE_TAG}): ${reason}. Previous app restored." >&2
+  set +e
+  docker compose up -d --no-build --remove-orphans
+  local up_rc=$?
+  set -e
+  if [[ "$up_rc" -ne 0 ]]; then
+    echo "::error::Deploy failed (${RELEASE_TAG}): ${reason}. Rollback compose up also failed (exit ${up_rc})." >&2
+    docker compose ps >&2 || true
+    return 1
+  fi
+
+  if ! containers_running; then
+    local name
+    for name in app db kokoro whisper; do
+      if [[ "$(docker inspect -f '{{.State.Running}}' "$name" 2>/dev/null || echo false)" != true ]]; then
+        echo "::error::Deploy failed (${RELEASE_TAG}): ${reason}. Rollback left ${name} down." >&2
+        docker logs --tail 80 "$name" >&2 || true
+      fi
+    done
+    return 1
+  fi
+
+  set +e
+  wait_http_ok "http://127.0.0.1:3000/" 45
+  local health_rc=$?
+  set -e
+  if [[ "$health_rc" -ne 0 ]]; then
+    echo "::error::Deploy failed (${RELEASE_TAG}): ${reason}. Previous containers are up but :3000 health check failed." >&2
+    docker logs --tail 100 app >&2 || true
+    docker compose ps >&2 || true
+    return 1
+  fi
+
+  echo "::error::Deploy failed (${RELEASE_TAG}): ${reason}. Previous containers restored and running; exiting." >&2
   docker compose ps >&2 || true
   return 1
 }
 
-# --- Phase 5 success: drop previous unused app/images; keep disk data --------
+fail_deploy() {
+  local reason="$1"
+  rollback_stack "$reason" || true
+  exit 1
+}
+
+# --- Phase 5 success: prune unused Docker + deploy temps; keep disk data ----
 cleanup_after_success() {
-  echo "phase 5: success — remove previous unused containers/images (keep disk data)"
+  echo "phase 5: success — prune unused Docker resources and deploy temps (keep disk data)"
   cleanup_candidate
+  point_nginx_at_production
 
   # Image IDs from the generation we backed up at phase 3 (previous app).
   local -a old_ids=()
@@ -224,6 +269,7 @@ cleanup_after_success() {
   done
 
   # Refresh predeploy tags to the NEW running generation (backup for next deploy).
+  mkdir -p "${rollback}/images"
   for name in app db kokoro whisper; do
     id="$(docker inspect -f '{{.Image}}' "$name")"
     docker tag "$id" "uv-rollback-${name}:predeploy"
@@ -237,35 +283,57 @@ cleanup_after_success() {
     cp -a .env "${rollback}/env.bak"
     chmod 600 "${rollback}/env.bak" || true
   fi
+  printf '%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >"${rollback}/created_at"
 
-  # Drop stopped leftovers + dangling layers.
-  docker container prune -f >/dev/null || true
-  docker image prune -f >/dev/null || true
+  # Drop stopped leftovers.
+  docker container prune -f >/dev/null 2>&1 || true
 
-  # Best-effort remove previous generation image IDs if nothing uses them anymore.
+  # Remove previous generation image IDs when nothing references them anymore.
   for id in "${old_ids[@]+"${old_ids[@]}"}"; do
     [[ -n "$id" ]] || continue
     docker rmi "$id" >/dev/null 2>&1 || true
   done
 
-  # Legacy Compose default network name from older releases.
-  docker network rm unlocked-venture_default >/dev/null 2>&1 || true
-  docker builder prune -f >/dev/null || true
+  # All unused images (running stack + uv-rollback:* tags on current IDs keep those).
+  docker image prune -af >/dev/null 2>&1 || true
 
-  echo "cleanup done (previous unused images removed; UV_DATA_DIR / UV_MEDIA_DIR kept on disk)"
+  # Unused networks only (in-use unlocked-venture is kept).
+  docker network prune -f >/dev/null 2>&1 || true
+
+  # Anonymous/unused volumes only — never UV_DATA_DIR / UV_MEDIA_DIR bind mounts.
+  docker volume prune -f >/dev/null 2>&1 || true
+
+  # Build cache from compose build --pull.
+  docker builder prune -af >/dev/null 2>&1 || true
+
+  # Deploy / build temp files under the app tree (never touch data/media dirs).
+  rm -rf -- .deploy-tmp ./tmp 2>/dev/null || true
+  find . -maxdepth 2 -type f \( \
+      -name '*.tmp' \
+      -o -name '*.temp' \
+      -o -name '*~' \
+      -o -name '*.swp' \
+      -o -name 'docker-compose*.yml.bak' \
+    \) ! -path './.deploy-rollback/*' -delete 2>/dev/null || true
+
+  # Leftover candidate compose project artifacts (containers already removed).
+  docker compose -p uv-candidate -f docker-compose.candidate.yml down \
+    --rmi local --remove-orphans >/dev/null 2>&1 || true
+
+  echo "cleanup done (unused containers/images/networks/volumes/build-cache/temps removed; UV_DATA_DIR / UV_MEDIA_DIR kept)"
 }
 
 # =============================================================================
 # Main
 # =============================================================================
-ensure_stack_network
-prepare_disk_mounts
-
-first_deploy=0
-if ! docker inspect app >/dev/null 2>&1; then
-  first_deploy=1
+if docker inspect app >/dev/null 2>&1; then
+  had_previous=1
 fi
 
+trap 'rc=$?; if [[ "$rc" -ne 0 && "$rolling_back" -eq 0 ]]; then rollback_stack "unexpected failure (exit ${rc})" || true; fi; exit "$rc"' EXIT
+
+ensure_stack_network
+prepare_disk_mounts
 ensure_predeploy_backup
 
 echo "phase 4: build + near-zero-downtime cutover (release ${RELEASE_TAG})"
@@ -274,19 +342,17 @@ docker compose build --pull
 build_rc=$?
 set -e
 if [[ "$build_rc" -ne 0 ]]; then
-  rollback_stack "docker compose build failed (exit ${build_rc})"
-  exit 1
+  fail_deploy "docker compose build failed (exit ${build_rc})"
 fi
 
-if [[ "$first_deploy" -eq 1 ]]; then
+if [[ "$had_previous" -eq 0 ]]; then
   echo "first deploy: no previous app — compose up"
   set +e
   docker compose up -d --remove-orphans
   up_rc=$?
   set -e
   if [[ "$up_rc" -ne 0 ]]; then
-    rollback_stack "first deploy compose up failed (exit ${up_rc})"
-    exit 1
+    fail_deploy "first deploy compose up failed (exit ${up_rc})"
   fi
 
   set +e
@@ -294,8 +360,7 @@ if [[ "$first_deploy" -eq 1 ]]; then
   schema_rc=$?
   set -e
   if [[ "$schema_rc" -ne 0 ]]; then
-    rollback_stack "first deploy: CMS schema missing (import a database dump before serving)"
-    exit 1
+    fail_deploy "first deploy: CMS schema missing (import a database dump before serving)"
   fi
 
   set +e
@@ -304,8 +369,7 @@ if [[ "$first_deploy" -eq 1 ]]; then
   set -e
   if [[ "$prod_rc" -ne 0 ]]; then
     docker logs --tail 100 app >&2 || true
-    rollback_stack "first deploy: production app health check failed on :3000"
-    exit 1
+    fail_deploy "first deploy: production app health check failed on :3000"
   fi
 else
   # Live app dual-homed in phase 1 so DB DNS stays up while workers recreate.
@@ -314,8 +378,7 @@ else
   workers_rc=$?
   set -e
   if [[ "$workers_rc" -ne 0 ]]; then
-    rollback_stack "compose up for db/whisper/kokoro failed (exit ${workers_rc})"
-    exit 1
+    fail_deploy "compose up for db/whisper/kokoro failed (exit ${workers_rc})"
   fi
 
   set +e
@@ -323,20 +386,17 @@ else
   schema_rc=$?
   set -e
   if [[ "$schema_rc" -ne 0 ]]; then
-    rollback_stack "CMS schema missing on live database (abort before cutover)"
-    exit 1
+    fail_deploy "CMS schema missing on live database (abort before cutover)"
   fi
 
   cleanup_candidate
-  candidate_started=1
   echo "starting app-candidate on 127.0.0.1:3001 (production :3000 still live)..."
   set +e
   docker compose -p uv-candidate -f docker-compose.candidate.yml up -d --no-build
   cand_rc=$?
   set -e
   if [[ "$cand_rc" -ne 0 ]]; then
-    rollback_stack "app-candidate failed to start (exit ${cand_rc})"
-    exit 1
+    fail_deploy "app-candidate failed to start (exit ${cand_rc})"
   fi
 
   set +e
@@ -345,23 +405,20 @@ else
   set -e
   if [[ "$health_rc" -ne 0 ]]; then
     docker logs --tail 100 app-candidate >&2 || true
-    rollback_stack "app-candidate health check failed on :3001 (production left on :3000)"
-    exit 1
+    fail_deploy "app-candidate health check failed on :3001 (production left on :3000)"
   fi
 
   if [[ -x ./.github/scripts/nginx-uv-upstream-switch.sh ]]; then
     ./.github/scripts/nginx-uv-upstream-switch.sh 3001 || true
   fi
 
-  cutover_started=1
   echo "cutover: replacing production app on :3000 with new image..."
   set +e
   docker compose up -d --no-deps --no-build --force-recreate app
   app_rc=$?
   set -e
   if [[ "$app_rc" -ne 0 ]]; then
-    rollback_stack "production app cutover failed (exit ${app_rc})"
-    exit 1
+    fail_deploy "production app cutover failed (exit ${app_rc})"
   fi
 
   set +e
@@ -370,8 +427,7 @@ else
   set -e
   if [[ "$prod_rc" -ne 0 ]]; then
     docker logs --tail 100 app >&2 || true
-    rollback_stack "production app health check failed on :3000 after cutover"
-    exit 1
+    fail_deploy "production app health check failed on :3000 after cutover"
   fi
 
   if [[ -x ./.github/scripts/nginx-uv-upstream-switch.sh ]]; then
@@ -379,28 +435,29 @@ else
   fi
 
   cleanup_candidate
-  candidate_started=0
 fi
 
-for name in app db kokoro whisper; do
-  if [[ "$(docker inspect -f '{{.State.Running}}' "$name" 2>/dev/null || echo false)" != true ]]; then
-    docker logs --tail 80 "$name" >&2 || true
-    rollback_stack "container not running after deploy: ${name}"
-    exit 1
-  fi
-done
+if ! containers_running; then
+  for name in app db kokoro whisper; do
+    if [[ "$(docker inspect -f '{{.State.Running}}' "$name" 2>/dev/null || echo false)" != true ]]; then
+      docker logs --tail 80 "$name" >&2 || true
+      fail_deploy "container not running after deploy: ${name}"
+    fi
+  done
+fi
 
 set +e
 require_cms_schema
 final_schema_rc=$?
 set -e
 if [[ "$final_schema_rc" -ne 0 ]]; then
-  rollback_stack "CMS schema missing after deploy"
-  exit 1
+  fail_deploy "CMS schema missing after deploy"
 fi
 
 echo "ok: app db kokoro whisper are running (release ${RELEASE_TAG})"
 docker compose ps
 
+# Clear EXIT trap before success cleanup so prune errors do not trigger rollback.
+trap - EXIT
 cleanup_after_success
 REMOTE

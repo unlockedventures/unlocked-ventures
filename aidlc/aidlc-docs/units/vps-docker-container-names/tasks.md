@@ -62,3 +62,9 @@ Project: Unlocked Ventures
 
 - Completed: Canonical § Production deploy in AGENTS.md; mirrored in CLAUDE, GEMINI, copilot-instructions, cursor rules (incl. prod-deploy.mdc), aidlc/AGENTS, README + README.DOCKER
 - Next: Operator says “deploy” → agent tags `prod-yyyy.MM.n` with `-m` and pushes tag
+
+### 2026-11-27 — assistant (fail restore / success prune)
+- Completed: `remote-compose-up.sh` always restores prior images+compose up+health on failure; success runs container/image/network/volume/builder prune + temp cleanup; keeps UV_DATA_DIR/UV_MEDIA_DIR and refreshed `.deploy-rollback`
+- Checks: `bash -n` on script + extracted remote body
+- Next: next annotated `prod-*` tag from `main` picks this up
+

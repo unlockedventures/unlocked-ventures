@@ -97,3 +97,5 @@ Git-pull / candidate verification:
 - `docker compose config --quiet` OK
 - `UV_CANDIDATE_NETWORK=… docker compose -f docker-compose.candidate.yml config --quiet` OK
 - Not run: live SSH git checkout, candidate boot, or nginx upstream flip on VPS
+| 2026-11-27 | assistant | change | Harden remote-compose-up: always restore+verify previous stack on failure; aggressive unused Docker/temp prune on success (keep data dirs) | user request |
+
