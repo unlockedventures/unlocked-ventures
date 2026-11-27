@@ -120,14 +120,14 @@ or `pnpm migrate` (same additive SQL as `src/migrations`).
 ## Docker / deploy packaging
 
 Deploy packaging stays in **Dockerfiles**, **`docker-compose*.yml`**, and
-**`.github/workflows/`** / **`.github/scripts/`**. Full operator runbook, scp
-backup upload, and AI context: gitignored [`automation/`](automation/) — when
-the VPS is ready open **`automation/WHEN-VPS-READY.md`**. Tracked stub:
-[`README.DOCKER.md`](README.DOCKER.md).
+**`.github/workflows/`** / **`.github/scripts/`**. Tracked deploy pointer:
+[`README.DOCKER.md`](README.DOCKER.md). Optional local operator/AI notes may exist
+under gitignored `automation/` on some machines — they are **not** required to
+trigger a production release.
 
-Quick local Compose (optional): `cp .env.example .env`, then follow `automation/`.
-Production release is an annotated tag `prod-yyyy.MM.n` from `main` (see
-`AGENTS.md` § Production deploy when an AI agent is asked to deploy).
+Production release is an annotated tag `prod-yyyy.MM.n` from `main`. When an AI
+agent is asked to **deploy**, follow `AGENTS.md` § Production deploy (self-contained:
+next tag + short `-m` from recent commits + push tag only → **Deploy IONOS**).
 
 ## Scripts
 

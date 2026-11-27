@@ -15,5 +15,6 @@ Preserve unrelated work and editorial content. Follow task-specific verification
 instructions. Never claim checks passed unless run, and do not push, merge or
 deploy without user authorization — except that **deploy** / **prod deploy** /
 **deploy it** / **trigger deploy** / **trigger deploy workflow** authorize the
-annotated `prod-yyyy.MM.n` tag + push flow in AGENTS.md (§ Production deploy).
-Deploy docs/AI context: gitignored automation/. Packaging: Dockerfiles, compose, .github/.
+annotated `prod-yyyy.MM.n` tag + push flow in AGENTS.md (§ Production deploy;
+self-contained — do not require gitignored `automation/`; tag `-m` from recent
+commits). Packaging: Dockerfiles, compose, .github/.

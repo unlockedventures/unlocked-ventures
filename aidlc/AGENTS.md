@@ -144,13 +144,14 @@ associations. Production startup does not automatically apply all schema rollout
 ## Production deploy (AI agents)
 
 Canonical procedure lives in the repository-root `AGENTS.md` (§ Production deploy
-and § Deploy packaging boundary). Full deploy docs + AI context:
-gitignored `automation/README.DOCKER.md` and `automation/AGENTS.md`. Packaging
-belongs in Dockerfiles, `docker-compose*.yml`, and `.github/workflows` /
-`.github/scripts` only — not in `src/`. If the user says deploy / prod deploy /
-deploy it / trigger deploy / trigger deploy workflow: create the next annotated
-`prod-yyyy.MM.n` tag on `main` with a short informative `-m` message and push
-that tag so **Deploy IONOS** runs. Do not treat a bare push of `main` as a deploy.
+and § Deploy packaging boundary) and is **self-contained** — do not require
+gitignored `automation/` to trigger a release. Packaging belongs in Dockerfiles,
+`docker-compose*.yml`, and `.github/workflows` / `.github/scripts` only — not in
+`src/`. If the user says deploy / prod deploy / deploy it / trigger deploy /
+trigger deploy workflow: create the next annotated `prod-yyyy.MM.n` tag on `main`
+with a short `-m` message summarized from recent commits
+(`git log -5 --oneline` / since previous `prod-*`) and push that tag so
+**Deploy IONOS** runs. Do not treat a bare push of `main` as a deploy.
 Canonical remote: `unlockedventures/unlocked-ventures` (BrainStation-23 copy retired).
 
 ## Verification and delivery

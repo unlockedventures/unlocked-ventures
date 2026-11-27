@@ -18,6 +18,7 @@ Preserve unrelated work and editorial content. Follow task-specific verification
 instructions. Never claim checks passed unless run, and do not push, merge or
 deploy without user authorization — except that **deploy** / **prod deploy** /
 **deploy it** / **trigger deploy** / **trigger deploy workflow** authorize the
-annotated `prod-yyyy.MM.n` tag + push flow in AGENTS.md (§ Production deploy).
+annotated `prod-yyyy.MM.n` tag + push flow in AGENTS.md (§ Production deploy;
+self-contained — no `automation/` required; short `-m` from recent commits).
 Keep deploy packaging in Dockerfiles, compose, and `.github/` only
 (AGENTS.md § Deploy packaging boundary). See also `.cursor/rules/prod-deploy.mdc`.

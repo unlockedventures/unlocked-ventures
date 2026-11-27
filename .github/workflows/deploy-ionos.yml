@@ -37,11 +37,12 @@
 #                               (Payload uploads; kept outside the git tree on VPS)
 #
 # Trigger: push annotated tag prod-yyyy.MM.n from branch main (see AGENTS.md).
+# AI agents: user "deploy" → next prod tag + short -m from recent commits + push
+# tag only. Root AGENTS.md is enough; gitignored automation/ is optional.
 # Optional: workflow_dispatch (manual).
 # Flow: validate → Gitleaks → snapshot backup → git checkout → write .env →
 #   network → disk mounts → backup refresh → build (live up) →
-#   app-candidate :3001 → cut over :3000 → prune previous images (keep disk data).
-# Docs/AI context: gitignored automation/ (README.DOCKER.md, AGENTS.md).
+#   app-candidate :3001 → nginx flip → cut over :3000 → prune unused (keep data).
 # Canonical remote: unlockedventures/unlocked-ventures (main). BrainStation-23
 # unlocked-venture is retired for production.
 # =============================================================================

@@ -54,6 +54,10 @@ Image boot helpers that Dockerfiles copy (`scripts/docker-app-entrypoint.mjs`,
 Canonical production remote: **`unlockedventures/unlocked-ventures`** on branch **`main`**.
 The older BrainStation-23 `unlocked-venture` repository is retired for production.
 
+This section is **self-contained**. Agents can trigger a production deploy from this
+file alone — the gitignored `automation/` folder is optional operator/AI context and
+must **not** be required to cut or push a release tag.
+
 When the user asks to **deploy**, **prod deploy**, **deploy it**, **trigger deploy**,
 **trigger deploy workflow**, or equivalent, do **not** run `workflow_dispatch` by
 default and do **not** wait for a push to `main` alone. Production deploys are
@@ -68,20 +72,33 @@ started only by pushing an annotated tag in the form `prod-yyyy.MM.n`.
      month and increments: `prod-2026.11.1`, `prod-2026.11.2`, …).
    - List existing: `git tag -l "prod-$(date -u +%Y.%m).*"` (use the user’s “today”
      from context when available) and use `max(N)+1`, or `1` if none exist.
-3. Create an **annotated** tag with a short, informative message (what/why, not a
-   novel), then push **only that tag**:
+3. Draft a **short annotated tag message** from recent commits on `main` (one line,
+   what/why — not a novel). Prefer summarizing since the previous `prod-*` tag when
+   one exists; otherwise use a few recent `main` commits:
+
+```bash
+# Since previous prod tag (if any):
+git log -5 --oneline "$(git describe --tags --match 'prod-*' --abbrev=0 2>/dev/null)..HEAD"
+# Or simply:
+git log -5 --oneline origin/main
+```
+
+   Examples of good `-m` values: `Ship homepage menu inheritance fixes.`,
+   `Release zero-downtime nginx cutover packaging.`, `Prod: podcast listing seed fix.`
+4. Create the **annotated** tag and push **only that tag**:
 
 ```bash
 git checkout main
 git pull --ff-only origin main
-# compute NEXT tag, e.g. prod-2026.11.3
-git tag -a "prod-YYYY.MM.N" -m "Short informative reason for this prod release."
-git push origin "refs/tags/prod-YYYY.MM.N"
+# NEXT=prod-YYYY.MM.N  MSG=one short line from the log above
+git tag -a "$NEXT" -m "$MSG"
+git push origin "refs/tags/$NEXT"
 ```
 
-4. Tell the user the tag name and that GitHub Actions workflow **Deploy IONOS**
+5. Tell the user the tag name and that GitHub Actions workflow **Deploy IONOS**
    should run. Do not push the `main` branch unless they also asked to push
-   commits. Details: `automation/README.DOCKER.md` (gitignored) / stub `README.DOCKER.md`.
+   commits. Optional deeper ops notes: stub `README.DOCKER.md` / gitignored
+   `automation/` when present — never block a deploy on their absence.
 
 ### Do not
 
@@ -89,6 +106,7 @@ git push origin "refs/tags/prod-YYYY.MM.N"
 - Invent tags outside `prod-yyyy.MM.n`.
 - Tag commits that are not on `main`.
 - Skip the annotated `-m` message.
+- Refuse or stall a deploy only because `automation/` is missing.
 
 ## AI tool onboarding
 

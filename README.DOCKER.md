@@ -1,25 +1,31 @@
 # Docker / VPS deployment
 
-**All deploy docs and AI context live in gitignored `automation/`** (not committed).
-
 Canonical production repo: **`unlockedventures/unlocked-ventures`** (`main`).  
-Live site: **https://unlockedventures.com/** — see `automation/2026-11-27-ai-context.md`.
-
-| Path | Purpose |
-| ---- | ------- |
-| `automation/2026-11-27-ai-context.md` | **Current** — what we did + live state |
-| `automation/NEXT-DEPLOY.md` | First tag deploy checklist / remaining polish |
-| `automation/WHEN-VPS-READY.md` | Ordered bring-up playbook |
-| `automation/README.md` | Index of this folder |
-| `automation/README.DOCKER.md` | Detailed operator runbook (as-built) |
-| `automation/AGENTS.md` | Deploy AI rules (zero-downtime order) |
-| `automation/RETIRED-REPO.md` | BrainStation-23 copy retired |
-| `automation/unlocked-venture-deployment.pdf` | Full LaTeX technical guide |
-| `automation/backups/*.tar.gz` | DB+media archive (local only — never GitHub) |
+Live site: **https://unlockedventures.com/**
 
 **Tracked packaging:** Dockerfiles, `docker-compose*.yml`, `.github/workflows/`, `.github/scripts/`.  
-**Coding:** root `README.md` (`pnpm`). Media is never pushed to GitHub — scp + import only.  
+**Coding:** root `README.md` (`pnpm`). Day-to-day work does not need this file.
 
-Production tags: annotated `prod-yyyy.MM.n` from **`main`** (not branch push alone).  
-Cutover: candidate `:3001` → nginx flip → recreate `:3000` → nginx flip back (zero downtime).  
-SSH for Actions: **`IONOS_SSH_PRIVATE_KEY`** only (guideline docs never document login passwords).
+## Trigger a production deploy (AI agents — no `automation/` required)
+
+User phrases **deploy** / **prod deploy** / **deploy it** / **trigger deploy** authorize
+the flow in root `AGENTS.md` § Production deploy. Short form:
+
+```bash
+git checkout main
+git pull --ff-only origin main
+git fetch origin --tags
+# next tag: prod-YYYY.MM.N  (N = max existing this month + 1, or 1)
+# message: one short line from recent commits, e.g.
+#   git log -5 --oneline origin/main
+git tag -a "prod-YYYY.MM.N" -m "Short summary of what this release ships."
+git push origin "refs/tags/prod-YYYY.MM.N"
+```
+
+That tag push starts GitHub Actions **Deploy IONOS**. A bare push of `main` does not.
+
+## Optional local operator notes
+
+When present on a machine, gitignored `automation/` holds deeper runbooks and AI context
+(`WHEN-VPS-READY.md`, `README.DOCKER.md`, dated AI context). It is **not** required to
+trigger a deploy, and clones often omit it. Never commit `automation/`, `.env`, or media.
